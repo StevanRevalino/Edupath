@@ -4,14 +4,6 @@ import * as yup from "yup";
 import { loginSchema } from "../schema/LoginSchema"; // Sesuaikan path-mu
 import { ValidationError } from "yup";
 
-const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Format email tidak valid")
-    .required("Email wajib diisi"),
-  password: yup.string().required("Password wajib diisi"),
-});
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,7 +75,12 @@ export default function Login() {
             placeholder="Email"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) {
+                setErrors((prev) => ({ ...prev, email: "" }));
+              }
+            }}
           />
           {submitted && errors.email && (
             <p className="text-xs text-red-500 mt-1">{errors.email}</p>
@@ -97,7 +94,12 @@ export default function Login() {
             placeholder="Password"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) {
+                setErrors((prev) => ({ ...prev, password: "" }));
+              }
+            }}
           />
           {submitted && errors.password && (
             <p className="text-xs text-red-500 mt-1">{errors.password}</p>
