@@ -16,7 +16,6 @@ interface DropdownListProps {
 }
 
 export default function DropdownList({
-  label,
   options,
   value,
   onChange,
@@ -29,11 +28,11 @@ export default function DropdownList({
       <select
         value={value}
         onChange={onChange}
-        className={`w-full px-4 py-3 rounded-md bg-white text-sm border border-gray-300 ${
-          className || ""
-        }`} // ✅ gabung
+        className={`w-full px-4 py-3 rounded-md bg-white text-sm border ${
+          value == "" ? "text-gray-500" : "text-black"
+        } border-gray-300 ${className || ""}`}
       >
-        <option value="" disabled>
+        <option value="" disabled selected hidden>
           {placeholder}
         </option>
         {options.map((option) => (

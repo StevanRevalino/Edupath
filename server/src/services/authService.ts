@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
-import { generateOTP } from "../utils/otp";
 
 const userRepository = new UserRepository();
 
@@ -32,16 +31,5 @@ export class AuthService {
     if (!isMatch) return null;
 
     return user;
-  }
-
-  async sendOTP(email: string) {
-    const otp = generateOTP();
-    const expires = new Date(Date.now() + 5 * 60 * 1000);
-    await userRepository.updateOTP(email, otp, expires);
-    return otp;
-  }
-
-  async verifyOTP(email: string, otp: string) {
-    return await userRepository.verifyOTP(email, otp);
   }
 }

@@ -21,7 +21,7 @@ export default function OTPModal({
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
-    setTimer(60);
+    setTimer(15);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -37,7 +37,7 @@ export default function OTPModal({
 
   const handleChange = (value: string, idx: number) => {
     if (!/^\d?$/.test(value)) return;
-    const newOtp = [...inputOtp]; // ✅ ini yang benar
+    const newOtp = [...inputOtp];
     newOtp[idx] = value;
     setInputOtp(newOtp);
     if (value && idx < 5) inputRefs.current[idx + 1]?.focus();
@@ -105,14 +105,14 @@ export default function OTPModal({
 
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold"
+          className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           Verify email
         </button>
 
         <button
           onClick={onClose}
-          className="text-sm text-gray-400 mt-4 hover:underline"
+          className="text-sm text-gray-400 mt-4 hover:underline cursor-pointer"
         >
           Cancel
         </button>

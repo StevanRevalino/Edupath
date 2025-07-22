@@ -14,7 +14,5 @@ model User {
     email       String    @unique
     password    String
     kelas       Int
-    otp         String?
-    otp_expires DateTime?
     created_at  DateTime  @default(now())
 }

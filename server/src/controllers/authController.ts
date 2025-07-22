@@ -26,27 +26,4 @@ export class AuthController {
 
     res.json(user);
   }
-
-  async sendOTP(req: Request, res: Response) {
-    const { email } = req.body;
-
-    try {
-      const otp = await authService.sendOTP(email);
-      res.json({ message: "OTP sent", otp });
-    } catch (error) {
-      console.error("Send OTP Error:", error);
-      res.status(500).json({
-        message: "Failed to send OTP",
-        error: (error as Error).message,
-      });
-    }
-  }
-
-  async verifyOTP(req: Request, res: Response) {
-    const { email, otp } = req.body;
-    const user = await authService.verifyOTP(email, otp);
-    if (!user)
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    res.json({ message: "OTP verified", user });
-  }
 }

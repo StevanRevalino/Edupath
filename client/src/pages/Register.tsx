@@ -3,8 +3,13 @@ import { CheckCircle } from "lucide-react";
 import OtpModal from "../components/ModalVerifyOtp";
 import emailjs from "@emailjs/browser";
 import DropdownList from "../components/DropDownList";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { registerSchema } from "../schema/registerSchema";
+import * as yup from "yup";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -17,6 +22,7 @@ export default function Register() {
   const [kelas, setKelas] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const SERVICE_ID = "service_h6ptjp7";
   const TEMPLATE_ID = "template_2hb217b";
@@ -37,40 +43,59 @@ export default function Register() {
     password.length >= 6 &&
     isVerified;
 
-  const handleSubmit = async () => {
+  const handleRegisterSubmit = async () => {
     setSubmitted(true);
+    setErrors({}); // reset error
 
-    if (!isFormValid) return;
+    const formData = {
+      firstName,
+      lastName,
+      kelas,
+      email,
+      password,
+      confirmPassword,
+    };
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstname: firstName,
-          lastname: lastName,
-          kelas: Number(kelas),
-          email,
-          password,
-        }),
+      // Validasi pakai Yup schema
+      await registerSchema.validate(formData, { abortEarly: false });
+    } catch (err: any) {
+      if (err.name === "ValidationError") {
+        const newErrors: { [key: string]: string } = {};
+        err.inner.forEach((e: yup.ValidationError) => {
+          if (e.path) newErrors[e.path] = e.message;
+        });
+        setErrors(newErrors);
+        return; // ❌ STOP proses jika validasi gagal
+      }
+    }
+
+    // Validasi manual tambahan
+    if (!isVerified) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Email belum diverifikasi",
+      }));
+      return; // ❌ STOP jika belum verifikasi
+    }
+
+    try {
+      // Kirim ke server
+      await axios.post("http://localhost:5000/api/auth/register", {
+        firstname: firstName,
+        lastname: lastName,
+        kelas: Number(kelas),
+        email,
+        password,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Tangkap error email sudah terdaftar dari backend
-        if (data.message === "Email sudah terdaftar") {
-          alert("Email sudah digunakan. Silakan gunakan email lain.");
-        } else {
-          alert(data.message || "Gagal daftar");
-        }
-        return;
-      }
-
       alert("Pendaftaran berhasil!");
-    } catch (err) {
-      console.error("Register Error:", err);
-      alert("Terjadi kesalahan saat mendaftar");
+      navigate("/login");
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message || "Terjadi kesalahan server";
+      console.error("Error saat register:", errorMsg);
+      alert(errorMsg);  
     }
   };
 
@@ -122,7 +147,7 @@ export default function Register() {
 
       {/* Kanan: Form */}
       <div className="w-1/2 bg-slate-100 flex flex-col justify-center p-10">
-        <h1 className="text-2xl font-bold mb-2">Create an account</h1>
+        <h1 className="text-2xl font-bold mb-2">Buat Akun</h1>
         <p className="mb-6 text-sm text-gray-600">
           Yuk, jadi anggota EduFamily!
         </p>
@@ -134,10 +159,12 @@ export default function Register() {
               type="text"
               placeholder="Nama awal"
               className="w-full px-4 py-3 rounded-md bg-white text-sm"
+              value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
-            {submitted && firstName.trim() === "" && (
-              <p className="text-xs text-red-500 mt-1">Nama awal wajib diisi</p>
+
+            {errors.firstName && (
+              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
             )}
           </div>
           <div>
@@ -145,12 +172,11 @@ export default function Register() {
               type="text"
               placeholder="Nama akhir"
               className="w-full px-4 py-3 rounded-md bg-white text-sm"
+              value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
-            {submitted && lastName.trim() === "" && (
-              <p className="text-xs text-red-300 mt-1">
-                Nama akhir wajib diisi
-              </p>
+            {errors.lastName && (
+              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
             )}
           </div>
         </div>
@@ -161,17 +187,13 @@ export default function Register() {
             value={kelas}
             onChange={(e) => setKelas(e.target.value)}
             placeholder="Kelas"
-            className="border-0 placeholder:text-red-300"
+            className="border-0"
             options={[
               { value: "10", label: "Kelas 10" },
               { value: "11", label: "Kelas 11" },
               { value: "12", label: "Kelas 12" },
             ]}
-            error={
-              submitted && kelas.trim() === ""
-                ? "Pilih kelas terlebih dahulu"
-                : ""
-            }
+            error={errors.kelas}
           />
         </div>
 
@@ -190,7 +212,7 @@ export default function Register() {
           {!isVerified ? (
             <button
               onClick={handleVerifyEmail}
-              className="bg-blue-500 text-white px-1 py-2 rounded-md text-md font-semibold"
+              className="bg-blue-500 text-white px-1 py-2 rounded-md text-md font-semibold cursor-pointer"
             >
               Verifikasi
             </button>
@@ -202,6 +224,7 @@ export default function Register() {
         {submitted && email.trim() === "" && (
           <p className="text-xs text-red-500 mt-1">Email wajib diisi</p>
         )}
+
         {submitted &&
           email.trim() !== "" &&
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
@@ -209,9 +232,15 @@ export default function Register() {
               Format email tidak valid
             </p>
           )}
-        {submitted && !isVerified && (
-          <p className="text-xs text-red-500 mt-1">Email belum diverifikasi</p>
-        )}
+
+        {submitted &&
+          email.trim() !== "" &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+          !isVerified && (
+            <p className="text-xs text-red-500 mt-1">
+              Email belum diverifikasi
+            </p>
+          )}
 
         {/* Password */}
         <div className="mt-2">
@@ -219,6 +248,7 @@ export default function Register() {
             type="password"
             placeholder="Password"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           {submitted && password.trim() === "" && (
@@ -235,8 +265,9 @@ export default function Register() {
         <div className="mt-2">
           <input
             type="password"
-            placeholder="Konfirmasi password"
+            placeholder="Konfirmasi Password"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
+            value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           {submitted && confirmPassword.trim() === "" && (
@@ -254,16 +285,16 @@ export default function Register() {
         <p className="text-sm mt-3">
           Sudah punya akun?{" "}
           <a href="/login" className="text-blue-600 underline">
-            Log in!
+            Masuk!
           </a>
         </p>
 
         <button
-          onClick={handleSubmit}
+          onClick={handleRegisterSubmit}
           className={`mt-4 w-full py-2 font-bold rounded-md ${
             isFormValid
               ? "bg-black text-white"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-300 text-gray-500 cursor-pointer"
           }`}
         >
           <div className="text-lg">Daftar akun</div>
