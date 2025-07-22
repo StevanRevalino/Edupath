@@ -1,44 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as yup from "yup";
+import { loginSchema } from "../schema/LoginSchema"; // Sesuaikan path-mu
+import { ValidationError } from "yup";
+
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .email("Format email tidak valid")
+    .required("Email wajib diisi"),
+  password: yup.string().required("Password wajib diisi"),
+});
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
 
-  const validate = () => {
-    let valid = true;
-
-    // Reset all
-    setEmailError("");
-    setPasswordError("");
-    setServerError("");
-
-    if (!email.trim()) {
-      setEmailError("Email wajib diisi");
-      valid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setEmailError("Format email tidak valid");
-      valid = false;
-    }
-
-    if (!password.trim()) {
-      setPasswordError("Password wajib diisi");
-      valid = false;
-    }
-
-    return valid;
-  };
-
   const handleLogin = async () => {
     setSubmitted(true);
-    if (!validate()) return;
+    setServerError("");
 
     try {
+      await loginSchema.validate({ email, password }, { abortEarly: false });
+
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,14 +42,21 @@ export default function Login() {
         return;
       }
 
-      // Simpan token jika perlu
-      // localStorage.setItem("token", data.token);
-
       alert("Berhasil masuk!");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Login Error:", err);
-      setServerError("Terjadi kesalahan saat login");
+      if (err instanceof ValidationError) {
+        const newErrors: { email?: string; password?: string } = {};
+        err.inner.forEach((e) => {
+          if (e.path && !newErrors[e.path as keyof typeof newErrors]) {
+            newErrors[e.path as "email" | "password"] = e.message;
+          }
+        });
+        setErrors(newErrors);
+      } else {
+        console.error("Login Error:", err);
+        setServerError("Terjadi kesalahan saat login");
+      }
     }
   };
 
@@ -88,8 +85,8 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {submitted && emailError && (
-            <p className="text-xs text-red-500 mt-1">{emailError}</p>
+          {submitted && errors.email && (
+            <p className="text-xs text-red-500 mt-1">{errors.email}</p>
           )}
         </div>
 
@@ -102,8 +99,8 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {submitted && passwordError && (
-            <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+          {submitted && errors.password && (
+            <p className="text-xs text-red-500 mt-1">{errors.password}</p>
           )}
         </div>
 

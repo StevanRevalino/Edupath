@@ -5,7 +5,7 @@ import emailjs from "@emailjs/browser";
 import DropdownList from "../components/DropDownList";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { registerSchema } from "../schema/registerSchema";
+import { registerSchema } from "../schema/RegsiterSchema";
 import * as yup from "yup";
 
 export default function Register() {
@@ -95,7 +95,7 @@ export default function Register() {
       const errorMsg =
         err.response?.data?.message || "Terjadi kesalahan server";
       console.error("Error saat register:", errorMsg);
-      alert(errorMsg);  
+      alert(errorMsg);
     }
   };
 
