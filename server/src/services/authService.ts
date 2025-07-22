@@ -2,12 +2,24 @@ import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
 import { generateOTP } from "../utils/otp";
+
 const userRepository = new UserRepository();
 
 export class AuthService {
   async register(data: any) {
+    const existingUser = await userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new Error("Email sudah terdaftar");
+    }
     const hashed = await bcrypt.hash(data.password, 10);
-    const user = await userRepository.create({ ...data, password: hashed });
+    const formatedUser = {
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email,
+      kelas: Number(data.kelas),
+      password: hashed,
+    };
+    const user = await userRepository.create(formatedUser);
     return user;
   }
 

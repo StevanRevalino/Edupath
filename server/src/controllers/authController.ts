@@ -5,8 +5,12 @@ const authService = new AuthService();
 
 export class AuthController {
   async register(req: Request, res: Response) {
-    const user = await authService.register(req.body);
-    res.status(201).json(user);
+    try {
+      const user = await authService.register(req.body);
+      res.status(201).json({ message: "Berhasil register", user });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   }
 
   async login(req: Request, res: Response) {
@@ -31,12 +35,10 @@ export class AuthController {
       res.json({ message: "OTP sent", otp });
     } catch (error) {
       console.error("Send OTP Error:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to send OTP",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to send OTP",
+        error: (error as Error).message,
+      });
     }
   }
 
