@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginSchema } from "../schema/LoginSchema";
 import { ValidationError } from "yup";
+import ModalResetPassword from "../components/ModalForgotPassword";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function Login() {
     {}
   );
   const [serverError, setServerError] = useState("");
+  const [openModalVerifyOtp, setOpenModalVerifyOtp] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -110,11 +112,22 @@ export default function Login() {
         {/* Lupa Password */}
         <div className="text-right mt-2">
           <a
-            href="/forgot-password"
+            href="#"
             className="text-sm text-blue-600 underline"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenModalVerifyOtp(true);
+            }}
           >
             Lupa password?
           </a>
+
+          {openModalVerifyOtp && (
+            <ModalResetPassword
+              isOpen={openModalVerifyOtp}
+              onClose={() => setOpenModalVerifyOtp(false)}
+            />
+          )}
         </div>
 
         {/* Server Error */}
