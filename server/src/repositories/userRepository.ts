@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 interface CreateUserDTO {
+  user_id: string;
   firstname: string;
   lastname: string;
   email: string;

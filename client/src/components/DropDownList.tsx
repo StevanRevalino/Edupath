@@ -1,46 +1,57 @@
 import React from "react";
+import Select from "react-select";
 
-type DropdownOption = {
+type OptionType = {
   value: string | number;
   label: string;
 };
 
 interface DropdownListProps {
-  label?: string;
-  options: DropdownOption[];
-  value: string | number;
-  onChange: React.ChangeEventHandler<HTMLSelectElement>;
-  error?: string;
+  value: OptionType | null;
+  onChange: (value: OptionType | null) => void;
+  options: OptionType[];
   placeholder?: string;
+  error?: string;
   className?: string;
 }
 
 export default function DropdownList({
-  options,
   value,
   onChange,
+  options,
+  placeholder = "Pilih...",
   error,
-  placeholder,
-  className,
+  className = "",
 }: DropdownListProps) {
   return (
-    <div className="flex flex-col mt-2">
-      <select
+    <div className={`flex flex-col mt-2 ${className}`}>
+      <Select
         value={value}
         onChange={onChange}
-        className={`w-full px-4 py-3 rounded-md bg-white text-sm border ${
-          value == "" ? "text-gray-500" : "text-black"
-        } border-gray-300 ${className || ""}`}
-      >
-        <option value="" disabled selected hidden>
-          {placeholder}
-        </option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        options={options}
+        placeholder={placeholder}
+        classNames={{
+          control: () => "rounded-md text-sm",
+          menu: () => "rounded-md shadow-md mt-1 z-20",
+        }}
+        styles={{
+          control: (base) => ({
+            ...base,
+            borderColor: error ? "#ef4444" : "#ffffff",
+            minHeight: "40px",
+          }),
+          placeholder: (base) => ({
+            ...base,
+            color: "#757575", // Tailwind gray-400
+            marginLeft: "0.5rem", 
+          }),
+          valueContainer: (base) => ({
+            ...base,
+            marginLeft: "0.3rem",
+          }),
+        }}
+        isSearchable={false}
+      />
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );

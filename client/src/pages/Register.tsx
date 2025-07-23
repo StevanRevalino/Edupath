@@ -8,6 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema } from "../schema/RegsiterSchema";
 import * as yup from "yup";
 
+type OptionType = {
+  value: string | number;
+  label: string;
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -16,10 +21,15 @@ export default function Register() {
   const [isVerified, setIsVerified] = useState(false);
   const [timer, setTimer] = useState(60);
   const [submitted, setSubmitted] = useState(false);
-
+  const kelasOptions = [
+    { value: "10", label: "Kelas 10" },
+    { value: "11", label: "Kelas 11" },
+    { value: "12", label: "Kelas 12" },
+  ];
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [kelas, setKelas] = useState("");
+  const [kelas, setKelas] = useState<OptionType | null>(null);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -34,7 +44,7 @@ export default function Register() {
   const isFormValid =
     firstName.trim() !== "" &&
     lastName.trim() !== "" &&
-    kelas.trim() !== "" &&
+    String(kelas?.value).trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
     confirmPassword.trim() !== "" &&
@@ -45,19 +55,18 @@ export default function Register() {
 
   const handleRegisterSubmit = async () => {
     setSubmitted(true);
-    setErrors({}); // reset error
+    setErrors({});
 
     const formData = {
       firstName,
       lastName,
-      kelas,
+      kelas: kelas?.value ?? "",
       email,
       password,
       confirmPassword,
     };
 
     try {
-      // Validasi pakai Yup schema
       await registerSchema.validate(formData, { abortEarly: false });
     } catch (err: any) {
       if (err.name === "ValidationError") {
@@ -66,25 +75,23 @@ export default function Register() {
           if (e.path) newErrors[e.path] = e.message;
         });
         setErrors(newErrors);
-        return; // ❌ STOP proses jika validasi gagal
+        return;
       }
     }
 
-    // Validasi manual tambahan
     if (!isVerified) {
       setErrors((prev) => ({
         ...prev,
         email: "Email belum diverifikasi",
       }));
-      return; // ❌ STOP jika belum verifikasi
+      return;
     }
 
     try {
-      // Kirim ke server
       await axios.post("http://localhost:5000/api/auth/register", {
         firstname: firstName,
         lastname: lastName,
-        kelas: Number(kelas),
+        kelas: Number(kelas?.value),
         email,
         password,
       });
@@ -160,9 +167,17 @@ export default function Register() {
               placeholder="Nama awal"
               className="w-full px-4 py-3 rounded-md bg-white text-sm"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                if (errors.firstName) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.firstName;
+                    return newErrors;
+                  });
+                }
+              }}
             />
-
             {errors.firstName && (
               <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
             )}
@@ -173,7 +188,16 @@ export default function Register() {
               placeholder="Nama akhir"
               className="w-full px-4 py-3 rounded-md bg-white text-sm"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                setLastName(e.target.value);
+                if (errors.lastName) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.lastName;
+                    return newErrors;
+                  });
+                }
+              }}
             />
             {errors.lastName && (
               <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
@@ -182,18 +206,23 @@ export default function Register() {
         </div>
 
         {/* Kelas */}
-        <div className="mt-2">
+        <div className="">
           <DropdownList
+            options={kelasOptions}
             value={kelas}
-            onChange={(e) => setKelas(e.target.value)}
-            placeholder="Kelas"
-            className="border-0"
-            options={[
-              { value: "10", label: "Kelas 10" },
-              { value: "11", label: "Kelas 11" },
-              { value: "12", label: "Kelas 12" },
-            ]}
+            onChange={(option) => {
+              setKelas(option);
+              if (errors.kelas) {
+                setErrors((prev) => {
+                  const newErrors = { ...prev };
+                  delete newErrors.kelas;
+                  return newErrors;
+                });
+              }
+            }}
+            placeholder="Pilih kelas"
             error={errors.kelas}
+            className="outline-none"
           />
         </div>
 
@@ -205,7 +234,16 @@ export default function Register() {
               placeholder="Email"
               className="w-full px-4 py-3 rounded-md bg-white text-sm"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.email;
+                    return newErrors;
+                  });
+                }
+              }}
             />
           </div>
 
@@ -220,27 +258,9 @@ export default function Register() {
             <CheckCircle className="text-green-500" />
           )}
         </div>
-
-        {submitted && email.trim() === "" && (
-          <p className="text-xs text-red-500 mt-1">Email wajib diisi</p>
+        {errors.email && (
+          <p className="text-xs text-red-500 mt-1">{errors.email}</p>
         )}
-
-        {submitted &&
-          email.trim() !== "" &&
-          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
-            <p className="text-xs text-red-500 mt-1">
-              Format email tidak valid
-            </p>
-          )}
-
-        {submitted &&
-          email.trim() !== "" &&
-          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-          !isVerified && (
-            <p className="text-xs text-red-500 mt-1">
-              Email belum diverifikasi
-            </p>
-          )}
 
         {/* Password */}
         <div className="mt-2">
@@ -249,15 +269,19 @@ export default function Register() {
             placeholder="Password"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) {
+                setErrors((prev) => {
+                  const newErrors = { ...prev };
+                  delete newErrors.password;
+                  return newErrors;
+                });
+              }
+            }}
           />
-          {submitted && password.trim() === "" && (
-            <p className="text-xs text-red-500 mt-1">Password wajib diisi</p>
-          )}
-          {submitted && password.length > 0 && password.length < 6 && (
-            <p className="text-xs text-red-500 mt-1">
-              Password minimal 6 karakter
-            </p>
+          {errors.password && (
+            <p className="text-xs text-red-500 mt-1">{errors.password}</p>
           )}
         </div>
 
@@ -268,18 +292,22 @@ export default function Register() {
             placeholder="Konfirmasi Password"
             className="w-full px-4 py-3 rounded-md bg-white text-sm"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (errors.confirmPassword) {
+                setErrors((prev) => {
+                  const newErrors = { ...prev };
+                  delete newErrors.confirmPassword;
+                  return newErrors;
+                });
+              }
+            }}
           />
-          {submitted && confirmPassword.trim() === "" && (
+          {errors.confirmPassword && (
             <p className="text-xs text-red-500 mt-1">
-              Konfirmasi password wajib diisi
+              {errors.confirmPassword}
             </p>
           )}
-          {submitted &&
-            password !== confirmPassword &&
-            confirmPassword !== "" && (
-              <p className="text-xs text-red-500 mt-1">Password tidak cocok</p>
-            )}
         </div>
 
         <p className="text-sm mt-3">

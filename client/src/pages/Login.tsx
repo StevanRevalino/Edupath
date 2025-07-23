@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as yup from "yup";
-import { loginSchema } from "../schema/LoginSchema"; // Sesuaikan path-mu
+import { loginSchema } from "../schema/LoginSchema";
 import { ValidationError } from "yup";
 
 export default function Login() {
@@ -15,6 +14,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setErrors({});
     setSubmitted(true);
     setServerError("");
 
@@ -45,6 +45,7 @@ export default function Login() {
           }
         });
         setErrors(newErrors);
+        return;
       } else {
         console.error("Login Error:", err);
         setServerError("Terjadi kesalahan saat login");
@@ -78,7 +79,7 @@ export default function Login() {
             onChange={(e) => {
               setEmail(e.target.value);
               if (errors.email) {
-                setErrors((prev) => ({ ...prev, email: "" }));
+                setErrors((prev) => ({ ...prev, email: undefined }));
               }
             }}
           />
@@ -97,7 +98,7 @@ export default function Login() {
             onChange={(e) => {
               setPassword(e.target.value);
               if (errors.password) {
-                setErrors((prev) => ({ ...prev, password: "" }));
+                setErrors((prev) => ({ ...prev, password: undefined }));
               }
             }}
           />

@@ -1,8 +1,30 @@
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 const userRepository = new UserRepository();
+const generateCustomUserId = async (): Promise<string> => {
+  const lastUser = await prisma.user.findFirst({
+    orderBy: { user_id: "desc" },
+    where: {
+      user_id: {
+        startsWith: "US",
+      },
+    },
+  });
+
+  let lastNumber = 0;
+
+  if (lastUser) {
+    const numPart = parseInt(lastUser.user_id.replace("US", ""));
+    lastNumber = isNaN(numPart) ? 0 : numPart;
+  }
+
+  const nextNumber = lastNumber + 1;
+  return `US${String(nextNumber).padStart(3, "0")}`; // US001, US002, ...
+};
 
 export class AuthService {
   async register(data: any) {
@@ -11,7 +33,9 @@ export class AuthService {
       throw new Error("Email sudah terdaftar");
     }
     const hashed = await bcrypt.hash(data.password, 10);
+    const customId = await generateCustomUserId();
     const formatedUser = {
+      user_id: customId,
       firstname: data.firstname,
       lastname: data.lastname,
       email: data.email,
