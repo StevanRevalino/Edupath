@@ -10,7 +10,7 @@ export async function seedDefaultAdmins() {
       firstname: "Admin",
       lastname: "01",
       email: "gurubk01@gmail.com",
-      password: "bk123456!", // plain password
+      password: "bk123456!",
     },
     {
       user_id: "BK002",
