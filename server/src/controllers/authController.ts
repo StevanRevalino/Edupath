@@ -26,4 +26,20 @@ export class AuthController {
 
     res.json(user);
   }
+
+  async forgotPassword(req: Request, res: Response) {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword)
+      return res
+        .status(400)
+        .json({ message: "Email dan password baru wajib diisi" });
+
+    try {
+      await authService.forgotPassword(email, newPassword);
+      res.status(200).json({ message: "Password berhasil direset" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
 }

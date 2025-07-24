@@ -19,4 +19,11 @@ export class UserRepository {
   async create(data: CreateUserDTO) {
     return prisma.user.create({ data });
   }
+
+  async updatePassword(email: string, hashedPassword: string) {
+    return prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+  }
 }

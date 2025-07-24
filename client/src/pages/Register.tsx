@@ -7,6 +7,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { registerSchema } from "../schema/RegsiterSchema";
 import * as yup from "yup";
+import { toast } from "react-hot-toast";
 
 type OptionType = {
   value: string | number;
@@ -96,18 +97,18 @@ export default function Register() {
         password,
       });
 
-      alert("Pendaftaran berhasil!");
+      toast.success("Register berhasil!");
       navigate("/login");
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.message || "Terjadi kesalahan server";
       console.error("Error saat register:", errorMsg);
-      alert(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
   const handleVerifyEmail = async () => {
-    if (!email) return alert("Masukkan email terlebih dahulu");
+    if (!email) return toast.error("Masukkan email terlebih dahulu");
 
     const generatedOtp = generateOtp();
     setOtp(generatedOtp);
@@ -122,8 +123,30 @@ export default function Register() {
       setShowModal(true);
     } catch (err) {
       console.error("EmailJS error:", err);
-      alert("Gagal mengirim OTP");
+      toast.error("Gagal mengirim OTP");
     }
+  };
+
+  const handleResendOtp = () => {
+    const newOtp = generateOtp();
+    setOtp(newOtp); // update OTP yang valid
+
+    emailjs
+      .send(
+        "YOUR_SERVICE_ID",
+        "YOUR_TEMPLATE_ID",
+        {
+          to_email: email,
+          otp: newOtp,
+        },
+        "YOUR_PUBLIC_KEY"
+      )
+      .then(() => {
+        toast.success("OTP berhasil dikirim ulang!");
+      })
+      .catch(() => {
+        toast.error("Gagal mengirim ulang OTP");
+      });
   };
 
   useEffect(() => {
@@ -339,7 +362,7 @@ export default function Register() {
             setIsVerified(true);
             setShowModal(false);
           }}
-          onResend={handleVerifyEmail}
+          onResend={handleResendOtp}
         />
       )}
     </div>

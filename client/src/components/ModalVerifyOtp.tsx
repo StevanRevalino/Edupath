@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Mail } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface OTPModalProps {
   email: string;
@@ -56,7 +57,7 @@ export default function OTPModal({
     if (inputOtp.join("") === otp.trim()) {
       onVerifySuccess();
     } else {
-      alert("OTP salah!");
+      toast.error("Invalid OTP");
     }
   };
 

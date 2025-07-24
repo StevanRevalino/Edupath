@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginSchema } from "../schema/LoginSchema";
 import { ValidationError } from "yup";
-import ModalResetPassword from "../components/ModalForgotPassword";
+import ModalResetPassword from "../components/ModalResetPassword";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ export default function Login() {
         return;
       }
 
-      alert("Berhasil masuk!");
+      toast.success("Login berhasil!");
       navigate("/dashboard");
     } catch (err) {
       if (err instanceof ValidationError) {

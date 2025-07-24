@@ -56,4 +56,17 @@ export class AuthService {
 
     return user;
   }
+
+  async forgotPassword(email: string, newPassword: string) {
+    const user = await userRepository.findByEmail(email);
+
+    if (!user) throw new Error("User not found");
+
+    const isSame = await bcrypt.compare(newPassword, user.password!);
+    if (isSame)
+      throw new Error("Password baru tidak boleh sama dengan sebelumnya");
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await userRepository.updatePassword(email, hashed);
+  }
 }
