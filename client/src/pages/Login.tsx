@@ -139,7 +139,7 @@ export default function Login() {
         {/* Tombol Masuk */}
         <button
           onClick={handleLogin}
-          className={`mt-4 w-full py-2 font-bold rounded-md ${
+          className={`mt-4 w-full py-2 font-bold rounded-md cursor-pointer ${
             email && password
               ? "bg-black text-white"
               : "bg-gray-300 text-gray-500"
