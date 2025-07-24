@@ -30,7 +30,7 @@ export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [kelas, setKelas] = useState<OptionType | null>(null);
-
+  const [otpResetTrigger, setOtpResetTrigger] = useState(0);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -128,18 +128,21 @@ export default function Register() {
   };
 
   const handleResendOtp = () => {
+    if (timer > 0) return;
+
     const newOtp = generateOtp();
-    setOtp(newOtp); // update OTP yang valid
+    setOtp(newOtp);
+    setOtpResetTrigger((prev) => prev + 1);
 
     emailjs
       .send(
-        "YOUR_SERVICE_ID",
-        "YOUR_TEMPLATE_ID",
+        SERVICE_ID,
+        TEMPLATE_ID,
         {
           to_email: email,
           otp: newOtp,
         },
-        "YOUR_PUBLIC_KEY"
+        PUBLIC_KEY
       )
       .then(() => {
         toast.success("OTP berhasil dikirim ulang!");
@@ -152,7 +155,7 @@ export default function Register() {
   useEffect(() => {
     if (!showModal) return;
 
-    setTimer(60);
+    setTimer(30);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -165,6 +168,21 @@ export default function Register() {
 
     return () => clearInterval(interval);
   }, [showModal]);
+
+  useEffect(() => {
+    if (timer === 60) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev === 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [timer]);
 
   return (
     <div className="flex h-screen">
@@ -243,7 +261,7 @@ export default function Register() {
                 });
               }
             }}
-            placeholder="Pilih kelas"
+            placeholder="Pilih Kelas"
             error={errors.kelas}
             className="outline-none"
           />
@@ -355,6 +373,7 @@ export default function Register() {
       {/* Modal OTP */}
       {showModal && (
         <OtpModal
+          key={otp}
           email={email}
           otp={otp}
           onClose={() => setShowModal(false)}
@@ -363,6 +382,7 @@ export default function Register() {
             setShowModal(false);
           }}
           onResend={handleResendOtp}
+          resetTrigger={otpResetTrigger}
         />
       )}
     </div>

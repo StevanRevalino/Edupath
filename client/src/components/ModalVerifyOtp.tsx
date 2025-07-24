@@ -8,6 +8,7 @@ interface OTPModalProps {
   onClose: () => void;
   onVerifySuccess: () => void;
   onResend: () => void;
+  resetTrigger: number;
 }
 
 export default function OTPModal({
@@ -20,9 +21,10 @@ export default function OTPModal({
   const [inputOtp, setInputOtp] = useState(Array(6).fill(""));
   const [timer, setTimer] = useState(60);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
   useEffect(() => {
-    setTimer(15);
+    setTimer(60);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -33,8 +35,7 @@ export default function OTPModal({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
-
+  }, [resetTrigger]);
 
   const handleChange = (value: string, idx: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -98,9 +99,11 @@ export default function OTPModal({
           <button
             onClick={onResend}
             disabled={timer > 0}
-            className={`font-semibold text-blue-600 hover:underline disabled:opacity-40`}
+            className={`font-semibold text-blue-600 hover:underline disabled:opacity-40 cursor-pointer ${
+              timer > 0 ? "disabled:cursor-not-allowed" : ""
+            }`}
           >
-            {timer > 0 ? `resend (${timer}s)` : "resend"}
+            {timer > 0 ? `resend in (${timer}s)` : "resend"}
           </button>
         </div>
 

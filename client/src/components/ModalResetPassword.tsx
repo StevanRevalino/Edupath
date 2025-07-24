@@ -21,6 +21,8 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [timer, setTimer] = useState(0);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   const SERVICE_ID = "service_h6ptjp7";
   const TEMPLATE_ID = "template_2hb217b";
@@ -28,6 +30,19 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
   const generateOtp = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
+
+  const startTimer = () => {
+    setTimer(30);
+    const id = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1 && intervalId) {
+          clearInterval(id);
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    setIntervalId(id);
+  };
 
   const handleVerifyEmail = async () => {
     if (!email) return toast.error("Masukkan email terlebih dahulu");
@@ -43,6 +58,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         PUBLIC_KEY
       );
       toast.success("OTP berhasil dikirim!");
+      startTimer();
     } catch (err) {
       console.error("EmailJS error:", err);
       toast.error("Gagal mengirim OTP");
@@ -94,10 +110,8 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         { abortEarly: false }
       );
 
-      // Clear error
       setErrors({});
 
-      // Kirim ke backend
       const res = await fetch(
         "http://localhost:5000/api/auth/forgot-password",
         {
@@ -115,6 +129,11 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       if (!res.ok) return toast.error(data.message);
 
       setSuccess(true);
+      toast.success("Password berhasil direset!");
+
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (err: any) {
       if (err.name === "ValidationError") {
         const newErrors: { [key: string]: string } = {};
@@ -129,11 +148,17 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [intervalId]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-xl w-[600px] shadow-xl relative">
+      <div className="bg-white p-6 rounded-xl w-[700px] shadow-xl relative">
         <h1 className="text-xl font-bold mb-3 text-start">Reset Password</h1>
 
         <div className="grid grid-cols-2 gap-4 mb-3">
@@ -150,9 +175,14 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                 {!isVerified ? (
                   <button
                     onClick={handleVerifyEmail}
-                    className="bg-blue-500 text-white px-2 py-2 rounded-md cursor-pointer"
+                    className={`${
+                      timer > 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 text-white"
+                    } px-2 py-2 rounded-md cursor-pointer`}
+                    disabled={timer > 0}
                   >
-                    Verifikasi
+                    {timer > 0 ? `Kirim ulang (${timer}s)` : "Verifikasi"}
                   </button>
                 ) : (
                   <CheckCircle className="text-green-500" />
@@ -215,7 +245,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         </div>
 
         <div className="flex justify-between items-center gap-4 mb-9">
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             {otp.map((val, idx) => (
               <input
                 key={idx}
@@ -246,7 +276,10 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
         {/* Batal */}
         <div className="flex justify-between">
-          <button onClick={onClose} className="text-gray-600 text-sm underline cursor-pointer">
+          <button
+            onClick={onClose}
+            className="text-gray-600 text-sm underline cursor-pointer"
+          >
             Batal
           </button>
           {/* Success message */}
