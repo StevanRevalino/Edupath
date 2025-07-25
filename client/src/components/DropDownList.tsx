@@ -24,7 +24,7 @@ export default function DropdownList({
   className = "",
 }: DropdownListProps) {
   return (
-    <div className={`flex flex-col mt-2 ${className}`}>
+    <div className={`flex flex-col ${className}`}>
       <Select
         value={value}
         onChange={onChange}

@@ -1,9 +1,14 @@
 import { CheckCircle } from "lucide-react";
 import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
-import { resetPasswordSchema } from "../schema/ResetPasswordSchema";
+import {
+  resetPasswordSchema,
+  emailSchema,
+} from "../schema/ResetPasswordSchema";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { X } from "lucide-react";
+import { ValidationError } from "yup";
 
 interface Props {
   isOpen: boolean;
@@ -45,23 +50,30 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   };
 
   const handleVerifyEmail = async () => {
-    if (!email) return toast.error("Masukkan email terlebih dahulu");
-
-    const generatedOtp = generateOtp();
-    setServerOtp(generatedOtp);
-
     try {
+      await emailSchema.validate({ email }, { abortEarly: false });
+      setErrors({}); // reset errors
+
+      const generatedOtp = generateOtp();
+      setServerOtp(generatedOtp);
+
       await emailjs.send(
         SERVICE_ID,
         TEMPLATE_ID,
         { to_email: email, otp: generatedOtp },
         PUBLIC_KEY
       );
+
       toast.success("OTP berhasil dikirim!");
       startTimer();
     } catch (err) {
-      console.error("EmailJS error:", err);
-      toast.error("Gagal mengirim OTP");
+      if (err instanceof ValidationError) {
+        const emailErr: { email?: string } = {};
+        err.inner.forEach((e) => {
+          if (e.path === "email") emailErr.email = e.message;
+        });
+        setErrors((prev) => ({ ...prev, ...emailErr }));
+      }
     }
   };
 
@@ -105,7 +117,8 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
   const handleSubmit = async () => {
     try {
-      await resetPasswordSchema.validate(
+      const schema = resetPasswordSchema(isVerified);
+      await schema.validate(
         { email, newPassword, confirmPassword },
         { abortEarly: false }
       );
@@ -134,16 +147,13 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (err: any) {
-      if (err.name === "ValidationError") {
+    } catch (err) {
+      if (err instanceof ValidationError) {
         const newErrors: { [key: string]: string } = {};
-        err.inner.forEach((e: any) => {
-          newErrors[e.path] = e.message;
+        err.inner.forEach((e) => {
+          if (e.path) newErrors[e.path] = e.message;
         });
         setErrors(newErrors);
-      } else {
-        console.error(err);
-        toast.error("Terjadi kesalahan");
       }
     }
   };
@@ -157,136 +167,136 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-xl w-[700px] shadow-xl relative">
-        <h1 className="text-xl font-bold mb-3 text-start">Reset Password</h1>
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[700px] shadow-xl relative mx-4">
+        <button
+          onClick={onClose}
+          className="text-gray-600 text-sm underline cursor-pointer"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <h1 className="text-2xl sm:text-md font-bold mb-3 text-start">
+          Reset Password
+        </h1>
 
-        <div className="grid grid-cols-2 gap-4 mb-3">
-          <div>
-            <label className="text-sm block mb-1 text-left">Email</label>
-            <div className="flex gap-2">
+        <div className="flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+            <div>
+              <label className="text-sm block mb-1 text-left">Email</label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  className="flex-1 px-3 py-2 bg-[#D9D9D9] rounded-md w-full focus:outline-none"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="flex items-center">
+                  {!isVerified ? (
+                    <button
+                      onClick={handleVerifyEmail}
+                      className={`${
+                        timer > 0
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-500 text-white"
+                      } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap`}
+                      disabled={timer > 0}
+                    >
+                      {timer > 0 ? `Kirim ulang (${timer}s)` : "Verifikasi"}
+                    </button>
+                  ) : (
+                    <CheckCircle className="text-green-500" />
+                  )}
+                </div>
+              </div>
+              {errors.email && (
+                <p className="text-sm text-red-500 text-left">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm block mb-1 text-left">
+                Password Baru
+              </label>
               <input
-                type="email"
-                className="flex-1 px-3 py-2 border rounded-md w-full"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="password"
+                className="w-full px-3 py-2 bg-[#D9D9D9] rounded-md focus:outline-none"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
-              <div className="flex items-center">
-                {!isVerified ? (
-                  <button
-                    onClick={handleVerifyEmail}
-                    className={`${
-                      timer > 0
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-500 text-white"
-                    } px-2 py-2 rounded-md cursor-pointer`}
-                    disabled={timer > 0}
-                  >
-                    {timer > 0 ? `Kirim ulang (${timer}s)` : "Verifikasi"}
-                  </button>
-                ) : (
-                  <CheckCircle className="text-green-500" />
-                )}
+              {errors.newPassword && (
+                <p className="text-sm text-red-500 text-left">
+                  {errors.newPassword}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="flex items-center order-2 lg:order-1 mb-3 lg:mb-0">
+              <div>
+                <label className="font-bold block text-left text-xl sm:text-2xl">
+                  Verifikasi Email
+                </label>
+                <p className="text-xs text-gray-500 text-left">
+                  Masukkan kode yang kami kirimkan ke email Anda!
+                </p>
               </div>
             </div>
-            {errors.email && (
-              <p className="text-sm text-red-500 mt-1 text-left">
-                {errors.email}
-              </p>
-            )}
-          </div>
 
-          <div>
-            <label className="text-sm block mb-1 text-left">
-              Password Baru
-            </label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 border rounded-md"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            {errors.newPassword && (
-              <p className="text-sm text-red-500 mt-1 text-left">
-                {errors.newPassword}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-3">
-          <div className="flex items-center">
-            <div>
-              <label className="font-bold block text-left text-2xl">
-                Verifikasi Email
+            <div className="order-1 lg:order-2">
+              <label className="text-sm block mb-1 text-left">
+                Konfirmasi Password
               </label>
-              <p className="text-xs text-gray-500 text-left">
-                Masukkan kode yang kami kirimkan ke email Anda!
-              </p>
+              <input
+                type="password"
+                className="w-full px-3 py-2 bg-[#D9D9D9] rounded-md focus:outline-none"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500 text-left">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
           </div>
 
-          <div>
-            <label className="text-sm block mb-1 text-left">
-              Konfirmasi Password
-            </label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 border rounded-md"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            {errors.confirmPassword && (
-              <p className="text-sm text-red-500 mt-1 text-left">
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
-        </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div className="flex gap-1 sm:gap-2 flex-wrap justify-center sm:justify-start w-full sm:w-auto">
+              {otp.map((val, idx) => (
+                <input
+                  key={idx}
+                  ref={(el) => {
+                    inputRefs.current[idx] = el!;
+                  }}
+                  type="text"
+                  maxLength={1}
+                  value={val}
+                  onChange={(e) => handleChangeOtp(e.target.value, idx)}
+                  onKeyDown={(e) => handleKeyDown(e, idx)}
+                  className="w-8 h-8 sm:w-10 sm:h-10 bg-[#D9D9D9] rounded-md text-center text-lg focus:outline-none mb-4 sm:mb-10"
+                />
+              ))}
+            </div>
 
-        <div className="flex justify-between items-center gap-4 mb-9">
-          <div className="flex gap-2">
-            {otp.map((val, idx) => (
-              <input
-                key={idx}
-                ref={(el) => {
-                  inputRefs.current[idx] = el!;
-                }}
-                type="text"
-                maxLength={1}
-                value={val}
-                onChange={(e) => handleChangeOtp(e.target.value, idx)}
-                onKeyDown={(e) => handleKeyDown(e, idx)}
-                className="w-10 h-10 border rounded-md text-center text-lg"
-              />
-            ))}
+            <button
+              onClick={handleSubmit}
+              className={`${
+                isFormValid
+                  ? "bg-black text-white"
+                  : "bg-gray-300 text-gray-500 cursor-pointer"
+              } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap`}
+            >
+              Simpan Perubahan
+            </button>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            className={`${
-              isFormValid
-                ? "bg-black text-white"
-                : "bg-gray-300 text-gray-500 cursor-pointer"
-            } px-4 py-2 rounded-md font-semibold`}
-          >
-            Simpan Perubahan
-          </button>
         </div>
 
         {/* Batal */}
         <div className="flex justify-between">
-          <button
-            onClick={onClose}
-            className="text-gray-600 text-sm underline cursor-pointer"
-          >
-            Batal
-          </button>
           {/* Success message */}
           {success && (
-            <p className="text-green-600 text-sm mb-3">
-              Password berhasil direset!
-            </p>
+            <p className="text-green-600 text-sm">Password berhasil direset!</p>
           )}
         </div>
       </div>

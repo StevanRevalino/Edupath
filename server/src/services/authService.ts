@@ -3,6 +3,7 @@ import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import jwt from "jsonwebtoken";
 
 const userRepository = new UserRepository();
 const generateCustomUserId = async (): Promise<string> => {
@@ -23,7 +24,7 @@ const generateCustomUserId = async (): Promise<string> => {
   }
 
   const nextNumber = lastNumber + 1;
-  return `US${String(nextNumber).padStart(3, "0")}`; // US001, US002, ...
+  return `US${String(nextNumber).padStart(3, "0")}`;
 };
 
 export class AuthService {
@@ -49,12 +50,33 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await userRepository.findByEmail(email);
 
-    if (!user || !user.password) return null; // Tambahkan pengecekan ini
+    if (!user || !user.password) return null;
 
-    const isMatch = await bcrypt.compare(password, user.password); // pastikan password ada
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return null;
 
-    return user;
+    // ✅ Buat JWT Token
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        email: user.email,
+        role: user.user_id.startsWith("BK_") ? "admin" : "user",
+      },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1h" } // expire dalam 1 jam
+    );
+
+    // Kirim token + data user (jangan kirim password!)
+    return {
+      token,
+      user: {
+        user_id: user.user_id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        kelas: user.kelas,
+      },
+    };
   }
 
   async forgotPassword(email: string, newPassword: string) {

@@ -13,18 +13,24 @@ export class AuthController {
     }
   }
 
+  constructor() {
+    this.login = this.login.bind(this);
+  }
+
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
 
     if (!email || !password)
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "Email dan password wajib diisi" });
 
-    const user = await authService.login(email, password);
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    const result = await authService.login(email, password);
 
-    res.json(user);
+    if (!result)
+      return res.status(401).json({ message: "Email atau password salah" });
+
+    res.json(result); // token + user
   }
 
   async forgotPassword(req: Request, res: Response) {
