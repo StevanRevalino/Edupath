@@ -12,8 +12,6 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 }
 
 function App() {
-  const userId = localStorage.getItem("user_id");
-
   return (
     <BrowserRouter>
       <Routes>
@@ -24,17 +22,22 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              {userId?.startsWith("BK") ? (
-                <AdminDashboard />
-              ) : (
-                <UserDashboard />
-              )}
-            </ProtectedRoute> 
+              <DashboardRouter />
+            </ProtectedRoute>
           }
         />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function DashboardRouter() {
+  const userId = localStorage.getItem("user_id");
+  if (userId?.startsWith("BK")) {
+    return <AdminDashboard />;
+  } else {
+    return <UserDashboard />;
+  }
 }
 
 export default App;
