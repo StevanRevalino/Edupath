@@ -71,9 +71,9 @@ export default function OTPModal({
           </div>
         </div>
 
-        <h2 className="text-xl font-bold mb-1">Check your email</h2>
+        <h2 className="text-xl font-bold mb-1">Periksa Email Anda</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Enter the verification code sent to <br />
+          Kode verifikasi telah dikirim ke<br />
           <span className="font-medium">{email}</span>
         </p>
 
@@ -95,7 +95,7 @@ export default function OTPModal({
         </div>
 
         <div className="text-sm text-gray-500 mb-4">
-          Didn’t get a code?{" "}
+          tidak menerima kode verifikasi?{" "}
           <button
             onClick={onResend}
             disabled={timer > 0}
@@ -103,7 +103,7 @@ export default function OTPModal({
               timer > 0 ? "disabled:cursor-not-allowed" : ""
             }`}
           >
-            {timer > 0 ? `resend in (${timer}s)` : "resend"}
+            {timer > 0 ? `kirim ulang (${timer}s)` : "kirim ulang"}
           </button>
         </div>
 
@@ -111,14 +111,14 @@ export default function OTPModal({
           onClick={handleSubmit}
           className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
-          Verify email
+          Verifikasi Email
         </button>
 
         <button
           onClick={onClose}
           className="text-sm text-gray-400 mt-4 hover:underline cursor-pointer"
         >
-          Cancel
+          Batal
         </button>
       </div>
     </div>

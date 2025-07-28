@@ -169,15 +169,17 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[700px] shadow-xl relative mx-4">
-        <button
-          onClick={onClose}
-          className="text-gray-600 text-sm underline cursor-pointer"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <h1 className="text-2xl sm:text-md font-bold mb-3 text-start">
-          Reset Password
-        </h1>
+        <div className="flex items-start justify-between h-16">
+          <h1 className="text-2xl sm:text-md font-bold text-start mt-6">
+            Reset Password
+          </h1>
+          <button
+            onClick={onClose}
+            className="text-gray-600 text-sm underline cursor-pointer"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
         <div className="flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
