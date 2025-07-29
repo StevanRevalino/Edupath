@@ -9,6 +9,7 @@ import Home from "./pages/user/Home";
 import Jurusan from "./pages/user/Jurusan";
 import Universitas from "./pages/user/Universitas";
 import Konseling from "./pages/user/Konseling";
+import Profil from "./pages/user/Profil";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const userId = localStorage.getItem("user_id");
@@ -45,6 +46,7 @@ function App() {
           <Route path="/jurusan" element={<Jurusan />} />
           <Route path="/universitas" element={<Universitas />} />
           <Route path="/konseling" element={<Konseling />} />
+          <Route path="/profil" element={<Profil />} />
         </Route>
       </Routes>
     </BrowserRouter>

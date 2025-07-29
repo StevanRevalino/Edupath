@@ -33,7 +33,6 @@ export default function Login() {
       if (!res.ok) {
         const data = await res.json().catch(() => null);
 
-        // Gunakan fallback message kalau tidak ada message dari server
         const errorMessage = data?.message || "Email atau password salah";
 
         setServerError(errorMessage);
