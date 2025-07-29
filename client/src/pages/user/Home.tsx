@@ -36,7 +36,6 @@ const Home = () => {
     { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
     { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
     { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
   ];
   const colorMap: Record<string, string> = {
     Akuntansi: "bg-[#3C3782]",
@@ -108,7 +107,7 @@ const Home = () => {
           </div>
 
           {/* ===== Content ===== */}
-          <div className="grid grid-cols-[1fr_3fr] gap-6 mt-2">
+          <div className="grid grid-cols-[1fr_3fr] gap-x-6 gap-y-2 mt-2">
             {/* 1.1 Total Tes */}
             <div className="row-span-1">
               <div className="text-3xl font-bold mb-2">
