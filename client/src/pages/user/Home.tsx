@@ -52,7 +52,7 @@ const Home = () => {
   const hasMore = historyTags.length > 5 && !showAll;
 
   return (
-    <div className="py-24 px-24">
+    <div className=" px-24 ">
       <div className="flex flex-col items-start px-20 pt-10">
         <h1 className="text-5xl font-bold">Hello, Name!</h1>
         <div className="flex justify-between w-full items-center">
@@ -75,7 +75,7 @@ const Home = () => {
             </div>
           </div>
           <div className="mb-5">
-            <div className="bg-[#E6F3FF] border-3 border-[#003B73] rounded-tl-[50px] rounded-br-[50px] pl-4 pr-3 pt-4 pb-3">
+            <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[50px] rounded-br-[50px] pl-4 pr-3 pt-4 pb-3">
               <div className="relative mb-3">
                 <div className="absolute -top-9 left-10 bg-white px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-md font-bold">
                   Info

@@ -18,7 +18,7 @@ const UserLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 text-lg"> {/* text diperbesar */}
+    <div className=" bg-gray-100 text-lg h-full"> {/* text diperbesar */}
       {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-[#6CCBFF] flex items-center justify-between px-8 md:px-12 z-10 h-24 rounded-b-3xl shadow-lg">
         {/* Logo */}
@@ -87,7 +87,7 @@ const UserLayout = () => {
       )}
 
       {/* Konten */}
-      <main className="">
+      <main className="py-24">
         <Outlet />
       </main>
     </div>
