@@ -45,7 +45,11 @@ export default function Login() {
       console.log(result);
 
       toast.success("Login berhasil!");
-      navigate("/dashboard");
+      if (result.user.user_id.startsWith("BK")) {
+        navigate("/dashboard-admin");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       if (err instanceof ValidationError) {
         const newErrors: { email?: string; password?: string } = {};

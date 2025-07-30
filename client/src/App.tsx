@@ -25,41 +25,33 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route
-          path="/dashboard"
+          path="/dashboard-admin"
           element={
             <ProtectedRoute>
-              <DashboardRouter />
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />
 
         {/* Dashboard User dengan header tetap */}
         <Route
+          path="/"
           element={
             <ProtectedRoute>
               <UserDashboard />
             </ProtectedRoute>
           }
         >
-          <Route path="/home" element={<Home />} />
-          <Route path="/tes" element={<Tes />} />
-          <Route path="/jurusan" element={<Jurusan />} />
-          <Route path="/universitas" element={<Universitas />} />
-          <Route path="/konseling" element={<Konseling />} />
-          <Route path="/profil" element={<Profil />} />
+          <Route index path="home" element={<Home />} />
+          <Route path="tes" element={<Tes />} />
+          <Route path="jurusan" element={<Jurusan />} />
+          <Route path="universitas" element={<Universitas />} />
+          <Route path="konseling" element={<Konseling />} />
+          <Route path="profil" element={<Profil />} />
         </Route>
       </Routes>
     </BrowserRouter>
   );
-}
-
-function DashboardRouter() {
-  const userId = localStorage.getItem("user_id");
-  if (userId?.startsWith("BK")) {
-    return <AdminDashboard />;
-  } else {
-    return <UserDashboard />;
-  }
 }
 
 export default App;

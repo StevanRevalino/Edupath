@@ -9,12 +9,12 @@ const UserLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuItems = [
-    { label: "Home", path: "/home" },
-    { label: "Tes", path: "/tes" },
-    { label: "Jurusan", path: "/jurusan" },
-    { label: "Universitas", path: "/universitas" },
-    { label: "Konseling", path: "/konseling" },
-    { label: "Profil", path: "/profil" },
+    { label: "Home", path: "home" },
+    { label: "Tes", path: "tes" },
+    { label: "Jurusan", path: "jurusan" },
+    { label: "Universitas", path: "universitas" },
+    { label: "Konseling", path: "konseling" },
+    { label: "Profil", path: "profil" },
   ];
 
   return (
@@ -24,7 +24,7 @@ const UserLayout = () => {
         {/* Logo */}
         <div
           className="flex items-center space-x-4 cursor-pointer"
-          onClick={() => navigate("/home")}
+          onClick={() => navigate("home")}
         >
           <img src={logo} alt="Edupath Logo" className="h-20 w-auto mb-4" />
         </div>
