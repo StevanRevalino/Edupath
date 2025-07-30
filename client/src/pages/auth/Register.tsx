@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import OtpModal from "../../components/ModalVerifyOtp";
 import emailjs from "@emailjs/browser";
 import DropdownList from "../../components/DropDownList";
@@ -34,6 +34,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const SERVICE_ID = "service_h6ptjp7";
   const TEMPLATE_ID = "template_2hb217b";
@@ -199,41 +200,41 @@ export default function Register() {
   }, [timer]);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
       {/* Kiri: Logo */}
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-blue-100">
-        <div className="w-[250px] h-[150px] bg-gray-300 flex items-center justify-center text-xl font-medium">
+      <div className="hidden lg:flex w-1/2 items-center justify-center">
+        <div className="w-[200px] h-[120px] xl:w-[250px] xl:h-[150px] bg-gray-300 flex items-center justify-center text-lg xl:text-xl font-medium">
           Edupath Logo
         </div>
       </div>
 
       {/* Kanan: Form */}
       <div
-        className="w-full md:w-1/2 bg-slate-100 flex flex-col justify-center py-10 px-6 md:px-10 lg:px-20 xl:px-40"
+        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-30 lg:rounded-tl-[50px] lg:rounded-bl-[50px] min-h-screen lg:min-h-auto"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleRegisterSubmit();
           }
         }}
       >
-        <div className="w-full">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">
+        <div className="w-full mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-bold text-center mb-2">
             Create an account
           </h1>
-          <p className="text-lg md:text-xl mb-6 text-gray-600 text-center">
+          <p className="text-base sm:text-lg md:text-xl mb-2 text-gray-900 text-center">
             Yuk, jadi anggota EduFamily!
           </p>
         </div>
 
         {/* Form */}
-        <div className="w-full flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-4 sm:gap-5 bg-[#f5f5f5] px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
           {/* First & Last Name */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <input
                 type="text"
                 placeholder="Nama awal"
-                className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
                 value={firstName}
                 onChange={(e) => {
                   setFirstName(e.target.value);
@@ -247,14 +248,16 @@ export default function Register() {
                 }}
               />
               {errors.firstName && (
-                <p className="text-xs text-red-500">{errors.firstName}</p>
+                <p className="text-xs text-red-500 mt-1 px-2">
+                  {errors.firstName}
+                </p>
               )}
             </div>
             <div>
               <input
                 type="text"
                 placeholder="Nama akhir"
-                className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
                 value={lastName}
                 onChange={(e) => {
                   setLastName(e.target.value);
@@ -268,7 +271,9 @@ export default function Register() {
                 }}
               />
               {errors.lastName && (
-                <p className="text-xs text-red-500">{errors.lastName}</p>
+                <p className="text-xs text-red-500 mt-1 px-2">
+                  {errors.lastName}
+                </p>
               )}
             </div>
           </div>
@@ -287,18 +292,18 @@ export default function Register() {
                 });
               }
             }}
-            placeholder="Pilih Kelas"
+            placeholder="Kelas"
             error={errors.kelas}
             className="outline-none"
           />
 
           {/* Email */}
           <div className="flex flex-col">
-            <div className="flex flex-row gap-3 w-full">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -315,26 +320,28 @@ export default function Register() {
               {!isVerified ? (
                 <button
                   onClick={handleVerifyEmail}
-                  className="bg-blue-500 text-white px-1 py-2 rounded-md text-md font-semibold cursor-pointer"
+                  className="bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white px-4 sm:px-3 py-2.5 sm:py-2 rounded-full text-md sm:text-lg font-semibold cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   Verifikasi
                 </button>
               ) : (
-                <CheckCircle className="text-green-500" />
+                <div className="flex items-center justify-center sm:justify-start w-fit h-fit">
+                  <CheckCircle className="text-green-500 w-8 h-8" />
+                </div>
               )}
             </div>
 
             {errors.email && (
-              <p className="text-xs text-red-500">{errors.email}</p>
+              <p className="text-xs text-red-500 mt-1 px-2">{errors.email}</p>
             )}
           </div>
 
           {/* Password */}
-          <div className="">
+          <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -347,17 +354,26 @@ export default function Register() {
                 }
               }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
+            </button>
             {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
+              <p className="text-xs text-red-500 mt-1 px-2">
+                {errors.password}
+              </p>
             )}
           </div>
 
           {/* Konfirmasi Password */}
-          <div className="">
+          <div>
             <input
               type="password"
               placeholder="Konfirmasi Password"
-              className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
               value={confirmPassword}
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
@@ -371,28 +387,32 @@ export default function Register() {
               }}
             />
             {errors.confirmPassword && (
-              <p className="text-xs text-red-500">{errors.confirmPassword}</p>
+              <p className="text-xs text-red-500 mt-1 px-2">
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
+
+          <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
+            <p className="text-center text-xs sm:text-sm">
+              Sudah punya akun?{" "}
+              <a href="/login" className="text-blue-600 underline">
+                Log in!
+              </a>
+            </p>
+
+            <button
+              onClick={handleRegisterSubmit}
+              className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 font-semibold rounded-full shadow-lg transition-colors cursor-pointer ${
+                isFormValid
+                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+                  : "bg-gray-300 text-gray-500"
+              }`}
+            >
+              <div className="text-lg sm:text-xl lg:text-2xl">Daftar akun</div>
+            </button>
+          </div>
         </div>
-
-        <p className="text-center text-sm mt-10">
-          Sudah punya akun?{" "}
-          <a href="/login" className="text-blue-600 underline">
-            Masuk!
-          </a>
-        </p>
-
-        <button
-          onClick={handleRegisterSubmit}
-          className={`mt-4 w-full py-2 font-bold rounded-md ${
-            isFormValid
-              ? "bg-black text-white"
-              : "bg-gray-300 text-gray-500 cursor-pointer"
-          }`}
-        >
-          <div className="text-lg">Daftar akun</div>
-        </button>
       </div>
 
       {/* Modal OTP */}

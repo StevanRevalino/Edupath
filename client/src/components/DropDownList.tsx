@@ -31,14 +31,19 @@ export default function DropdownList({
         options={options}
         placeholder={placeholder}
         classNames={{
-          control: () => "rounded-md text-sm",
-          menu: () => "rounded-md shadow-md mt-1 z-20",
+          control: () => "rounded-full text-lg shadow-md",
+          menu: () => "rounded-full shadow-md z-20",
         }}
         styles={{
           control: (base) => ({
             ...base,
             borderColor: error ? "#ef4444" : "#ffffff",
             minHeight: "40px",
+            borderRadius: "full",
+            paddingTop: "9px",
+            paddingBottom: "9px",
+            paddingLeft: "6px",
+            paddingRight: "6px",
           }),
           placeholder: (base) => ({
             ...base,
@@ -46,7 +51,7 @@ export default function DropdownList({
           }),
           valueContainer: (base) => ({
             ...base,
-            marginLeft: "0.3rem",
+            
           }),
         }}
         isSearchable={false}

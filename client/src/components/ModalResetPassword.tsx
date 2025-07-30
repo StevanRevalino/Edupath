@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
+import warningLogo from "../assets/warning-logo.png";
 
 interface Props {
   isOpen: boolean;
@@ -169,15 +170,18 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[700px] shadow-xl relative mx-4">
-        <div className="flex items-start justify-between h-16">
-          <h1 className="text-2xl sm:text-md font-bold text-start mt-6">
-            Reset Password
-          </h1>
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-12">
+            <img src={warningLogo} alt="warning" className="h-28 w-24 " />
+            <h1 className="text-4xl sm:text-md font-bold text-start">
+              Reset Password
+            </h1>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-600 text-sm underline cursor-pointer"
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" strokeWidth={3}/>
           </button>
         </div>
 
@@ -188,7 +192,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
-                  className="flex-1 px-3 py-2 bg-[#D9D9D9] rounded-md w-full focus:outline-none"
+                  className="flex-1 px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md w-full focus:outline-none"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -199,7 +203,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                       className={`${
                         timer > 0
                           ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 text-white"
+                          : "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
                       } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap`}
                       disabled={timer > 0}
                     >
@@ -221,7 +225,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 bg-[#D9D9D9] rounded-md focus:outline-none"
+                className="w-full px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
@@ -239,7 +243,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                 <label className="font-bold block text-left text-xl sm:text-2xl">
                   Verifikasi Email
                 </label>
-                <p className="text-xs text-gray-500 text-left">
+                <p className="text-sm text-gray-500 text-left">
                   Masukkan kode yang kami kirimkan ke email Anda!
                 </p>
               </div>
@@ -251,7 +255,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 bg-[#D9D9D9] rounded-md focus:outline-none"
+                className="w-full px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -276,7 +280,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                   value={val}
                   onChange={(e) => handleChangeOtp(e.target.value, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
-                  className="w-8 h-8 sm:w-10 sm:h-10 bg-[#D9D9D9] rounded-md text-center text-lg focus:outline-none mb-4 sm:mb-10"
+                  className="sm:w-10 sm:h-10 mb-4 sm:mb-10 w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-[#6CCBFF]"
                 />
               ))}
             </div>
@@ -285,9 +289,9 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               onClick={handleSubmit}
               className={`${
                 isFormValid
-                  ? "bg-black text-white"
-                  : "bg-gray-300 text-gray-500 cursor-pointer"
-              } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap`}
+                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+                  : "bg-gray-300 text-gray-500 "
+              } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap cursor-pointer`}
             >
               Simpan Perubahan
             </button>

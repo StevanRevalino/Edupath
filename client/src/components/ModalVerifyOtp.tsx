@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mail } from "lucide-react";
 import toast from "react-hot-toast";
+import warningLogo from "../assets/warning-logo.png";
 
 interface OTPModalProps {
   email: string;
@@ -55,6 +56,10 @@ export default function OTPModal({
   };
 
   const handleSubmit = () => {
+    if (timer <= 0) {
+      toast.error("Kode OTP sudah kedaluwarsa");
+      return;
+    }
     if (inputOtp.join("") === otp.trim()) {
       onVerifySuccess();
     } else {
@@ -64,16 +69,15 @@ export default function OTPModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-sm p-8 rounded-2xl shadow-lg text-center">
+      <div className="bg-white w-full max-w-sm p-8 rounded-4xl shadow-lg text-center">
         <div className="flex justify-center mb-4">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <Mail className="text-blue-600 w-6 h-6" />
-          </div>
+          <img src={warningLogo} alt="warning" className="w-24 h-28" />
         </div>
 
         <h2 className="text-xl font-bold mb-1">Periksa Email Anda</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Kode verifikasi telah dikirim ke<br />
+          Kode verifikasi telah dikirim ke
+          <br />
           <span className="font-medium">{email}</span>
         </p>
 
@@ -89,13 +93,13 @@ export default function OTPModal({
               value={val}
               onChange={(e) => handleChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className="w-12 h-12 border border-gray-300 rounded-lg text-center text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-[#6CCBFF]"
             />
           ))}
         </div>
 
         <div className="text-sm text-gray-500 mb-4">
-          tidak menerima kode verifikasi?{" "}
+          Tidak menerima kode verifikasi?{" "}
           <button
             onClick={onResend}
             disabled={timer > 0}
@@ -109,14 +113,14 @@ export default function OTPModal({
 
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
+          className="bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           Verifikasi Email
         </button>
 
         <button
           onClick={onClose}
-          className="text-sm text-gray-400 mt-4 hover:underline cursor-pointer"
+          className="text-sm font-semibold text-gray-600 mt-4 hover:underline cursor-pointer"
         >
           Batal
         </button>

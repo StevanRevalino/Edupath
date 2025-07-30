@@ -4,10 +4,12 @@ import { loginSchema } from "../../schema/LoginSchema";
 import { ValidationError } from "yup";
 import ModalResetPassword from "../../components/ModalResetPassword";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
@@ -74,40 +76,40 @@ export default function Login() {
   }, [serverError]);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
-      {/* Kiri: Logo (desktop only) */}
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-red-100">
-        <div className="w-[250px] h-[150px] bg-gray-300 flex items-center justify-center text-xl font-medium">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
+      {/* Kiri: Logo */}
+      <div className="hidden lg:flex w-1/2 items-center justify-center">
+        <div className="w-[200px] h-[120px] xl:w-[250px] xl:h-[150px] bg-gray-300 flex items-center justify-center text-lg xl:text-xl font-medium">
           Edupath Logo
         </div>
       </div>
 
       {/* Kanan: Form Login */}
-      <div className="w-full md:w-1/2 bg-slate-100 flex flex-col justify-center px-6 py-10 md:px-10 lg:px-20 xl:px-40">
-        <div className="w-full">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">
+      <div
+        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-40 lg:rounded-tl-[50px] lg:rounded-bl-[50px] min-h-screen lg:min-h-auto"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleLogin();
+          }
+        }}
+      >
+        <div className="w-full mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-bold text-center mb-2">
             Log in
           </h1>
-          <p className="text-lg md:text-xl mb-6 text-gray-600 text-center">
+          <p className="text-base sm:text-lg md:text-xl mb-2 text-gray-900 text-center">
             Masuk menggunakan akun terdaftar.
           </p>
         </div>
 
         {/* Form */}
-        <div
-          className="w-full flex flex-col gap-2"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
-        >
+        <div className="w-full flex flex-col gap-4 sm:gap-5 bg-[#f5f5f5] px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
           {/* Email */}
-          <div className="mt-2">
+          <div>
             <input
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -117,16 +119,16 @@ export default function Login() {
               }}
             />
             {submitted && errors.email && (
-              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+              <p className="text-xs text-red-500 mt-1 px-2">{errors.email}</p>
             )}
           </div>
 
           {/* Password */}
-          <div className="mt-2">
+          <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full px-4 py-3 rounded-md bg-white text-sm focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -135,52 +137,63 @@ export default function Login() {
                 }
               }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
+            </button>
             {submitted && errors.password && (
-              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+              <p className="text-xs text-red-500 mt-1 px-2">
+                {errors.password}
+              </p>
             )}
           </div>
+
+          {/* Lupa Password */}
+          <div className="flex justify-end">
+            <a
+              href="#"
+              className="text-xs sm:text-sm text-blue-600 underline"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenModalVerifyOtp(true);
+              }}
+            >
+              Lupa password?
+            </a>
+
+            {openModalVerifyOtp && (
+              <ModalResetPassword
+                isOpen={openModalVerifyOtp}
+                onClose={() => setOpenModalVerifyOtp(false)}
+              />
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
+            {/* Daftar Link */}
+            <p className="text-center text-xs sm:text-sm">
+              Tidak punya akun?{" "}
+              <a href="/register" className="text-blue-600 underline">
+                Daftar!
+              </a>
+            </p>
+
+            {/* Tombol Masuk */}
+            <button
+              onClick={handleLogin}
+              className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 font-semibold rounded-full shadow-lg transition-colors cursor-pointer ${
+                email && password
+                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+                  : "bg-gray-300 text-gray-500"
+              }`}
+            >
+              <div className="text-lg sm:text-xl lg:text-2xl">Masuk</div>
+            </button>
+          </div>
         </div>
-
-        {/* Lupa Password */}
-        <div className="text-right mt-2">
-          <a
-            href="#"
-            className="text-sm text-blue-600 underline"
-            onClick={(e) => {
-              e.preventDefault();
-              setOpenModalVerifyOtp(true);
-            }}
-          >
-            Lupa password?
-          </a>
-
-          {openModalVerifyOtp && (
-            <ModalResetPassword
-              isOpen={openModalVerifyOtp}
-              onClose={() => setOpenModalVerifyOtp(false)}
-            />
-          )}
-        </div>
-
-        {/* Daftar Link */}
-        <p className="text-sm mt-10 text-center">
-          Tidak punya akun?{" "}
-          <a href="/register" className="text-blue-600 underline">
-            Daftar!
-          </a>
-        </p>
-
-        {/* Tombol Masuk */}
-        <button
-          onClick={handleLogin}
-          className={`mt-4 w-full py-2 font-bold rounded-md cursor-pointer ${
-            email && password
-              ? "bg-black text-white"
-              : "bg-gray-300 text-gray-500"
-          }`}
-        >
-          <div className="text-lg">Masuk</div>
-        </button>
       </div>
     </div>
   );
