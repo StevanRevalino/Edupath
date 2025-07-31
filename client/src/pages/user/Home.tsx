@@ -79,6 +79,30 @@ const Home = () => {
     "Sastra Inggris",
   ];
 
+  // Dummy data untuk universitas
+  const universities = [
+    "Bina Nusantara",
+    "Univ. Pelita Harapan",
+    "Univ. Indonesia",
+    "Univ. Tarumanagara",
+    "Atma Jaya",
+    "Institut Teknologi Bandung",
+    "Univ. Gadjah Mada",
+    "Prasetiya Mulya",
+    "Univ. Airlangga",
+    "Univ. Brawijaya",
+    "Institut Teknologi Sepuluh Nopember",
+    "Univ. Diponegoro",
+    "Univ. Padjadjaran",
+    "Univ. Hasanuddin",
+    "Univ. Sebelas Maret",
+    "Univ. Negeri Yogyakarta",
+    "Institut Pertanian Bogor",
+    "Univ. Sumatera Utara",
+    "Univ. Andalas",
+    "Univ. Riau",
+  ];
+
   const colorMap: Record<string, string> = {
     Akuntansi: "bg-[#3C3782]",
     Mikrobiologi: "bg-[#B31507]",
@@ -101,11 +125,35 @@ const Home = () => {
     Kimia: "bg-[#047857]",
     Biologi: "bg-[#C2410C]",
     "Sastra Inggris": "bg-[#7E22CE]",
+
+    // Universities colors
+    "Bina Nusantara": "bg-[#1E3A8A]",
+    "Univ. Pelita Harapan": "bg-[#7C2D12]",
+    "Univ. Indonesia": "bg-[#B91C1C]",
+    "Univ. Tarumanagara": "bg-[#059669]",
+    "Atma Jaya": "bg-[#7C3AED]",
+    "Institut Teknologi Bandung": "bg-[#BE123C]",
+    "Univ. Gadjah Mada": "bg-[#C2410C]",
+    "Prasetiya Mulya": "bg-[#0891B2]",
+    "Univ. Airlangga": "bg-[#5B21B6]",
+    "Univ. Brawijaya": "bg-[#047857]",
+    "Institut Teknologi Sepuluh Nopember": "bg-[#1F2937]",
+    "Univ. Diponegoro": "bg-[#DC2626]",
+    "Univ. Padjadjaran": "bg-[#F59E0B]",
+    "Univ. Hasanuddin": "bg-[#EF4444]",
+    "Univ. Sebelas Maret": "bg-[#8B0000]",
+    "Univ. Negeri Yogyakarta": "bg-[#B31507]",
+    "Institut Pertanian Bogor": "bg-[#3C3782]",
+    "Univ. Sumatera Utara": "bg-[#00B7F3]",
+    "Univ. Andalas": "bg-[#FF00E5]",
+    "Univ. Riau": "bg-[#F0544F]",
   };
 
   const [showAll, setShowAll] = useState(false);
   const [showAllExplore, setShowAllExplore] = useState(false);
+  const [showAllUniversities, setShowAllUniversities] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [universitySearchQuery, setUniversitySearchQuery] = useState("");
 
   const displayedTags = showAll ? historyTags : historyTags.slice(0, 5);
   const hasMore = historyTags.length > 5 && !showAll;
@@ -119,6 +167,17 @@ const Home = () => {
     ? filteredExploreMajors
     : filteredExploreMajors.slice(0, 9);
   const hasMoreExplore = filteredExploreMajors.length > 9 && !showAllExplore;
+
+  // Filter universities based on search query
+  const filteredUniversities = universities.filter((university) =>
+    university.toLowerCase().includes(universitySearchQuery.toLowerCase())
+  );
+
+  const displayedUniversities = showAllUniversities
+    ? filteredUniversities
+    : filteredUniversities.slice(0, 8);
+  const hasMoreUniversities =
+    filteredUniversities.length > 8 && !showAllUniversities;
 
   return (
     <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
@@ -306,123 +365,167 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Bottom Section - Stack on mobile, side by side on desktop */}
-      <div className="flex flex-col lg:flex-row mt-8 lg:mt-16 gap-8 lg:gap-20 items-center lg:items-start px-10">
-        {/* Explore Section */}
-        <div className="w-fit lg:w-[838px] h-fit border-3 border-[#90007D] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFE6FC] px-4 lg:px-10 py-4 lg:py-6 relative">
-          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
-            Explore
-          </div>
-
-          <div className="mt-2">
-            {/* Search Bar */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Jelajahi jurusan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#90007D] rounded-full text-sm lg:text-base focus:outline-none bg-white"
-              />
+      {/* Bottom Sections */}
+      <div className="flex flex-col mt-8 lg:mt-16 gap-8 lg:gap-16">
+        {/* First Row: Jurusan + Ujian */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
+          {/* Jurusan Section */}
+          <div className="w-full lg:w-[60%] h-fit border-3 border-[#90007D] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFE6FC] px-4 lg:px-10 py-4 lg:py-6 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
+              Jurusan
             </div>
 
-            {/* Major Tags */}
-            <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
-              {displayedExploreMajors.map((major, idx) => (
-                <span
-                  key={idx}
-                  className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
-                    colorMap[major] || "bg-[#888]"
-                  }`}
-                >
-                  {major}
-                </span>
-              ))}
-              {hasMoreExplore && (
-                <>
-                  <button
-                    onClick={() => setShowAllExplore(true)}
-                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                  >
-                    Lihat lainnya...
-                  </button>
-                </>
-              )}
-              {filteredExploreMajors.length === 0 && searchQuery && (
-                <div className="text-gray-500 text-sm lg:text-base italic">
-                  Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Ujian Section */}
-        <div className="w-fit lg:w-[500px] h-fit border-3 border-yellow-500 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFFBEB] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
-          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
-            Ujian
-          </div>
-
-          <div className="flex items-center justify-center h-full">
-            <button className="bg-white rounded-2xl p-3 text-center w-full max-w-md h-fit cursor-pointer">
-              <div className="flex items-center gap-3 lg:gap-5 h-full">
-                <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
-                  <Plus
-                    size={24}
-                    className="lg:hidden text-[#7E7E7E]"
-                    strokeWidth={2}
-                  />
-                  <Plus
-                    size={32}
-                    className="hidden lg:block text-[#7E7E7E]"
-                    strokeWidth={2}
-                  />
-                </div>
-                <div className="text-gray-500 text-base lg:text-lg italic">
-                  Lakukan tes baru...
-                </div>
+            <div className="mt-2">
+              {/* Search Bar */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Jelajahi jurusan..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#90007D] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                />
               </div>
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Riwayat Tes Section */}
-      <div className="flex px-10">
-        <div className="mt-8 lg:mt-16 w-full border-3 border-[#005005] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#F2FFF3] px-4 lg:px-10 py-4 lg:py-6 relative">
-          <div className="absolute -top-4 lg:-top-6  left-8 lg:left-16 bg-white border-3 border-[#005005] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
-            Riwayat Tes
+              {/* Major Tags */}
+              <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
+                {displayedExploreMajors.map((major, idx) => (
+                  <span
+                    key={idx}
+                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
+                      colorMap[major] || "bg-[#888]"
+                    }`}
+                  >
+                    {major}
+                  </span>
+                ))}
+                {hasMoreExplore && (
+                  <>
+                    <button
+                      onClick={() => setShowAllExplore(true)}
+                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                    >
+                      Lihat lainnya...
+                    </button>
+                  </>
+                )}
+                {filteredExploreMajors.length === 0 && searchQuery && (
+                  <div className="text-gray-500 text-sm lg:text-base italic">
+                    Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="mt-2 w-full">
-            <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
-              {testHistories.map((test, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-3xl shadow-md p-4 hover:shadow-lg transition-shadow
-                    cursor-pointer flex-1 min-w-[200px] sm:min-w-[250px] lg:min-w-[220px] max-w-[300px]
-                    sm:max-w-[350px] lg:max-w-[300px]"
-                >
-                  <div className="text-xs lg:text-lg font-bold mb-2">
-                    {test.date}
+          {/* Ujian Section */}
+          <div className="w-full lg:w-[40%] h-fit border-3 border-yellow-500 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFFBEB] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg outline-none">
+              Ujian
+            </div>
+
+            <div className="flex items-center justify-start h-full min-h-[120px]">
+              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+                <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
+                  <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
+                    <Plus
+                      size={24}
+                      className="lg:hidden text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
+                    <Plus
+                      size={32}
+                      className="hidden lg:block text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
                   </div>
-                  <div className="text-sm lg:text-base mb-1">
-                    <div className="text-gray-700">Hasil penjurusan:</div>
-                    <div className="font-bold text-gray-900 text-lg">
-                      {test.major}
-                    </div>
-                  </div>
-                  <div className="text-sm lg:text-base mb-1">
-                    <div className="text-gray-700 font-bold">
-                      Skor akhir: {test.score}
-                    </div>
-                    <div className="font-bold text-blue-600"></div>
-                  </div>
-                  <div className="text-xs lg:text-sm underline transition-colors">
-                    Lihat rincian &gt;&gt;
+                  <div className="text-gray-500 text-base lg:text-lg italic">
+                    Lakukan tes baru...
                   </div>
                 </div>
-              ))}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Second Row: Universitas + Konseling */}
+        <div className="flex flex-col lg:flex-row gap-32">
+          {/* Universitas Section */}
+          <div className="w-full lg:w-[60%] h-fit border-3 border-[#007B3A] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#E8F5E8] px-4 lg:px-10 py-4 lg:py-6 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#007B3A] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
+              Universitas
+            </div>
+
+            <div className="mt-2">
+              {/* Search Bar */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Jelajahi universitas..."
+                  value={universitySearchQuery}
+                  onChange={(e) => setUniversitySearchQuery(e.target.value)}
+                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#007B3A] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                />
+              </div>
+
+              {/* University Tags */}
+              <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
+                {displayedUniversities.map((university, idx) => (
+                  <span
+                    key={idx}
+                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
+                      colorMap[university] || "bg-[#007B3A]"
+                    }`}
+                  >
+                    {university}
+                  </span>
+                ))}
+                {hasMoreUniversities && (
+                  <>
+                    <button
+                      onClick={() => setShowAllUniversities(true)}
+                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                    >
+                      Lihat lainnya...
+                    </button>
+                  </>
+                )}
+                {filteredUniversities.length === 0 && universitySearchQuery && (
+                  <div className="text-gray-500 text-sm lg:text-base italic">
+                    Tidak ada universitas yang ditemukan untuk "
+                    {universitySearchQuery}"
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Konseling Section */}
+          <div className="w-full lg:w-[40%] h-fit border-3 border-[#FF6B35] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFF4F0] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#FF6B35] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
+              Konseling
+            </div>
+
+            <div className="flex items-center justify-start h-full min-h-[120px]">
+              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+                <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
+                  <div className="p-4 lg:p-6 bg-[#FFF4F0] rounded-md">
+                    <Plus
+                      size={24}
+                      className="lg:hidden text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
+                    <Plus
+                      size={32}
+                      className="hidden lg:block text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <div className="text-[#7E7E7E] text-base lg:text-lg italic">
+                    Jadwalkan sesi konseling...
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         </div>
