@@ -122,39 +122,41 @@ const Home = () => {
 
   return (
     <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
-      <div className="flex flex-col items-start px-4 sm:px-8 lg:px-20 pt-6 lg:pt-10">
+      <div className="flex flex-col items-start px-4 sm:px-8 lg:px-20 pt-6 lg:pt-10 gap-2">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
           Hello, Name!
         </h1>
 
-        {/* Header Section - Stack on mobile, side by side on desktop */}
-        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full lg:items-center space-y-8 lg:space-y-0">
+        {/* Header Section */}
+        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full lg:items-center space-y-8 lg:space-y-2">
           {/* Profile Section */}
           <div className="flex flex-col items-center lg:items-start">
-            <div className="relative flex items-center py-4 lg:py-6">
-              <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
-              <div className="flex items-center border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
-                <div className="ml-2 lg:ml-4 flex flex-col items-center">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                    Nama Lengkap
-                  </div>
-                  <div className="text-lg sm:text-xl font-semibold text-gray-700">
-                    Kelas XX
+            <div className="flex flex-col w-fit items-start mb-4 lg:mb-0">
+              <div className="relative flex items-center py-4 lg:py-6">
+                <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
+                <div className="flex items-center border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
+                  <div className="ml-2 lg:ml-4 flex flex-col items-center">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                      Nama Lengkap
+                    </div>
+                    <div className="text-lg sm:text-xl font-semibold text-gray-700">
+                      Kelas XX
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-start w-full ml-4 lg:ml-8">
-              <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md text-sm">
-                Ubah profil
-              </button>
+              <div className="flex items-center justify-center lg:justify-start w-full ml-0 lg:ml-3">
+                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md text-sm lg:mb-10 xl:mb-0 cursor-pointer">
+                  Ubah profil
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Info Section */}
           <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[30px] lg:rounded-tl-[50px] rounded-br-[30px] lg:rounded-br-[50px] pl-3 lg:pl-4 pr-2 lg:pr-3 pt-3 lg:pt-4 pb-2 lg:pb-3 w-full lg:w-auto">
             <div className="relative mb-2 lg:mb-3">
-              <div className="absolute -top-6 lg:-top-9 left-6 lg:left-10 bg-white px-4 lg:px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-sm lg:text-md font-bold">
+              <div className="absolute -top-6 lg:-top-9 left-6 lg:left-10 bg-white px-4 lg:px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-sm lg:text-lg font-bold">
                 Info
               </div>
             </div>
@@ -162,7 +164,7 @@ const Home = () => {
               {infoItems.map((item, index) => (
                 <div
                   key={index}
-                  className="flex flex-col items-center text-center text-xs lg:text-[13px] font-bold w-full lg:w-[110px] mt-1"
+                  className="flex flex-col items-center text-center text-xs lg:text-[13px] font-bold w-full lg:w-[110px] mt-1 cursor-pointer"
                 >
                   <div className="w-16 h-12 sm:w-20 sm:h-16 lg:w-24 lg:h-20 bg-white rounded-2xl lg:rounded-3xl border-1 border-[#003B73] mb-1" />
                   <span className="leading-tight">{item.label}</span>
@@ -175,7 +177,7 @@ const Home = () => {
 
       {/* Analytics Section */}
       <div className="mt-8 lg:mt-16 w-full border-3 border-red-700 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFEEEE] px-4 lg:px-10 py-4 lg:py-6 relative">
-        <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-red-700 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
+        <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-red-700 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
           Analytics
         </div>
 
@@ -211,7 +213,7 @@ const Home = () => {
                 {displayedTags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold ${
+                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold hover:opacity-80 cursor-pointer ${
                       colorMap[tag] || "bg-[#888]"
                     }`}
                   >
@@ -308,7 +310,7 @@ const Home = () => {
       <div className="flex flex-col lg:flex-row mt-8 lg:mt-16 gap-8 lg:gap-20 items-center lg:items-start px-10">
         {/* Explore Section */}
         <div className="w-fit lg:w-[838px] h-fit border-3 border-[#90007D] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFE6FC] px-4 lg:px-10 py-4 lg:py-6 relative">
-          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-md">
+          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
             Explore
           </div>
 
@@ -357,12 +359,12 @@ const Home = () => {
 
         {/* Ujian Section */}
         <div className="w-fit lg:w-[500px] h-fit border-3 border-yellow-500 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFFBEB] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
-          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
+          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
             Ujian
           </div>
 
           <div className="flex items-center justify-center h-full">
-            <div className="bg-white rounded-2xl p-3 text-center w-full max-w-md h-fit">
+            <button className="bg-white rounded-2xl p-3 text-center w-full max-w-md h-fit cursor-pointer">
               <div className="flex items-center gap-3 lg:gap-5 h-full">
                 <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                   <Plus
@@ -380,7 +382,7 @@ const Home = () => {
                   Lakukan tes baru...
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -388,7 +390,7 @@ const Home = () => {
       {/* Riwayat Tes Section */}
       <div className="flex px-10">
         <div className="mt-8 lg:mt-16 w-full border-3 border-[#005005] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#F2FFF3] px-4 lg:px-10 py-4 lg:py-6 relative">
-          <div className="absolute -top-4 lg:-top-5 left-8 lg:left-16 bg-white border-3 border-[#005005] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
+          <div className="absolute -top-4 lg:-top-6  left-8 lg:left-16 bg-white border-3 border-[#005005] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
             Riwayat Tes
           </div>
 
