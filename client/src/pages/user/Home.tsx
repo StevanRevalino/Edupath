@@ -132,8 +132,8 @@ const Home = () => {
           {/* Profile Section */}
           <div className="flex flex-col items-center lg:items-start">
             <div className="relative flex items-center py-4 lg:py-6">
-              <div className="absolute left-0 w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
-              <div className="flex items-center border-3 border-[#003B73] rounded-full pl-20 sm:pl-28 lg:pl-32 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
+              <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
+              <div className="flex items-center border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
                 <div className="ml-2 lg:ml-4 flex flex-col items-center">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                     Nama Lengkap
@@ -272,21 +272,29 @@ const Home = () => {
             <div className="text-xl lg:text-2xl font-bold mb-3">
               Riwayat Tes
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3 lg:gap-4 lg:flex-wrap">
-              {testHistories.map((test, idx) => (
+            <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
+              {testHistories.slice(0, 4).map((test, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#f9f9f9] rounded-lg shadow border border-gray-300 w-full lg:w-fit p-3"
+                  className="bg-white rounded-3xl shadow-md p-3 lg:p-4 hover:shadow-lg transition-shadow
+                    cursor-pointer flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px]
+                    sm:max-w-[300px] lg:max-w-[280px]"
                 >
-                  <div className="text-sm font-bold">{test.date}</div>
-                  <div className="text-sm">
-                    Hasil penjurusan: <br />
-                    <span className="font-bold">{test.major}</span>
+                  <div className="text-xs lg:text-base font-bold mb-2">
+                    {test.date}
                   </div>
-                  <div className="text-sm font-bold">
-                    Skor akhir: {test.score}
+                  <div className="text-xs lg:text-sm mb-1">
+                    <div className="text-gray-700">Hasil penjurusan:</div>
+                    <div className="font-bold text-gray-900 text-sm lg:text-base">
+                      {test.major}
+                    </div>
                   </div>
-                  <div className="text-xs underline mt-1 cursor-pointer">
+                  <div className="text-xs lg:text-sm mb-1">
+                    <div className="text-gray-700 font-bold">
+                      Skor akhir: {test.score}
+                    </div>
+                  </div>
+                  <div className="text-xs lg:text-sm underline transition-colors">
                     Lihat rincian &gt;&gt;
                   </div>
                 </div>

@@ -56,7 +56,7 @@ const Header = () => {
           <img
             src={logo}
             alt="Edupath Logo"
-            className="h-12 md:h-16 xl:h-20 w-auto mb-4"
+            className="h-12 md:h-16 xl:h-20 w-auto"
           />
         </div>
 
