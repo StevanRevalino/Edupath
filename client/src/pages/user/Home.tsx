@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import React, { useState } from "react";
 
 const Home = () => {
@@ -10,33 +10,75 @@ const Home = () => {
     { label: "Rekomendasi Universitas" },
     { label: "Info beasiswa" },
   ];
+
   const historyTags = [
+    "Sistem Informasi",
     "Akuntansi",
-    "Mikrobiologi",
     "Teknik Sipil",
-    "Aktuaria",
-    "Manajemen",
     "Food Tech",
-    "Akuntansi",
-    "Mikrobiologi",
-    "Teknik Sipil",
-    "Aktuaria",
     "Manajemen",
-    "Food Tech",
-    "Akuntansi",
-    "Mikrobiologi",
-    "Teknik Sipil",
+    "Arsitektur",
     "Aktuaria",
-    "Manajemen",
-    "Food Tech",
+    "Pendidikan",
+    "Agroteknologi",
+    "Teknik Informatika",
+    "Psikologi",
+    "Kedokteran",
+    "Farmasi",
+    "Hukum",
+    "Ekonomi",
+    "Matematika",
+    "Fisika",
+    "Kimia",
+    "Biologi",
+    "Sastra Inggris",
   ];
+
   const testHistories = [
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
-    { date: "tgl bln thn", major: "Nama Jurusan", score: "xxxxxx" },
+    { date: "15 Jan 2024", major: "Computer Science", score: "95.5" },
+    { date: "28 Des 2023", major: "Sistem Informasi", score: "88.2" },
+    { date: "10 Nov 2023", major: "Teknik Informatika", score: "92.1" },
+    { date: "22 Okt 2023", major: "Manajemen", score: "78.9" },
+    { date: "05 Sep 2023", major: "Akuntansi", score: "85.7" },
+    { date: "22 Okt 2023", major: "Manajemen", score: "78.9" },
+    { date: "05 Sep 2023", major: "Akuntansi", score: "85.7" },
   ];
+
+  // Dummy data untuk analytics
+  const analyticsData = {
+    totalTests: 12,
+    lastTestDate: "15 Jan 2024",
+    topRecommendation: {
+      major: "Computer Science",
+      percentage: 87,
+    },
+    lastTestNumber: 12,
+  };
+
+  // Dummy data untuk explore majors
+  const exploreMajors = [
+    "Sistem Informasi",
+    "Akuntansi",
+    "Teknik Sipil",
+    "Food Tech",
+    "Manajemen",
+    "Arsitektur",
+    "Aktuaria",
+    "Pendidikan",
+    "Agroteknologi",
+    "Teknik Informatika",
+    "Psikologi",
+    "Kedokteran",
+    "Farmasi",
+    "Hukum",
+    "Ekonomi",
+    "Matematika",
+    "Fisika",
+    "Kimia",
+    "Biologi",
+    "Sastra Inggris",
+  ];
+
   const colorMap: Record<string, string> = {
     Akuntansi: "bg-[#3C3782]",
     Mikrobiologi: "bg-[#B31507]",
@@ -44,96 +86,132 @@ const Home = () => {
     Aktuaria: "bg-[#00B7F3]",
     Manajemen: "bg-[#FF00E5]",
     "Food Tech": "bg-[#F0544F]",
-    // Tambahkan warna untuk jurusan lain jika ada
+    "Sistem Informasi": "bg-[#8B0000]",
+    Arsitektur: "bg-[#7C3AED]",
+    Pendidikan: "bg-[#F59E0B]",
+    Agroteknologi: "bg-[#EF4444]",
+    "Teknik Informatika": "bg-[#1E40AF]",
+    Psikologi: "bg-[#DC2626]",
+    Kedokteran: "bg-[#059669]",
+    Farmasi: "bg-[#7C2D12]",
+    Hukum: "bg-[#1F2937]",
+    Ekonomi: "bg-[#0891B2]",
+    Matematika: "bg-[#5B21B6]",
+    Fisika: "bg-[#BE123C]",
+    Kimia: "bg-[#047857]",
+    Biologi: "bg-[#C2410C]",
+    "Sastra Inggris": "bg-[#7E22CE]",
   };
 
   const [showAll, setShowAll] = useState(false);
+  const [showAllExplore, setShowAllExplore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const displayedTags = showAll ? historyTags : historyTags.slice(0, 5);
   const hasMore = historyTags.length > 5 && !showAll;
 
+  // Filter majors based on search query
+  const filteredExploreMajors = exploreMajors.filter((major) =>
+    major.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const displayedExploreMajors = showAllExplore
+    ? filteredExploreMajors
+    : filteredExploreMajors.slice(0, 9);
+  const hasMoreExplore = filteredExploreMajors.length > 9 && !showAllExplore;
+
   return (
-    <div className=" px-24 ">
-      <div className="flex flex-col items-start px-20 pt-10">
-        <h1 className="text-5xl font-bold">Hello, Name!</h1>
-        <div className="flex justify-between w-full items-center">
-          <div className="flex flex-col items-center">
-            <div className="relative flex items-center py-6">
-              <div className=" absolute left-0 w-36 h-36 rounded-full bg-white border-3 border-[#003B73]" />
-              <div className="flex items-center border-3 border-[#003B73] rounded-full pl-32 pr-8 py-6 min-w-[380px]">
-                <div className="ml-4 flex flex-col  items-center">
-                  <div className="text-3xl font-bold">Nama Lengkap</div>
-                  <div className="text-xl font-semibold  text-gray-700">
+    <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
+      <div className="flex flex-col items-start px-4 sm:px-8 lg:px-20 pt-6 lg:pt-10">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
+          Hello, Name!
+        </h1>
+
+        {/* Header Section - Stack on mobile, side by side on desktop */}
+        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full lg:items-center space-y-8 lg:space-y-0">
+          {/* Profile Section */}
+          <div className="flex flex-col items-center lg:items-start">
+            <div className="relative flex items-center py-4 lg:py-6">
+              <div className="absolute left-0 w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
+              <div className="flex items-center border-3 border-[#003B73] rounded-full pl-20 sm:pl-28 lg:pl-32 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
+                <div className="ml-2 lg:ml-4 flex flex-col items-center">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                    Nama Lengkap
+                  </div>
+                  <div className="text-lg sm:text-xl font-semibold text-gray-700">
                     Kelas XX
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-start w-full ml-8">
-              <button className="bg-[#003B73] text-white px-6 py-3 rounded-md text-sm">
+            <div className="flex items-start w-full ml-4 lg:ml-8">
+              <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md text-sm">
                 Ubah profil
               </button>
             </div>
           </div>
-          <div className="mb-5">
-            <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[50px] rounded-br-[50px] pl-4 pr-3 pt-4 pb-3">
-              <div className="relative mb-3">
-                <div className="absolute -top-9 left-10 bg-white px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-md font-bold">
-                  Info
-                </div>
+
+          {/* Info Section */}
+          <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[30px] lg:rounded-tl-[50px] rounded-br-[30px] lg:rounded-br-[50px] pl-3 lg:pl-4 pr-2 lg:pr-3 pt-3 lg:pt-4 pb-2 lg:pb-3 w-full lg:w-auto">
+            <div className="relative mb-2 lg:mb-3">
+              <div className="absolute -top-6 lg:-top-9 left-6 lg:left-10 bg-white px-4 lg:px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-sm lg:text-md font-bold">
+                Info
               </div>
-              <div className="flex flex-row gap-4 items-start">
-                {infoItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center text-center text-[13px] font-bold w-[110px] mt-1"
-                  >
-                    <div className="w-24 h-20 bg-white rounded-3xl border-1 border-[#003B73] mb-1 items-start" />
-                    {item.label}
-                  </div>
-                ))}
-                <div className="flex justify-center items-center h-full mt-7 font-bold">
-                  <ChevronRight className="text-[#003B73] font-bold w-8 h-8" />
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-6 lg:flex lg:flex-row gap-2 lg:gap-4 items-start">
+              {infoItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col items-center text-center text-xs lg:text-[13px] font-bold w-full lg:w-[110px] mt-1"
+                >
+                  <div className="w-16 h-12 sm:w-20 sm:h-16 lg:w-24 lg:h-20 bg-white rounded-2xl lg:rounded-3xl border-1 border-[#003B73] mb-1" />
+                  <span className="leading-tight">{item.label}</span>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-      {/*analytic*/}
-      <div className="mt-16 w-full border-3 border-red-700 rounded-br-[60px] rounded-tl-[60px] bg-[#FFEEEE] px-10 py-6 relative">
-        <div className="absolute -top-6 left-10 bg-white border-3 border-red-700 rounded-4xl px-4 py-1 font-bold text-md">
+
+      {/* Analytics Section */}
+      <div className="mt-8 lg:mt-16 w-full border-3 border-red-700 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFEEEE] px-4 lg:px-10 py-4 lg:py-6 relative">
+        <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-red-700 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
           Analytics
         </div>
 
-        {/* ===== Content ===== */}
-        <div className="grid grid-cols-[1fr_3fr] gap-x-6 gap-y-2 mt-2">
-          {/* 1.1 Total Tes */}
-          <div className="row-span-1">
-            <div className="text-3xl font-bold mb-2">
+        {/* Content Grid - Stack on mobile, grid on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 lg:gap-x-6 lg:gap-y-2 mt-2">
+          {/* Total Tes */}
+          <div className="lg:row-span-1">
+            <div className="text-2xl lg:text-3xl font-bold mb-2">
               Total tes diselesaikan
             </div>
             <div className="flex gap-4">
               <div>
-                <div className="text-[#780000] text-6xl font-bold">10</div>
-                <div className="text-xl font-bold ml-3">Tes</div>
+                <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
+                  {analyticsData.totalTests}
+                </div>
+                <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
               </div>
-              <div className="text-base">
+              <div className="text-sm lg:text-base">
                 Kamu telah mengerjakan <br />
                 tes minat bakat sebanyak <br />
-                <strong>10 kali!</strong>
+                <strong>{analyticsData.totalTests} kali!</strong>
               </div>
             </div>
           </div>
 
-          {/* 1.2 Riwayat Penjurusan + Rekomendasi */}
-          <div className="row-span-1">
+          {/* Riwayat Penjurusan + Rekomendasi */}
+          <div className="lg:row-span-1">
             <div>
-              <div className="text-lg font-bold mb-3">Riwayat Penjurusan</div>
-              <div className="flex flex-wrap justify-start gap-3">
+              <div className="text-base lg:text-lg font-bold mb-3">
+                Riwayat Penjurusan
+              </div>
+              <div className="flex flex-wrap justify-start gap-2 lg:gap-3">
                 {displayedTags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className={`text-white text-sm px-3 py-1 rounded-full font-semibold ${
+                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold ${
                       colorMap[tag] || "bg-[#888]"
                     }`}
                   >
@@ -142,12 +220,12 @@ const Home = () => {
                 ))}
                 {hasMore && (
                   <>
-                    <span className="text-white text-sm px-3 py-1 rounded-full font-semibold bg-gray-500">
+                    <span className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500">
                       ...
                     </span>
                     <button
                       onClick={() => setShowAll(true)}
-                      className="text-white text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer"
+                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer"
                     >
                       Lihat lainnya...
                     </button>
@@ -156,42 +234,49 @@ const Home = () => {
               </div>
             </div>
             <div className="text-end mt-4">
-              <div className="text-2xl font-bold">
-                (85%) Jurusan paling cocok
+              <div className="text-lg lg:text-2xl font-bold">
+                ({analyticsData.topRecommendation.percentage}%) Jurusan paling
+                cocok
               </div>
-              <div className="text-green-700 text-4xl font-bold">
-                Computer Science
+              <div className="text-green-700 text-2xl lg:text-4xl font-bold">
+                {analyticsData.topRecommendation.major}
               </div>
-              <div className="text-sm mt-1">
+              <div className="text-xs lg:text-sm mt-1">
                 Rekomendasi tertinggimu saat ini!
               </div>
             </div>
           </div>
 
-          {/* 2.1 Tes Terakhir */}
-          <div className="row-span-1">
-            <div className="text-2xl font-bold mb-2">Tes terakhir</div>
+          {/* Tes Terakhir */}
+          <div className="lg:row-span-1">
+            <div className="text-xl lg:text-2xl font-bold mb-2">
+              Tes terakhir
+            </div>
             <div className="flex gap-4">
               <div>
-                <div className="text-[#180085] text-6xl font-bold">10</div>
-                <div className="text-xl font-bold ml-3">Tes</div>
+                <div className="text-[#180085] text-4xl lg:text-6xl font-bold">
+                  {analyticsData.lastTestNumber}
+                </div>
+                <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
               </div>
-              <div className="text-base">
+              <div className="text-sm lg:text-base">
                 Terakhir kali kamu mengerjakan <br />
                 tes minat bakat adalah pada: <br />
-                <strong>tgl/bln/thn.</strong>
+                <strong>{analyticsData.lastTestDate}.</strong>
               </div>
             </div>
           </div>
 
-          {/* 2.2 Riwayat Tes */}
-          <div className="row-span-1">
-            <div className="text-2xl font-bold mb-3">Riwayat Tes</div>
-            <div className="flex flex-row gap-4 flex-wrap">
+          {/* Riwayat Tes */}
+          <div className="lg:row-span-1">
+            <div className="text-xl lg:text-2xl font-bold mb-3">
+              Riwayat Tes
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3 lg:gap-4 lg:flex-wrap">
               {testHistories.map((test, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#f9f9f9] rounded-lg shadow border border-gray-300 w-fit p-3"
+                  className="bg-[#f9f9f9] rounded-lg shadow border border-gray-300 w-full lg:w-fit p-3"
                 >
                   <div className="text-sm font-bold">{test.date}</div>
                   <div className="text-sm">
@@ -202,6 +287,128 @@ const Home = () => {
                     Skor akhir: {test.score}
                   </div>
                   <div className="text-xs underline mt-1 cursor-pointer">
+                    Lihat rincian &gt;&gt;
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section - Stack on mobile, side by side on desktop */}
+      <div className="flex flex-col lg:flex-row mt-8 lg:mt-16 gap-8 lg:gap-20 items-center lg:items-start px-10">
+        {/* Explore Section */}
+        <div className="w-fit lg:w-[838px] h-fit border-3 border-[#90007D] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFE6FC] px-4 lg:px-10 py-4 lg:py-6 relative">
+          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-md">
+            Explore
+          </div>
+
+          <div className="mt-2">
+            {/* Search Bar */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Jelajahi jurusan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#90007D] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+              />
+            </div>
+
+            {/* Major Tags */}
+            <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
+              {displayedExploreMajors.map((major, idx) => (
+                <span
+                  key={idx}
+                  className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
+                    colorMap[major] || "bg-[#888]"
+                  }`}
+                >
+                  {major}
+                </span>
+              ))}
+              {hasMoreExplore && (
+                <>
+                  <button
+                    onClick={() => setShowAllExplore(true)}
+                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                  >
+                    Lihat lainnya...
+                  </button>
+                </>
+              )}
+              {filteredExploreMajors.length === 0 && searchQuery && (
+                <div className="text-gray-500 text-sm lg:text-base italic">
+                  Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Ujian Section */}
+        <div className="w-fit lg:w-[500px] h-fit border-3 border-yellow-500 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFFBEB] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
+          <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
+            Ujian
+          </div>
+
+          <div className="flex items-center justify-center h-full">
+            <div className="bg-white rounded-2xl p-3 text-center w-full max-w-md h-fit">
+              <div className="flex items-center gap-3 lg:gap-5 h-full">
+                <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
+                  <Plus
+                    size={24}
+                    className="lg:hidden text-[#7E7E7E]"
+                    strokeWidth={2}
+                  />
+                  <Plus
+                    size={32}
+                    className="hidden lg:block text-[#7E7E7E]"
+                    strokeWidth={2}
+                  />
+                </div>
+                <div className="text-gray-500 text-base lg:text-lg italic">
+                  Lakukan tes baru...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Riwayat Tes Section */}
+      <div className="flex px-10">
+        <div className="mt-8 lg:mt-16 w-full border-3 border-[#005005] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#F2FFF3] px-4 lg:px-10 py-4 lg:py-6 relative">
+          <div className="absolute -top-4 lg:-top-5 left-8 lg:left-16 bg-white border-3 border-[#005005] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-md">
+            Riwayat Tes
+          </div>
+
+          <div className="mt-2 w-full">
+            <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
+              {testHistories.map((test, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-3xl shadow-md p-4 hover:shadow-lg transition-shadow
+                    cursor-pointer flex-1 min-w-[200px] sm:min-w-[250px] lg:min-w-[220px] max-w-[300px]
+                    sm:max-w-[350px] lg:max-w-[300px]"
+                >
+                  <div className="text-xs lg:text-lg font-bold mb-2">
+                    {test.date}
+                  </div>
+                  <div className="text-sm lg:text-base mb-1">
+                    <div className="text-gray-700">Hasil penjurusan:</div>
+                    <div className="font-bold text-gray-900 text-lg">
+                      {test.major}
+                    </div>
+                  </div>
+                  <div className="text-sm lg:text-base mb-1">
+                    <div className="text-gray-700 font-bold">
+                      Skor akhir: {test.score}
+                    </div>
+                    <div className="font-bold text-blue-600"></div>
+                  </div>
+                  <div className="text-xs lg:text-sm underline transition-colors">
                     Lihat rincian &gt;&gt;
                   </div>
                 </div>
