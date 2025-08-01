@@ -64,17 +64,19 @@ const Header = () => {
         <nav className="hidden md:flex flex-1 justify-center space-x-8 md:space-x-8 lg:space-x-16 xl:space-x-24 text-white text-lg md:text-xl xl:text-2xl">
           {menuItems
             .filter((item) => item.label !== "Profil")
-            .map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`cursor-pointer transition ${
-                  location.pathname === item.path ? "font-bold" : ""
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+            .map((item) => {
+              const itemPath = item.path.startsWith("/") ? item.path : `/${item.path}`;
+              const isActive = location.pathname === itemPath;
+              return (
+          <button
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            className={`cursor-pointer transition ${isActive ? "font-bold" : ""}`}
+          >
+            {item.label}
+          </button>
+              );
+            })}
         </nav>
 
         {/* Profil untuk Desktop */}
