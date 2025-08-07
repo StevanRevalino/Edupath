@@ -73,8 +73,20 @@ export default function Register() {
     } catch (err: any) {
       if (err.name === "ValidationError") {
         const newErrors: { [key: string]: string } = {};
-        err.inner.forEach((e: yup.ValidationError) => {
-          if (e.path) newErrors[e.path] = e.message;
+        const sortedErrors = err.inner.sort((a: any, b: any) => {
+          // Required errors get priority (lower index)
+          const aIsRequired = a.message.includes("wajib");
+          const bIsRequired = b.message.includes("wajib");
+
+          if (aIsRequired && !bIsRequired) return -1;
+          if (!aIsRequired && bIsRequired) return 1;
+          return 0;
+        });
+
+        sortedErrors.forEach((e: yup.ValidationError) => {
+          if (e.path && !newErrors[e.path]) {
+            newErrors[e.path] = e.message;
+          }
         });
         setErrors(newErrors);
         return;
