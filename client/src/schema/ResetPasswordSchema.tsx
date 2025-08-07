@@ -4,6 +4,11 @@ export const resetPasswordSchema = (isEmailVerified: boolean) =>
   yup.object().shape({
     email: yup
       .string()
+      .email("Format email tidak valid")
+      .matches(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Email harus memiliki domain yang valid (contoh: user@gmail.com)"
+      )
       .required("Email wajib diisi")
       .test("is-verified", "Email belum diverifikasi", () => isEmailVerified),
     newPassword: yup
@@ -22,5 +27,9 @@ export const emailSchema = yup.object().shape({
   email: yup
     .string()
     .email("Format email tidak valid")
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Email harus memiliki domain yang valid (contoh: user@gmail.com)"
+    )
     .required("Email wajib diisi"),
 });

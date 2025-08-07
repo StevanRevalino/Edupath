@@ -91,4 +91,20 @@ export class AuthService {
     const hashed = await bcrypt.hash(newPassword, 10);
     await userRepository.updatePassword(email, hashed);
   }
+
+  async updateProfile(
+    userId: string,
+    data: { firstname?: string; lastname?: string; kelas?: number }
+  ) {
+    // Update profil user
+    const updatedUser = await userRepository.updateProfile(userId, data);
+
+    if (!updatedUser) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    // Return user tanpa password
+    const { password, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
+  }
 }

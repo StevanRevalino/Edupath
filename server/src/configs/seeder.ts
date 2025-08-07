@@ -42,7 +42,7 @@ export async function seedDefaultAdmins() {
           lastname: admin.lastname,
           email: admin.email,
           password: hashed,
-          kelas: 0,
+          kelas: null,
         },
       });
 

@@ -81,11 +81,11 @@ const Header = () => {
 
         {/* Profil untuk Desktop */}
         <div
-          className="hidden md:flex flex-col items-center text-white cursor-pointer"
+          className="hidden md:flex flex-row gap-2 items-center text-white cursor-pointer"
           onClick={() => navigate("/profil")}
         >
           <div className="w-12 h-12 bg-white rounded-full mb-1"></div>
-          <span className="text-sm">Profil</span>
+          <span className="text-sm">Nama</span>
         </div>
 
         {/* Hamburger Menu untuk Mobile */}

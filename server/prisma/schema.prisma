@@ -8,11 +8,11 @@ datasource db {
 }
 
 model User {
-    user_id     String    @id
-    firstname   String
-    lastname    String
-    email       String    @unique
-    password    String
-    kelas       Int
-    created_at  DateTime  @default(now())
+    user_id    String   @id
+    firstname  String
+    lastname   String
+    email      String   @unique
+    password   String
+    kelas      Int?
+    created_at DateTime @default(now())
 }

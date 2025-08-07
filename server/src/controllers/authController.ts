@@ -48,4 +48,41 @@ export class AuthController {
       res.status(400).json({ message: error.message });
     }
   }
+
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const userId = req.user?.user_id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User tidak terautentikasi" });
+      }
+
+      const { firstname, lastname, kelas } = req.body;
+      const updateData: {
+        firstname?: string;
+        lastname?: string;
+        kelas?: number;
+      } = {};
+
+      if (firstname) updateData.firstname = firstname;
+      if (lastname) updateData.lastname = lastname;
+      if (kelas !== undefined) updateData.kelas = Number(kelas);
+
+      // Cek apakah ada data yang akan diupdate
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({
+          message: "Tidak ada data yang akan diperbarui",
+        });
+      }
+
+      const updatedUser = await authService.updateProfile(userId, updateData);
+
+      res.status(200).json({
+        message: "Profil berhasil diperbarui",
+        user: updatedUser,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
 }

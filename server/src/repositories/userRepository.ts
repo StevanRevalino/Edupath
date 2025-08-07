@@ -26,4 +26,18 @@ export class UserRepository {
       data: { password: hashedPassword },
     });
   }
+
+  async updateProfile(
+    userId: string,
+    data: { firstname?: string; lastname?: string; kelas?: number }
+  ) {
+    return prisma.user.update({
+      where: { user_id: userId },
+      data: data,
+    });
+  }
+
+  async findById(userId: string) {
+    return prisma.user.findUnique({ where: { user_id: userId } });
+  }
 }
