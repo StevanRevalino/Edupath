@@ -11,5 +11,5 @@ export const loginSchema = yup.object().shape({
   password: yup
     .string()
     .required("Password wajib diisi")
-    .min(6, "Password minimal 6 karakter"),
+    .min(8, "Password minimal 8 karakter"),
 });

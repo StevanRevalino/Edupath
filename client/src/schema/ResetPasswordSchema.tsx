@@ -13,7 +13,7 @@ export const resetPasswordSchema = (isEmailVerified: boolean) =>
     newPassword: yup
       .string()
       .required("Password wajib diisi")
-      .min(6, "Password minimal 6 karakter")
+      .min(8, "Password minimal 8 karakter")
       .matches(/[a-zA-Z]/, "Password harus mengandung huruf")
       .matches(/\d/, "Password harus mengandung angka"),
     confirmPassword: yup
