@@ -74,7 +74,6 @@ export default function Register() {
       if (err.name === "ValidationError") {
         const newErrors: { [key: string]: string } = {};
         const sortedErrors = err.inner.sort((a: any, b: any) => {
-          // Required errors get priority (lower index)
           const aIsRequired = a.message.includes("wajib");
           const bIsRequired = b.message.includes("wajib");
 
