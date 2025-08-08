@@ -24,13 +24,21 @@ function parseIntOrNull(value) {
 function parseStringOrNull(value) {
   if (!value) return null;
   const v = value.trim();
-  return v.toUpperCase() === "NULL" || v === "" ? null : v;
+  // Filter alamat yang tidak valid atau terlalu pendek
+  if (v.toUpperCase() === "NULL" || v === "" || v.length <= 4) {
+    return null;
+  }
+  return v;
 }
 
 async function main() {
   try {
     await client.connect();
     console.log("Terhubung ke PostgreSQL ✅");
+
+    // Hapus data lama terlebih dahulu
+    await client.query('DELETE FROM universitas');
+    console.log("Data lama telah dihapus ✅");
 
     const filePath = path.join(__dirname, "../dataset/list_universitas.csv");
     const parser = fs
@@ -47,10 +55,17 @@ async function main() {
     for await (const row of parser) {
 
     if (
-        !/^universitas\s/i.test(row.nama) &&
-        !/^institut\s/i.test(row.nama)
+      (!/^universitas\s/i.test(row.nama) && !/^institut\s/i.test(row.nama)) ||
+      !parseStringOrNull(row.alamat) ||
+      !parseStringOrNull(row.nama) ||
+      !parseIntOrNull(row.npsn) ||
+      !parseIntOrNull(row.kode_pos) ||
+      !parseStringOrNull(row.telepon) ||
+      !parseStringOrNull(row.fax) ||
+      !parseStringOrNull(row.email) ||
+      !parseStringOrNull(row.provinsi)
     ) {
-        continue;
+      continue;
     }
 
       const query = `
