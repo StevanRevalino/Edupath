@@ -26,16 +26,16 @@ model User {
 model Universitas {
     university_id Int     @id
     nama          String
-    npsn          Int?
+    npsn          Int
     nama_singkat  String?
-    kode_pos      Int?
-    telepon       String?
-    email         String?
-    alamat        String?
-    kota          String?
-    provinsi      String?
-    akreditasi    String?
-    status        String?
+    kode_pos      Int
+    telepon       String
+    email         String
+    alamat        String
+    kota          String
+    provinsi      String
+    akreditasi    String
+    status        String
     rank_qs       Int?
     rank_country  Int?
 }
