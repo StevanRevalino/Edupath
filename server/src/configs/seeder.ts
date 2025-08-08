@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -11,6 +11,7 @@ export async function seedDefaultAdmins() {
       lastname: "01",
       email: "gurubk01@gmail.com",
       password: "bk123456!",
+      role: Role.ADMIN,
     },
     {
       user_id: "BK002",
@@ -18,6 +19,7 @@ export async function seedDefaultAdmins() {
       lastname: "02",
       email: "gurubk02@gmail.com",
       password: "bk123456!",
+      role: Role.ADMIN,
     },
     {
       user_id: "BK003",
@@ -25,6 +27,7 @@ export async function seedDefaultAdmins() {
       lastname: "03",
       email: "gurubk03@gmail.com",
       password: "bk123456!",
+      role: Role.ADMIN,
     },
   ];
 
@@ -42,6 +45,7 @@ export async function seedDefaultAdmins() {
           lastname: admin.lastname,
           email: admin.email,
           password: hashed,
+          role: admin.role,
           kelas: null,
         },
       });

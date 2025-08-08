@@ -40,6 +40,7 @@ export class AuthService {
       firstname: data.firstname,
       lastname: data.lastname,
       email: data.email,
+      role: "STUDENT" as const,
       kelas: Number(data.kelas),
       password: hashed,
     };
@@ -59,8 +60,11 @@ export class AuthService {
     const token = jwt.sign(
       {
         user_id: user.user_id,
+        firstname: user.firstname,
+        lastname: user.lastname,
         email: user.email,
-        role: user.user_id.startsWith("BK_") ? "admin" : "user",
+        role: user.role, // Menggunakan role dari database
+        kelas: user.kelas,
       },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" } // expire dalam 1 jam
@@ -68,12 +72,14 @@ export class AuthService {
 
     // Kirim token + data user (jangan kirim password!)
     return {
+      message: "Login berhasil",
       token,
       user: {
         user_id: user.user_id,
         email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
+        role: user.role,
         kelas: user.kelas,
       },
     };

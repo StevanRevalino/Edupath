@@ -42,12 +42,12 @@ export default function Login() {
       }
 
       const result = await res.json();
-      localStorage.setItem("user_id", result.user.user_id);
+      localStorage.setItem("role", result.user.role);
       localStorage.setItem("token", result.token);
       console.log(result);
 
       toast.success("Login berhasil!");
-      if (result.user.user_id.startsWith("BK")) {
+      if (result.user.role === "ADMIN") {
         navigate("/dashboard-admin");
       } else {
         navigate("/home");
