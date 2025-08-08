@@ -187,13 +187,13 @@ const Home = () => {
         </h1>
 
         {/* Header Section */}
-        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full lg:items-center space-y-8 lg:space-y-2">
+        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full justify-start lg:items-center space-y-8 lg:space-y-2">
           {/* Profile Section */}
-          <div className="flex flex-col items-center lg:items-start">
+          <div className="flex flex-col items-start lg:items-start justify-start w-full ">
             <div className="flex flex-col w-fit items-start mb-4 lg:mb-0">
               <div className="relative flex items-center py-4 lg:py-6">
                 <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
-                <div className="flex items-center border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
+                <div className="flex items-start border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
                   <div className="ml-2 lg:ml-4 flex flex-col items-center">
                     <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                       Nama Lengkap
@@ -213,7 +213,7 @@ const Home = () => {
           </div>
 
           {/* Info Section */}
-          <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[30px] lg:rounded-tl-[50px] rounded-br-[30px] lg:rounded-br-[50px] pl-3 lg:pl-4 pr-2 lg:pr-3 pt-3 lg:pt-4 pb-2 lg:pb-3 w-full lg:w-auto">
+          <div className="bg-[#e6f3ff] border-3 border-[#003B73] rounded-tl-[30px] lg:rounded-tl-[50px] rounded-br-[30px] lg:rounded-br-[50px] pl-3 lg:pl-4 pr-2 lg:pr-3 pt-3 lg:pt-4 pb-2 lg:pb-3 w-full lg:w-auto justify-start">
             <div className="relative mb-2 lg:mb-3">
               <div className="absolute -top-6 lg:-top-9 left-6 lg:left-10 bg-white px-4 lg:px-8 py-0.5 border-3 border-[#003B73] rounded-4xl text-sm lg:text-lg font-bold">
                 Info
@@ -449,7 +449,7 @@ const Home = () => {
         </div>
 
         {/* Second Row: Universitas + Konseling */}
-        <div className="flex flex-col lg:flex-row gap-32">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
           {/* Universitas Section */}
           <div className="w-full lg:w-[60%] h-fit border-3 border-[#007B3A] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#E8F5E8] px-4 lg:px-10 py-4 lg:py-6 relative">
             <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#007B3A] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
