@@ -62,11 +62,6 @@ export class UniversitasRepository {
   async getProvinsiList() {
     const result = await prisma.universitas.groupBy({
       by: ["provinsi"],
-      where: {
-        provinsi: {
-          not: null,
-        },
-      },
       orderBy: {
         provinsi: "asc",
       },
@@ -77,11 +72,6 @@ export class UniversitasRepository {
   async getAkreditasiList() {
     const result = await prisma.universitas.groupBy({
       by: ["akreditasi"],
-      where: {
-        akreditasi: {
-          not: null,
-        },
-      },
       orderBy: {
         akreditasi: "asc",
       },
