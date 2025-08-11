@@ -46,4 +46,10 @@ router.get(
   universitasController.getAkreditasiList.bind(universitasController)
 );
 
+// GET /api/universitas/:id/prodi - Get prodi offered by the university
+router.get(
+  "/:id/prodi",
+  universitasController.getProdiByUniversitas.bind(universitasController)
+);
+
 export default router;

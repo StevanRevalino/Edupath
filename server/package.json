@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "university:clean": "ts-node src/university-manager.ts --clean",
-    "university:seed": "ts-node src/university-manager.ts --seed",
-    "university:check": "ts-node src/check-universities.ts",
-    "university:verify": "ts-node src/verify-constraints.ts"
+    "universitasdanprodi:seed": "ts-node prisma/seed/universitas_dan_prodi.ts"
   },
   "keywords": [],
   "author": "",

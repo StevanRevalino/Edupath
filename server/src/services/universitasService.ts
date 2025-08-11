@@ -74,4 +74,20 @@ export class UniversitasService {
       throw new Error(`Gagal mengambil daftar akreditasi: ${error.message}`);
     }
   }
+
+  async getProdiByUniversitas(
+    university_id: number,
+    filter: { q?: string; jenjang?: string; skip?: number; take?: number }
+  ) {
+    try {
+      const { rows, total } =
+        await universitasRepository.findProdiByUniversitas(
+          university_id,
+          filter
+        );
+      return { data: rows, total };
+    } catch (error: any) {
+      throw new Error(`Gagal mengambil prodi di universitas: ${error.message}`);
+    }
+  }
 }

@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import universitasRoutes from "./routes/universitasRoutes";
+import prodiRoutes from "./routes/prodiRoutes";
 import { seedDefaultAdmins } from "./configs/seeder";
 
 dotenv.config();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
+app.use("/api/prodi", prodiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {

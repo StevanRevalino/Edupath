@@ -161,4 +161,43 @@ export class UniversitasController {
       });
     }
   }
+
+  async getProdiByUniversitas(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID universitas tidak valid" });
+      }
+      const { q, jenjang, page = "1", limit = "20" } = req.query as any;
+      const take = Math.min(
+        Math.max(parseInt(limit as string, 10) || 20, 1),
+        100
+      );
+      const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
+      const skip = (pageNum - 1) * take;
+
+      const { data, total } = await universitasService.getProdiByUniversitas(
+        id,
+        {
+          q: q as string,
+          jenjang: jenjang as string,
+          skip,
+          take,
+        }
+      );
+
+      res.status(200).json({
+        message: "Berhasil mengambil prodi di universitas",
+        data,
+        total,
+        page: pageNum,
+        limit: take,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        message: "Gagal mengambil prodi di universitas",
+        error: error.message,
+      });
+    }
+  }
 }

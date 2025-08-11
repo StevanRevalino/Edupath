@@ -113,12 +113,12 @@ export async function seedUniversitas() {
                 data: {
                   university_id: parseInt(row.no),
                   nama: row.nama.trim(),
-                  npsn: parseInt(row.npsn), // Sudah divalidasi di filter, pasti valid
+                  npsn: row.npsn.trim(), // Sudah divalidasi di filter, pasti valid
                   nama_singkat:
                     row["nama singkat"] && row["nama singkat"] !== "NULL"
                       ? row["nama singkat"].trim()
                       : null,
-                  kode_pos: parseInt(row.kode_pos), // Sudah divalidasi di filter, pasti valid
+                  kode_pos: row.kode_pos.trim(), // Sudah divalidasi di filter, pasti valid
                   telepon: row.telepon.trim(), // Sudah divalidasi di filter, pasti valid
                   email: row.email.trim(), // Sudah divalidasi di filter, pasti valid
                   alamat: row.alamat.trim(), // Sudah divalidasi di filter, pasti valid

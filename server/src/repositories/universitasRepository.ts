@@ -78,4 +78,52 @@ export class UniversitasRepository {
     });
     return result.map((item) => item.akreditasi);
   }
+
+  async findProdiByUniversitas(
+    university_id: number,
+    filter: { q?: string; jenjang?: string; skip?: number; take?: number }
+  ) {
+    const where: any = { university_id };
+    const AND: any[] = [];
+    if (filter?.q && filter.q.trim()) {
+      AND.push({
+        Prodi: {
+          nama_prodi: { contains: filter.q.trim(), mode: "insensitive" },
+        },
+      });
+    }
+    if (filter?.jenjang && filter.jenjang.trim()) {
+      AND.push({
+        Prodi: {
+          jenjang: {
+            equals: filter.jenjang.trim(),
+            mode: "insensitive",
+          } as any,
+        },
+      });
+    }
+    if (AND.length) where.AND = AND;
+
+    const [rows, total] = await Promise.all([
+      prisma.prodiPT.findMany({
+        where,
+        include: {
+          Prodi: {
+            select: {
+              prodi_id: true,
+              nama_prodi: true,
+              jenjang: true,
+              bidang: true,
+            },
+          },
+        },
+        orderBy: [{ Prodi: { nama_prodi: "asc" } }],
+        skip: filter?.skip,
+        take: filter?.take,
+      }),
+      prisma.prodiPT.count({ where }),
+    ]);
+
+    return { rows, total };
+  }
 }
