@@ -27,8 +27,7 @@ const corsOpts: cors.CorsOptions = {
 
 app.use(cors(corsOpts));
 
-// Handle preflight requests explicitly
-app.options("*", cors(corsOpts));
+// CORS middleware sudah menangani preflight requests, jadi kita tidak perlu app.options
 
 // Additional CORS middleware as backup
 app.use((req, res, next) => {
