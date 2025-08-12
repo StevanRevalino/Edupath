@@ -10,15 +10,22 @@ dotenv.config();
 
 const app = express();
 
-// Configure CORS with specific options
+// Simple CORS configuration to fix the error
 app.use(
   cors({
-    origin: true, // Allow all origins for now
+    origin: "*", // Allow all origins for development
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log("Origin:", req.headers.origin);
+  next();
+});
 
 app.use(express.json());
 
