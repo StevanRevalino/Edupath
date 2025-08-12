@@ -6,14 +6,28 @@ type UniversitasDetailType = {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
+  npsn?: string | null;
   kota?: string | null;
   provinsi?: string | null;
+  alamat?: string | null;
+  kode_pos?: string | null;
   akreditasi?: string | null;
   status?: string | null;
   rank_qs?: number | null;
   rank_country?: number | null;
   email?: string | null;
   telepon?: string | null;
+  fax?: string | null;
+  website?: string | null;
+  tanggal_berdiri?: string | null;
+  sk_pendirian?: string | null;
+  jumlah_mahasiswa?: number | null;
+  jumlah_dosen?: number | null;
+  kecamatan?: string | null;
+  lintang?: number | null;
+  bujur?: number | null;
+  tanggal_sk?: string | null;
+  status_akreditasi?: string | null;
 };
 
 const API_BASE =
@@ -172,6 +186,15 @@ const UniversitasDetail: React.FC = () => {
                 </div>
               )}
 
+              {universitas.npsn && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">NPSN</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.npsn}
+                  </dd>
+                </div>
+              )}
+
               {universitas.kota && (
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Kota</dt>
@@ -188,6 +211,37 @@ const UniversitasDetail: React.FC = () => {
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {universitas.provinsi}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.alamat && (
+                <div className="md:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Alamat</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.alamat}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.kode_pos && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Kode Pos
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.kode_pos}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.kecamatan && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Kecamatan
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.kecamatan}
                   </dd>
                 </div>
               )}
@@ -224,13 +278,61 @@ const UniversitasDetail: React.FC = () => {
                 </div>
               )}
 
+              {universitas.tanggal_berdiri && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Tanggal Berdiri
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {new Date(universitas.tanggal_berdiri).toLocaleDateString(
+                      "id-ID"
+                    )}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.sk_pendirian && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    SK Pendirian
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.sk_pendirian}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.tanggal_sk && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Tanggal SK Pendirian
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {new Date(universitas.tanggal_sk).toLocaleDateString(
+                      "id-ID"
+                    )}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.status_akreditasi && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Status Akreditasi
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.status_akreditasi}
+                  </dd>
+                </div>
+              )}
+
               {universitas.rank_qs && (
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
                     Ranking QS
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.rank_qs}
+                    #{universitas.rank_qs}
                   </dd>
                 </div>
               )}
@@ -241,7 +343,29 @@ const UniversitasDetail: React.FC = () => {
                     Ranking Nasional
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.rank_country}
+                    #{universitas.rank_country}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.jumlah_mahasiswa && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Jumlah Mahasiswa
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.jumlah_mahasiswa.toLocaleString("id-ID")} orang
+                  </dd>
+                </div>
+              )}
+
+              {universitas.jumlah_dosen && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Jumlah Dosen
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.jumlah_dosen.toLocaleString("id-ID")} orang
                   </dd>
                 </div>
               )}
@@ -250,10 +374,15 @@ const UniversitasDetail: React.FC = () => {
         </div>
 
         {/* Contact Information */}
-        {(universitas.email || universitas.telepon) && (
+        {(universitas.email ||
+          universitas.telepon ||
+          universitas.fax ||
+          universitas.website) && (
           <div className="mt-6 bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Kontak</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Kontak & Website
+              </h2>
             </div>
 
             <div className="px-6 py-4">
@@ -264,8 +393,21 @@ const UniversitasDetail: React.FC = () => {
                     <dd className="mt-1">
                       <a
                         href={`mailto:${universitas.email}`}
-                        className="text-sm text-blue-600 hover:text-blue-800"
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                       >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
                         {universitas.email}
                       </a>
                     </dd>
@@ -280,13 +422,147 @@ const UniversitasDetail: React.FC = () => {
                     <dd className="mt-1">
                       <a
                         href={`tel:${universitas.telepon}`}
-                        className="text-sm text-blue-600 hover:text-blue-800"
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                       >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                          />
+                        </svg>
                         {universitas.telepon}
                       </a>
                     </dd>
                   </div>
                 )}
+
+                {universitas.fax && (
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Fax</dt>
+                    <dd className="mt-1 text-sm text-gray-900 flex items-center">
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4v16a1 1 0 001 1h8a1 1 0 001-1V4m-5 8h.01M12 16h.01"
+                        />
+                      </svg>
+                      {universitas.fax}
+                    </dd>
+                  </div>
+                )}
+
+                {universitas.website && (
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">
+                      Website
+                    </dt>
+                    <dd className="mt-1">
+                      <a
+                        href={
+                          universitas.website.startsWith("http")
+                            ? universitas.website
+                            : `https://${universitas.website}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
+                        </svg>
+                        {universitas.website}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          </div>
+        )}
+
+        {/* Location Coordinates */}
+        {universitas.lintang && universitas.bujur && (
+          <div className="mt-6 bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Koordinat Lokasi
+              </h2>
+            </div>
+
+            <div className="px-6 py-4">
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Lintang</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-mono">
+                    {universitas.lintang}°
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Bujur</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-mono">
+                    {universitas.bujur}°
+                  </dd>
+                </div>
+
+                <div className="md:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Lihat di Peta
+                  </dt>
+                  <dd className="mt-1">
+                    <a
+                      href={`https://www.google.com/maps?q=${universitas.lintang},${universitas.bujur}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Buka di Google Maps
+                    </a>
+                  </dd>
+                </div>
               </dl>
             </div>
           </div>
