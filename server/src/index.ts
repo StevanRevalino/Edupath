@@ -58,9 +58,9 @@ app.use((req, _res, next) => {
   if (req.headers.origin) {
     console.log(`Origin: ${req.headers.origin}`);
   }
-  if (req.headers['user-agent']) {
-    const isMac = req.headers['user-agent'].includes('Mac');
-    if (isMac) console.log('Request from macOS detected');
+  if (req.headers["user-agent"]) {
+    const isMac = req.headers["user-agent"].includes("Mac");
+    if (isMac) console.log("Request from macOS detected");
   }
   next();
 });
@@ -79,6 +79,8 @@ app.listen(PORT, "0.0.0.0", async () => {
   console.log(`  macOS/Linux:     http://127.0.0.1:${PORT}`);
   console.log(`  Network IP:      http://10.10.70.163:${PORT}`);
   console.log(`  IPv6 (macOS):    http://[::1]:${PORT}`);
-  console.log(`\nTeman di macOS coba gunakan: http://127.0.0.1:${PORT} atau network IP`);
+  console.log(
+    `\nTeman di macOS coba gunakan: http://127.0.0.1:${PORT} atau network IP`
+  );
   await seedDefaultAdmins();
 });

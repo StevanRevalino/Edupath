@@ -126,19 +126,17 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       setErrors({});
 
-      const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const res = await fetch(
-        `${API_URL}/api/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            otp: serverOtp,
-            newPassword,
-          }),
-        }
-      );
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          otp: serverOtp,
+          newPassword,
+        }),
+      });
 
       const data = await res.json();
       if (!res.ok) return toast.error(data.message);
@@ -182,7 +180,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
             onClick={onClose}
             className="text-gray-600 text-sm underline cursor-pointer"
           >
-            <X className="w-6 h-6" strokeWidth={3}/>
+            <X className="w-6 h-6" strokeWidth={3} />
           </button>
         </div>
 

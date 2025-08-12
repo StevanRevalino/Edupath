@@ -26,7 +26,8 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
