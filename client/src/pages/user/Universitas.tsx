@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 type UniversitasItem = {
-  university_id: number;
+  university_id: string;
   nama: string;
   nama_singkat?: string | null;
   kota?: string | null;
@@ -19,6 +20,7 @@ const API_BASE =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const Universitas: React.FC = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -68,6 +70,13 @@ const Universitas: React.FC = () => {
     setError("");
   }, []);
 
+  const handleUniversitasClick = useCallback(
+    (universityId: string) => {
+      navigate(`/universitas/${universityId}`);
+    },
+    [navigate]
+  );
+
   return (
     <div className="pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -113,6 +122,30 @@ const Universitas: React.FC = () => {
 
         {results.length > 0 && (
           <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <div className="mb-2 text-sm text-gray-600">
+              <span className="inline-flex items-center">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                Klik pada universitas untuk melihat detail
+              </span>
+            </div>
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50">
                 <tr>
@@ -126,16 +159,39 @@ const Universitas: React.FC = () => {
                 {results.map((u) => (
                   <tr
                     key={u.university_id}
-                    className="border-t border-gray-100 hover:bg-gray-50"
+                    onClick={() => handleUniversitasClick(u.university_id)}
+                    className="border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150"
                   >
                     <td className="px-4 py-2">
-                      <div className="font-medium">{u.nama}</div>
+                      <div className="font-medium text-blue-600 hover:text-blue-800">
+                        {u.nama}
+                      </div>
                       {u.nama_singkat && (
-                        <div className="text-gray-500">{u.nama_singkat}</div>
+                        <div className="text-gray-500 text-xs">
+                          {u.nama_singkat}
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-2">{u.provinsi || "-"}</td>
-                    <td className="px-4 py-2">{u.akreditasi || "-"}</td>
+                    <td className="px-4 py-2">
+                      {u.akreditasi ? (
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            u.akreditasi === "A"
+                              ? "bg-green-100 text-green-800"
+                              : u.akreditasi === "B"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : u.akreditasi === "C"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {u.akreditasi}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                     <td className="px-4 py-2">{u.status || "-"}</td>
                   </tr>
                 ))}

@@ -10,12 +10,6 @@ router.get(
   universitasController.getAllUniversitas.bind(universitasController)
 );
 
-// GET /api/universitas/:id - Get universitas by ID
-router.get(
-  "/:id",
-  universitasController.getUniversitasById.bind(universitasController)
-);
-
 // GET /api/universitas/filter/provinsi - Get universitas by provinsi
 router.get(
   "/filter/provinsi",
@@ -44,6 +38,12 @@ router.get(
 router.get(
   "/list/akreditasi",
   universitasController.getAkreditasiList.bind(universitasController)
+);
+
+// GET /api/universitas/:id - Get universitas by ID
+router.get(
+  "/:id",
+  universitasController.getUniversitasById.bind(universitasController)
 );
 
 // GET /api/universitas/:id/prodi - Get prodi offered by the university

@@ -8,6 +8,7 @@ import type { JSX } from "react";
 import Home from "./pages/user/Home";
 import Jurusan from "./pages/user/Jurusan";
 import Universitas from "./pages/user/Universitas";
+import UniversitasDetail from "./pages/user/UniversitasDetail";
 import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="tes" element={<Tes />} />
           <Route path="jurusan" element={<Jurusan />} />
           <Route path="universitas" element={<Universitas />} />
+          <Route path="universitas/:id" element={<UniversitasDetail />} />
           <Route path="konseling" element={<Konseling />} />
           <Route path="profil" element={<Profil />} />
         </Route>

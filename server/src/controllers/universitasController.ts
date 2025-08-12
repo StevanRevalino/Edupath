@@ -23,16 +23,15 @@ export class UniversitasController {
   async getUniversitasById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const university_id = parseInt(id, 10);
 
-      if (isNaN(university_id)) {
+      if (!id || typeof id !== "string" || id.trim() === "") {
         return res.status(400).json({
           message: "ID universitas tidak valid",
         });
       }
 
       const universitas = await universitasService.getUniversitasById(
-        university_id
+        id.trim()
       );
       res.status(200).json({
         message: "Berhasil mengambil data universitas",
@@ -164,8 +163,8 @@ export class UniversitasController {
 
   async getProdiByUniversitas(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id, 10);
-      if (isNaN(id)) {
+      const { id } = req.params;
+      if (!id || typeof id !== "string" || id.trim() === "") {
         return res.status(400).json({ message: "ID universitas tidak valid" });
       }
       const { q, jenjang, page = "1", limit = "20" } = req.query as any;
@@ -177,7 +176,7 @@ export class UniversitasController {
       const skip = (pageNum - 1) * take;
 
       const { data, total } = await universitasService.getProdiByUniversitas(
-        id,
+        id.trim(),
         {
           q: q as string,
           jenjang: jenjang as string,

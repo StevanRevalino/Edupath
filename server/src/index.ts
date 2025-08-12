@@ -68,7 +68,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = 5000;
 
 // Listen on all network interfaces untuk cross-platform compatibility
 app.listen(PORT, "0.0.0.0", async () => {
@@ -78,8 +78,5 @@ app.listen(PORT, "0.0.0.0", async () => {
   console.log(`  macOS/Linux:     http://127.0.0.1:${PORT}`);
   console.log(`  Network IP:      http://10.10.70.163:${PORT}`);
   console.log(`  IPv6 (macOS):    http://[::1]:${PORT}`);
-  console.log(
-    `\nTeman di macOS coba gunakan: http://127.0.0.1:${PORT} atau network IP`
-  );
   await seedDefaultAdmins();
 });
