@@ -18,19 +18,30 @@ export class AuthController {
   }
 
   async login(req: Request, res: Response) {
+    console.log("Login request received:", req.body);
     const { email, password } = req.body;
 
-    if (!email || !password)
+    if (!email || !password) {
+      console.log("Missing email or password");
       return res
         .status(400)
         .json({ message: "Email dan password wajib diisi" });
+    }
 
-    const result = await authService.login(email, password);
+    try {
+      const result = await authService.login(email, password);
 
-    if (!result)
-      return res.status(401).json({ message: "Email atau password salah" });
+      if (!result) {
+        console.log("Login failed: Invalid credentials");
+        return res.status(401).json({ message: "Email atau password salah" });
+      }
 
-    res.json(result); // token + user
+      console.log("Login successful for:", email);
+      res.json(result); // token + user
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 
   async forgotPassword(req: Request, res: Response) {
