@@ -2,6 +2,11 @@ import axios from "axios";
 
 // Determine the best base URL for the current platform
 const getBaseURL = () => {
+  // If VITE_API_URL is set, use it (for network access)
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
   // For development, try different localhost variations
   const possibleHosts = [
     "http://localhost:5000",
@@ -9,8 +14,8 @@ const getBaseURL = () => {
     "http://[::1]:5000",
   ];
 
-  // Use localhost by default, but this can be configured via env
-  return import.meta.env.VITE_API_URL || possibleHosts[0];
+  // Use localhost by default
+  return possibleHosts[0];
 };
 
 // Create axios instance with default config
