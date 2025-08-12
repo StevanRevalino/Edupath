@@ -10,19 +10,22 @@ dotenv.config();
 
 const app = express();
 
-// Configure CORS with specific options
+// Simple CORS configuration to fix the error
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Add both localhost variations
+    origin: "*", // Allow all origins for development
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
-// // Handle preflight requests
-// app.options("*", cors());
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log("Origin:", req.headers.origin);
+  next();
+});
 
 app.use(express.json());
 
