@@ -35,6 +35,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const SERVICE_ID = "service_h6ptjp7";
   const TEMPLATE_ID = "template_2hb217b";
@@ -348,30 +349,36 @@ export default function Register() {
           </div>
 
           {/* Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) {
-                  setErrors((prev) => {
-                    const newErrors = { ...prev };
-                    delete newErrors.password;
-                    return newErrors;
-                  });
-                }
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
-            </button>
+          <div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 sm:pr-14 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) {
+                    setErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors.password;
+                      return newErrors;
+                    });
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                ) : (
+                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-xs text-red-500 mt-1 px-2">
                 {errors.password}
@@ -381,22 +388,35 @@ export default function Register() {
 
           {/* Konfirmasi Password */}
           <div>
-            <input
-              type="password"
-              placeholder="Konfirmasi Password"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (errors.confirmPassword) {
-                  setErrors((prev) => {
-                    const newErrors = { ...prev };
-                    delete newErrors.confirmPassword;
-                    return newErrors;
-                  });
-                }
-              }}
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Konfirmasi Password"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 sm:pr-14 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (errors.confirmPassword) {
+                    setErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors.confirmPassword;
+                      return newErrors;
+                    });
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                ) : (
+                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                )}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-xs text-red-500 mt-1 px-2">
                 {errors.confirmPassword}
