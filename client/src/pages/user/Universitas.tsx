@@ -9,7 +9,6 @@ type UniversitasItem = {
   kota?: string | null;
   provinsi?: string | null;
   akreditasi?: string | null;
-  status?: string | null;
   rank_qs?: number | null;
   rank_country?: number | null;
   email?: string | null;
@@ -152,7 +151,6 @@ const Universitas: React.FC = () => {
                   <th className="px-4 py-2">Nama</th>
                   <th className="px-4 py-2">Provinsi</th>
                   <th className="px-4 py-2">Akreditasi</th>
-                  <th className="px-4 py-2">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,7 +190,6 @@ const Universitas: React.FC = () => {
                         "-"
                       )}
                     </td>
-                    <td className="px-4 py-2">{u.status || "-"}</td>
                   </tr>
                 ))}
               </tbody>

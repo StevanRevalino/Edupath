@@ -6,28 +6,24 @@ type UniversitasDetailType = {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
-  npsn?: string | null;
+  kelompok?: string | null;
+  pembina?: string | null;
+  alamat?: string | null;
+  kecamatan?: string | null;
   kota?: string | null;
   provinsi?: string | null;
-  alamat?: string | null;
   kode_pos?: string | null;
-  akreditasi?: string | null;
-  status?: string | null;
-  rank_qs?: number | null;
-  rank_country?: number | null;
+  lintang?: number | null;
+  bujur?: number | null;
   email?: string | null;
   telepon?: string | null;
   fax?: string | null;
   website?: string | null;
   tanggal_berdiri?: string | null;
-  sk_pendirian?: string | null;
-  jumlah_mahasiswa?: number | null;
-  jumlah_dosen?: number | null;
-  kecamatan?: string | null;
-  lintang?: number | null;
-  bujur?: number | null;
-  tanggal_sk?: string | null;
+  akreditasi?: string | null;
   status_akreditasi?: string | null;
+  rank_qs?: number | null;
+  rank_country?: number | null;
 };
 
 const API_BASE =
@@ -186,11 +182,22 @@ const UniversitasDetail: React.FC = () => {
                 </div>
               )}
 
-              {universitas.npsn && (
+              {universitas.kelompok && (
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">NPSN</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Kelompok
+                  </dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.npsn}
+                    {universitas.kelompok}
+                  </dd>
+                </div>
+              )}
+
+              {universitas.pembina && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Pembina</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {universitas.pembina}
                   </dd>
                 </div>
               )}
@@ -254,26 +261,20 @@ const UniversitasDetail: React.FC = () => {
                   <dd className="mt-1">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        universitas.akreditasi === "Unggul" ||
                         universitas.akreditasi === "A"
                           ? "bg-green-100 text-green-800"
-                          : universitas.akreditasi === "B"
+                          : universitas.akreditasi === "Baik Sekali" ||
+                            universitas.akreditasi === "B"
+                          ? "bg-blue-100 text-blue-800"
+                          : universitas.akreditasi === "Baik" ||
+                            universitas.akreditasi === "C"
                           ? "bg-yellow-100 text-yellow-800"
-                          : universitas.akreditasi === "C"
-                          ? "bg-red-100 text-red-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {universitas.akreditasi}
                     </span>
-                  </dd>
-                </div>
-              )}
-
-              {universitas.status && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.status}
                   </dd>
                 </div>
               )}
@@ -287,41 +288,6 @@ const UniversitasDetail: React.FC = () => {
                     {new Date(universitas.tanggal_berdiri).toLocaleDateString(
                       "id-ID"
                     )}
-                  </dd>
-                </div>
-              )}
-
-              {universitas.sk_pendirian && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    SK Pendirian
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.sk_pendirian}
-                  </dd>
-                </div>
-              )}
-
-              {universitas.tanggal_sk && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Tanggal SK Pendirian
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {new Date(universitas.tanggal_sk).toLocaleDateString(
-                      "id-ID"
-                    )}
-                  </dd>
-                </div>
-              )}
-
-              {universitas.status_akreditasi && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Status Akreditasi
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.status_akreditasi}
                   </dd>
                 </div>
               )}
@@ -344,28 +310,6 @@ const UniversitasDetail: React.FC = () => {
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     #{universitas.rank_country}
-                  </dd>
-                </div>
-              )}
-
-              {universitas.jumlah_mahasiswa && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Jumlah Mahasiswa
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.jumlah_mahasiswa.toLocaleString("id-ID")} orang
-                  </dd>
-                </div>
-              )}
-
-              {universitas.jumlah_dosen && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Jumlah Dosen
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {universitas.jumlah_dosen.toLocaleString("id-ID")} orang
                   </dd>
                 </div>
               )}
