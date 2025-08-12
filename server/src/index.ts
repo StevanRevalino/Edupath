@@ -13,12 +13,16 @@ const app = express();
 // Configure CORS with specific options
 app.use(
   cors({
-    origin: true, // Allow all origins for now
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Add both localhost variations
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   })
 );
+
+// // Handle preflight requests
+// app.options("*", cors());
 
 app.use(express.json());
 
