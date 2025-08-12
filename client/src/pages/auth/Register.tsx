@@ -102,7 +102,8 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+      const API_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      await axios.post(`${API_URL}/api/auth/register`, {
         firstname: firstName,
         lastname: lastName,
         kelas: Number(kelas?.value),
