@@ -8,8 +8,6 @@ type UniversitasItem = {
   kota?: string | null;
   provinsi?: string | null;
   akreditasi?: string | null;
-  rank_qs?: number | null;
-  rank_country?: number | null;
   email?: string | null;
   telepon?: string | null;
 };
@@ -123,6 +121,12 @@ const Universitas: React.FC = () => {
     [fetchUniversitasDetail]
   );
 
+  // Function to clean province name by removing "Prov." prefix
+  const cleanProvinceName = (provinsi: string | null | undefined) => {
+    if (!provinsi) return "-";
+    return provinsi.replace(/^Prov\.\s*/i, "");
+  };
+
   return (
     <div className="pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -201,6 +205,8 @@ const Universitas: React.FC = () => {
                       <th className="px-4 py-2">Nama</th>
                       <th className="px-4 py-2">Provinsi</th>
                       <th className="px-4 py-2">Akreditasi</th>
+                      <th className="px-4 py-2">Email</th>
+                      <th className="px-4 py-2">Telepon</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -224,14 +230,18 @@ const Universitas: React.FC = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-2">{u.provinsi || "-"}</td>
+                        <td className="px-4 py-2">{cleanProvinceName(u.provinsi)}</td>
                         <td className="px-4 py-2">
                           {u.akreditasi ? (
                             <span
                               className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                u.akreditasi === "A"
+                                u.akreditasi === "A" ||
+                                u.akreditasi === "Unggul"
                                   ? "bg-green-100 text-green-800"
-                                  : u.akreditasi === "B"
+                                  : u.akreditasi === "Baik Sekali"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : u.akreditasi === "B" ||
+                                    u.akreditasi === "Baik"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : u.akreditasi === "C"
                                   ? "bg-red-100 text-red-800"
@@ -240,6 +250,34 @@ const Universitas: React.FC = () => {
                             >
                               {u.akreditasi}
                             </span>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {u.email ? (
+                            <a
+                              href={`mailto:${u.email}`}
+                              className="text-blue-600 hover:text-blue-800 text-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {u.email.length > 20
+                                ? `${u.email.substring(0, 20)}...`
+                                : u.email}
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {u.telepon ? (
+                            <a
+                              href={`tel:${u.telepon}`}
+                              className="text-blue-600 hover:text-blue-800 text-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {u.telepon}
+                            </a>
                           ) : (
                             "-"
                           )}
@@ -318,7 +356,7 @@ const Universitas: React.FC = () => {
                       <div>
                         <dt className="font-medium text-gray-500">Provinsi</dt>
                         <dd className="text-gray-900">
-                          {selectedUniversitas.provinsi}
+                          {cleanProvinceName(selectedUniversitas.provinsi)}
                         </dd>
                       </div>
                     )}

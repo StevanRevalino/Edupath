@@ -8,19 +8,31 @@ export class ProdiService {
 
       // Normalize the response to match expected format
       const prodi = {
-        prodi_id: payload?.id_prodi || prodi_id,
-        nama_prodi: payload?.nama_prodi || payload?.nm_lemb || "-",
-        jenjang: payload?.jenjang || payload?.nm_jenj_didik || null,
-        kode_prodi: payload?.kode_prodi || null,
-        bidang: payload?.bidang || payload?.nm_klmpk_bidang || null,
-        akreditasi: payload?.akreditasi || payload?.akred_sp || null,
-        status_akreditasi: payload?.status_akreditasi || null,
-        tanggal_berdiri: payload?.tgl_berdiri || null,
-        tanggal_tutup: payload?.tgl_tutup || null,
-        status: payload?.stat_prodi || payload?.status || "Aktif",
-        gelar: payload?.gelar || null,
-        singkatan_gelar: payload?.singkatan_gelar || null,
-        deskripsi: payload?.deskripsi || null,
+        prodi_id: payload?.id_sms,
+        nama_prodi: payload?.nama_prodi || "-",
+        jenjang: payload?.jenj_didik,
+        kode_prodi: payload?.kode_prodi,
+        bidang: payload?.kel_bidang,
+        akreditasi: payload?.akreditasi,
+        akreditasi_internasional: payload?.akreditasi_internasional,
+        status_akreditasi: payload?.status_akreditasi,
+        status: payload?.status || "Aktif",
+        tanggal_berdiri: payload?.tgl_berdiri,
+        no_tel: payload?.no_tel,
+        no_fax: payload?.no_fax,
+        website: payload?.website,
+        email: payload?.email,
+        alamat: payload?.alamat,
+        universitas: {
+          university_id: payload?.id_sp,
+          nama: payload?.nama_pt,
+          kode_pt: payload?.kode_pt?.trim(),
+          provinsi: payload?.provinsi,
+          kab_kota: payload?.kab_kota,
+          kecamatan: payload?.kecamatan,
+          lintang: payload?.lintang !== 0 ? payload?.lintang : null,
+          bujur: payload?.bujur !== 0 ? payload?.bujur : null,
+        },
       };
 
       return prodi;
@@ -41,24 +53,33 @@ export class ProdiService {
         : [];
 
       // Map to a minimal shape the UI expects
-      const mapped = items.map((it: any, idx: number) => ({
-        // Use PDDIKTI's id_prodi as the unique identifier
-        prodi_id: it?.id_prodi || it?.id || `prodi_${idx}`,
-        nama_prodi: it?.nama_prodi || it?.nama || it?.nm_lemb || "-",
-        jenjang:
-          it?.jenjang || it?.nm_jenj_didik || it?.jenjang_pendidikan || null,
-        kode_prodi: it?.kode_prodi || it?.kode || null,
-        bidang:
-          it?.bidang || it?.nm_klmpk_bidang || it?.kelompok_bidang || null,
-        akreditasi: it?.akreditasi || it?.akred_sp || null,
-        status: it?.stat_prodi || it?.status || "Aktif",
-        gelar: it?.gelar || null,
-        universitas: {
-          university_id: it?.id_pt || it?.id_perguruan_tinggi || null,
-          nama: it?.nama_pt || it?.perguruan_tinggi || it?.pt || null,
-          provinsi: it?.provinsi_pt || it?.provinsi || null,
-        },
-      }));
+      const mapped = await Promise.all(
+        items.map(async (it: any, idx: number) => {
+          let akreditasi = null;
+          
+          // If we have an ID, try to get detailed info including akreditasi
+          if (it?.id) {
+            try {
+              const detailData = await getProdiDetail(it.id);
+              akreditasi = detailData?.akreditasi || null;
+            } catch (error) {
+              // If detail fetch fails, continue without akreditasi
+              console.warn(`Failed to fetch detail for prodi ${it.id}:`, error);
+            }
+          }
+
+          return {
+            // Use id as the unique identifier
+            prodi_id: it?.id || `prodi_${idx}`,
+            nama_prodi: it?.nama || "-",
+            jenjang: it?.jenjang,
+            akreditasi: akreditasi,
+            universitas: {
+              nama: it?.pt,
+            },
+          };
+        })
+      );
 
       return mapped;
     } catch (error: any) {

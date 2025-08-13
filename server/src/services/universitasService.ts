@@ -64,25 +64,33 @@ export class UniversitasService {
         ? payload.data
         : [];
 
-      // Map to a minimal shape the UI expects
-      const mapped = items.map((it: any, idx: number) => ({
-        // Use PDDIKTI's id_pt as the unique identifier
-        university_id: it?.id_pt || it?.id || `pt_${idx}`,
-        nama: it?.nama_pt || it?.nama || "-",
-        nama_singkat:
-          it?.nm_singkat || it?.singkatan || it?.nama_singkat || null,
-        provinsi:
-          it?.provinsi_pt ||
-          it?.provinsi ||
-          it?.propinsi ||
-          it?.wilayah ||
-          null,
-        akreditasi: it?.akreditasi_pt || it?.akreditasi || null,
-        rank_qs: null,
-        rank_country: null,
-        email: it?.email || null,
-        telepon: it?.no_tel || it?.telepon || it?.no_telp || null,
-      }));
+      // Map to a minimal shape with akreditasi from detail API
+      const mapped = await Promise.all(
+        items.map(async (it: any, idx: number) => {
+          let detailData = null;
+
+          // If we have an ID, get full details including akreditasi
+          if (it?.id) {
+            try {
+              detailData = await getPerguruanTinggiDetail(it.id);
+            } catch (error) {
+              // If detail fetch fails, continue without detail data
+              console.warn(`Failed to fetch detail for university ${it.id}`);
+            }
+          }
+
+          return {
+            university_id: it?.id,
+            nama: it?.nama || detailData?.nama_pt || "-",
+            nama_singkat: it?.nama_singkat  || null,
+            kota: detailData?.kab_kota_pt || null,
+            provinsi: detailData?.provinsi_pt || null,
+            akreditasi: detailData?.akreditasi_pt || null,
+            email: detailData?.email || null,
+            telepon: detailData?.no_tel || null,
+          };
+        })
+      );
 
       return mapped;
     } catch (error: any) {
