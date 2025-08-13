@@ -230,7 +230,9 @@ const Universitas: React.FC = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-2">{cleanProvinceName(u.provinsi)}</td>
+                        <td className="px-4 py-2">
+                          {cleanProvinceName(u.provinsi)}
+                        </td>
                         <td className="px-4 py-2">
                           {u.akreditasi ? (
                             <span
