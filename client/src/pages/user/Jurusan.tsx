@@ -199,7 +199,6 @@ const Jurusan: React.FC = () => {
                       <th className="px-4 py-2">Nama Program Studi</th>
                       <th className="px-4 py-2">Jenjang</th>
                       <th className="px-4 py-2">Universitas</th>
-                      <th className="px-4 py-2">Akreditasi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -244,28 +243,6 @@ const Jurusan: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className="px-4 py-2">
-                          {p.akreditasi ? (
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                p.akreditasi === "A" ||
-                                p.akreditasi === "Unggul"
-                                  ? "bg-green-100 text-green-800"
-                                  : p.akreditasi === "B" ||
-                                    p.akreditasi === "Baik Sekali"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : p.akreditasi === "C" ||
-                                    p.akreditasi === "Baik"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {p.akreditasi}
-                            </span>
                           ) : (
                             "-"
                           )}
