@@ -7,7 +7,6 @@ import prodiRoutes from "./routes/prodiRoutes";
 import { seedDefaultAdmins } from "./configs/seeder";
 
 dotenv.config();
-
 const app = express();
 
 // CORS configuration - specific origins for better compatibility
@@ -36,6 +35,7 @@ app.use(cors(corsOpts));
 
 app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);

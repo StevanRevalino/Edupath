@@ -1,6 +1,5 @@
 import { CheckCircle } from "lucide-react";
 import { useRef, useState } from "react";
-import emailjs from "@emailjs/browser";
 import {
   resetPasswordSchema,
   emailSchema,
@@ -10,6 +9,7 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../assets/warning-logo.png";
+import axios from "axios";
 
 interface Props {
   isOpen: boolean;
@@ -30,13 +30,6 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const [timer, setTimer] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
-  const SERVICE_ID = "service_h6ptjp7";
-  const TEMPLATE_ID = "template_2hb217b";
-  const PUBLIC_KEY = "OYlVYfIRphM9lXZe7";
-
-  const generateOtp = () =>
-    Math.floor(100000 + Math.random() * 900000).toString();
-
   const startTimer = () => {
     setTimer(30);
     const id = setInterval(() => {
@@ -55,25 +48,31 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({}); // reset errors
 
-      const generatedOtp = generateOtp();
-      setServerOtp(generatedOtp);
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-      await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        { to_email: email, otp: generatedOtp },
-        PUBLIC_KEY
-      );
+      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
+        email,
+      });
 
-      toast.success("OTP berhasil dikirim!");
+      // Set OTP from server response (in production, OTP should not be returned)
+      setServerOtp(response.data.otp);
+
+      toast.success("OTP berhasil dikirim ke email!");
       startTimer();
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ValidationError) {
         const emailErr: { email?: string } = {};
         err.inner.forEach((e) => {
           if (e.path === "email") emailErr.email = e.message;
         });
         setErrors((prev) => ({ ...prev, ...emailErr }));
+      } else if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Gagal mengirim OTP";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Terjadi kesalahan saat mengirim OTP");
       }
     }
   };
@@ -126,21 +125,14 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       setErrors({});
 
-      const res = await fetch(
-        "http://localhost:5000/api/auth/forgot-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            otp: serverOtp,
-            newPassword,
-          }),
-        }
-      );
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-      const data = await res.json();
-      if (!res.ok) return toast.error(data.message);
+      await axios.post(`${API_URL}/api/auth/forgot-password`, {
+        email,
+        otp: serverOtp,
+        newPassword,
+      });
 
       setSuccess(true);
       toast.success("Password berhasil direset!");
@@ -148,13 +140,20 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ValidationError) {
         const newErrors: { [key: string]: string } = {};
         err.inner.forEach((e) => {
           if (e.path) newErrors[e.path] = e.message;
         });
         setErrors(newErrors);
+      } else if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message ||
+          "Terjadi kesalahan saat reset password";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Terjadi kesalahan saat reset password");
       }
     }
   };
@@ -181,7 +180,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
             onClick={onClose}
             className="text-gray-600 text-sm underline cursor-pointer"
           >
-            <X className="w-6 h-6" strokeWidth={3}/>
+            <X className="w-6 h-6" strokeWidth={3} />
           </button>
         </div>
 

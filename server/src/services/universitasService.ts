@@ -1,5 +1,8 @@
 // import { UniversitasRepository } from "../repositories/universitasRepository";
-import { searchPerguruanTinggi } from "../api/pddiktiClient";
+import {
+  searchPerguruanTinggi,
+  getPerguruanTinggiDetail,
+} from "../api/pddiktiClient";
 // const universitasRepository = new UniversitasRepository();
 
 export class UniversitasService {
@@ -14,40 +17,39 @@ export class UniversitasService {
     }
   }
 
-  async getUniversitasById(university_id: number): Promise<any> {
+  async getUniversitasById(university_id: string): Promise<any> {
     try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Detail universitas belum tersedia dari API eksternal"
-      );
+      // Use PDDIKTI API to get university details
+      const payload = await getPerguruanTinggiDetail(university_id);
+
+      // Normalize the response to match expected format
+      const universitas = {
+        university_id: payload?.id_pt || university_id,
+        nama: payload?.nama_pt || "-",
+        nama_singkat: payload?.nm_singkat || null,
+        kelompok: payload?.kelompok || null,
+        pembina: payload?.pembina || null,
+        alamat: payload?.alamat || null,
+        kecamatan: payload?.kecamatan_pt || null,
+        kota: payload?.kab_kota_pt || null,
+        provinsi: payload?.provinsi_pt || null,
+        kode_pos: payload?.kode_pos || null,
+        lintang: payload?.lintang_pt || null,
+        bujur: payload?.bujur_pt || null,
+        email: payload?.email || null,
+        telepon: payload?.no_tel || null,
+        fax: payload?.no_fax || null,
+        website: payload?.website || null,
+        tanggal_berdiri: payload?.tgl_berdiri_pt || null,
+        akreditasi: payload?.akreditasi_pt || null,
+        status_akreditasi: payload?.status_akreditasi || null,
+        rank_qs: payload?.rank_qs || null,
+        rank_country: payload?.rank_country || null,
+      };
+
+      return universitas;
     } catch (error: any) {
       throw new Error(`Gagal mengambil data universitas: ${error.message}`);
-    }
-  }
-
-  async getUniversitasByProvinsi(provinsi: string): Promise<any[]> {
-    try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Filter provinsi belum tersedia dari API eksternal"
-      );
-    } catch (error: any) {
-      throw new Error(
-        `Gagal mengambil data universitas berdasarkan provinsi: ${error.message}`
-      );
-    }
-  }
-
-  async getUniversitasByAkreditasi(akreditasi: string): Promise<any[]> {
-    try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Filter akreditasi belum tersedia dari API eksternal"
-      );
-    } catch (error: any) {
-      throw new Error(
-        `Gagal mengambil data universitas berdasarkan akreditasi: ${error.message}`
-      );
     }
   }
 
@@ -64,58 +66,27 @@ export class UniversitasService {
 
       // Map to a minimal shape the UI expects
       const mapped = items.map((it: any, idx: number) => ({
-        // PDDIKTI search likely has an id field; fallback to index if missing
-        university_id: it?.id_pt || it?.id || idx,
+        // Use PDDIKTI's id_pt as the unique identifier
+        university_id: it?.id_pt || it?.id || `pt_${idx}`,
         nama: it?.nama_pt || it?.nama || "-",
-        nama_singkat: it?.singkatan || it?.nama_singkat || null,
-        provinsi: it?.provinsi || it?.propinsi || it?.wilayah || null,
-        akreditasi: it?.akreditasi || it?.akreditasi_pt || null,
-        status: it?.status || it?.status_pt || null,
+        nama_singkat:
+          it?.nm_singkat || it?.singkatan || it?.nama_singkat || null,
+        provinsi:
+          it?.provinsi_pt ||
+          it?.provinsi ||
+          it?.propinsi ||
+          it?.wilayah ||
+          null,
+        akreditasi: it?.akreditasi_pt || it?.akreditasi || null,
         rank_qs: null,
         rank_country: null,
         email: it?.email || null,
-        telepon: it?.telepon || it?.no_telp || null,
+        telepon: it?.no_tel || it?.telepon || it?.no_telp || null,
       }));
 
       return mapped;
     } catch (error: any) {
       throw new Error(`Gagal mencari universitas: ${error.message}`);
-    }
-  }
-
-  async getProvinsiList(): Promise<string[]> {
-    try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Daftar provinsi belum tersedia dari API eksternal"
-      );
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil daftar provinsi: ${error.message}`);
-    }
-  }
-
-  async getAkreditasiList(): Promise<string[]> {
-    try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Daftar akreditasi belum tersedia dari API eksternal"
-      );
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil daftar akreditasi: ${error.message}`);
-    }
-  }
-
-  async getProdiByUniversitas(
-    university_id: number,
-    filter: { q?: string; jenjang?: string; skip?: number; take?: number }
-  ): Promise<{ data: any[]; total: number }> {
-    try {
-      // DB access disabled temporarily
-      throw new Error(
-        "Fitur DB dinonaktifkan. Prodi per universitas belum tersedia dari API eksternal"
-      );
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil prodi di universitas: ${error.message}`);
     }
   }
 }

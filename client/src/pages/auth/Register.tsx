@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import OtpModal from "../../components/ModalVerifyOtp";
-import emailjs from "@emailjs/browser";
 import DropdownList from "../../components/DropDownList";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -36,13 +35,6 @@ export default function Register() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const SERVICE_ID = "service_h6ptjp7";
-  const TEMPLATE_ID = "template_2hb217b";
-  const PUBLIC_KEY = "OYlVYfIRphM9lXZe7";
-
-  const generateOtp = () =>
-    Math.floor(100000 + Math.random() * 900000).toString();
 
   const isFormValid =
     firstName.trim() !== "" &&
@@ -102,7 +94,9 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      await axios.post(`${API_URL}/api/auth/register`, {
         firstname: firstName,
         lastname: lastName,
         kelas: Number(kelas?.value),
@@ -125,16 +119,19 @@ export default function Register() {
       // validasi pakai yup
       await emailSchema.validate({ email });
 
-      const generatedOtp = generateOtp();
-      setOtp(generatedOtp);
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-      await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        { to_email: email, otp: generatedOtp },
-        PUBLIC_KEY
-      );
+      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
+        email,
+      });
+
+      // Set OTP dari server response
+      const serverOtp = response.data.otp;
+      setOtp(serverOtp);
+
       setShowModal(true);
+      toast.success("OTP berhasil dikirim ke email!");
 
       // hapus error jika sukses
       setErrors((prev) => {
@@ -148,35 +145,41 @@ export default function Register() {
           ...prev,
           email: err.message,
         }));
+      } else if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Gagal mengirim OTP";
+        toast.error(errorMessage);
       } else {
         toast.error("Gagal mengirim OTP");
       }
     }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     if (timer > 0) return;
 
-    const newOtp = generateOtp();
-    setOtp(newOtp);
-    setOtpResetTrigger((prev) => prev + 1);
+    try {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-    emailjs
-      .send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        {
-          to_email: email,
-          otp: newOtp,
-        },
-        PUBLIC_KEY
-      )
-      .then(() => {
-        toast.success("OTP berhasil dikirim ulang!");
-      })
-      .catch(() => {
-        toast.error("Gagal mengirim ulang OTP");
+      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
+        email,
       });
+
+      const newOtp = response.data.otp;
+      setOtp(newOtp);
+      setOtpResetTrigger((prev) => prev + 1);
+
+      toast.success("OTP berhasil dikirim ulang!");
+    } catch (err: any) {
+      if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Gagal mengirim ulang OTP";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Gagal mengirim ulang OTP");
+      }
+    }
   };
 
   useEffect(() => {
