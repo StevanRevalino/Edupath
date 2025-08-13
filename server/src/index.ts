@@ -10,17 +10,41 @@ dotenv.config();
 
 const app = express();
 
-// Simple CORS configuration
-app.use(cors());
+// CORS configuration - specific origins for better compatibility
+const corsOpts: cors.CorsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://[::1]:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Origin",
+    "Accept",
+    "Cache-Control",
+  ],
+  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOpts));
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
-app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+// Listen on localhost for better compatibility
+app.listen(PORT, "localhost", async () => {
+  console.log(`Server running on localhost:${PORT}`);
+  console.log(`Access URL: http://localhost:${PORT}`);
   await seedDefaultAdmins();
 });
