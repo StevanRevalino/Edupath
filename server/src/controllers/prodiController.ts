@@ -4,6 +4,7 @@ import { ProdiService } from "../services/prodiService";
 const service = new ProdiService();
 
 export class ProdiController {
+  // API-based endpoints using PDDIKTI
   async list(req: Request, res: Response) {
     try {
       const { q, jenjang, bidang, page = "1", limit = "20" } = req.query as any;
@@ -36,40 +37,6 @@ export class ProdiController {
     }
   }
 
-  async getById(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id, 10);
-      if (isNaN(id))
-        return res.status(400).json({ message: "ID prodi tidak valid" });
-      const prodi = await service.getById(id);
-      res.json({ message: "Berhasil mengambil detail prodi", data: prodi });
-    } catch (e: any) {
-      const code = e.message.includes("tidak ditemukan") ? 404 : 500;
-      res.status(code).json({ message: e.message });
-    }
-  }
-
-  async getUniversitas(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id, 10);
-      if (isNaN(id))
-        return res.status(400).json({ message: "ID prodi tidak valid" });
-      const rows = await service.getUniversitas(id);
-      res.json({
-        message: "Berhasil mengambil universitas untuk prodi",
-        data: rows,
-        total: rows.length,
-      });
-    } catch (e: any) {
-      res
-        .status(500)
-        .json({
-          message: "Gagal mengambil universitas untuk prodi",
-          error: e.message,
-        });
-    }
-  }
-
   async getJenjangList(req: Request, res: Response) {
     try {
       const data = await service.getJenjangList();
@@ -82,6 +49,44 @@ export class ProdiController {
       res
         .status(500)
         .json({ message: "Gagal mengambil daftar jenjang", error: e.message });
+    }
+  }
+
+  async getProdiById(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ message: "ID prodi harus disediakan" });
+      }
+
+      const prodi = await service.getProdiById(id);
+      res.json({
+        message: "Berhasil mengambil detail prodi",
+        data: prodi,
+      });
+    } catch (e: any) {
+      const code = e.message.includes("tidak ditemukan") ? 404 : 500;
+      res.status(code).json({ message: e.message });
+    }
+  }
+
+  async searchProdiByName(req: Request, res: Response) {
+    try {
+      const { nama } = req.params;
+      if (!nama || nama.trim().length === 0) {
+        return res.status(400).json({ message: "Nama prodi harus disediakan" });
+      }
+
+      const data = await service.searchProdiByName(nama);
+      res.json({
+        message: `Berhasil mencari prodi dengan nama: ${nama}`,
+        data,
+        total: data.length,
+      });
+    } catch (e: any) {
+      res
+        .status(500)
+        .json({ message: "Gagal mencari prodi", error: e.message });
     }
   }
 }

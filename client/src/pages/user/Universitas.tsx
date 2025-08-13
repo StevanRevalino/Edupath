@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 type UniversitasItem = {
@@ -43,7 +42,6 @@ const API_BASE =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const Universitas: React.FC = () => {
-  const navigate = useNavigate();
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
