@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
+import { sendOtpEmail } from "../services/emailService";
 
 const authService = new AuthService();
 
@@ -94,6 +95,34 @@ export class AuthController {
       });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  }
+
+  async sendOtp(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          message: "Email wajib diisi",
+        });
+      }
+
+      // Generate OTP (6 digit)
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Send email using nodemailer
+      await sendOtpEmail(email, otp);
+
+      res.status(200).json({
+        message: "OTP berhasil dikirim ke email",
+        otp: otp, // In production, don't return OTP in response
+      });
+    } catch (error: any) {
+      console.error("Send OTP error:", error);
+      res.status(500).json({
+        message: "Gagal mengirim OTP",
+      });
     }
   }
 }
