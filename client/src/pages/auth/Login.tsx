@@ -5,6 +5,7 @@ import { ValidationError } from "yup";
 import ModalResetPassword from "../../components/ModalResetPassword";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,22 +29,13 @@ export default function Login() {
 
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
+        email,
+        password,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-
-        const errorMessage = data?.message || "Email atau password salah";
-
-        setServerError(errorMessage);
-        return;
-      }
-
-      const result = await res.json();
+      const result = res.data;
       localStorage.setItem("role", result.user.role);
       localStorage.setItem("token", result.token);
       console.log(result);
@@ -54,7 +46,7 @@ export default function Login() {
       } else {
         navigate("/home");
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ValidationError) {
         const newErrors: { email?: string; password?: string } = {};
         err.inner.forEach((e) => {
@@ -64,6 +56,10 @@ export default function Login() {
         });
         setErrors(newErrors);
         return;
+      } else if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Email atau password salah";
+        setServerError(errorMessage);
       } else {
         console.error("Login Error:", err);
         setServerError("Terjadi kesalahan saat login");

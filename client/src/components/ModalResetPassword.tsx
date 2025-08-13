@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../assets/warning-logo.png";
+import axios from "axios";
 
 interface Props {
   isOpen: boolean;
@@ -128,18 +129,12 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          otp: serverOtp,
-          newPassword,
-        }),
-      });
 
-      const data = await res.json();
-      if (!res.ok) return toast.error(data.message);
+      await axios.post(`${API_URL}/api/auth/forgot-password`, {
+        email,
+        otp: serverOtp,
+        newPassword,
+      });
 
       setSuccess(true);
       toast.success("Password berhasil direset!");
@@ -147,13 +142,20 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ValidationError) {
         const newErrors: { [key: string]: string } = {};
         err.inner.forEach((e) => {
           if (e.path) newErrors[e.path] = e.message;
         });
         setErrors(newErrors);
+      } else if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message ||
+          "Terjadi kesalahan saat reset password";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Terjadi kesalahan saat reset password");
       }
     }
   };
