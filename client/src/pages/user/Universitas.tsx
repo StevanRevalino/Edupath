@@ -102,6 +102,7 @@ const Universitas: React.FC = () => {
       const url = `${API_BASE}/api/universitas/${universityId}`;
       const res = await axios.get(url);
       const data = res.data?.data as UniversitasDetailType;
+      console.log("Universitas Detail:", data);
       setSelectedUniversitas(data);
     } catch (e: any) {
       const msg =
