@@ -7,7 +7,6 @@
 //     url      = env("DATABASE_URL")
 // }
 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,61 +18,17 @@ datasource db {
 }
 
 enum Role {
-    ADMIN // Guru BK/Admin
-    STUDENT // Murid
+  ADMIN // Guru BK/Admin
+  STUDENT // Murid
 }
 
 model User {
-    user_id    String   @id
-    firstname  String
-    lastname   String
-    email      String   @unique
-    password   String
-    role       Role     @default(STUDENT)
-    kelas      Int?
-    created_at DateTime @default(now())
-}
-
-model Universitas {
-  university_id  Int       @id
-  nama           String
-  npsn           String?
-  nama_singkat   String?
-  kode_pos       String?
-  telepon        String?
-  fax            String?
-  email          String?
-  alamat         String?
-  kota           String?
-  provinsi       String?
-  akreditasi     String?
-  status         String?
-  rank_qs        Float?
-  rank_country   Int?
-  ProdiPT        ProdiPT[] // Relasi ke program studi di universitas ini
-}
-
-model Prodi {
-  prodi_id       Int       @id
-  nama_prodi     String
-  jenjang        String
-  bidang         String?
-  keywords       String?
-  ProdiPT        ProdiPT[] // Relasi ke universitas yang punya prodi ini
-}
-
-model ProdiPT {
-  id               Int         @id @default(autoincrement())
-  prodi_id         Int
-  university_id    Int
-  akreditasi_prodi String?
-  ukt_min          Int?
-  ukt_max          Int?
-  link_prodi       String?
-
-  // Relasi
-  Prodi            Prodi       @relation(fields: [prodi_id], references: [prodi_id])
-  Universitas      Universitas @relation(fields: [university_id], references: [university_id])
-
-  @@unique([prodi_id, university_id]) // Satu prodi hanya sekali di satu universitas
+  user_id    String   @id
+  firstname  String
+  lastname   String
+  email      String   @unique
+  password   String
+  role       Role     @default(STUDENT)
+  kelas      Int?
+  created_at DateTime @default(now())
 }
