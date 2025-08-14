@@ -6,16 +6,6 @@ import {
 // const universitasRepository = new UniversitasRepository();
 
 export class UniversitasService {
-  async getAllUniversitas(): Promise<any[]> {
-    try {
-      // DB access disabled temporarily; use external search endpoint instead
-      throw new Error(
-        "Fitur DB dinonaktifkan. Gunakan endpoint /api/universitas/search/nama"
-      );
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil data universitas: ${error.message}`);
-    }
-  }
 
   async getUniversitasById(university_id: string): Promise<any> {
     try {

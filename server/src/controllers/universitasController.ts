@@ -4,22 +4,6 @@ import { UniversitasService } from "../services/universitasService";
 const universitasService = new UniversitasService();
 
 export class UniversitasController {
-  async getAllUniversitas(req: Request, res: Response) {
-    try {
-      const universitas = await universitasService.getAllUniversitas();
-      res.status(200).json({
-        message: "Berhasil mengambil data universitas",
-        data: universitas,
-        total: universitas.length,
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        message: "Gagal mengambil data universitas",
-        error: error.message,
-      });
-    }
-  }
-
   async getUniversitasById(req: Request, res: Response) {
     try {
       const { id } = req.params;

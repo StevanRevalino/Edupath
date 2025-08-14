@@ -4,12 +4,6 @@ import { UniversitasController } from "../controllers/universitasController";
 const router = Router();
 const universitasController = new UniversitasController();
 
-// GET /api/universitas - Get all universitas
-router.get(
-  "/",
-  universitasController.getAllUniversitas.bind(universitasController)
-);
-
 // GET /api/universitas/search/nama - Search universitas by name
 router.get(
   "/search/nama",
