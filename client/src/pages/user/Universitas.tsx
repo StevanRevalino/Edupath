@@ -1,4 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 type UniversitasItem = {
@@ -40,6 +47,7 @@ const API_BASE =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const Universitas: React.FC = () => {
+  const location = useLocation();
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -51,49 +59,6 @@ const Universitas: React.FC = () => {
   const controllerRef = useRef<AbortController | null>(null);
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
-
-  const search = useCallback(async (q: string) => {
-    if (!q.trim()) return;
-    // Cancel previous request if still in-flight
-    if (controllerRef.current) controllerRef.current.abort();
-    const ctrl = new AbortController();
-    controllerRef.current = ctrl;
-    setLoading(true);
-    setError("");
-    try {
-      const url = `${API_BASE}/api/universitas/search/nama`;
-      const res = await axios.get(url, {
-        params: { nama: q.trim() },
-        signal: ctrl.signal,
-      });
-      const data = (res.data?.data || []) as UniversitasItem[];
-      setResults(data);
-    } catch (e: any) {
-      if (axios.isCancel(e)) return; // silently ignore canceled
-      const msg =
-        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
-      setError(msg);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const onSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (canSearch) search(query);
-    },
-    [canSearch, query, search]
-  );
-
-  const onClear = useCallback(() => {
-    setQuery("");
-    setResults([]);
-    setError("");
-    setSelectedUniversitas(null);
-    setDetailError("");
-  }, []);
 
   const fetchUniversitasDetail = useCallback(async (universityId: string) => {
     setDetailLoading(true);
@@ -122,6 +87,75 @@ const Universitas: React.FC = () => {
     [fetchUniversitasDetail]
   );
 
+  const search = useCallback(
+    async (q: string, autoSelectExactMatch = false) => {
+      if (!q.trim()) return;
+      // Cancel previous request if still in-flight
+      if (controllerRef.current) controllerRef.current.abort();
+      const ctrl = new AbortController();
+      controllerRef.current = ctrl;
+      setLoading(true);
+      setError("");
+      try {
+        const url = `${API_BASE}/api/universitas/search/nama`;
+        const res = await axios.get(url, {
+          params: { nama: q.trim() },
+          signal: ctrl.signal,
+        });
+        const data = (res.data?.data || []) as UniversitasItem[];
+        setResults(data);
+
+        // Auto-select exact match if requested (from Home.tsx navigation)
+        if (autoSelectExactMatch && data.length > 0) {
+          const exactMatch = data.find(
+            (univ) => univ.nama.toLowerCase() === q.trim().toLowerCase()
+          );
+          if (exactMatch) {
+            // Automatically fetch detail for exact match
+            setTimeout(() => {
+              fetchUniversitasDetail(exactMatch.university_id);
+            }, 100);
+          }
+        }
+      } catch (e: any) {
+        if (axios.isCancel(e)) return; // silently ignore canceled
+        const msg =
+          e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+        setError(msg);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchUniversitasDetail]
+  );
+
+  const onSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (canSearch) search(query);
+    },
+    [canSearch, query, search]
+  );
+
+  const onClear = useCallback(() => {
+    setQuery("");
+    setResults([]);
+    setError("");
+    setSelectedUniversitas(null);
+    setDetailError("");
+  }, []);
+
+  // Handle selected university from Home.tsx navigation
+  useEffect(() => {
+    const selectedUniversityName = location.state?.selectedUniversity;
+    if (selectedUniversityName) {
+      // Set the query to the selected university name and search for it
+      setQuery(selectedUniversityName);
+      search(selectedUniversityName, true); // true = autoSelectExactMatch
+    }
+  }, [location.state, search]);
+
   // Function to clean province name by removing "Prov." prefix
   const cleanProvinceName = (provinsi: string | null | undefined) => {
     if (!provinsi) return "-";
@@ -147,8 +181,11 @@ const Universitas: React.FC = () => {
               <button
                 type="submit"
                 disabled={!canSearch || loading}
-                className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50"
+                className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[80px] justify-center"
               >
+                {loading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                )}
                 {loading ? "Mencari…" : "Cari"}
               </button>
               {query && (
@@ -174,7 +211,59 @@ const Universitas: React.FC = () => {
               </div>
             )}
 
-            {results.length > 0 && (
+            {/* Loading State */}
+            {loading && (
+              <div className="space-y-4">
+                {/* Skeleton Loading for Table */}
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2">Nama</th>
+                        <th className="px-4 py-2">Provinsi</th>
+                        <th className="px-4 py-2">Akreditasi</th>
+                        <th className="px-4 py-2">Email</th>
+                        <th className="px-4 py-2">Telepon</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((index) => (
+                        <tr key={index} className="border-t border-gray-100">
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-4 bg-gray-300 rounded w-3/4 mb-1"></div>
+                              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-3 bg-gray-300 rounded w-full"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-6 bg-gray-300 rounded-full w-12"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-3 bg-gray-300 rounded w-full"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {results.length > 0 && !loading && (
               <div className="rounded-lg border border-gray-200 overflow-hidden">
                 <div className="mb-2 text-sm text-gray-600">
                   <span className="inline-flex items-center">

@@ -1,4 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 type ProdiItem = {
@@ -37,6 +44,7 @@ const API_BASE =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const Jurusan: React.FC = () => {
+  const location = useLocation();
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -49,50 +57,6 @@ const Jurusan: React.FC = () => {
   const controllerRef = useRef<AbortController | null>(null);
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
-
-  const search = useCallback(async (q: string) => {
-    if (!q.trim()) return;
-    // Cancel previous request if still in-flight
-    if (controllerRef.current) controllerRef.current.abort();
-    const ctrl = new AbortController();
-    controllerRef.current = ctrl;
-    setLoading(true);
-    setError("");
-    try {
-      const url = `${API_BASE}/api/prodi/search/nama/${encodeURIComponent(
-        q.trim()
-      )}`;
-      const res = await axios.get(url, {
-        signal: ctrl.signal,
-      });
-      const data = (res.data?.data || []) as ProdiItem[];
-      setResults(data);
-    } catch (e: any) {
-      if (axios.isCancel(e)) return; // silently ignore canceled
-      const msg =
-        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
-      setError(msg);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const onSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (canSearch) search(query);
-    },
-    [canSearch, query, search]
-  );
-
-  const onClear = useCallback(() => {
-    setQuery("");
-    setResults([]);
-    setError("");
-    setSelectedProdi(null);
-    setDetailError("");
-  }, []);
 
   const fetchProdiDetail = useCallback(async (prodiId: string) => {
     setDetailLoading(true);
@@ -114,12 +78,82 @@ const Jurusan: React.FC = () => {
     }
   }, []);
 
+  const search = useCallback(
+    async (q: string, autoSelectExactMatch = false) => {
+      if (!q.trim()) return;
+      // Cancel previous request if still in-flight
+      if (controllerRef.current) controllerRef.current.abort();
+      const ctrl = new AbortController();
+      controllerRef.current = ctrl;
+      setLoading(true);
+      setError("");
+      try {
+        const url = `${API_BASE}/api/prodi/search/nama/${encodeURIComponent(
+          q.trim()
+        )}`;
+        const res = await axios.get(url, {
+          signal: ctrl.signal,
+        });
+        const data = (res.data?.data || []) as ProdiItem[];
+        setResults(data);
+
+        // Auto-select exact match if requested (from Home.tsx navigation)
+        if (autoSelectExactMatch && data.length > 0) {
+          const exactMatch = data.find(
+            (prodi) => prodi.nama_prodi.toLowerCase() === q.trim().toLowerCase()
+          );
+          if (exactMatch) {
+            // Automatically fetch detail for exact match
+            setTimeout(() => {
+              fetchProdiDetail(exactMatch.prodi_id);
+            }, 100);
+          }
+        }
+      } catch (e: any) {
+        if (axios.isCancel(e)) return; // silently ignore canceled
+        const msg =
+          e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+        setError(msg);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchProdiDetail]
+  );
+
+  const onSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (canSearch) search(query);
+    },
+    [canSearch, query, search]
+  );
+
+  const onClear = useCallback(() => {
+    setQuery("");
+    setResults([]);
+    setError("");
+    setSelectedProdi(null);
+    setDetailError("");
+  }, []);
+
   const handleProdiClick = useCallback(
     (prodiId: string) => {
       fetchProdiDetail(prodiId);
     },
     [fetchProdiDetail]
   );
+
+  // Handle selected major from Home.tsx navigation
+  useEffect(() => {
+    const selectedMajorName = location.state?.selectedMajor;
+    if (selectedMajorName) {
+      // Set the query to the selected major name and search for it
+      setQuery(selectedMajorName);
+      search(selectedMajorName, true); // true = autoSelectExactMatch
+    }
+  }, [location.state, search]);
 
   return (
     <div className="pt-16 px-4 sm:px-6 lg:px-8">
@@ -140,8 +174,11 @@ const Jurusan: React.FC = () => {
               <button
                 type="submit"
                 disabled={!canSearch || loading}
-                className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50"
+                className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[80px] justify-center"
               >
+                {loading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                )}
                 {loading ? "Mencari…" : "Cari"}
               </button>
               {query && (
@@ -168,8 +205,56 @@ const Jurusan: React.FC = () => {
               </div>
             )}
 
-            {results.length > 0 && (
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
+            {/* Loading State */}
+            {loading && (
+              <div className="space-y-4">
+                
+                {/* Skeleton Loading for Table */}
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2">Nama Program Studi</th>
+                        <th className="px-4 py-2">Jenjang</th>
+                        <th className="px-4 py-2">Universitas</th>
+                        <th className="px-4 py-2">Akreditasi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((index) => (
+                        <tr key={index} className="border-t border-gray-100">
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-4 bg-gray-300 rounded w-3/4 mb-1"></div>
+                              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-3 bg-gray-300 rounded w-full mb-1"></div>
+                              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="animate-pulse">
+                              <div className="h-6 bg-gray-300 rounded-full w-12"></div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {results.length > 0 && !loading && (
+              <div className="rounded-lg border border-gray-200 overflow-hidden relative">
                 <div className="mb-2 text-sm text-gray-600">
                   <span className="inline-flex items-center">
                     <svg

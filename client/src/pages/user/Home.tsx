@@ -1,7 +1,57 @@
 import { Plus } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  // Static data for better performance - no API calls
+  const allMajors = [
+    "Teknik Informatika",
+    "Sistem Informasi",
+    "Manajemen",
+    "Akuntansi",
+    "Teknik Sipil",
+    "Kedokteran",
+    "Psikologi",
+    "Hukum",
+    "Ekonomi",
+    "Arsitektur",
+    "Teknik Mesin",
+    "Farmasi",
+    "Teknik Elektro",
+    "Ilmu Komunikasi",
+    "Desain Komunikasi Visual",
+    "Matematika",
+    "Fisika",
+    "Kimia",
+    "Biologi",
+    "Sastra Inggris",
+  ];
+
+  const allUniversities = [
+    "Universitas Indonesia",
+    "Institut Teknologi Bandung",
+    "Universitas Gadjah Mada",
+    "Institut Teknologi Sepuluh Nopember",
+    "Universitas Bina Nusantara",
+    "Universitas Brawijaya",
+    "Universitas Diponegoro",
+    "Universitas Padjadjaran",
+    "Bina Nusantara",
+    "Universitas Trisakti",
+    "Universitas Pelita Harapan",
+    "Universitas Tarumanagara",
+    "Institut Pertanian Bogor",
+    "Universitas Sebelas Maret",
+    "Universitas Hasanuddin",
+    "Universitas Negeri Yogyakarta",
+    "Universitas Sumatera Utara",
+    "Universitas Andalas",
+    "Universitas Riau",
+    "Universitas Lampung",
+  ];
+
   const infoItems = [
     { label: "Tentang kami" },
     { label: "Apa itu tes minat & bakat?" },
@@ -11,173 +61,97 @@ const Home = () => {
     { label: "Info beasiswa" },
   ];
 
-  const historyTags = [
-    "Sistem Informasi",
-    "Akuntansi",
-    "Teknik Sipil",
-    "Food Tech",
-    "Manajemen",
-    "Arsitektur",
-    "Aktuaria",
-    "Pendidikan",
-    "Agroteknologi",
-    "Teknik Informatika",
-    "Psikologi",
-    "Kedokteran",
-    "Farmasi",
-    "Hukum",
-    "Ekonomi",
-    "Matematika",
-    "Fisika",
-    "Kimia",
-    "Biologi",
-    "Sastra Inggris",
-  ];
-
-  const testHistories = [
-    { date: "15 Jan 2024", major: "Computer Science", score: "95.5" },
-    { date: "28 Des 2023", major: "Sistem Informasi", score: "88.2" },
-    { date: "10 Nov 2023", major: "Teknik Informatika", score: "92.1" },
-    { date: "22 Okt 2023", major: "Manajemen", score: "78.9" },
-    { date: "05 Sep 2023", major: "Akuntansi", score: "85.7" },
-    { date: "22 Okt 2023", major: "Manajemen", score: "78.9" },
-    { date: "05 Sep 2023", major: "Akuntansi", score: "85.7" },
-  ];
-
-  // Dummy data untuk analytics
-  const analyticsData = {
-    totalTests: 12,
-    lastTestDate: "15 Jan 2024",
-    topRecommendation: {
-      major: "Computer Science",
-      percentage: 87,
-    },
-    lastTestNumber: 12,
-  };
-
-  // Dummy data untuk explore majors
-  const exploreMajors = [
-    "Sistem Informasi",
-    "Akuntansi",
-    "Teknik Sipil",
-    "Food Tech",
-    "Manajemen",
-    "Arsitektur",
-    "Aktuaria",
-    "Pendidikan",
-    "Agroteknologi",
-    "Teknik Informatika",
-    "Psikologi",
-    "Kedokteran",
-    "Farmasi",
-    "Hukum",
-    "Ekonomi",
-    "Matematika",
-    "Fisika",
-    "Kimia",
-    "Biologi",
-    "Sastra Inggris",
-  ];
-
-  // Dummy data untuk universitas
-  const universities = [
-    "Bina Nusantara",
-    "Univ. Pelita Harapan",
-    "Univ. Indonesia",
-    "Univ. Tarumanagara",
-    "Atma Jaya",
-    "Institut Teknologi Bandung",
-    "Univ. Gadjah Mada",
-    "Prasetiya Mulya",
-    "Univ. Airlangga",
-    "Univ. Brawijaya",
-    "Institut Teknologi Sepuluh Nopember",
-    "Univ. Diponegoro",
-    "Univ. Padjadjaran",
-    "Univ. Hasanuddin",
-    "Univ. Sebelas Maret",
-    "Univ. Negeri Yogyakarta",
-    "Institut Pertanian Bogor",
-    "Univ. Sumatera Utara",
-    "Univ. Andalas",
-    "Univ. Riau",
-  ];
+  // Dummy data untuk universitas - will be replaced by API data
+  const universities = allUniversities;
 
   const colorMap: Record<string, string> = {
-    Akuntansi: "bg-[#3C3782]",
-    Mikrobiologi: "bg-[#B31507]",
-    "Teknik Sipil": "bg-[#B7D200]",
-    Aktuaria: "bg-[#00B7F3]",
-    Manajemen: "bg-[#FF00E5]",
-    "Food Tech": "bg-[#F0544F]",
-    "Sistem Informasi": "bg-[#8B0000]",
-    Arsitektur: "bg-[#7C3AED]",
-    Pendidikan: "bg-[#F59E0B]",
-    Agroteknologi: "bg-[#EF4444]",
+    // Majors colors
     "Teknik Informatika": "bg-[#1E40AF]",
-    Psikologi: "bg-[#DC2626]",
+    "Sistem Informasi": "bg-[#8B0000]",
+    Manajemen: "bg-[#FF00E5]",
+    Akuntansi: "bg-[#3C3782]",
+    "Teknik Sipil": "bg-[#B7D200]",
     Kedokteran: "bg-[#059669]",
-    Farmasi: "bg-[#7C2D12]",
+    Psikologi: "bg-[#DC2626]",
     Hukum: "bg-[#1F2937]",
     Ekonomi: "bg-[#0891B2]",
+    Arsitektur: "bg-[#7C3AED]",
+    "Teknik Mesin": "bg-[#4B5563]",
+    Farmasi: "bg-[#7C2D12]",
+    "Teknik Elektro": "bg-[#991B1B]",
+    "Ilmu Komunikasi": "bg-[#7E22CE]",
+    "Desain Komunikasi Visual": "bg-[#EC4899]",
     Matematika: "bg-[#5B21B6]",
     Fisika: "bg-[#BE123C]",
     Kimia: "bg-[#047857]",
     Biologi: "bg-[#C2410C]",
-    "Sastra Inggris": "bg-[#7E22CE]",
+    "Sastra Inggris": "bg-[#6366F1]",
 
     // Universities colors
-    "Bina Nusantara": "bg-[#1E3A8A]",
-    "Univ. Pelita Harapan": "bg-[#7C2D12]",
-    "Univ. Indonesia": "bg-[#B91C1C]",
-    "Univ. Tarumanagara": "bg-[#059669]",
-    "Atma Jaya": "bg-[#7C3AED]",
+    "Universitas Indonesia": "bg-[#B91C1C]",
     "Institut Teknologi Bandung": "bg-[#BE123C]",
-    "Univ. Gadjah Mada": "bg-[#C2410C]",
-    "Prasetiya Mulya": "bg-[#0891B2]",
-    "Univ. Airlangga": "bg-[#5B21B6]",
-    "Univ. Brawijaya": "bg-[#047857]",
+    "Universitas Gadjah Mada": "bg-[#C2410C]",
     "Institut Teknologi Sepuluh Nopember": "bg-[#1F2937]",
-    "Univ. Diponegoro": "bg-[#DC2626]",
-    "Univ. Padjadjaran": "bg-[#F59E0B]",
-    "Univ. Hasanuddin": "bg-[#EF4444]",
-    "Univ. Sebelas Maret": "bg-[#8B0000]",
-    "Univ. Negeri Yogyakarta": "bg-[#B31507]",
+    "Universitas Bina Nusantara": "bg-[#1E3A8A]",
+    "Universitas Brawijaya": "bg-[#047857]",
+    "Universitas Diponegoro": "bg-[#DC2626]",
+    "Universitas Padjadjaran": "bg-[#F59E0B]",
+    "Bina Nusantara": "bg-[#1E40AF]",
+    "Universitas Trisakti": "bg-[#7C3AED]",
+    "Universitas Pelita Harapan": "bg-[#7C2D12]",
+    "Universitas Tarumanagara": "bg-[#059669]",
     "Institut Pertanian Bogor": "bg-[#3C3782]",
-    "Univ. Sumatera Utara": "bg-[#00B7F3]",
-    "Univ. Andalas": "bg-[#FF00E5]",
-    "Univ. Riau": "bg-[#F0544F]",
+    "Universitas Sebelas Maret": "bg-[#8B0000]",
+    "Universitas Hasanuddin": "bg-[#EF4444]",
+    "Universitas Negeri Yogyakarta": "bg-[#B31507]",
+    "Universitas Sumatera Utara": "bg-[#00B7F3]",
+    "Universitas Andalas": "bg-[#FF00E5]",
+    "Universitas Riau": "bg-[#F0544F]",
+    "Universitas Lampung": "bg-[#10B981]",
   };
 
   const [showAll, setShowAll] = useState(false);
-  const [showAllExplore, setShowAllExplore] = useState(false);
-  const [showAllUniversities, setShowAllUniversities] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [universitySearchQuery, setUniversitySearchQuery] = useState("");
 
+  // Use first 8 majors for history tags display
+  const historyTags = allMajors.slice(0, 8);
   const displayedTags = showAll ? historyTags : historyTags.slice(0, 5);
   const hasMore = historyTags.length > 5 && !showAll;
 
+  // Simple placeholder data for analytics (to be replaced with real API data later)
+  const totalTests = 0;
+  const topRecommendationMajor =
+    allMajors.length > 0 ? allMajors[0] : "Belum ada data";
+  const topRecommendationPercentage = 0;
+
   // Filter majors based on search query
-  const filteredExploreMajors = exploreMajors.filter((major) =>
+  const filteredExploreMajors = allMajors.filter((major) =>
     major.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const displayedExploreMajors = showAllExplore
-    ? filteredExploreMajors
-    : filteredExploreMajors.slice(0, 9);
-  const hasMoreExplore = filteredExploreMajors.length > 9 && !showAllExplore;
+  // Always show only 8 items for home page preview
+  const displayedExploreMajors = filteredExploreMajors.slice(0, 8);
+  const hasMoreExplore = filteredExploreMajors.length > 8;
 
   // Filter universities based on search query
   const filteredUniversities = universities.filter((university) =>
     university.toLowerCase().includes(universitySearchQuery.toLowerCase())
   );
 
-  const displayedUniversities = showAllUniversities
-    ? filteredUniversities
-    : filteredUniversities.slice(0, 8);
-  const hasMoreUniversities =
-    filteredUniversities.length > 8 && !showAllUniversities;
+  // Always show only 8 items for home page preview
+  const displayedUniversities = filteredUniversities.slice(0, 8);
+  const hasMoreUniversities = filteredUniversities.length > 8;
+
+  // Handle university click - navigate to universitas page with selected university
+  const handleUniversityClick = (universityName: string) => {
+    navigate("/universitas", { state: { selectedUniversity: universityName } });
+  };
+
+  // Handle major click - navigate to jurusan page with selected major
+  const handleMajorClick = (majorName: string) => {
+    navigate("/jurusan", { state: { selectedMajor: majorName } });
+  };
 
   return (
     <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
@@ -250,14 +224,14 @@ const Home = () => {
             <div className="flex gap-4">
               <div>
                 <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
-                  {analyticsData.totalTests}
+                  {totalTests}
                 </div>
                 <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
               </div>
               <div className="text-sm lg:text-base">
                 Kamu telah mengerjakan <br />
                 tes minat bakat sebanyak <br />
-                <strong>{analyticsData.totalTests} kali!</strong>
+                <strong>{totalTests} kali!</strong>
               </div>
             </div>
           </div>
@@ -296,11 +270,10 @@ const Home = () => {
             </div>
             <div className="text-end mt-4">
               <div className="text-lg lg:text-2xl font-bold">
-                ({analyticsData.topRecommendation.percentage}%) Jurusan paling
-                cocok
+                ({topRecommendationPercentage}%) Jurusan paling cocok
               </div>
               <div className="text-green-700 text-2xl lg:text-4xl font-bold">
-                {analyticsData.topRecommendation.major}
+                {topRecommendationMajor}
               </div>
               <div className="text-xs lg:text-sm mt-1">
                 Rekomendasi tertinggimu saat ini!
@@ -316,14 +289,14 @@ const Home = () => {
             <div className="flex gap-4">
               <div>
                 <div className="text-[#180085] text-4xl lg:text-6xl font-bold">
-                  {analyticsData.lastTestNumber}
+                  {totalTests}
                 </div>
                 <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
               </div>
               <div className="text-sm lg:text-base">
                 Terakhir kali kamu mengerjakan <br />
                 tes minat bakat adalah pada: <br />
-                <strong>{analyticsData.lastTestDate}.</strong>
+                <strong>Belum ada data.</strong>
               </div>
             </div>
           </div>
@@ -334,32 +307,14 @@ const Home = () => {
               Riwayat Tes
             </div>
             <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
-              {testHistories.slice(0, 4).map((test, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-3xl shadow-md p-3 lg:p-4 hover:shadow-lg transition-shadow
-                    cursor-pointer flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px]
-                    sm:max-w-[300px] lg:max-w-[280px]"
-                >
-                  <div className="text-xs lg:text-base font-bold mb-2">
-                    {test.date}
-                  </div>
-                  <div className="text-xs lg:text-sm mb-1">
-                    <div className="text-gray-700">Hasil penjurusan:</div>
-                    <div className="font-bold text-gray-900 text-sm lg:text-base">
-                      {test.major}
-                    </div>
-                  </div>
-                  <div className="text-xs lg:text-sm mb-1">
-                    <div className="text-gray-700 font-bold">
-                      Skor akhir: {test.score}
-                    </div>
-                  </div>
-                  <div className="text-xs lg:text-sm underline transition-colors">
-                    Lihat rincian &gt;&gt;
-                  </div>
+              <div className="bg-white rounded-3xl shadow-md p-3 lg:p-4 flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px] sm:max-w-[300px] lg:max-w-[280px] text-center">
+                <div className="text-gray-500 text-sm lg:text-base">
+                  Belum ada riwayat tes
                 </div>
-              ))}
+                <div className="text-xs lg:text-sm mt-2">
+                  Mulai tes pertama Anda untuk melihat riwayat di sini
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -392,6 +347,7 @@ const Home = () => {
                 {displayedExploreMajors.map((major, idx) => (
                   <span
                     key={idx}
+                    onClick={() => handleMajorClick(major)}
                     className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
                       colorMap[major] || "bg-[#888]"
                     }`}
@@ -400,14 +356,12 @@ const Home = () => {
                   </span>
                 ))}
                 {hasMoreExplore && (
-                  <>
-                    <button
-                      onClick={() => setShowAllExplore(true)}
-                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                    >
-                      Lihat lainnya...
-                    </button>
-                  </>
+                  <button
+                    onClick={() => navigate("/jurusan")}
+                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                  >
+                    Lihat semua jurusan...
+                  </button>
                 )}
                 {filteredExploreMajors.length === 0 && searchQuery && (
                   <div className="text-gray-500 text-sm lg:text-base italic">
@@ -473,6 +427,7 @@ const Home = () => {
                 {displayedUniversities.map((university, idx) => (
                   <span
                     key={idx}
+                    onClick={() => handleUniversityClick(university)}
                     className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
                       colorMap[university] || "bg-[#007B3A]"
                     }`}
@@ -481,14 +436,12 @@ const Home = () => {
                   </span>
                 ))}
                 {hasMoreUniversities && (
-                  <>
-                    <button
-                      onClick={() => setShowAllUniversities(true)}
-                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                    >
-                      Lihat lainnya...
-                    </button>
-                  </>
+                  <button
+                    onClick={() => navigate("/universitas")}
+                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                  >
+                    Lihat semua universitas...
+                  </button>
                 )}
                 {filteredUniversities.length === 0 && universitySearchQuery && (
                   <div className="text-gray-500 text-sm lg:text-base italic">
