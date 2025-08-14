@@ -4,18 +4,18 @@ import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
 import Tes from "./pages/user/Tes";
-// import type { JSX } from "react";
+import type { JSX } from "react";
 import Home from "./pages/user/Home";
 import Jurusan from "./pages/user/Jurusan";
 import Universitas from "./pages/user/Universitas";
 import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
 
-// function ProtectedRoute({ children }: { children: JSX.Element }) {
-//   const userId = localStorage.getItem("user_id");
-//   if (!userId) return <Navigate to="/login" />;
-//   return children;
-// }
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return <Navigate to="/login" />;
+  return children;
+}
 
 function App() {
   return (
@@ -27,9 +27,9 @@ function App() {
         <Route
           path="/dashboard-admin"
           element={
-            // <ProtectedRoute>
-            <AdminDashboard />
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
           }
         />
 
@@ -37,9 +37,9 @@ function App() {
         <Route
           path="/"
           element={
-            // <ProtectedRoute>
-            <UserDashboard />
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
           }
         >
           <Route index path="home" element={<Home />} />

@@ -36,6 +36,7 @@ export default function Login() {
       });
 
       const result = res.data;
+      localStorage.setItem("user_id", result.user.user_id);
       localStorage.setItem("role", result.user.role);
       localStorage.setItem("token", result.token);
       console.log(result);

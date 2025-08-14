@@ -101,6 +101,7 @@ const Jurusan: React.FC = () => {
       const url = `${API_BASE}/api/prodi/detail/${prodiId}`;
       const res = await axios.get(url);
       const data = res.data?.data as ProdiDetailType;
+      console.log("Prodi Detail:", data);
       setSelectedProdi(data);
     } catch (e: any) {
       const msg =
