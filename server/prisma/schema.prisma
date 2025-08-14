@@ -23,12 +23,29 @@ enum Role {
 }
 
 model User {
-  user_id    String   @id
-  firstname  String
-  lastname   String
-  email      String   @unique
-  password   String
-  role       Role     @default(STUDENT)
-  kelas      Int?
-  created_at DateTime @default(now())
+  user_id       String          @id
+  firstname     String
+  lastname      String
+  email         String          @unique
+  password      String
+  role          Role            @default(STUDENT)
+  kelas         Int?
+  created_at    DateTime        @default(now())
+  searchHistory SearchHistory[]
+}
+
+enum SearchType {
+  PRODI
+  UNIVERSITAS
+}
+
+model SearchHistory {
+  id         String     @id @default(cuid())
+  user_id    String?
+  query      String
+  type       SearchType
+  created_at DateTime   @default(now())
+  user       User?      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id, type, created_at])
 }

@@ -40,6 +40,13 @@ type ProdiDetailType = {
   deskripsi?: string | null;
 };
 
+type SearchHistoryItem = {
+  id: string;
+  query: string;
+  type: string;
+  created_at: string;
+};
+
 const API_BASE =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
@@ -54,9 +61,72 @@ const Jurusan: React.FC = () => {
   );
   const [detailLoading, setDetailLoading] = useState<boolean>(false);
   const [detailError, setDetailError] = useState<string>("");
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
   const controllerRef = useRef<AbortController | null>(null);
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
+
+  // Fetch search history from localStorage
+  const fetchSearchHistory = useCallback(async () => {
+    try {
+      const stored = localStorage.getItem("search-history-prodi");
+      if (stored) {
+        const history = JSON.parse(stored) as SearchHistoryItem[];
+        // Sort by created_at desc and take latest 5
+        const sortedHistory = history
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+          .slice(0, 5);
+        setSearchHistory(sortedHistory);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch search history:", e);
+    }
+  }, []);
+
+  // Save search to localStorage
+  const saveSearchHistory = useCallback(async (searchQuery: string) => {
+    try {
+      const stored = localStorage.getItem("search-history-prodi");
+      let history: SearchHistoryItem[] = [];
+
+      if (stored) {
+        history = JSON.parse(stored);
+      }
+
+      // Check if query already exists
+      const existingIndex = history.findIndex(
+        (item) => item.query.toLowerCase() === searchQuery.toLowerCase()
+      );
+
+      if (existingIndex >= 0) {
+        // Update timestamp and move to front
+        history[existingIndex].created_at = new Date().toISOString();
+        const item = history.splice(existingIndex, 1)[0];
+        history.unshift(item);
+      } else {
+        // Add new search to front
+        const newItem: SearchHistoryItem = {
+          id: Date.now().toString(),
+          query: searchQuery,
+          type: "PRODI",
+          created_at: new Date().toISOString(),
+        };
+        history.unshift(newItem);
+      }
+
+      // Keep only last 10 searches
+      history = history.slice(0, 10);
+
+      localStorage.setItem("search-history-prodi", JSON.stringify(history));
+    } catch (e) {
+      console.warn("Failed to save search history:", e);
+    }
+  }, []);
 
   const fetchProdiDetail = useCallback(async (prodiId: string) => {
     setDetailLoading(true);
@@ -87,6 +157,7 @@ const Jurusan: React.FC = () => {
       controllerRef.current = ctrl;
       setLoading(true);
       setError("");
+      setShowHistory(false); // Hide history when searching
       try {
         const url = `${API_BASE}/api/prodi/search/nama/${encodeURIComponent(
           q.trim()
@@ -96,6 +167,12 @@ const Jurusan: React.FC = () => {
         });
         const data = (res.data?.data || []) as ProdiItem[];
         setResults(data);
+
+        // Save search to history (don't await to avoid blocking)
+        saveSearchHistory(q.trim());
+
+        // Refresh search history after saving
+        setTimeout(() => fetchSearchHistory(), 500);
 
         // Auto-select exact match if requested (from Home.tsx navigation)
         if (autoSelectExactMatch && data.length > 0) {
@@ -119,7 +196,7 @@ const Jurusan: React.FC = () => {
         setLoading(false);
       }
     },
-    [fetchProdiDetail]
+    [fetchProdiDetail, saveSearchHistory, fetchSearchHistory]
   );
 
   const onSubmit = useCallback(
@@ -136,6 +213,75 @@ const Jurusan: React.FC = () => {
     setError("");
     setSelectedProdi(null);
     setDetailError("");
+    setShowHistory(false);
+  }, []);
+
+  const handleInputFocus = useCallback(() => {
+    if (!query.trim() && searchHistory.length > 0) {
+      setShowHistory(true);
+    }
+  }, [query, searchHistory]);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+
+      // Show history dropdown if input is empty or very short
+      if (!value.trim() && searchHistory.length > 0) {
+        setShowHistory(true);
+      } else {
+        setShowHistory(false);
+      }
+    },
+    [searchHistory]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Hide history on Escape
+      if (e.key === "Escape") {
+        setShowHistory(false);
+      }
+      // Show history on ArrowDown when input is empty
+      if (e.key === "ArrowDown" && !query.trim() && searchHistory.length > 0) {
+        setShowHistory(true);
+      }
+    },
+    [query, searchHistory]
+  );
+
+  const handleInputBlur = useCallback(() => {
+    // Delay hiding to allow clicks on history items
+    setTimeout(() => setShowHistory(false), 200);
+  }, []);
+
+  const handleHistoryClick = useCallback(
+    (historyQuery: string) => {
+      setQuery(historyQuery);
+      setShowHistory(false);
+      search(historyQuery);
+    },
+    [search]
+  );
+
+  const clearAllHistory = useCallback(() => {
+    localStorage.removeItem("search-history-prodi");
+    setSearchHistory([]);
+  }, []);
+
+  const removeHistoryItem = useCallback((itemId: string) => {
+    try {
+      const stored = localStorage.getItem("search-history-prodi");
+      if (stored) {
+        const history = JSON.parse(stored) as SearchHistoryItem[];
+        const filtered = history.filter((item) => item.id !== itemId);
+        localStorage.setItem("search-history-prodi", JSON.stringify(filtered));
+        setSearchHistory(filtered);
+      }
+    } catch (e) {
+      console.warn("Failed to remove history item:", e);
+    }
   }, []);
 
   const handleProdiClick = useCallback(
@@ -155,6 +301,11 @@ const Jurusan: React.FC = () => {
     }
   }, [location.state, search]);
 
+  // Fetch search history when component mounts
+  useEffect(() => {
+    fetchSearchHistory();
+  }, [fetchSearchHistory]);
+
   return (
     <div className="pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -163,40 +314,240 @@ const Jurusan: React.FC = () => {
         <div className="flex gap-6">
           {/* Left Side - Search Panel */}
           <div className="flex-1">
-            <form onSubmit={onSubmit} className="flex gap-2 mb-6">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ketik minimal 2 huruf nama program studi…"
-                className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="submit"
-                disabled={!canSearch || loading}
-                className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[80px] justify-center"
-              >
-                {loading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                )}
-                {loading ? "Mencari…" : "Cari"}
-              </button>
-              {query && (
+            <div className="relative">
+              <form onSubmit={onSubmit} className="flex gap-2 mb-6">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  placeholder="Ketik minimal 2 huruf nama program studi…"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <button
-                  type="button"
-                  onClick={onClear}
-                  className="rounded-md border border-gray-300 px-3 py-2"
+                  type="submit"
+                  disabled={!canSearch || loading}
+                  className="rounded-md bg-blue-600 text-white px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[80px] justify-center"
                 >
-                  Hapus
+                  {loading && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  {loading ? "Mencari…" : "Cari"}
                 </button>
-              )}
-            </form>
+                {query && (
+                  <button
+                    type="button"
+                    onClick={onClear}
+                    className="rounded-md border border-gray-300 px-3 py-2"
+                  >
+                    Hapus
+                  </button>
+                )}
+              </form>
 
-            {!query && (
-              <p className="text-gray-500 text-sm mb-4">
-                Mulai dengan mengetik nama program studi, misalnya: "Teknik
-                Informatika".
-              </p>
+              {/* Search History Dropdown */}
+              {showHistory && searchHistory.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                  <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                    <p className="text-sm text-gray-600 font-medium">
+                      Pencarian Terakhir
+                    </p>
+                    <button
+                      onClick={clearAllHistory}
+                      className="text-xs text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Hapus Semua
+                    </button>
+                  </div>
+                  <div className="py-1">
+                    {searchHistory.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center hover:bg-blue-50 group"
+                      >
+                        <button
+                          onClick={() => handleHistoryClick(item.query)}
+                          className="flex-1 px-3 py-2 text-left flex items-center gap-2 text-sm"
+                        >
+                          <svg
+                            className="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span className="text-gray-700">{item.query}</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeHistoryItem(item.id);
+                          }}
+                          className="px-2 py-2 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Hapus dari riwayat"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Popular Search Tags */}
+            {!query && !loading && searchHistory.length === 0 && (
+              <div className="mb-6">
+                <p className="text-sm text-gray-600 mb-3">Pencarian populer:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    {
+                      label: "Sistem Informasi",
+                      color: "bg-red-100 text-red-800",
+                      icon: "💻",
+                    },
+                    {
+                      label: "Teknik Sipil",
+                      color: "bg-blue-100 text-blue-800",
+                      icon: "🏗️",
+                    },
+                    {
+                      label: "Pertanian",
+                      color: "bg-green-100 text-green-800",
+                      icon: "🌱",
+                    },
+                    {
+                      label: "Arsitektur",
+                      color: "bg-yellow-100 text-yellow-800",
+                      icon: "🏛️",
+                    },
+                    {
+                      label: "Akuntansi",
+                      color: "bg-purple-100 text-purple-800",
+                      icon: "📊",
+                    },
+                    {
+                      label: "Food Tech",
+                      color: "bg-green-100 text-green-800",
+                      icon: "🍽️",
+                    },
+                    {
+                      label: "Manajemen",
+                      color: "bg-pink-100 text-pink-800",
+                      icon: "📈",
+                    },
+                  ].map((tag, index) => (
+                    <button
+                      key={tag.label}
+                      onClick={() => handleHistoryClick(tag.label)}
+                      className={`px-3 py-2 rounded-full text-xs font-medium hover:opacity-80 hover:scale-105 transition-all duration-200 flex items-center gap-1 animate-fade-in ${tag.color}`}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <span className="text-sm">{tag.icon}</span>
+                      {tag.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Search History Tags */}
+            {!query && !loading && searchHistory.length > 0 && (
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-sm text-gray-600">Pencarian terakhir:</p>
+                  <button
+                    onClick={clearAllHistory}
+                    className="text-xs text-gray-400 hover:text-red-600 font-medium transition-colors"
+                  >
+                    Hapus semua
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {searchHistory.slice(0, 7).map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="group relative animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <button
+                        onClick={() => handleHistoryClick(item.query)}
+                        className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-all duration-200 flex items-center gap-1 group-hover:pr-8"
+                      >
+                        <svg
+                          className="w-3 h-3 text-gray-500 group-hover:text-blue-600 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {item.query}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeHistoryItem(item.id);
+                        }}
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full bg-gray-300 hover:bg-red-500 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center"
+                        title="Hapus dari riwayat"
+                      >
+                        <svg
+                          className="w-2 h-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!query && searchHistory.length === 0 && !loading && (
+              <div className="text-center py-4">
+                <p className="text-gray-500 text-sm mb-4">
+                  Mulai dengan mengetik nama program studi atau pilih dari
+                  pencarian populer di atas.
+                </p>
+                <div className="text-xs text-gray-400">
+                  💡 Tips: Riwayat pencarian akan tersimpan untuk memudahkan
+                  pencarian berikutnya
+                </div>
+              </div>
             )}
 
             {error && (
@@ -208,7 +559,6 @@ const Jurusan: React.FC = () => {
             {/* Loading State */}
             {loading && (
               <div className="space-y-4">
-                
                 {/* Skeleton Loading for Table */}
                 <div className="rounded-lg border border-gray-200 overflow-hidden">
                   <table className="w-full text-left text-sm">
