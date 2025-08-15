@@ -27,7 +27,7 @@ export class LocalDataService {
             },
           },
         },
-        take: limit,
+        // Remove take here, apply limit after transformation
       });
 
       // Transform to match API format
@@ -51,7 +51,8 @@ export class LocalDataService {
         }))
       );
 
-      return transformedResults;
+      // Apply limit after transformation
+      return transformedResults.slice(0, limit);
     } catch (error) {
       console.error("Error searching prodi locally:", error);
       throw error;

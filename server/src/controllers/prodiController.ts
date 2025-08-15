@@ -111,8 +111,8 @@ export class ProdiController {
       // } catch (apiError) {
       //   console.warn("API failed, trying local database:", apiError);
 
-      // Use local database (from CSV dataset)
-      const localData = await localService.searchProdiLocal(nama);
+      // Use local database (from CSV dataset) with limit 15
+      const localData = await localService.searchProdiLocal(nama, 15);
       res.json({
         message: `Berhasil mencari prodi dengan nama: ${nama} (dataset lokal)`,
         data: localData,
