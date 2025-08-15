@@ -13,9 +13,6 @@ router.get("/detail/:id", controller.getProdiById.bind(controller));
 // GET /api/prodi/jenjang - Get list of available jenjang (S1, D3, D4)
 router.get("/jenjang", controller.getJenjangList.bind(controller));
 
-// GET /api/prodi/local/stats - Get local database statistics
-router.get("/local/stats", controller.getLocalDataStats.bind(controller));
-
 // GET /api/prodi - List prodi with filters using PDDIKTI API
 router.get("/", controller.list.bind(controller));
 

@@ -126,20 +126,4 @@ export class ProdiController {
         .json({ message: "Gagal mencari prodi", error: e.message });
     }
   }
-
-  // Local data endpoints
-  async getLocalDataStats(req: Request, res: Response) {
-    try {
-      const stats = await localService.getLocalDataStats();
-      res.json({
-        message: "Berhasil mengambil statistik data lokal",
-        data: stats,
-      });
-    } catch (e: any) {
-      res.status(500).json({
-        message: "Gagal mengambil statistik data lokal",
-        error: e.message,
-      });
-    }
-  }
 }
