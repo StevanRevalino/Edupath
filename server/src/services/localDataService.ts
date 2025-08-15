@@ -263,58 +263,179 @@ export class LocalDataService {
   // Search universitas from local database
   async searchUniversitasLocal(query: string, limit: number = 20) {
     try {
-      const results = await prisma.localUniversitas.findMany({
-        where: {
-          OR: [
-            {
-              nama: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-            {
-              nama_singkat: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-        include: {
-          prodi_pt: {
-            include: {
-              prodi: true,
-            },
-          },
-        },
-        take: limit,
-      });
+      // Normalize query: trim, lowercase, split into words
+      const normalizedQuery = query.trim().toLowerCase();
+      const queryWords = normalizedQuery
+        .split(/\s+/)
+        .filter((word) => word.length >= 2);
 
-      // Transform to match API format
-      const transformedResults = results.map((univ) => ({
-        university_id: univ.university_id.toString(),
-        nama: univ.nama,
-        npsn: univ.npsn,
-        nama_singkat: univ.nama_singkat,
-        kode_pos: univ.kode_pos,
-        telepon: univ.telepon,
-        fax: univ.fax,
-        email: univ.email,
-        alamat: univ.alamat,
-        kota: univ.kota,
-        provinsi: univ.provinsi,
-        akreditasi: univ.akreditasi,
-        status: univ.status,
-        rank_qs: univ.rank_qs,
-        rank_country: univ.rank_country,
-        jumlah_prodi: univ.prodi_pt.length,
-      }));
+      // If single word or very short, use simple search
+      if (queryWords.length <= 1) {
+        return this.simpleUniversitasSearch(normalizedQuery, limit);
+      }
 
-      return transformedResults;
+      // Multi-word search with intelligent matching
+      return this.multiWordUniversitasSearch(queryWords, limit);
     } catch (error) {
       console.error("Error searching universitas locally:", error);
       throw error;
     }
+  }
+
+  // Simple search for single words (universitas)
+  private async simpleUniversitasSearch(query: string, limit: number) {
+    const results = await prisma.localUniversitas.findMany({
+      where: {
+        OR: [
+          {
+            nama: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            nama_singkat: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            kota: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            provinsi: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      include: {
+        prodi_pt: {
+          include: {
+            prodi: true,
+          },
+        },
+      },
+      take: limit,
+    });
+
+    return this.transformUniversitasResults(results);
+  }
+
+  // Multi-word search with intelligent matching (universitas)
+  private async multiWordUniversitasSearch(
+    queryWords: string[],
+    limit: number
+  ) {
+    // Get all potential matches
+    const allResults = await prisma.localUniversitas.findMany({
+      include: {
+        prodi_pt: {
+          include: {
+            prodi: true,
+          },
+        },
+      },
+    });
+
+    // Score and filter results
+    const scoredResults = [];
+
+    for (const univ of allResults) {
+      let score = 0;
+      const univName = univ.nama.toLowerCase();
+      const univShortName = univ.nama_singkat?.toLowerCase() || "";
+      const kota = univ.kota?.toLowerCase() || "";
+      const provinsi = univ.provinsi?.toLowerCase() || "";
+
+      // Calculate score based on word matches
+      for (const word of queryWords) {
+        // Special handling for common university nicknames/shortcuts
+        if (word === "binus" && univName.includes("bina nusantara")) {
+          score += 20; // Very high score for nickname match
+          continue;
+        }
+        if (word === "ui" && univName.includes("universitas indonesia")) {
+          score += 20;
+          continue;
+        }
+        if (word === "itb" && univName.includes("teknologi bandung")) {
+          score += 20;
+          continue;
+        }
+        if (word === "ugm" && univName.includes("gadjah mada")) {
+          score += 20;
+          continue;
+        }
+        if (word === "its" && univName.includes("teknologi sepuluh")) {
+          score += 20;
+          continue;
+        }
+        if (word === "unair" && univName.includes("airlangga")) {
+          score += 20;
+          continue;
+        }
+
+        // Higher score for exact matches in university name
+        if (univName.includes(word)) {
+          score += 10;
+        }
+        // Medium score for short name matches
+        if (univShortName.includes(word)) {
+          score += 8;
+        }
+        // Lower score for city/province matches
+        if (kota.includes(word) || provinsi.includes(word)) {
+          score += 3;
+        }
+        // Bonus for multiple word matches
+        if (score > 10) {
+          score += 2;
+        }
+      }
+
+      // Only include results that match at least one word
+      if (score > 0) {
+        scoredResults.push({
+          univ,
+          score,
+        });
+      }
+    }
+
+    // Sort by score (highest first) and transform
+    const sortedResults = scoredResults
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => item.univ);
+
+    return this.transformUniversitasResults(sortedResults);
+  }
+
+  // Transform universitas results to API format
+  private transformUniversitasResults(results: any[]) {
+    return results.map((univ) => ({
+      university_id: univ.university_id.toString(),
+      nama: univ.nama,
+      npsn: univ.npsn,
+      nama_singkat: univ.nama_singkat,
+      kode_pos: univ.kode_pos,
+      telepon: univ.telepon,
+      fax: univ.fax,
+      email: univ.email,
+      alamat: univ.alamat,
+      kota: univ.kota,
+      provinsi: univ.provinsi,
+      akreditasi: univ.akreditasi,
+      status: univ.status,
+      rank_qs: univ.rank_qs,
+      rank_country: univ.rank_country,
+      jumlah_prodi: univ.prodi_pt.length,
+    }));
   }
 
   // Get universitas detail from local database

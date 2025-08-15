@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { UniversitasService } from "../services/universitasService";
+import { LocalDataService } from "../services/localDataService";
 
 const universitasService = new UniversitasService();
+const localService = new LocalDataService();
 
 export class UniversitasController {
   async getUniversitasById(req: Request, res: Response) {
@@ -45,6 +47,12 @@ export class UniversitasController {
         });
       }
 
+      if (nama.trim().length < 2) {
+        return res.status(400).json({
+          message: "Nama universitas harus minimal 2 karakter",
+        });
+      }
+
       // TODO: Uncomment when API is ready
       // try {
       //   // Try API first
@@ -58,13 +66,16 @@ export class UniversitasController {
       // } catch (apiError) {
       //   console.warn("API failed for universitas search:", apiError);
 
-      // Use local database (from CSV dataset) - but not implemented yet
+      // Use local database (from CSV dataset) with smart search
+      const localData = await localService.searchUniversitasLocal(
+        nama.trim(),
+        15
+      );
       res.status(200).json({
-        message: `Pencarian universitas: "${nama}" (dataset lokal - belum diimplementasi)`,
-        data: [],
-        total: 0,
+        message: `Berhasil mencari universitas dengan nama: ${nama.trim()} (dataset lokal)`,
+        data: localData,
+        total: localData.length,
         source: "local",
-        note: "Local universitas search akan diimplementasi jika diperlukan",
       });
       // }
     } catch (error: any) {

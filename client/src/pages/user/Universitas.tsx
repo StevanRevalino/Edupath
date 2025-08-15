@@ -179,7 +179,7 @@ const Universitas: React.FC = () => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ketik minimal 2 huruf nama universitas…"
+                placeholder="Cari universitas (mis: Binus Jakarta, UI Depok, ITB Bandung)…"
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -204,8 +204,67 @@ const Universitas: React.FC = () => {
             </form>
 
             {!query && (
+              <div className="mb-6">
+                <p className="text-sm text-gray-600 mb-3">Pencarian populer:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    {
+                      label: "UGM",
+                      color: "bg-red-100 text-red-800",
+                      icon: "🎓",
+                    },
+                    {
+                      label: "UI Depok",
+                      color: "bg-blue-100 text-blue-800",
+                      icon: "🏛️",
+                    },
+                    {
+                      label: "ITB Bandung",
+                      color: "bg-green-100 text-green-800",
+                      icon: "⚙️",
+                    },
+                    {
+                      label: "Binus Jakarta",
+                      color: "bg-purple-100 text-purple-800",
+                      icon: "💼",
+                    },
+                    {
+                      label: "ITS Surabaya",
+                      color: "bg-yellow-100 text-yellow-800",
+                      icon: "🔬",
+                    },
+                    {
+                      label: "Unair",
+                      color: "bg-pink-100 text-pink-800",
+                      icon: "⚕️",
+                    },
+                    {
+                      label: "UNS Solo",
+                      color: "bg-indigo-100 text-indigo-800",
+                      icon: "📚",
+                    },
+                  ].map((tag, index) => (
+                    <button
+                      key={tag.label}
+                      onClick={() => {
+                        setQuery(tag.label);
+                        search(tag.label);
+                      }}
+                      className={`px-3 py-2 rounded-full text-xs font-medium hover:opacity-80 hover:scale-105 transition-all duration-200 flex items-center gap-1 animate-fade-in ${tag.color}`}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <span className="text-sm">{tag.icon}</span>
+                      {tag.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!query && (
               <p className="text-gray-500 text-sm mb-4">
-                Mulai dengan mengetik nama universitas, misalnya: "Gadjah Mada".
+                Mulai dengan mengetik nama universitas atau pilih dari pencarian
+                populer di atas.
               </p>
             )}
 
