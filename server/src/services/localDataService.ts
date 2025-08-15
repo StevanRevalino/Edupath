@@ -20,7 +20,9 @@ export class LocalDataService {
       });
 
       if (!universitas) {
-        throw new Error(`Universitas dengan ID ${universityId} tidak ditemukan`);
+        throw new Error(
+          `Universitas dengan ID ${universityId} tidak ditemukan`
+        );
       }
 
       // Transform to match expected format
@@ -45,7 +47,9 @@ export class LocalDataService {
         akreditasi: universitas.akreditasi,
         status_akreditasi: universitas.status,
         rank_qs: universitas.rank_qs ? parseFloat(universitas.rank_qs) : null,
-        rank_country: universitas.rank_country ? parseFloat(universitas.rank_country) : null,
+        rank_country: universitas.rank_country
+          ? parseFloat(universitas.rank_country)
+          : null,
       };
     } catch (error) {
       console.error("Error getting universitas by ID:", error);
@@ -536,23 +540,6 @@ export class LocalDataService {
       return transformedResult;
     } catch (error) {
       console.error("Error getting universitas detail locally:", error);
-      throw error;
-    }
-  }
-
-  // Get database statistics
-  async getLocalDataStats() {
-    try {
-      const stats = {
-        universities: await prisma.localUniversitas.count(),
-        prodi: await prisma.localProdi.count(),
-        relations: await prisma.localProdiPT.count(),
-        last_updated: new Date(),
-      };
-
-      return stats;
-    } catch (error) {
-      console.error("Error getting local data stats:", error);
       throw error;
     }
   }
