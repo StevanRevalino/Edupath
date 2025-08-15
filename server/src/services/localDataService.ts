@@ -410,7 +410,7 @@ export class LocalDataService {
       for (const word of queryWords) {
         // Special handling for common university nicknames/shortcuts
         if (word === "binus" && univName.includes("bina nusantara")) {
-          score += 20; // Very high score for nickname match
+          score += 20;
           continue;
         }
         if (word === "ui" && univName.includes("universitas indonesia")) {
