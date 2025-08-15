@@ -325,7 +325,7 @@ const Jurusan: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
-                  placeholder="Ketik minimal 2 huruf nama program studi…"
+                  placeholder="Cari program studi atau universitas (mis: Film Binus, Informatika ITB, Akuntansi)…"
                   className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
@@ -434,24 +434,24 @@ const Jurusan: React.FC = () => {
                       icon: "🏗️",
                     },
                     {
-                      label: "Pertanian",
-                      color: "bg-green-100 text-green-800",
-                      icon: "🌱",
+                      label: "Film Binus",
+                      color: "bg-purple-100 text-purple-800",
+                      icon: "�",
                     },
                     {
-                      label: "Arsitektur",
-                      color: "bg-yellow-100 text-yellow-800",
-                      icon: "🏛️",
+                      label: "Informatika ITB",
+                      color: "bg-green-100 text-green-800",
+                      icon: "💻",
                     },
                     {
                       label: "Akuntansi",
-                      color: "bg-purple-100 text-purple-800",
+                      color: "bg-yellow-100 text-yellow-800",
                       icon: "📊",
                     },
                     {
-                      label: "Food Tech",
-                      color: "bg-green-100 text-green-800",
-                      icon: "🍽️",
+                      label: "Kedokteran",
+                      color: "bg-red-100 text-red-800",
+                      icon: "⚕️",
                     },
                     {
                       label: "Manajemen",

@@ -136,12 +136,10 @@ export class ProdiController {
         data: stats,
       });
     } catch (e: any) {
-      res
-        .status(500)
-        .json({
-          message: "Gagal mengambil statistik data lokal",
-          error: e.message,
-        });
+      res.status(500).json({
+        message: "Gagal mengambil statistik data lokal",
+        error: e.message,
+      });
     }
   }
 }
