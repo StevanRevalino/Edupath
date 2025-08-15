@@ -16,9 +16,8 @@ export class UniversitasController {
         });
       }
 
-      const universitas = await universitasService.getUniversitasById(
-        id.trim()
-      );
+      // Use local data service instead of external API
+      const universitas = await localService.getUniversitasById(id.trim());
       res.status(200).json({
         message: "Berhasil mengambil data universitas",
         data: universitas,

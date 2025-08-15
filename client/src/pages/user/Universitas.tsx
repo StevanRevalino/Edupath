@@ -351,41 +351,6 @@ const Universitas: React.FC = () => {
                     </svg>
                     Klik pada universitas untuk melihat detail
                   </span>
-                  {dataSource && (
-                    <span className="inline-flex items-center text-xs">
-                      {dataSource === "api" ? (
-                        <>
-                          <svg
-                            className="w-3 h-3 mr-1 text-green-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="text-green-600">Data PDDIKTI</span>
-                        </>
-                      ) : dataSource === "local" ? (
-                        <>
-                          <svg
-                            className="w-3 h-3 mr-1 text-blue-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="text-blue-600">Data Lokal</span>
-                        </>
-                      ) : null}
-                    </span>
-                  )}
                 </div>
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-50">

@@ -3,6 +3,56 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export class LocalDataService {
+  // Get university detail by ID from local database
+  async getUniversitasById(universityId: string) {
+    try {
+      const universitas = await prisma.localUniversitas.findUnique({
+        where: {
+          university_id: parseInt(universityId),
+        },
+        include: {
+          prodi_pt: {
+            include: {
+              prodi: true,
+            },
+          },
+        },
+      });
+
+      if (!universitas) {
+        throw new Error(`Universitas dengan ID ${universityId} tidak ditemukan`);
+      }
+
+      // Transform to match expected format
+      return {
+        university_id: universitas.university_id.toString(),
+        nama: universitas.nama,
+        nama_singkat: universitas.nama_singkat,
+        kelompok: null, // Not available in local database
+        pembina: null, // Not available in local database
+        alamat: universitas.alamat,
+        kecamatan: null, // Not available in local database
+        kota: universitas.kota,
+        provinsi: universitas.provinsi,
+        kode_pos: universitas.kode_pos,
+        lintang: null, // Not available in local database
+        bujur: null, // Not available in local database
+        email: universitas.email,
+        telepon: universitas.telepon,
+        fax: universitas.fax,
+        website: null, // Not available in local database
+        tanggal_berdiri: null, // Not available in local database
+        akreditasi: universitas.akreditasi,
+        status_akreditasi: universitas.status,
+        rank_qs: universitas.rank_qs ? parseFloat(universitas.rank_qs) : null,
+        rank_country: universitas.rank_country ? parseFloat(universitas.rank_country) : null,
+      };
+    } catch (error) {
+      console.error("Error getting universitas by ID:", error);
+      throw error;
+    }
+  }
+
   // Search prodi from local database
   async searchProdiLocal(query: string, limit: number = 20) {
     try {
