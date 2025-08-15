@@ -45,14 +45,28 @@ export class UniversitasController {
         });
       }
 
-      const universitas = await universitasService.searchUniversitasByName(
-        nama
-      );
+      // TODO: Uncomment when API is ready
+      // try {
+      //   // Try API first
+      //   const universitas = await universitasService.searchUniversitasByName(nama);
+      //   res.status(200).json({
+      //     message: `Hasil pencarian universitas: "${nama}"`,
+      //     data: universitas,
+      //     total: universitas.length,
+      //     source: "api"
+      //   });
+      // } catch (apiError) {
+      //   console.warn("API failed for universitas search:", apiError);
+
+      // Use local database (from CSV dataset) - but not implemented yet
       res.status(200).json({
-        message: `Hasil pencarian universitas: "${nama}"`,
-        data: universitas,
-        total: universitas.length,
+        message: `Pencarian universitas: "${nama}" (dataset lokal - belum diimplementasi)`,
+        data: [],
+        total: 0,
+        source: "local",
+        note: "Local universitas search akan diimplementasi jika diperlukan",
       });
+      // }
     } catch (error: any) {
       res.status(500).json({
         message: "Gagal mencari universitas",

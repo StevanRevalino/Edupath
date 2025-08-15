@@ -49,3 +49,56 @@ model SearchHistory {
 
   @@index([user_id, type, created_at])
 }
+
+model LocalUniversitas {
+  university_id Int            @id
+  nama          String
+  npsn          String?
+  nama_singkat  String?
+  kode_pos      String?
+  telepon       String?
+  fax           String?
+  email         String?
+  alamat        String?
+  kota          String?
+  provinsi      String?
+  akreditasi    String?
+  status        String?
+  rank_qs       String?
+  rank_country  String?
+  created_at    DateTime       @default(now())
+  prodi_pt      LocalProdiPT[]
+
+  @@index([nama])
+  @@index([provinsi])
+  @@index([kota])
+}
+
+model LocalProdi {
+  prodi_id   Int            @id
+  nama_prodi String
+  jenjang    String?
+  created_at DateTime       @default(now())
+  prodi_pt   LocalProdiPT[]
+
+  @@index([nama_prodi])
+  @@index([jenjang])
+}
+
+model LocalProdiPT {
+  id               Int      @id @default(autoincrement())
+  prodi_id         Int
+  university_id    Int
+  akreditasi_prodi String?
+  ukt_min          String?
+  ukt_max          String?
+  link_prodi       String?
+  created_at       DateTime @default(now())
+
+  prodi       LocalProdi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  universitas LocalUniversitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
+
+  @@unique([prodi_id, university_id])
+  @@index([prodi_id])
+  @@index([university_id])
+}

@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { ProdiService } from "../services/prodiService";
+import { LocalDataService } from "../services/localDataService";
 
 const service = new ProdiService();
+const localService = new LocalDataService();
 
 export class ProdiController {
   // API-based endpoints using PDDIKTI
@@ -59,11 +61,30 @@ export class ProdiController {
         return res.status(400).json({ message: "ID prodi harus disediakan" });
       }
 
-      const prodi = await service.getProdiById(id);
-      res.json({
-        message: "Berhasil mengambil detail prodi",
-        data: prodi,
-      });
+      // TODO: Uncomment when API is ready
+      // try {
+      //   // Try API first
+      //   const prodi = await service.getProdiById(id);
+      //   res.json({
+      //     message: "Berhasil mengambil detail prodi",
+      //     data: prodi,
+      //     source: "api"
+      //   });
+      // } catch (apiError) {
+      //   console.warn("API failed, trying local database:", apiError);
+
+      // Use local database (from CSV dataset)
+      const localProdi = await localService.getProdiDetailLocal(id);
+      if (localProdi) {
+        res.json({
+          message: "Berhasil mengambil detail prodi (dataset lokal)",
+          data: localProdi,
+          source: "local",
+        });
+      } else {
+        throw new Error("Prodi tidak ditemukan");
+      }
+      // }
     } catch (e: any) {
       const code = e.message.includes("tidak ditemukan") ? 404 : 500;
       res.status(code).json({ message: e.message });
@@ -77,16 +98,50 @@ export class ProdiController {
         return res.status(400).json({ message: "Nama prodi harus disediakan" });
       }
 
-      const data = await service.searchProdiByName(nama);
+      // TODO: Uncomment when API is ready
+      // try {
+      //   // Try API first
+      //   const data = await service.searchProdiByName(nama);
+      //   res.json({
+      //     message: `Berhasil mencari prodi dengan nama: ${nama}`,
+      //     data,
+      //     total: data.length,
+      //     source: "api"
+      //   });
+      // } catch (apiError) {
+      //   console.warn("API failed, trying local database:", apiError);
+
+      // Use local database (from CSV dataset)
+      const localData = await localService.searchProdiLocal(nama);
       res.json({
-        message: `Berhasil mencari prodi dengan nama: ${nama}`,
-        data,
-        total: data.length,
+        message: `Berhasil mencari prodi dengan nama: ${nama} (dataset lokal)`,
+        data: localData,
+        total: localData.length,
+        source: "local",
       });
+      // }
     } catch (e: any) {
       res
         .status(500)
         .json({ message: "Gagal mencari prodi", error: e.message });
+    }
+  }
+
+  // Local data endpoints
+  async getLocalDataStats(req: Request, res: Response) {
+    try {
+      const stats = await localService.getLocalDataStats();
+      res.json({
+        message: "Berhasil mengambil statistik data lokal",
+        data: stats,
+      });
+    } catch (e: any) {
+      res
+        .status(500)
+        .json({
+          message: "Gagal mengambil statistik data lokal",
+          error: e.message,
+        });
     }
   }
 }

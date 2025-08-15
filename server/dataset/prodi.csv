@@ -1,0 +1,680 @@
+prodi_id,nama_prodi,jenjang
+1,Pendidikan Agama Islam,S1
+2,Pendidikan Bahasa Arab,S1
+3,Ekonomi Syari'ah,S1
+4,Perbankan Syari'ah,S1
+5,Ilmu Al-Qur'an Dan Tafsir,S1
+6,Manajemen Pendidikan Islam,S1
+7,Ekonomi Syariah,S1
+8,Pendidikan Islam Anak Usia Dini,S1
+9,Ahwal Al Syakhshiyah,S1
+10,Pendidikan Guru Madrasah Ibtidaiyah,S1
+11,Perbankan Syariah,S1
+12,Komunikasi Dan Penyiaran Islam,S1
+13,Bimbingan Dan Konseling Pendidikan Islam,S1
+14,Hukum Pidana Islam (Jinayah),S1
+15,Hukum Keluarga (Ahwal Syakhshiyah),S1
+16,Ilmu Al-Qur`an Dan Tafsir,S1
+17,Ekonomi Syari`ah,S1
+18,Hukum Ekonomi Syari`ah (Mu`amalah),S1
+19,Hukum Keluarga (Ahwal Al Syakhshiyah),S1
+20,Manajemen Dakwah,S1
+21,Ilmu Al-Quran Dan Tafsir,S1
+22,Tadris Bahasa Inggris,S1
+23,Hukum Keluarga Islam (Ahwal Syakhshiyyah),S1
+24,Tadris Bahasa Indonesia,S1
+25,Hukum Tatanegara (Siyasah Syar'iyyah),S1
+26,Tadris Matematika,S1
+27,Ilmu Perpustakaan Dan Informasi Islam,S1
+28,Bimbingan Penyuluhan Islam,S1
+29,Bimbingan Dan Konseling Islam,S1
+30,Pendididkan Islam Anak Usia Dini,S1
+31,Manajemen Bisnis Syariah,S1
+32,Manajemen Zakat Dan Wakaf,S1
+33,Aqidah Dan Filsafat Islam,S1
+34,Ilmu Hadist,S1
+35,Pemikiran Politik Islam,S1
+36,Tasawuf Dan Psikoterapi,S1
+37,Hukum Keluarga Islam,S1
+38,Tadris Biologi,S1
+39,Tadris IPA,S1
+40,Akuntansi Syari'ah,S1
+41,Bimbingan Konseling Pendidikan Islam,S1
+42,Pengembangan Masyarakat Islam,S1
+43,Tadris IPS,S1
+44,Hukum Ekonomi Syariah (Muamalah),S1
+45,Perbankan Syariah,D3
+46,Bahasa Dan Sastra Arab,S1
+47,Manajemen Haji Dan Umroh,S1
+48,Pendidikan Bimbingan Dan Konseling  Islam,S1
+49,Perbankan Syari`ah,S1
+50,Hukum Keluarga Islam (Ahwal Syakhsiyyah),S1
+51,Bio Kewirausahaan,S1
+52,Teknologi Pangan,S1
+53,Bio Teknologi,S1
+54,Bio Medis Dan Rekayasa Hayati,S1
+55,Bio Informatika,S1
+56,Pangan Dan Nutrisi,S1
+57,Akuntansi,S1
+58,Komunikasi,S1
+59,Manajemen,S1
+60,Administrasi Bisnis,S1
+61,Teknik Informatika,S1
+62,Sistem Informasi,S1
+63,Ilmu Administrasi Niaga,S1
+64,Ilmu Komunikasi,S1
+65,Akuntansi,D3
+66,Bimbingan Dan Penyuluhan Islam,S1
+67,KEDOKTERAN GIGI,S1
+68,TEKNIK GIGI,D3
+69,KEBIDANAN,D3
+70,FARMASI,S1
+71,Biologi,S1
+72,Kimia,S1
+73,Desain Komunikasi Visual,S1
+74,Manajemen Informatika,D3
+75,Teologi/Kependetaan,S1
+76,Pendidikan Agama Kristen,S1
+77,Misiologi,S1
+78,Teknologi Hasil Perikanan,S1
+79,Pendidikan Ekonomi,S1
+80,Ahwal Al-Syakhshiyah,S1
+81,Muamalah,S1
+82,Pendidikan Bahasa Inggris,S1
+83,Psikologi,S1
+84,KESEHATAN MASYARAKAT,S1
+85,Desain Grafis,S1
+86,Teknologi Hasil Pertanian,S1
+87,Agribisnis,S1
+88,Agroteknologi,S1
+89,Kehutanan,S1
+90,Teknik Pertanian,S1
+91,Teknik Mesin,S1
+92,Teknik Kimia,S1
+93,Teknik Industri,S1
+94,Teknik Geologi,S1
+95,Statistika,S1
+96,Teknik Mesin,D3
+97,Teknik Lingkungan,S1
+98,Teknik Elektro,S1
+99,Rekayasa Sistem Komputer,S1
+100,Teknologi Industri,D3
+101,Teknik Elektronika,D3
+102,Teknik Sipil,S1
+103,Teknik Sipil,D3
+104,Fisika,S1
+105,Arsitektur,S1
+106,Teknik Pertambangan,S1
+107,Desain Interior,D3
+108,Perencanaan Wilayah Dan Kota,S1
+109,Seni Teater,S1
+110,Antropologi Budaya,S1
+111,Seni Tari,S1
+112,Seni Rupa Murni,S1
+113,Seni Karawitan,S1
+114,Kriya Seni,D3
+115,Desain Interior,S1
+116,Fotografi,S1
+117,Seni Pedalangan,S1
+118,Pendidikan Seni Pertunjukan,S1
+119,Tari,S1
+120,Seni Murni,S1
+121,Kriya,S1
+122,Seni Musik,S1
+123,Kriya Seni,S1
+124,Pendidikan Kriya,S1
+125,Televisi Dan Film,S1
+126,Sistem Komputer,S1
+127,Desain Produk,S1
+128,Teknik Perkapalan,S1
+129,Informatika,S1
+130,Pendidikan Bahasa Dan Sastra Indonesia,S1
+131,Pendidikan Guru Sekolah Dasar,S1
+132,Mesin Otomotif,D3
+133,Teknologi Industri Pertanian,S1
+134,Teknik Geodesi,S1
+135,Teknik Listrik,D3
+136,Teknik Industri,D3
+137,Teknologi Listrik,D3
+138,Teknik Biomedik,S1
+139,Teknik Elektro Komputer Kontrol,D3
+140,Metrologi Dan Instrumentasi,D3
+141,Manajemen Bisnis,S1
+142,Teknik Komputer,S1
+143,Teknik Transportasi Laut,S1
+144,Teknik Sistem Perkapalan,S1
+145,Matematika,S1
+146,Teknik Geofisika,S1
+147,Teknik Material,S1
+148,Teknik Fisika,S1
+149,Teknologi Informasi,S1
+150,Sains Aktuaria,S1
+151,Teknik Pangan,S1
+152,Teknik Kelautan,S1
+153,Rekayasa Perangkat Lunak,S1
+154,Teknik Telekomunikasi,S1
+155,Teknik Telekomunikasi,D3
+156,Bisnis Digital,S1
+157,Teknik Energi,S1
+158,Pemanfaatan Sumberdaya Perikanan,S1
+159,Ilmu Administrasi Negara,S1
+160,Pendidikan Biologi,S1
+161,Pendidikan Sejarah,S1
+162,Hukum,S1
+163,Ilmu Hukum,S1
+164,Pemanfaatan Sumber Daya Perikanan,S1
+165,Perhotelan,D3
+166,Ilmu Pemerintahan,S1
+167,Ilmu Administrasi Publik,S1
+168,Ilmu Politik,S1
+169,Ilmu Hubungan Internasional,S1
+170,Administrasi Publik,S1
+171,Bahasa Jepang,D3
+172,Sastra Inggris,S1
+173,Administrasi Bisnis,D3
+174,Bahasa Inggris,D3
+175,Sastra Jepang,S1
+176,Ekonomi Pembangunan,S1
+177,Budidaya Perairan,S1
+178,Kepariwisataan,D3
+179,Televisi Dan Film,D3
+180,FISIOTERAPI,D3
+181,KEPERAWATAN,S1
+182,Bioteknologi,S1
+183,Pendidikan Matematika,S1
+184,Hukum Keluarga (Ahwalus Syakhsiyah),S1
+185,Agrobisnis Perikanan,S1
+186,Pendidikan Agama Islam (PAI),S1
+187,Sastra Indonesia,S1
+188,Agroekoteknologi,S1
+189,Sosiologi,S1
+190,Ekonomi Pembangunan (Kampus Payakumbuh),S1
+191,Peternakan (Kampus II Payakumbuh),S1
+192,Peternakan,S1
+193,Kesekretariatan,D3
+194,Proteksi Tanaman,S1
+195,Manajemen Pemasaran,D3
+196,Ilmu Tanah,S1
+197,Keuangan,D3
+198,Antropologi Sosial,S1
+199,Penyuluhan Pertanian,S1
+200,Sastra Minangkabau,S1
+201,Manajemen Sumber Daya Perairan,S1
+202,RADIODIAGNOSTIK DAN RADIOTERAPI,D3
+203,Kewirausahaan,S1
+204,Pendidikan Guru Pendidikan Anak Usia Dini,S1
+205,Pendidikan IPS,S1
+206,Pendidikan Geografi,S1
+207,Ilmu Kelautan,S1
+208,Akuakultur,S1
+209,Ekonomi,S1
+210,KEDOKTERAN,S1
+211,Teknologi Pendidikan,S1
+212,Pendidikan Nonformal,S1
+213,Sekretari,D3
+214,Pendidikan Fisika,S1
+215,Administrasi Perkantoran,D3
+216,Jurnalistik,S1
+217,Pendidikan Bahasa Indonesia,S1
+218,Kesejahteraan Sosial,S1
+219,Perpustakaan,D3
+220,Perpustakaan Dan Sains Informasi,S1
+221,Laboratorium Sains,D3
+222,Bimbingan Dan Konseling,S1
+223,Pendidikan Jasmani,S1
+224,Pendidikan IPA,S1
+225,Jurnalistik,D3
+226,Pendidikan Kimia,S1
+227,Pendidikan Kepelatihan Olah Raga,S1
+228,Teknik Perminyakan,S1
+229,Teknik Komputer,D3
+230,Manajemen Perusahaan,D3
+231,Komputerisasi Akuntansi,D3
+232,Pendidikan Olahraga,S1
+233,Destinasi Pariwisata,S1
+234,Hubungan Internasional,S1
+235,Film,S1
+236,PJJ Teknik Informatika,S1
+237,Sastra Cina,S1
+238,Hubungan Masyarakat (Kampus Kota Malang),S1
+239,PJJ Sistem Informasi,S1
+240,Teknik Informatika (Kampus Kota Bandung),S1
+241,PJJ Manajemen,S1
+242,PJJ Teknik Industri,S1
+243,Desain Interior (Kampus Kota Bandung),S1
+244,Desain Komunikasi Visual (Kampus Kota Bandung),S1
+245,Desain Interior (Kampus Kota Malang),S1
+246,Desain Komunikasi Visual (Kampus Kota Malang),S1
+247,Kewirausahaan (Kampus Kota Bandung),S1
+248,Kewirausahaan (Kampus Kota Malang),S1
+249,Teknik Informatika (Kampus Kota Malang),S1
+250,PJJ Akuntansi,S1
+251,Ilmu Komunikasi (Kampus Kota Malang),S1
+252,Tekonologi Pangan,S1
+253,PENDIDIKAN DOKTER,S1
+254,Ilmu Dan Teknologi Pangan,S1
+255,Teknologi Bioproses,S1
+256,Administrasi Pendidikan,S1
+257,Bahasa Dan Sastra Prancis,S1
+258,Perpajakan,S1
+259,Keuangan Dan Perbankan,D3
+260,Ekonomi Islam,S1
+261,Teknologi Informasi,D3
+262,Pendidikan Teknologi Informasi,S1
+263,Ilmu Perpustakaan,S1
+264,Pendidikan Bahasa Jepang,S1
+265,Pariwisata,S1
+266,Agribisnis (Kampus Kota Kediri),S1
+267,Antropologi,S1
+268,Agroekoteknologi (Kampus Kota Kediri),S1
+269,Sosial Ekonomi Perikanan (Kampus Kota Kediri),S1
+270,Instrumentasi,S1
+271,Peternakan (Kampus Kota Kediri),S1
+272,Akuakultur (Kampus Kota Kediri),S1
+273,Teknik Pengairan,S1
+274,Teknik Perangkat Lunak,S1
+275,Kriminologi,S1
+276,Hospitality Dan Pariwisata,S1
+277,Bahasa Mandarin,S1
+278,Bahasa Inggris,S1
+279,Pendidikan Teknik Informatika Dan Komputer,S1
+280,Pendidikan Pancasila Dan Kewarganegaraan,S1
+281,Teknik Ekonomi Konstruksi,D3
+282,Ilmu Keolahragaan,S1
+283,Manajemen Pendidikan,S1
+284,Planologi,S1
+285,Teknik Elektro,D3
+286,Ilmu Kesejahteraan Sosial,S1
+287,Manajemen Administrasi Perkantoran,S1
+288,Ilmu Perikanan,S1
+289,Ilmu Hubungan Masyarakat,S1
+290,Teknologi Pertanian,S1
+291,Bimbingan Konseling,S1
+292,Tafsir Hadist,S1
+293,Ilmu Sosiatri,S1
+294,KEPERAWATAN,D3
+295,Pendidikan Guru Pendidikan Anak  Usia Dini,S1
+296,Pendidikan  Bahasa Inggris,S1
+297,Pendidikan Bahasa Indonesia Dan Daerah,S1
+298,FISIOTERAPI,S1
+299,Bina Wisata,D3
+300,Ekonomi Pertanian Dan Agribisnis,S1
+301,Agronomi,S1
+302,Arkeologi,S1
+303,Bahasa Dan Kebudayaan Korea,S1
+304,Teknik Geomatika,D3
+305,Teknik Nuklir,S1
+306,Teknologi Pangan Dan Hasil Pertanian,S1
+307,Mikrobiologi Pertanian,S1
+308,Geofisika,S1
+309,Manajemen Sumberdaya Akuatik,S1
+310,Ilmu Ekonomi,S1
+311,Sejarah,S1
+312,Sastra Jawa,S1
+313,Sastra Arab,S1
+314,Bahasa Dan Sastra Indonesia,S1
+315,Pariwisata,D3
+316,Teknologi Instrumentasi,D3
+317,Filsafat,S1
+318,Ilmu Dan Industri Peternakan,S1
+319,Ilmu Komputer,S1
+320,Kartografi Dan Penginderaan Jauh,S1
+321,Pengelolaan Hutan,D3
+322,Pembangunan Sosial Dan Kesejahteraan,S1
+323,Elektronika Dan Instrumentasi,S1
+324,Geografi Lingkungan,S1
+325,Kearsipan,D3
+326,Penginderaan Jauh Dan Sistem Informasi Geografi,D3
+327,Pembangunan Wilayah,S1
+328,Bahasa Korea,D3
+329,Manajemen,D3
+330,Ekonomika Terapan,D3
+331,Manajemen Dan Kebijakan Publik,S1
+332,Kesehatan Hewan,D3
+333,Politik Dan Pemerintahan,S1
+334,Komputer Dan Sistem Informasi,D3
+335,Agroindustri,D3
+336,Ilmu Aktuaria,S1
+337,Sastra Prancis,S1
+338,Teknik Infrastruktur Lingkungan,S1
+339,Penyuluhan Dan Komunikasi Pertanian,S1
+340,Teknik Biomedis,S1
+341,Pendidikan Kepelatihan Olahraga,S1
+342,Pendidikan Akuntansi,S1
+343,Perikanan,S1
+344,Nautika,D3
+345,Teknika,D3
+346,Ketatalaksanaan Pelayaran Niaga Dan Kepelabuhan,D3
+347,Oseanologi,S1
+348,Permesinan Kapal,D3
+349,Manajemen Pelabuhan,D3
+350,ILMU GIZI,S1
+351,Ilmu Sejarah,S1
+352,Hukum Administrasi Negara,S1
+353,Sastra Daerah,S1
+354,Bahasa Mandarin Dan Kebudayaan Tiongkok,S1
+355,Sosial Ekonomi Perikanan,S1
+356,Sastra Perancis,S1
+357,Aktuaria,S1
+358,Pendidikan Ilmu Pengetahuan Alam,S1
+359,Pendidikan Bahasa Jerman,S1
+360,Administrasi Perpajakan,D3
+361,Manajemen Pengelolaan Sumberdaya Perairan,S1
+362,Pendidikan Kewarganegaraan,S1
+363,Pengolahan Hasil Perikanan,D3
+364,Teknik Arsitektur,S1
+365,Survei Dan Pemetaan,D3
+366,GIZI,S1
+367,Ilmu Filsafat,S1
+368,Geografi,S1
+369,Geologi,S1
+370,Sastra Belanda,S1
+371,Sastra Rusia,S1
+372,Sastra Jerman,S1
+373,Administrasi Keuangan Dan Perbankan,D3
+374,Manajemen Informasi Dan Dokumen,D3
+375,Hubungan Masyarakat,D3
+376,Bisnis Islam,S1
+377,Ilmu Administrasi Fiskal,S1
+378,Arsitektur Interior,S1
+379,Teknik Metalurgi Dan Material,S1
+380,Manajemen Administrasi,D3
+381,Ilmu Teknologi Pangan,S1
+382,Komunikasi Penyiaran Islam,S1
+383,Ilmu Ternak,S1
+384,Ilmu Al Qur`an Dan Tafsir,S1
+385,Administrasi Negara,S1
+386,Hukum Keluarga Islam (Ahwal Syakhshiyah),S1
+387,PG PAUD,S1
+388,Administrasi Fiskal,S1
+389,Ilmu Administrasi Bisnis,S1
+390,Pendidikan Guru Raudlatul Athfal,S1
+391,Hukum Keluarga Islam (Ahwal Syakhshiyyah) (S1),S1
+392,Bahasa Dan Sastra Inggris,S1
+393,Sosiologi Agama,S1
+394,Hukum Pidana Islam,S1
+395,Hukum Ekonomi Syari'ah (Muamalah),S1
+396,Pendidikan Teknik Elektro,S1
+397,Studi Agama-Agama,S1
+398,Perbandingan Mazhab Dan Hukum,S1
+399,Sejarah Dan Kebudayaan Islam,S1
+400,Hukum Keluarga (Akhwal Syahsiyyah),S1
+401,Pendidikan Ilmu Pengetahuan Sosial,S1
+402,Hukum Tata Negara (Siyasah),S1
+403,Hukum Ekonomi Syariah (Mu'amalah),S1
+404,Perpustakaan Dan Ilmu Informasi,S1
+405,Psikologi Islam,S1
+406,Tadris Ilmu Pengetahuan Sosial,S1
+407,Asuransi Syariah,S1
+408,Ilmu Hadis,S1
+409,Perbandingan Mazhab,S1
+410,Sejarah Peradaban Islam,S1
+411,Hukum Tatanegara (Siyasah),S1
+412,Bimbingan Konseling Islam,S1
+413,Ilmu Alquran Dan Tafsir,S1
+414,Sejarah Dan Peradaban Islam,S1
+415,Tadris Fisika,S1
+416,Ilmu Tasawuf,S1
+417,Tadris Ilmu Pengetahuan Sosial (IPS),S1
+418,Tadris Kimia,S1
+419,Hukum Keluarga (Ahwal Al-Syakhshiyah),S1
+420,Dirasat Islamiyah,S1
+421,Akuntansi Syari`ah,S1
+422,Studi Agama-agama,S1
+423,Hukum Keluarga Islam (Ahwal Al-Syakhsiyyah),S1
+424,Ilmu Falak,S1
+425,Manajemen Dakwah (MD),S1
+426,Ekonomi Syariah (Ekonomi Islam),S1
+427,Ilmu Seni Dan Arsitektur Islam,S1
+428,Manajemen Haji Dan Umrah,S1
+429,Pendidikan Luar Sekolah,S1
+430,Pendidikan Luar Biasa,S1
+431,Teknik Informatika,D3
+432,Kimia Industri,D3
+433,Analis Kimia,D3
+434,Kepelatihan Olahraga,S1
+435,Seni Drama Tari Dan Musik,S1
+436,Agrobisnis,D3
+437,Teknologi Hasil Perikanan,D3
+438,Perpajakan,D3
+439,Pendidikan Olahraga Dan Kesehatan,S1
+440,Administrasi Keuangan,D3
+441,Usaha Perjalanan Wisata,D3
+442,ILMU KEPERAWATAN,S1
+443,Teknik Konstruksi Perkapalan,S1
+444,Ilmu Pertanian,S1
+445,Teknik Metalurgi,S1
+446,Biologi,D3
+447,Agribisnis,D3
+448,Budi Daya Ternak,D3
+449,Perencanaan Sumber Daya Lahan,D3
+450,Bahasa Mandarin,D3
+451,Bisnis Internasional,D3
+452,Pendidikan Olah Raga,S1
+453,Manajemen Kepelabuhan Dan Pelayaran,S1
+454,Ilmu Informatika,S1
+455,Hospitality,S1
+456,Ilmu Pendidikan Teologi,S1
+457,Pendidikan Keagamaan Katolik,S1
+458,Sistem Informasi,D3
+459,Admnistrasi Perkantoran,D3
+460,Pendidikan Bahasa Indonesia (kampus Kota Madiun),S1
+461,Bahasa Inggris (Kampus Kota Madiun),S1
+462,Psikologi (Kampus Kota Madiun),S1
+463,Biologi (Kampus Kota Madiun),S1
+464,Akuntansi (Kampus Kota Madiun),S1
+465,Pendidikan Musik,S1
+466,Agribinis,S1
+467,Teknik Perencanaan Wilayah Dan Kota,S1
+468,Desain Grafis,D3
+469,Teologi Agama Kristen,S1
+470,Mekanisasi Pertanian,S1
+471,Teologi,S1
+472,Filsafat Keilahian,S1
+473,Musik Gereja,S1
+474,Teologi Kristen Protestan,S1
+475,Seni Rupa Dan Disain,D3
+476,Ilmu Teologi,S1
+477,Pendidikan Teknik Informatika & Komputer,S1
+478,Hubungan Masyarakat,S1
+479,Perpustakaan,S1
+480,Sistem Informasi Akuntansi,D3
+481,ANALIS FARMASI DAN MAKANAN,D3
+482,Pendidikan Ilmu Komputer,S1
+483,Pendidikan Sosiologi,S1
+484,Perikanan Tangkap,S1
+485,Teknik Survey Dan Pemetaan,D3
+486,Pendidikan Bahasa Perancis,S1
+487,Sumberdaya Akuatik,S1
+488,Perkebunan,D3
+489,Pendidikan Tari,S1
+490,Nutrisi Dan Teknologi Pakan Ternak,S1
+491,Biologi Terapan,S1
+492,Kepolisian,D3
+493,Pendidikan Bahasa Mandarin,S1
+494,Desain Komunikasi Visual -,S1
+495,Teknik Sipil K. Mataram,S1
+496,Hukum K. Mataram,S1
+497,Manajemen K. Mataram,S1
+498,Pariwisata K. Kab. Lombok Utara,D3
+499,Kesehatan Hewan K. Bima,D3
+500,Budidaya Perikanan Kab Lombok Utara,D3
+501,Agribisnis Peternakan,D3
+502,Perbankan Dan Keuangan,D3
+503,Perjalanan Wisata,D3
+504,Pendidikan Anak Usia Dini,S1
+505,Ilmu Quran Dan Tafsir,S1
+506,Budidaya Perikanan,S1
+507,Pendidikan Islam,S1
+508,Pendidikan Seni Rupa,S1
+509,Teknologi Elektronika,D3
+510,Pendidikan Bahasa,S1
+511,Hukum Ekonomi Syari'ah,S1
+512,PGRA,S1
+513,Manajemen K. Sintang,S1
+514,ILMU KESEHATAN MASYARAKAT,S1
+515,TEKNIK KARDIOVASKULER,D3
+516,Hukum Ekonomi Syari'ah (Mu'amalah),S1
+517,Pendidikan Bahasa Dan Sastra Jawa,S1
+518,Pendidikan Informatika,S1
+519,Pendidikan Vokasional Teknik Elektronika,S1
+520,Pengolahan Hasil Perikanan,S1
+521,Pendidikan Jasmani Kesehatan Dan Rekreasi,S1
+522,PGSD,S1
+523,ADMINISTRASI RUMAH SAKIT,D3
+524,Pendidikan Guru Madrasah Ibtidiyah,S1
+525,Perbandingan Agama,S1
+526,Pendidikan Seni Drama Tari Dan Musik,S1
+527,Teknologi Mesin,D3
+528,Teknologi Elektro-medis,D3
+529,Etnomusikologi,S1
+530,Pendidikan Komputer,S1
+531,Agrobisnis,S1
+532,Manajemen Sumberdaya Perairan,S1
+533,Pendidikan Guru Madrasah Ibtidaiyah (PGMI),S1
+534,Pendidikan Bimbingan Dan Konseling,S1
+535,Hukum Keluarga Islam (Ahwal Al Syakhshiyah),S1
+536,Hukum Keluarga (Ahwal Al-syakhshiyah),S1
+537,Tafsir Hadits,S1
+538,FARMASI,D3
+539,Bahasa Korea,S1
+540,Pendidikan Teknik Mesin,S1
+541,Admnistrasi Publik,S1
+542,Pendidikan Vokasional Konstruksi Bangunan,S1
+543,Pendidikan Kesejahteraan Keluarga,S1
+544,Usaha Jasa Pariwisata,D3
+545,Ilmu Agama Islam,S1
+546,Transportasi,D3
+547,Pendidikan Teknik Elektronika,S1
+548,Tata Rias,D3
+549,Tata Busana,D3
+550,Pendidikan Administrasi Perkantoran,S1
+551,Kepelatihan Kecabangan Olahraga,S1
+552,Olahraga Rekreasi,S1
+553,Tata Boga,D3
+554,Pendidikan Teknik Bangunan,S1
+555,Pendidikan Tata Boga,S1
+556,Pendidikan Tata Busana,S1
+557,Pendidikan Bisnis,S1
+558,Pendidikan Tata Rias,S1
+559,Pendidikan Bahasa Dan Sastra Daerah,S1
+560,Pendidikan Teknik Otomotif,S1
+561,Teknik Sipil Bangunan Gedung,D3
+562,Pendidikan Teknologi Pertanian,S1
+563,Pendidikan Antropologi,S1
+564,Pendidikan Vokasional Mekatronika,S1
+565,Pendidikan Teknik Informatika,S1
+566,Pendidikan Seni Tari Dan Musik,S1
+567,Game Animasi,D3
+568,Pendidikan Tata Niaga,S1
+569,Pendidikan Khusus,S1
+570,Akutansi,S1
+571,Pendidikan Teknologi Informasi Dan Komunikasi,S1
+572,Statistika Terapan Dan Komputasi,D3
+573,Desain Komunikasi Visual,D3
+574,Pendidikan Sosiologi Dan Antropologi,S1
+575,Pendidikan Ipa,S1
+576,Pendidikan Tata Kecantikan,S1
+577,Seni Rupa,S1
+578,Pendidikan Jasmani Sekolah Dasar,S1
+579,Pendidikan Sains,S1
+580,Administrasi Negara,D3
+581,Pendidikan Seni Kerajinan,S1
+582,Pendidikan Guru Sekolah Dasar Pendidikan Jasmani,S1
+583,Pendidikan Teknik Sipil DanPerencanaan,S1
+584,Kebijakan Pendidikan,S1
+585,Pendidikan Seni Musik,S1
+586,Tata Rias Dan Kecantikan,D3
+587,Pendidikan Teknik Mekatronika,S1
+588,Teknik Manufaktur,S1
+589,Pendidikan Seni Tari,S1
+590,Manajemen Hutan,S1
+591,Kedokteran Hewan,S1
+592,Agroteknologi/Agroekoteknologi,S1
+593,Manajemen Sumberdaya Pesisir,S1
+594,Manajemen Komunikasi,S1
+595,Sastra Sunda,S1
+596,Perikanan K Pangandaran,S1
+597,Administrasi Bisnis K. Pangandaran,S1
+598,Peternakan K. Pangandaran,S1
+599,Ilmu Komunikasi K. Pangandaran,S1
+600,Manajemen Keuangan Dan Perbankan,D3
+601,Manajemen Perpajakan,D3
+602,Teknik Kimia,D3
+603,Teknik Lingkungan,D3
+604,Administrasi Niaga,D3
+605,Falsafah Dan Agama,S1
+606,Teknologi Batik,D3
+607,Pendidikan Bahasa Bali,S1
+608,Survey Dan Pemetaan,D3
+609,Pendidikan Vokasional Seni Kuliner,S1
+610,Budidaya Kelautan,D3
+611,Perpustakaan Dan Informasi,S1
+612,Pendidikan Guru Sekolah Dasar (Kampus Sumedang),S1
+613,PGPAUD Kampus Serang,S1
+614,Pendidikan Guru Sekolah Dasar (Kampus Purwakarta),S1
+615,Pendidikan Guru Sekolah Dasar (Kampus Tasikmalaya),S1
+616,PGPAUD Kampus Tasikmalaya,S1
+617,PGSD Kampus Serang,S1
+618,PGPAUD Kampus Cibiru,S1
+619,PGSD Kampus Cibiru,S1
+620,Pendidikan Bahasa Sunda,S1
+621,Manajemen Resort Dan Leisure,S1
+622,Pendidikan Masyarakat,S1
+623,Pendidikan Bahasa Korea,S1
+624,Pendidikan Manajemen Perkantoran,S1
+625,Manajemen Pemasaran Pariwisata,S1
+626,Manajemen Industri Katering,S1
+627,PGPAUD Kampus Purwakarta,S1
+628,Ilmu Ekonomi Dan Keuangan Islam,S1
+629,Survei Pemetaan Dan Informasi Geografis,D3
+630,Ilmu Pendidikan Agama Islam,S1
+631,Pendidikan Teknik Arsitektur,S1
+632,Pendidikan Teknologi Agroindustri,S1
+633,Pendidikan Multimedia Kampus Cibiru,S1
+634,Pendidikan Sistem Dan Teknologi Informasi Kampus Purwakarta,S1
+635,Sistem Informasi Kelautan,S1
+636,Pendidikan Kelautan Dan Perikanan Kampus Serang,S1
+637,Kepelatihan Fisik Olahraga,S1
+638,Sains Informasi Geografi,S1
+639,Pendidikan Pariwisata,S1
+640,Kewirausahaan Kampus Tasikmalaya,S1
+641,Film Dan Televisi,S1
+642,Keperawatan,S1
+643,Pendidikan Vokasional Kesejahteraan Keluarga,S1
+644,Teknologi Pulp Dan Kertas,D3
+645,PGMI,S1
+646,Komputer Grafis,D3
+647,Mekatronika,D3
+648,Teknologi Elektromedis,D3
+649,Teknologi Perancangan Mekanik,D3
+650,Pendidikan Sosiologi Antropologi,S1
+651,Komunikasi Terapan,D3
+652,Manajemen Perdagangan,D3
+653,Manajemen Bisnis,D3
+654,Teknologi Hasil Pertanian,D3
+655,Pendidikan Bahasa Jawa,S1
+656,Pengelolaan Hutan,S1
+657,Ilmu Lingkungan,S1
+658,KESEHATAN LINGKUNGAN,S1
+659,Kedokteran,S1
+660,Agroteknologi Kampus Kab. Morowali,S1
+661,Konservasi Sumberdaya Hutan,D3
+662,Teknik Sipil Kampus Kab Tojo Una-una,S1
+663,Manajemen Kampus Kab.Morowali,S1
+664,Teknik Sipil Kampus Kab. Morowali,S1
+665,Agroteknologi Kampus Kab. Tojo Una-una,S1
+666,Manajemen Kampus Kab. Tojo Una-una,S1
+667,Sains Data,S1
+668,Informatika Medis,S1
+669,Teknk Industri,S1
+670,Sumber Daya Akuatik,S1
+671,Keuangan Dan Perbankan Syariah,D3
+672,Arsitektur Lansekap,S1
+673,Manajemen Jasa,D3
+674,Akuntansi Sektor Publik,D3
+675,Teknik Mekatronika,S1
+676,Hukum Bisnis Syariah,S1
+677,Enterpreneurship,D3
+678,Pendidikan Dokter Hewan,S1
+679,Kesehatan Hewan Dan Masyarakat Veteriner,D3

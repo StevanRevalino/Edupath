@@ -9,7 +9,9 @@
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:deploy": "npm run db:migrate && npm run db:generate",
-    "db:seed": "npm run universitasdanprodi:seed"
+    "db:seed": "npm run universitasdanprodi:seed",
+    "import:csv": "ts-node src/scripts/import-csv.ts",
+    "import:sample": "ts-node src/scripts/insert-sample-data.ts"
   },
   "keywords": [],
   "author": "",

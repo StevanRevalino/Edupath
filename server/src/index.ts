@@ -5,7 +5,9 @@ import authRoutes from "./routes/authRoutes";
 import universitasRoutes from "./routes/universitasRoutes";
 import prodiRoutes from "./routes/prodiRoutes";
 import searchHistoryRoutes from "./routes/searchHistoryRoutes";
+import adminRoutes from "./routes/adminRoutes";
 import { seedDefaultAdmins } from "./configs/seeder";
+import { seedLocalData } from "./configs/localDataSeeder";
 
 dotenv.config();
 const app = express();
@@ -41,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);
 app.use("/api/search-history", searchHistoryRoutes);
+app.use("/api/admin", adminRoutes);
 
 const PORT = 5000;
 
@@ -49,4 +52,5 @@ app.listen(PORT, "localhost", async () => {
   console.log(`Server running on localhost:${PORT}`);
   console.log(`Access URL: http://localhost:${PORT}`);
   await seedDefaultAdmins();
+  await seedLocalData();
 });
