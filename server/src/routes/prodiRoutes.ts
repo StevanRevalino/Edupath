@@ -11,9 +11,9 @@ router.get("/search/nama/:nama", controller.searchProdiByName.bind(controller));
 router.get("/detail/:id", controller.getProdiById.bind(controller));
 
 // GET /api/prodi/jenjang - Get list of available jenjang (S1, D3, D4)
-router.get("/jenjang", controller.getJenjangList.bind(controller));
+// router.get("/jenjang", controller.getJenjangList.bind(controller));
 
 // GET /api/prodi - List prodi with filters using PDDIKTI API
-router.get("/", controller.list.bind(controller));
+// router.get("/", controller.list.bind(controller));
 
 export default router;

@@ -50,8 +50,8 @@ model SearchHistory {
   @@index([user_id, type, created_at])
 }
 
-model LocalUniversitas {
-  university_id Int            @id
+model Universitas {
+  university_id Int       @id
   nama          String
   npsn          String?
   nama_singkat  String?
@@ -66,26 +66,26 @@ model LocalUniversitas {
   status        String?
   rank_qs       String?
   rank_country  String?
-  created_at    DateTime       @default(now())
-  prodi_pt      LocalProdiPT[]
+  created_at    DateTime  @default(now())
+  prodi_pt      ProdiPT[]
 
   @@index([nama])
   @@index([provinsi])
   @@index([kota])
 }
 
-model LocalProdi {
-  prodi_id   Int            @id
+model Prodi {
+  prodi_id   Int       @id
   nama_prodi String
   jenjang    String?
-  created_at DateTime       @default(now())
-  prodi_pt   LocalProdiPT[]
+  created_at DateTime  @default(now())
+  prodi_pt   ProdiPT[]
 
   @@index([nama_prodi])
   @@index([jenjang])
 }
 
-model LocalProdiPT {
+model ProdiPT {
   id               Int      @id @default(autoincrement())
   prodi_id         Int
   university_id    Int
@@ -95,8 +95,8 @@ model LocalProdiPT {
   link_prodi       String?
   created_at       DateTime @default(now())
 
-  prodi       LocalProdi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
-  universitas LocalUniversitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
+  prodi       Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  universitas Universitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
 
   @@unique([prodi_id, university_id])
   @@index([prodi_id])

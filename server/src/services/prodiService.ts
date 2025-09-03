@@ -1,181 +1,264 @@
-import { searchProdi, getProdiDetail } from "../api/pddiktiClient";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class ProdiService {
-  async getProdiById(prodi_id: string): Promise<any> {
+  // Search prodi from local database
+  async searchProdiLocal(query: string, limit: number = 20) {
     try {
-      // Use PDDIKTI API to get prodi details
-      const payload = await getProdiDetail(prodi_id);
+      // Normalize query: trim, lowercase, split into words
+      const normalizedQuery = query.trim().toLowerCase();
+      const queryWords = normalizedQuery
+        .split(/\s+/)
+        .filter((word) => word.length >= 2);
 
-      // Normalize the response to match expected format
-      const prodi = {
-        prodi_id: payload?.id_sms,
-        nama_prodi: payload?.nama_prodi || "-",
-        jenjang: payload?.jenj_didik,
-        kode_prodi: payload?.kode_prodi,
-        bidang: payload?.kel_bidang,
-        akreditasi: payload?.akreditasi,
-        akreditasi_internasional: payload?.akreditasi_internasional,
-        status_akreditasi: payload?.status_akreditasi,
-        status: payload?.status || "Aktif",
-        tanggal_berdiri: payload?.tgl_berdiri,
-        no_tel: payload?.no_tel,
-        no_fax: payload?.no_fax,
-        website: payload?.website,
-        email: payload?.email,
-        alamat: payload?.alamat,
-        universitas: {
-          university_id: payload?.id_sp,
-          nama: payload?.nama_pt,
-          kode_pt: payload?.kode_pt?.trim(),
-          provinsi: payload?.provinsi,
-          kab_kota: payload?.kab_kota,
-          kecamatan: payload?.kecamatan,
-          lintang: payload?.lintang !== 0 ? payload?.lintang : null,
-          bujur: payload?.bujur !== 0 ? payload?.bujur : null,
+      // If single word or very short, use simple search
+      if (queryWords.length <= 1) {
+        return this.simpleSearch(normalizedQuery, limit);
+      }
+
+      // Multi-word search with intelligent matching
+      return this.multiWordSearch(queryWords, limit);
+    } catch (error) {
+      console.error("Error searching prodi locally:", error);
+      throw error;
+    }
+  }
+
+  // Simple search for single words
+  private async simpleSearch(query: string, limit: number) {
+    // First, search by prodi name (higher priority)
+    const prodiNameResults = await prisma.prodi.findMany({
+      where: {
+        nama_prodi: {
+          contains: query,
+          mode: "insensitive",
         },
-      };
-
-      return prodi;
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil data prodi: ${error.message}`);
-    }
-  }
-
-  async searchProdiByName(nama: string): Promise<any[]> {
-    try {
-      // Fetch from external PDDIKTI API
-      const payload = await searchProdi(nama);
-      // The API may return an array or an object with fields; try to normalize
-      const items: any[] = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.data)
-        ? payload.data
-        : [];
-
-      // Map to a minimal shape the UI expects
-      const mapped = await Promise.all(
-        items.map(async (it: any, idx: number) => {
-          let akreditasi = null;
-          
-          // If we have an ID, try to get detailed info including akreditasi
-          if (it?.id) {
-            try {
-              const detailData = await getProdiDetail(it.id);
-              akreditasi = detailData?.akreditasi || null;
-            } catch (error) {
-              // If detail fetch fails, continue without akreditasi
-              console.warn(`Failed to fetch detail for prodi ${it.id}:`, error);
-            }
-          }
-
-          return {
-            // Use id as the unique identifier
-            prodi_id: it?.id || `prodi_${idx}`,
-            nama_prodi: it?.nama || "-",
-            jenjang: it?.jenjang,
-            akreditasi: akreditasi,
+      },
+      include: {
+        prodi_pt: {
+          include: {
             universitas: {
-              nama: it?.pt,
+              select: {
+                university_id: true,
+                nama: true,
+                nama_singkat: true,
+                provinsi: true,
+                akreditasi: true,
+              },
             },
-          };
-        })
-      );
+          },
+        },
+      },
+    });
 
-      return mapped;
-    } catch (error: any) {
-      throw new Error(`Gagal mencari prodi: ${error.message}`);
+    // Then, search by university name (lower priority)
+    const universityNameResults = await prisma.prodi.findMany({
+      where: {
+        prodi_pt: {
+          some: {
+            universitas: {
+              OR: [
+                {
+                  nama: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  nama_singkat: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      include: {
+        prodi_pt: {
+          include: {
+            universitas: {
+              select: {
+                university_id: true,
+                nama: true,
+                nama_singkat: true,
+                provinsi: true,
+                akreditasi: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Combine results, prioritizing prodi name matches
+    const combinedResults = [...prodiNameResults];
+
+    // Add university name results that aren't already included
+    for (const univResult of universityNameResults) {
+      const alreadyExists = combinedResults.some(
+        (existing) => existing.prodi_id === univResult.prodi_id
+      );
+      if (!alreadyExists) {
+        combinedResults.push(univResult);
+      }
     }
+
+    return this.transformResults(combinedResults, limit);
   }
 
-  async searchProdiByCombination(params: {
-    nama?: string;
-    jenjang?: string;
-    bidang?: string;
-  }): Promise<any[]> {
-    try {
-      let results: any[] = [];
+  // Multi-word search with intelligent matching
+  private async multiWordSearch(queryWords: string[], limit: number) {
+    // Get all potential matches
+    const allResults = await prisma.prodi.findMany({
+      include: {
+        prodi_pt: {
+          include: {
+            universitas: {
+              select: {
+                university_id: true,
+                nama: true,
+                nama_singkat: true,
+                provinsi: true,
+                akreditasi: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-      // If name is provided, use that as the primary search
-      if (params.nama) {
-        results = await this.searchProdiByName(params.nama);
-      } else {
-        // If no name, try to get results using broad search terms
-        const searchTerms = [];
-        if (params.bidang) searchTerms.push(params.bidang);
-        if (params.jenjang) searchTerms.push(params.jenjang);
+    // Score and filter results
+    const scoredResults = [];
 
-        if (searchTerms.length === 0) {
-          throw new Error("Minimal satu kriteria pencarian harus disediakan");
+    for (const prodi of allResults) {
+      for (const pt of prodi.prodi_pt) {
+        let score = 0;
+        const prodiName = prodi.nama_prodi.toLowerCase();
+        const univName = pt.universitas?.nama?.toLowerCase() || "";
+        const univShortName = pt.universitas?.nama_singkat?.toLowerCase() || "";
+
+        // Calculate score based on word matches
+        for (const word of queryWords) {
+          // Higher score for exact matches in prodi name
+          if (prodiName.includes(word)) {
+            score += 10;
+          }
+          // Medium score for university name matches
+          if (univName.includes(word) || univShortName.includes(word)) {
+            score += 5;
+          }
+          // Bonus for multiple word matches
+          if (score > 10) {
+            score += 2;
+          }
         }
 
-        // Use the first available term for search
-        results = await this.searchProdiByName(searchTerms[0]);
+        // Only include results that match at least one word
+        if (score > 0) {
+          scoredResults.push({
+            prodi,
+            pt,
+            score,
+          });
+        }
       }
-
-      // Filter by jenjang if provided
-      if (params.jenjang) {
-        results = results.filter(
-          (prodi) =>
-            prodi.jenjang &&
-            prodi.jenjang.toLowerCase().includes(params.jenjang!.toLowerCase())
-        );
-      }
-
-      // Filter by bidang if provided
-      if (params.bidang) {
-        results = results.filter(
-          (prodi) =>
-            prodi.bidang &&
-            prodi.bidang.toLowerCase().includes(params.bidang!.toLowerCase())
-        );
-      }
-
-      return results;
-    } catch (error: any) {
-      throw new Error(`Gagal mencari prodi: ${error.message}`);
     }
+
+    // Sort by score (highest first) and transform
+    const sortedResults = scoredResults
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => ({
+        prodi_id: item.prodi.prodi_id.toString(),
+        nama_prodi: item.prodi.nama_prodi,
+        jenjang: item.prodi.jenjang,
+        kode_prodi: null,
+        bidang: null,
+        akreditasi: item.pt.akreditasi_prodi,
+        status: "Aktif",
+        gelar: null,
+        universitas: item.pt.universitas
+          ? {
+              university_id: item.pt.universitas.university_id.toString(),
+              nama: item.pt.universitas.nama,
+              provinsi: item.pt.universitas.provinsi,
+            }
+          : null,
+      }));
+
+    return sortedResults;
   }
 
-  // Legacy method for backward compatibility - now uses API search
-  async list(filter: {
-    q?: string;
-    jenjang?: string;
-    bidang?: string;
-    skip?: number;
-    take?: number;
-  }) {
+  // Transform results to API format
+  private transformResults(combinedResults: any[], limit: number) {
+    const transformedResults = combinedResults.flatMap((prodi) =>
+      prodi.prodi_pt.map((pt: any) => ({
+        prodi_id: prodi.prodi_id.toString(),
+        nama_prodi: prodi.nama_prodi,
+        jenjang: prodi.jenjang,
+        kode_prodi: null,
+        bidang: null,
+        akreditasi: pt.akreditasi_prodi,
+        status: "Aktif",
+        gelar: null,
+        universitas: pt.universitas
+          ? {
+              university_id: pt.universitas.university_id.toString(),
+              nama: pt.universitas.nama,
+              provinsi: pt.universitas.provinsi,
+            }
+          : null,
+      }))
+    );
+
+    // Apply limit after transformation
+    return transformedResults.slice(0, limit);
+  }
+
+  // Get prodi detail from local database
+  async getProdiDetailLocal(prodiId: string) {
     try {
-      let results: any[] = [];
+      const result = await prisma.prodi.findUnique({
+        where: {
+          prodi_id: parseInt(prodiId),
+        },
+        include: {
+          prodi_pt: {
+            include: {
+              universitas: true,
+            },
+          },
+        },
+      });
 
-      // Use search by name if query is provided
-      if (filter.q) {
-        results = await this.searchProdiByName(filter.q);
-      } else {
-        // Use combination search for other filters
-        results = await this.searchProdiByCombination({
-          nama: filter.q,
-          jenjang: filter.jenjang,
-          bidang: filter.bidang,
-        });
+      if (!result) {
+        return null;
       }
 
-      // Apply pagination
-      const skip = filter.skip || 0;
-      const take = filter.take || 20;
-      const paginatedResults = results.slice(skip, skip + take);
-
-      return {
-        data: paginatedResults,
-        total: results.length,
+      // Transform to match API format
+      const transformedResult = {
+        prodi_id: result.prodi_id.toString(),
+        nama_prodi: result.nama_prodi,
+        jenjang: result.jenjang,
+        kode_prodi: null,
+        bidang: null,
+        akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
+        status_akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
+        tanggal_berdiri: null,
+        tanggal_tutup: null,
+        status: "Aktif",
+        gelar: null,
+        singkatan_gelar: null,
+        deskripsi: null,
       };
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil daftar prodi: ${error.message}`);
-    }
-  }
 
-  // Return simplified jenjang list
-  async getJenjangList() {
-    // Return only S1, D3, D4 as requested
-    return ["S1", "D3", "D4"];
+      return transformedResult;
+    } catch (error) {
+      console.error("Error getting prodi detail locally:", error);
+      throw error;
+    }
   }
 }

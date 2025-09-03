@@ -1,58 +1,58 @@
 import { Request, Response } from "express";
+import { ProdiPddiktiService } from "../services/prodiPddiktiService";
 import { ProdiService } from "../services/prodiService";
-import { LocalDataService } from "../services/localDataService";
 
-const service = new ProdiService();
-const localService = new LocalDataService();
+const pddiktiservice = new ProdiPddiktiService();
+const localService = new ProdiService();
 
 export class ProdiController {
-  // API-based endpoints using PDDIKTI
-  async list(req: Request, res: Response) {
-    try {
-      const { q, jenjang, bidang, page = "1", limit = "20" } = req.query as any;
-      const take = Math.min(
-        Math.max(parseInt(limit as string, 10) || 20, 1),
-        100
-      );
-      const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
-      const skip = (pageNum - 1) * take;
+  // // API-based endpoints using PDDIKTI
+  // async list(req: Request, res: Response) {
+  //   try {
+  //     const { q, jenjang, bidang, page = "1", limit = "20" } = req.query as any;
+  //     const take = Math.min(
+  //       Math.max(parseInt(limit as string, 10) || 20, 1),
+  //       100
+  //     );
+  //     const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
+  //     const skip = (pageNum - 1) * take;
 
-      const { data, total } = await service.list({
-        q: q as string,
-        jenjang: jenjang as string,
-        bidang: bidang as string,
-        skip,
-        take,
-      });
+  //     const { data, total } = await pddiktiservice.list({
+  //       q: q as string,
+  //       jenjang: jenjang as string,
+  //       bidang: bidang as string,
+  //       skip,
+  //       take,
+  //     });
 
-      res.json({
-        message: "Berhasil mengambil daftar prodi",
-        data,
-        total,
-        page: pageNum,
-        limit: take,
-      });
-    } catch (e: any) {
-      res
-        .status(500)
-        .json({ message: "Gagal mengambil daftar prodi", error: e.message });
-    }
-  }
+  //     res.json({
+  //       message: "Berhasil mengambil daftar prodi",
+  //       data,
+  //       total,
+  //       page: pageNum,
+  //       limit: take,
+  //     });
+  //   } catch (e: any) {
+  //     res
+  //       .status(500)
+  //       .json({ message: "Gagal mengambil daftar prodi", error: e.message });
+  //   }
+  // }
 
-  async getJenjangList(req: Request, res: Response) {
-    try {
-      const data = await service.getJenjangList();
-      res.json({
-        message: "Berhasil mengambil daftar jenjang",
-        data,
-        total: data.length,
-      });
-    } catch (e: any) {
-      res
-        .status(500)
-        .json({ message: "Gagal mengambil daftar jenjang", error: e.message });
-    }
-  }
+  // async getJenjangList(req: Request, res: Response) {
+  //   try {
+  //     const data = await pddiktiservice.getJenjangList();
+  //     res.json({
+  //       message: "Berhasil mengambil daftar jenjang",
+  //       data,
+  //       total: data.length,
+  //     });
+  //   } catch (e: any) {
+  //     res
+  //       .status(500)
+  //       .json({ message: "Gagal mengambil daftar jenjang", error: e.message });
+  //   }
+  // }
 
   async getProdiById(req: Request, res: Response) {
     try {
