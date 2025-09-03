@@ -374,10 +374,58 @@ export class LocalDataService {
           },
         },
       },
-      take: limit,
+      take: limit * 3, // Get more results for smart scoring
     });
 
-    return this.transformUniversitasResults(results);
+    // Apply smart scoring even for simple search
+    const scoredResults = [];
+
+    for (const univ of results) {
+      let score = 0;
+      const univName = univ.nama.toLowerCase();
+      const univShortName = univ.nama_singkat?.toLowerCase() || "";
+      const kota = univ.kota?.toLowerCase() || "";
+      const provinsi = univ.provinsi?.toLowerCase() || "";
+
+      // Smart nickname detection for single word
+      const nicknameScore = this.calculateNicknameScore(
+        query,
+        univName,
+        univShortName
+      );
+      if (nicknameScore > 0) {
+        score += nicknameScore;
+      }
+
+      // Higher score for exact matches in university name
+      if (univName.includes(query)) {
+        score += 10;
+      }
+      // Medium score for short name matches
+      if (univShortName.includes(query)) {
+        score += 8;
+      }
+      // Lower score for city/province matches
+      if (kota.includes(query) || provinsi.includes(query)) {
+        score += 3;
+      }
+
+      // Only include results that match at least one criterion
+      if (score > 0) {
+        scoredResults.push({
+          univ,
+          score,
+        });
+      }
+    }
+
+    // Sort by score (highest first) and apply limit
+    const sortedResults = scoredResults
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => item.univ);
+
+    return this.transformUniversitasResults(sortedResults);
   }
 
   // Multi-word search with intelligent matching (universitas)
@@ -408,29 +456,14 @@ export class LocalDataService {
 
       // Calculate score based on word matches
       for (const word of queryWords) {
-        // Special handling for common university nicknames/shortcuts
-        if (word === "binus" && univName.includes("bina nusantara")) {
-          score += 20;
-          continue;
-        }
-        if (word === "ui" && univName.includes("universitas indonesia")) {
-          score += 20;
-          continue;
-        }
-        if (word === "itb" && univName.includes("teknologi bandung")) {
-          score += 20;
-          continue;
-        }
-        if (word === "ugm" && univName.includes("gadjah mada")) {
-          score += 20;
-          continue;
-        }
-        if (word === "its" && univName.includes("teknologi sepuluh")) {
-          score += 20;
-          continue;
-        }
-        if (word === "unair" && univName.includes("airlangga")) {
-          score += 20;
+        // Smart nickname detection based on university name patterns
+        const nicknameScore = this.calculateNicknameScore(
+          word,
+          univName,
+          univShortName
+        );
+        if (nicknameScore > 0) {
+          score += nicknameScore;
           continue;
         }
 
@@ -542,5 +575,250 @@ export class LocalDataService {
       console.error("Error getting universitas detail locally:", error);
       throw error;
     }
+  }
+
+  // Smart nickname detection algorithm
+  private calculateNicknameScore(
+    searchWord: string,
+    univName: string,
+    univShortName: string
+  ): number {
+    // If short name exists and matches exactly, high score
+    if (univShortName && univShortName === searchWord) {
+      return 30; // Highest score for exact short name match
+    }
+
+    // Check if search word matches existing short name patterns
+    if (univShortName && univShortName.includes(searchWord)) {
+      return 25; // Very high score for partial short name match
+    }
+
+    // Check if short name is contained in search word (for longer searches)
+    if (
+      univShortName &&
+      searchWord.length >= 4 &&
+      searchWord.includes(univShortName)
+    ) {
+      return 25; // Very high score when short name is part of search
+    }
+
+    // Check for special cases first (like 'binus' for 'bina nusantara')
+    if (this.isSpecialNickname(searchWord, univName.toLowerCase())) {
+      return 25;
+    }
+
+    // Algorithm to detect common nickname patterns
+    const univWords = univName
+      .split(/\s+/)
+      .filter(
+        (word) =>
+          word.length > 2 &&
+          ![
+            "universitas",
+            "institut",
+            "sekolah",
+            "politeknik",
+            "akademi",
+            "dan",
+            "di",
+            "negeri",
+          ].includes(word.toLowerCase())
+      );
+
+    // Check if search word is a significant part of any university word
+    for (const word of univWords) {
+      const lowerWord = word.toLowerCase();
+
+      // Exact match with significant words
+      if (lowerWord === searchWord) {
+        return 25; // Increased score for exact match
+      }
+
+      // Check if search word is contained in university word (minimum 3 chars)
+      if (searchWord.length >= 3 && lowerWord.includes(searchWord)) {
+        // Higher score if search word is substantial part of the university word
+        const matchRatio = searchWord.length / lowerWord.length;
+        if (matchRatio >= 0.6) {
+          return 22; // High score for substantial match
+        } else if (matchRatio >= 0.4) {
+          return 18; // Medium score
+        } else {
+          return 15; // Lower score but still significant
+        }
+      }
+
+      // Check if university word starts with search word (prefix match)
+      if (searchWord.length >= 3 && lowerWord.startsWith(searchWord)) {
+        return 20;
+      }
+
+      // Check common abbreviation patterns
+      if (
+        searchWord.length >= 3 &&
+        this.isLikelyAbbreviation(searchWord, lowerWord)
+      ) {
+        return 16;
+      }
+    }
+
+    // Try to match acronyms (first letters of important words)
+    const acronym = univWords
+      .map((word) => word.charAt(0).toLowerCase())
+      .join("");
+
+    if (searchWord === acronym && acronym.length >= 2) {
+      return 25; // Very high score for perfect acronym match
+    }
+
+    // Check partial acronym matches
+    if (searchWord.length >= 2 && acronym.includes(searchWord)) {
+      return 20;
+    }
+
+    // Check for common university type prefixes
+    if (
+      searchWord.startsWith("un") &&
+      univName.toLowerCase().includes("universitas")
+    ) {
+      // Extract the main part after 'un'
+      const mainPart = searchWord.substring(2);
+      for (const word of univWords) {
+        if (word.toLowerCase().startsWith(mainPart)) {
+          return 20;
+        }
+      }
+    }
+
+    return 0; // No nickname match found
+  }
+
+  // Helper method to detect likely abbreviations
+  private isLikelyAbbreviation(searchWord: string, univWord: string): boolean {
+    // Check if search word could be formed by taking first few chars + last few chars
+    if (searchWord.length >= 3 && univWord.length >= 6) {
+      const prefix = univWord.substring(0, Math.ceil(searchWord.length / 2));
+      const suffix = univWord.substring(
+        univWord.length - Math.floor(searchWord.length / 2)
+      );
+
+      if (searchWord === (prefix + suffix).toLowerCase()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Special cases for well-known university nicknames
+  private isSpecialNickname(searchWord: string, univName: string): boolean {
+    const specialCases: { [key: string]: string[] } = {
+      binus: ["bina nusantara"],
+      telkom: ["telkom", "telekomunikasi"],
+      trisakti: ["trisakti"],
+      atmajaya: ["atma jaya"],
+      petra: ["petra"],
+      tarumanagara: ["tarumanagara"],
+      ubaya: ["surabaya"],
+      uph: ["pelita harapan"],
+      umn: ["multimedia nusantara"],
+    };
+
+    // Direct match check
+    if (specialCases[searchWord]) {
+      return specialCases[searchWord].some((keyword) =>
+        univName.includes(keyword)
+      );
+    }
+
+    // Flexible matching for partial names and common variations
+    const flexibleMatches: { [key: string]: string[] } = {
+      // Tarumanagara variations
+      taruma: ["tarumanagara"],
+      tarumanegara: ["tarumanagara"], // common typo
+      untar: ["tarumanagara"],
+
+      // Binus variations
+      bin: ["bina nusantara"],
+      binus: ["bina nusantara"],
+
+      // Telkom variations
+      tel: ["telkom"],
+      telko: ["telkom"],
+
+      // Petra variations
+      pet: ["petra"],
+      ukp: ["petra"], // Universitas Kristen Petra
+
+      // Atmajaya variations
+      atma: ["atma jaya"],
+      jaya: ["atma jaya"],
+      uaj: ["atma jaya"],
+
+      // UPH variations
+      pelita: ["pelita harapan"],
+      harapan: ["pelita harapan"],
+
+      // UMN variations
+      multimedia: ["multimedia nusantara"],
+      nusantara: ["multimedia nusantara"],
+
+      // Common university short names
+      ui: ["universitas indonesia"],
+      itb: ["institut teknologi bandung"],
+      ugm: ["universitas gadjah mada"],
+      its: ["institut teknologi sepuluh"],
+      unair: ["universitas airlangga"],
+      undip: ["universitas diponegoro"],
+      uns: ["universitas sebelas maret"],
+      unpad: ["universitas padjadjaran"],
+      uny: ["universitas negeri yogyakarta"],
+      unnes: ["universitas negeri semarang"],
+      unm: ["universitas negeri makassar"],
+      unimed: ["universitas negeri medan"],
+      upi: ["universitas pendidikan indonesia"],
+      usu: ["universitas sumatera utara"],
+      unsri: ["universitas sriwijaya"],
+      unand: ["universitas andalas"],
+      unhas: ["universitas hasanuddin"],
+      unsyiah: ["universitas syiah kuala"],
+      unlam: ["universitas lambung mangkurat"],
+      unram: ["universitas mataram"],
+      uncen: ["universitas cenderawasih"],
+      unud: ["universitas udayana"],
+      unesa: ["universitas negeri surabaya"],
+      unmul: ["universitas mulawarman"],
+      untad: ["universitas tadulako"],
+      untirta: ["universitas sultan ageng tirtayasa"],
+      upn: ["universitas pembangunan nasional"],
+    };
+
+    // Check flexible matches
+    if (flexibleMatches[searchWord]) {
+      return flexibleMatches[searchWord].some((keyword) =>
+        univName.includes(keyword)
+      );
+    }
+
+    // Check if searchWord is a substantial part of any special university name
+    for (const [nickname, keywords] of Object.entries(specialCases)) {
+      for (const keyword of keywords) {
+        // Check if search word is contained in keyword and is substantial
+        if (searchWord.length >= 4 && keyword.includes(searchWord)) {
+          const matchRatio = searchWord.length / keyword.length;
+          if (matchRatio >= 0.5 && univName.includes(keyword)) {
+            return true;
+          }
+        }
+
+        // Check if keyword is contained in search word (for longer search terms)
+        if (searchWord.length >= 6 && searchWord.includes(keyword)) {
+          if (univName.includes(keyword)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 }
