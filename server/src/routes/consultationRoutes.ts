@@ -33,25 +33,13 @@ router.get(
   consultationController.getConsultationsByStatus.bind(consultationController)
 );
 
-// Get consultations for a specific student
+// Get consultations by student name
 router.get(
-  "/student/:student_id",
+  "/student/name/:firstname",
   authenticateToken,
-  consultationController.getConsultationsForStudent.bind(consultationController)
-);
-
-// Get consultations for a specific admin
-router.get(
-  "/admin/:admin_id",
-  authenticateToken,
-  consultationController.getConsultationsForAdmin.bind(consultationController)
-);
-
-// Get consultation by ID
-router.get(
-  "/:id",
-  authenticateToken,
-  consultationController.getConsultationById.bind(consultationController)
+  consultationController.getConsultationsForStudentByName.bind(
+    consultationController
+  )
 );
 
 // Update consultation status (accept/decline)

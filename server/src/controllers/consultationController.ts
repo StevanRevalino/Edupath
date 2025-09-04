@@ -281,6 +281,38 @@ export class ConsultationController {
     }
   }
 
+  // Get consultations for students by name
+  async getConsultationsForStudentByName(req: Request, res: Response) {
+    try {
+      const { firstname } = req.params;
+      const { lastname } = req.query;
+
+      if (!firstname) {
+        return res.status(400).json({
+          success: false,
+          message: "Nama depan siswa wajib diisi",
+        });
+      }
+
+      const result = await consultationService.getConsultationsForStudentByName(
+        firstname,
+        lastname as string
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil konseling berdasarkan nama siswa",
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || "Terjadi kesalahan saat mengambil data konseling",
+      });
+    }
+  }
+
   // Delete consultation
   async deleteConsultation(req: Request, res: Response) {
     try {

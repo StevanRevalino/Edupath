@@ -167,6 +167,38 @@ export class ConsultationService {
     }
   }
 
+  // Get consultations for students by name
+  async getConsultationsForStudentByName(firstname: string, lastname?: string) {
+    try {
+      // Find students with matching name
+      const students = await userRepository.findByName(firstname, lastname);
+
+      if (students.length === 0) {
+        throw new Error("Tidak ada siswa ditemukan dengan nama tersebut");
+      }
+
+      // Get consultations for all matching students
+      const consultationsPromises = students.map((student) =>
+        consultationRepository.findByMuridId(student.user_id)
+      );
+
+      const allConsultations = await Promise.all(consultationsPromises);
+
+      // Flatten the results and add student info
+      const consultations = allConsultations.flat().map((consultation) => ({
+        ...consultation,
+        student_info: students.find((s) => s.user_id === consultation.murid_id),
+      }));
+
+      return {
+        students: students,
+        consultations: consultations,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Delete consultation (optional - in case you need it)
   async deleteConsultation(consultation_id: string) {
     try {

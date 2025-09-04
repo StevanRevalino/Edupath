@@ -40,4 +40,32 @@ export class UserRepository {
   async findById(userId: string) {
     return prisma.user.findUnique({ where: { user_id: userId } });
   }
+
+  async findByName(firstname: string, lastname?: string) {
+    const where: any = {
+      firstname: {
+        contains: firstname,
+        mode: "insensitive",
+      },
+      role: "STUDENT",
+    };
+
+    if (lastname) {
+      where.lastname = {
+        contains: lastname,
+        mode: "insensitive",
+      };
+    }
+
+    return prisma.user.findMany({
+      where,
+      select: {
+        user_id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+        kelas: true,
+      },
+    });
+  }
 }
