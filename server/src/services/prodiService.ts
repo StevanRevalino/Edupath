@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { ProdiRepository } from "../repositories/prodiRepository";
 
-const prisma = new PrismaClient();
+const prodiRepository = new ProdiRepository();
 
 export class ProdiService {
   // Search prodi from local database
@@ -28,78 +28,50 @@ export class ProdiService {
   // Simple search for single words
   private async simpleSearch(query: string, limit: number) {
     // First, search by prodi name (higher priority)
-    const prodiNameResults = await prisma.prodi.findMany({
-      where: {
-        nama_prodi: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-      include: {
-        prodi_pt: {
-          include: {
-            universitas: {
-              select: {
-                university_id: true,
-                nama: true,
-                nama_singkat: true,
-                provinsi: true,
-                akreditasi: true,
-              },
-            },
-          },
-        },
-      },
+    const prodiNameResults = await prodiRepository.findMany({
+      nama_prodi: query,
+      limit: 1000, // Get more results for processing
     });
 
+    // Get the detailed results with relations
+    const prodiNameResultsWithRelations = await Promise.all(
+      prodiNameResults.map(async (prodi) => {
+        return await prodiRepository.findById(prodi.prodi_id);
+      })
+    );
+
     // Then, search by university name (lower priority)
-    const universityNameResults = await prisma.prodi.findMany({
-      where: {
-        prodi_pt: {
-          some: {
-            universitas: {
-              OR: [
-                {
-                  nama: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  nama_singkat: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            },
-          },
-        },
-      },
-      include: {
-        prodi_pt: {
-          include: {
-            universitas: {
-              select: {
-                university_id: true,
-                nama: true,
-                nama_singkat: true,
-                provinsi: true,
-                akreditasi: true,
-              },
-            },
-          },
-        },
-      },
+    // Since ProdiRepository doesn't have direct university search,
+    // we'll get all prodi and filter by university
+    const allProdiWithUniversities = await Promise.all(
+      (
+        await prodiRepository.findMany({ limit: 1000 })
+      ).map(async (prodi) => {
+        return await prodiRepository.findById(prodi.prodi_id);
+      })
+    );
+
+    const universityNameResults = allProdiWithUniversities.filter((prodi) => {
+      if (!prodi?.prodi_pt) return false;
+      return prodi.prodi_pt.some((pt) => {
+        const univName = pt.universitas?.nama?.toLowerCase() || "";
+        const univShortName = pt.universitas?.nama_singkat?.toLowerCase() || "";
+        return (
+          univName.includes(query.toLowerCase()) ||
+          univShortName.includes(query.toLowerCase())
+        );
+      });
     });
 
     // Combine results, prioritizing prodi name matches
-    const combinedResults = [...prodiNameResults];
+    const combinedResults = [...prodiNameResultsWithRelations.filter(Boolean)];
 
     // Add university name results that aren't already included
     for (const univResult of universityNameResults) {
+      if (!univResult) continue;
+
       const alreadyExists = combinedResults.some(
-        (existing) => existing.prodi_id === univResult.prodi_id
+        (existing) => existing && existing.prodi_id === univResult.prodi_id
       );
       if (!alreadyExists) {
         combinedResults.push(univResult);
@@ -111,29 +83,22 @@ export class ProdiService {
 
   // Multi-word search with intelligent matching
   private async multiWordSearch(queryWords: string[], limit: number) {
-    // Get all potential matches
-    const allResults = await prisma.prodi.findMany({
-      include: {
-        prodi_pt: {
-          include: {
-            universitas: {
-              select: {
-                university_id: true,
-                nama: true,
-                nama_singkat: true,
-                provinsi: true,
-                akreditasi: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    // Get all potential matches from repository
+    const allProdi = await prodiRepository.findMany({ limit: 2000 });
+
+    // Get detailed results with relations
+    const allResults = await Promise.all(
+      allProdi.map(async (prodi) => {
+        return await prodiRepository.findById(prodi.prodi_id);
+      })
+    );
 
     // Score and filter results
     const scoredResults = [];
 
     for (const prodi of allResults) {
+      if (!prodi || !prodi.prodi_pt) continue;
+
       for (const pt of prodi.prodi_pt) {
         let score = 0;
         const prodiName = prodi.nama_prodi.toLowerCase();
@@ -221,18 +186,7 @@ export class ProdiService {
   // Get prodi detail from local database
   async getProdiDetailLocal(prodiId: string) {
     try {
-      const result = await prisma.prodi.findUnique({
-        where: {
-          prodi_id: parseInt(prodiId),
-        },
-        include: {
-          prodi_pt: {
-            include: {
-              universitas: true,
-            },
-          },
-        },
-      });
+      const result = await prodiRepository.findById(parseInt(prodiId));
 
       if (!result) {
         return null;

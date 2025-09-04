@@ -23,15 +23,17 @@ enum Role {
 }
 
 model User {
-  user_id       String          @id
-  firstname     String
-  lastname      String
-  email         String          @unique
-  password      String
-  role          Role            @default(STUDENT)
-  kelas         Int?
-  created_at    DateTime        @default(now())
-  searchHistory SearchHistory[]
+  user_id              String          @id
+  firstname            String
+  lastname             String
+  email                String          @unique
+  password             String
+  role                 Role            @default(STUDENT)
+  kelas                Int?
+  created_at           DateTime        @default(now())
+  searchHistory        SearchHistory[]
+  consultationsAsMurid Consultation[]  @relation("ConsultationMurid")
+  consultationsAsAdmin Consultation[]  @relation("ConsultationAdmin")
 }
 
 enum SearchType {
@@ -101,4 +103,29 @@ model ProdiPT {
   @@unique([prodi_id, university_id])
   @@index([prodi_id])
   @@index([university_id])
+}
+
+enum ConsultationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Consultation {
+  consultation_id   String             @id
+  murid_id          String
+  admin_id          String
+  topic             String
+  consultation_date DateTime
+  notes             String?
+  status            ConsultationStatus @default(PENDING)
+  created_at        DateTime           @default(now())
+
+  murid User @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
+  admin User @relation("ConsultationAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
+
+  @@index([murid_id])
+  @@index([admin_id])
+  @@index([status])
+  @@index([consultation_date])
 }

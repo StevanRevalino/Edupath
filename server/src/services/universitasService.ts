@@ -1,23 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { UniversitasRepository } from "../repositories/universitasRepository";
 
-const prisma = new PrismaClient();
+const universitasRepository = new UniversitasRepository();
 
 export class UniversitasService {
   // Get university detail by ID from local database
   async getUniversitasById(universityId: string) {
     try {
-      const universitas = await prisma.universitas.findUnique({
-        where: {
-          university_id: parseInt(universityId),
-        },
-        include: {
-          prodi_pt: {
-            include: {
-              prodi: true,
-            },
-          },
-        },
-      });
+      const universitas = await universitasRepository.findById(
+        parseInt(universityId)
+      );
 
       if (!universitas) {
         throw new Error(
@@ -81,94 +72,93 @@ export class UniversitasService {
 
   // Simple search for single words (universitas)
   private async simpleUniversitasSearch(query: string, limit: number) {
-    const results = await prisma.universitas.findMany({
-      where: {
-        OR: [
-          {
-            nama: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-          {
-            nama_singkat: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-          {
-            kota: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-          {
-            provinsi: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-        ],
-      },
-      include: {
-        prodi_pt: {
-          include: {
-            prodi: true,
-          },
-        },
-      },
-      take: limit * 3, // Get more results for smart scoring
-    });
+    try {
+      // For advanced nickname search, we need to get more data for scoring
+      // First try exact name search
+      const nameResults = await universitasRepository.findMany({
+        nama: query, // Repository will handle the contains/insensitive search
+        limit: limit * 2, // Get some results for smart scoring
+      });
 
-    // Apply smart scoring even for simple search
-    const scoredResults = [];
+      // Also get additional data for nickname matching if name search is limited
+      const allResults = await universitasRepository.findMany({
+        limit: 500, // Get more results for advanced nickname matching
+      });
 
-    for (const univ of results) {
-      let score = 0;
-      const univName = univ.nama.toLowerCase();
-      const univShortName = univ.nama_singkat?.toLowerCase() || "";
-      const kota = univ.kota?.toLowerCase() || "";
-      const provinsi = univ.provinsi?.toLowerCase() || "";
+      // Combine results, prioritizing name matches
+      const combinedResults = [...nameResults];
+      const nameResultIds = new Set(nameResults.map((r) => r.university_id));
 
-      // Smart nickname detection for single word
-      const nicknameScore = this.calculateNicknameScore(
-        query,
-        univName,
-        univShortName
+      // Add non-duplicate results from all results for nickname matching
+      for (const result of allResults) {
+        if (!nameResultIds.has(result.university_id)) {
+          combinedResults.push(result);
+        }
+      }
+
+      console.log(
+        `Found ${nameResults?.length || 0} name matches and ${
+          combinedResults.length
+        } total results for query: ${query}`
       );
-      if (nicknameScore > 0) {
-        score += nicknameScore;
+
+      if (!combinedResults || combinedResults.length === 0) {
+        return [];
       }
 
-      // Higher score for exact matches in university name
-      if (univName.includes(query)) {
-        score += 10;
-      }
-      // Medium score for short name matches
-      if (univShortName.includes(query)) {
-        score += 8;
-      }
-      // Lower score for city/province matches
-      if (kota.includes(query) || provinsi.includes(query)) {
-        score += 3;
+      // Apply smart scoring even for simple search
+      const scoredResults = [];
+
+      for (const univ of combinedResults) {
+        let score = 0;
+        const univName = univ.nama.toLowerCase();
+        const univShortName = univ.nama_singkat?.toLowerCase() || "";
+        const kota = univ.kota?.toLowerCase() || "";
+        const provinsi = univ.provinsi?.toLowerCase() || "";
+
+        // Smart nickname detection for single word
+        const nicknameScore = this.calculateNicknameScore(
+          query,
+          univName,
+          univShortName
+        );
+        if (nicknameScore > 0) {
+          score += nicknameScore;
+        }
+
+        // Higher score for exact matches in university name
+        if (univName.includes(query)) {
+          score += 10;
+        }
+        // Medium score for short name matches
+        if (univShortName.includes(query)) {
+          score += 8;
+        }
+        // Lower score for city/province matches
+        if (kota.includes(query) || provinsi.includes(query)) {
+          score += 3;
+        }
+
+        // Only include results that match at least one criterion
+        if (score > 0) {
+          scoredResults.push({
+            univ,
+            score,
+          });
+        }
       }
 
-      // Only include results that match at least one criterion
-      if (score > 0) {
-        scoredResults.push({
-          univ,
-          score,
-        });
-      }
+      // Sort by score (highest first) and apply limit
+      const sortedResults = scoredResults
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((item) => item.univ);
+
+      return this.transformUniversitasResults(sortedResults);
+    } catch (error) {
+      console.error("Error in simpleUniversitasSearch:", error);
+      throw error;
     }
-
-    // Sort by score (highest first) and apply limit
-    const sortedResults = scoredResults
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((item) => item.univ);
-
-    return this.transformUniversitasResults(sortedResults);
   }
 
   // Multi-word search with intelligent matching (universitas)
@@ -177,14 +167,8 @@ export class UniversitasService {
     limit: number
   ) {
     // Get all potential matches
-    const allResults = await prisma.universitas.findMany({
-      include: {
-        prodi_pt: {
-          include: {
-            prodi: true,
-          },
-        },
-      },
+    const allResults = await universitasRepository.findMany({
+      limit: 1000, // Get more results for multi-word matching
     });
 
     // Score and filter results
@@ -264,25 +248,16 @@ export class UniversitasService {
       status: univ.status,
       rank_qs: univ.rank_qs,
       rank_country: univ.rank_country,
-      jumlah_prodi: univ.prodi_pt.length,
+      jumlah_prodi: univ._count?.prodi_pt || 0,
     }));
   }
 
   // Get universitas detail from local database
   async getUniversitasDetailLocal(universityId: string) {
     try {
-      const result = await prisma.universitas.findUnique({
-        where: {
-          university_id: parseInt(universityId),
-        },
-        include: {
-          prodi_pt: {
-            include: {
-              prodi: true,
-            },
-          },
-        },
-      });
+      const result = await universitasRepository.findById(
+        parseInt(universityId)
+      );
 
       if (!result) {
         return null;
@@ -305,7 +280,7 @@ export class UniversitasService {
         status: result.status,
         rank_qs: result.rank_qs,
         rank_country: result.rank_country,
-        prodi: result.prodi_pt.map((pt) => ({
+        prodi: result.prodi_pt.map((pt: any) => ({
           prodi_id: pt.prodi.prodi_id.toString(),
           nama_prodi: pt.prodi.nama_prodi,
           jenjang: pt.prodi.jenjang,

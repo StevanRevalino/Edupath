@@ -98,7 +98,7 @@ const Universitas: React.FC = () => {
       setLoading(true);
       setError("");
       try {
-        const url = `${API_BASE}/api/universitas/search/nama`;
+        const url = `${API_BASE}/api/universitas/search`;
         const res = await axios.get(url, {
           params: { nama: q.trim() },
           signal: ctrl.signal,

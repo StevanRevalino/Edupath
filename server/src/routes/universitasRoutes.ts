@@ -4,9 +4,9 @@ import { UniversitasController } from "../controllers/universitasController";
 const router = Router();
 const universitasController = new UniversitasController();
 
-// GET /api/universitas/search/nama - Search universitas by name
+// GET /api/universitas/search - Search universitas by name
 router.get(
-  "/search/nama",
+  "/search",
   universitasController.searchUniversitas.bind(universitasController)
 );
 
