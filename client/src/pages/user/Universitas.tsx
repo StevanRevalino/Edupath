@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import apiClient from "../../utils/apiClient";
 
 type UniversitasItem = {
   university_id: string;
@@ -43,9 +44,6 @@ type UniversitasDetailType = {
   rank_country?: number | null;
 };
 
-const API_BASE =
-  (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
 const Universitas: React.FC = () => {
   const location = useLocation();
   const [query, setQuery] = useState<string>("");
@@ -65,8 +63,8 @@ const Universitas: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const url = `${API_BASE}/api/universitas/${universityId}`;
-      const res = await axios.get(url);
+      const url = `/universitas/${universityId}`;
+      const res = await apiClient.get(url);
       const data = res.data?.data as UniversitasDetailType;
       console.log("Universitas Detail:", data);
       setSelectedUniversitas(data);
@@ -98,8 +96,8 @@ const Universitas: React.FC = () => {
       setLoading(true);
       setError("");
       try {
-        const url = `${API_BASE}/api/universitas/search`;
-        const res = await axios.get(url, {
+        const url = `/universitas/search`;
+        const res = await apiClient.get(url, {
           params: { nama: q.trim() },
           signal: ctrl.signal,
         });

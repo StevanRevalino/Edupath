@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import apiClient from "../../utils/apiClient";
 
 type ProdiItem = {
   prodi_id: string;
@@ -46,9 +47,6 @@ type SearchHistoryItem = {
   type: string;
   created_at: string;
 };
-
-const API_BASE =
-  (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 const Jurusan: React.FC = () => {
   const location = useLocation();
@@ -133,8 +131,8 @@ const Jurusan: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const url = `${API_BASE}/api/prodi/detail/${prodiId}`;
-      const res = await axios.get(url);
+      const url = `/prodi/detail/${prodiId}`;
+      const res = await apiClient.get(url);
       const data = res.data?.data as ProdiDetailType;
       console.log("Prodi Detail:", data);
       setSelectedProdi(data);
@@ -160,10 +158,10 @@ const Jurusan: React.FC = () => {
       setError("");
       setShowHistory(false); // Hide history when searching
       try {
-        const url = `${API_BASE}/api/prodi/search/nama/${encodeURIComponent(
+        const url = `/prodi/search/nama/${encodeURIComponent(
           q.trim()
         )}`;
-        const res = await axios.get(url, {
+        const res = await apiClient.get(url, {
           signal: ctrl.signal,
         });
         const data = (res.data?.data || []) as ProdiItem[];

@@ -8,7 +8,14 @@ export class SearchHistoryController {
   async saveSearch(req: Request, res: Response) {
     try {
       const { query, type } = req.body;
-      const userId = req.user?.user_id; // From auth middleware if authenticated
+      const userId = req.user?.user_id; // From auth middleware
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required",
+        });
+      }
 
       if (!query || !type) {
         return res.status(400).json({
@@ -25,22 +32,15 @@ export class SearchHistoryController {
       }
 
       // Check if the same search exists for this user recently (within last hour)
-      const whereClause: any = {
-        query: query.trim(),
-        type,
-        created_at: {
-          gte: new Date(Date.now() - 60 * 60 * 1000), // Last hour
-        },
-      };
-
-      if (userId) {
-        whereClause.user_id = userId;
-      } else {
-        whereClause.user_id = null;
-      }
-
       const recentSearch = await prisma.searchHistory.findFirst({
-        where: whereClause,
+        where: {
+          user_id: userId,
+          query: query.trim(),
+          type,
+          created_at: {
+            gte: new Date(Date.now() - 60 * 60 * 1000), // Last hour
+          },
+        },
       });
 
       if (recentSearch) {
@@ -58,17 +58,12 @@ export class SearchHistoryController {
       }
 
       // Create new search history record
-      const createData: any = {
-        query: query.trim(),
-        type,
-      };
-
-      if (userId) {
-        createData.user_id = userId;
-      }
-
       const searchHistory = await prisma.searchHistory.create({
-        data: createData,
+        data: {
+          user_id: userId,
+          query: query.trim(),
+          type,
+        },
       });
 
       res.status(201).json({
@@ -89,7 +84,14 @@ export class SearchHistoryController {
   async getRecentSearches(req: Request, res: Response) {
     try {
       const { type, limit = "5" } = req.query;
-      const userId = req.user?.user_id; // From auth middleware if authenticated
+      const userId = req.user?.user_id; // From auth middleware
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required",
+        });
+      }
 
       if (!type) {
         return res.status(400).json({
@@ -105,18 +107,11 @@ export class SearchHistoryController {
         });
       }
 
-      const getSearchWhereClause: any = {
-        type: type as SearchType,
-      };
-
-      if (userId) {
-        getSearchWhereClause.user_id = userId;
-      } else {
-        getSearchWhereClause.user_id = null;
-      }
-
       const searchHistory = await prisma.searchHistory.findMany({
-        where: getSearchWhereClause,
+        where: {
+          user_id: userId,
+          type: type as SearchType,
+        },
         orderBy: {
           created_at: "desc",
         },
@@ -141,15 +136,18 @@ export class SearchHistoryController {
   async clearHistory(req: Request, res: Response) {
     try {
       const { type } = req.query;
-      const userId = req.user?.user_id; // From auth middleware if authenticated
+      const userId = req.user?.user_id; // From auth middleware
 
-      const deleteCondition: any = {};
-
-      if (userId) {
-        deleteCondition.user_id = userId;
-      } else {
-        deleteCondition.user_id = null;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required",
+        });
       }
+
+      const deleteCondition: any = {
+        user_id: userId,
+      };
 
       if (type && Object.values(SearchType).includes(type as SearchType)) {
         deleteCondition.type = type as SearchType;
