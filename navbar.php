@@ -71,6 +71,9 @@
         margin-bottom: 4px;
     }
 
+    .navbar-links a:hover{
+        text-shadow: 2px 2px 4px #000000;
+    }
 </style>
 
   <nav class="navbar">
