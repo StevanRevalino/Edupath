@@ -17,11 +17,26 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function DefaultRoute() {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  if (role === "ADMIN") {
+    return <Navigate to="/dashboard-admin" />;
+  } else {
+    return <Navigate to="/home" />;
+  }
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<DefaultRoute />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route
@@ -35,19 +50,76 @@ function App() {
 
         {/* Dashboard User dengan header tetap */}
         <Route
-          path="/"
+          path="/user"
           element={
             <ProtectedRoute>
               <UserDashboard />
             </ProtectedRoute>
           }
         >
-          <Route index path="home" element={<Home />} />
-          <Route path="tes" element={<Tes />} />
-          <Route path="jurusan" element={<Jurusan />} />
-          <Route path="universitas" element={<Universitas />} />
-          <Route path="konseling" element={<Konseling />} />
-          <Route path="profil" element={<Profil />} />
+          <Route index element={<Navigate to="/home" />} />
+        </Route>
+
+        {/* User routes */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Home />} />
+        </Route>
+        <Route
+          path="/tes"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Tes />} />
+        </Route>
+        <Route
+          path="/jurusan"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Jurusan />} />
+        </Route>
+        <Route
+          path="/universitas"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Universitas />} />
+        </Route>
+        <Route
+          path="/konseling"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Konseling />} />
+        </Route>
+        <Route
+          path="/profil"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Profil />} />
         </Route>
       </Routes>
     </BrowserRouter>
