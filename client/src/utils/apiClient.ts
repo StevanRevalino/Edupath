@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+const API_BASE =
+  (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 // Create axios instance with interceptors for automatic token handling
 const apiClient = axios.create({

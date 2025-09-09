@@ -158,9 +158,7 @@ const Jurusan: React.FC = () => {
       setError("");
       setShowHistory(false); // Hide history when searching
       try {
-        const url = `/prodi/search/nama/${encodeURIComponent(
-          q.trim()
-        )}`;
+        const url = `/prodi/search/nama/${encodeURIComponent(q.trim())}`;
         const res = await apiClient.get(url, {
           signal: ctrl.signal,
         });
