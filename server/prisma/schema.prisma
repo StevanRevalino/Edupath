@@ -31,25 +31,8 @@ model User {
   role                 Role            @default(STUDENT)
   kelas                Int?
   created_at           DateTime        @default(now())
-  searchHistory        SearchHistory[]
   consultationsAsMurid Consultation[]  @relation("ConsultationMurid")
   consultationsAsAdmin Consultation[]  @relation("ConsultationAdmin")
-}
-
-enum SearchType {
-  PRODI
-  UNIVERSITAS
-}
-
-model SearchHistory {
-  id         String     @id @default(cuid())
-  user_id    String?
-  query      String
-  type       SearchType
-  created_at DateTime   @default(now())
-  user       User?      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-
-  @@index([user_id, type, created_at])
 }
 
 model Universitas {

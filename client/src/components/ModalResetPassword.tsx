@@ -209,7 +209,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && timer === 0) {
+                    if (e.key === "Enter" && timer === 0) {
                       handleVerifyEmail();
                     }
                   }}
