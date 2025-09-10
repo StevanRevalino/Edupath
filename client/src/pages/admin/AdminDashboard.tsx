@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminSidebar from "../../components/AdminSidebar";
+import AdminSidebar from "../../layouts/AdminSidebar";
 import KelolaDataMurid from "./KelolaDataMurid";
 import KelolaDataKonseling from "./KelolaDataKonseling";
 
