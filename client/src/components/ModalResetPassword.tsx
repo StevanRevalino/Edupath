@@ -1,4 +1,4 @@
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   resetPasswordSchema,
@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../assets/warning-logo.png";
 import axios from "axios";
+import { clearAuthData } from "../utils/authUtils";
 
 interface Props {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const [serverOtp, setServerOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -134,12 +137,23 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         newPassword,
       });
 
+      // Immediately clear all auth data when password reset is successful
+      console.log("🔄 Password reset successful, clearing auth data...");
+      clearAuthData();
+
       setSuccess(true);
-      toast.success("Password berhasil direset!");
+      toast.success("Password berhasil direset! Silakan login kembali.");
 
       setTimeout(() => {
         onClose();
-      }, 2000);
+
+        // Force redirect to login page to ensure user logs in again
+        const currentPath = window.location.pathname;
+        console.log("🚀 Redirecting from:", currentPath);
+        if (currentPath !== "/login" && currentPath !== "/register") {
+          window.location.href = "/login";
+        }
+      }, 2500);
     } catch (err: any) {
       if (err instanceof ValidationError) {
         const newErrors: { [key: string]: string } = {};
@@ -194,6 +208,11 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                   className="flex-1 px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md w-full focus:outline-none"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && timer === 0) {
+                      handleVerifyEmail();
+                    }
+                  }}
                 />
                 <div className="flex items-center">
                   {!isVerified ? (
@@ -222,12 +241,21 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               <label className="text-sm block mb-1 text-left">
                 Password Baru
               </label>
-              <input
-                type="password"
-                className="w-full px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {errors.newPassword && (
                 <p className="text-sm text-red-500 text-left">
                   {errors.newPassword}
@@ -252,12 +280,25 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               <label className="text-sm block mb-1 text-left">
                 Konfirmasi Password
               </label>
-              <input
-                type="password"
-                className="w-full px-3 py-2 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500 text-left">
                   {errors.confirmPassword}
