@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { getToken } from "../../utils/authUtils";
 
 interface Student {
   id: string;
   nama: string;
-  kelas: string;
+  kelas: string | null;
   email: string;
+  role: string;
   createdAt: string;
 }
 
@@ -13,52 +17,43 @@ const KelolaDataMurid = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedKelas, setSelectedKelas] = useState("all");
+  const API_URL = import.meta.env.VITE_API_URL;
 
-  // Mock data - nanti bisa diganti dengan API call
+  // Fetch users from API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockStudents: Student[] = [
-        {
-          id: "1",
-          nama: "Ahmad Rizki",
-          kelas: "XII IPA 1",
-          email: "ahmad.rizki@gmail.com",
-          createdAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          nama: "Siti Nurhaliza",
-          kelas: "XII IPS 2",
-          email: "siti.nurhaliza@gmail.com",
-          createdAt: "2024-01-20",
-        },
-        {
-          id: "3",
-          nama: "Budi Santoso",
-          kelas: "XI IPA 1",
-          email: "budi.santoso@gmail.com",
-          createdAt: "2024-02-10",
-        },
-        {
-          id: "4",
-          nama: "Dewi Sartika",
-          kelas: "XI IPS 1",
-          email: "dewi.sartika@gmail.com",
-          createdAt: "2024-02-15",
-        },
-        {
-          id: "5",
-          nama: "Rudi Hartono",
-          kelas: "X IPA 2",
-          email: "rudi.hartono@gmail.com",
-          createdAt: "2024-03-01",
-        },
-      ];
-      setStudents(mockStudents);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const token = getToken();
+
+        if (!token) {
+          toast.error("Token tidak ditemukan. Silakan login ulang.");
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log("API Response:", response.data); // Debug log
+        setStudents(response.data.data || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          toast.error("Session expired. Silakan login ulang.");
+        } else {
+          toast.error("Gagal mengambil data murid");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [API_URL]);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -74,9 +69,33 @@ const KelolaDataMurid = () => {
     // Implementasi edit functionality
   };
 
-  const handleDelete = (studentId: string) => {
+  const handleDelete = async (studentId: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
-      setStudents(students.filter((student) => student.id !== studentId));
+      try {
+        const token = getToken();
+
+        if (!token) {
+          toast.error("Token tidak ditemukan. Silakan login ulang.");
+          return;
+        }
+
+        await axios.delete(`${API_URL}/api/users/${studentId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setStudents(students.filter((student) => student.id !== studentId));
+        toast.success("Data murid berhasil dihapus");
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          toast.error("Session expired. Silakan login ulang.");
+        } else {
+          toast.error("Gagal menghapus data murid");
+        }
+      }
     }
   };
 

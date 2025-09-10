@@ -68,4 +68,29 @@ export class UserRepository {
       },
     });
   }
+
+  // New methods for user management
+  async findAllUsers() {
+    return prisma.user.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+  }
+
+  async updateUser(userId: string, data: Partial<CreateUserDTO>) {
+    return prisma.user.update({
+      where: { user_id: userId },
+      data: data,
+    });
+  }
+
+  async deleteUser(userId: string) {
+    return prisma.user.delete({
+      where: { user_id: userId },
+    });
+  }
 }
+
+// Create and export instance
+export const userRepository = new UserRepository();

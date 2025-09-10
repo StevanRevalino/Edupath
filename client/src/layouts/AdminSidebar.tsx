@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { useMemo, type FC } from "react";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -6,29 +6,31 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
-  const menuItems = [
-    {
-      id: "kelola-data-murid",
-      label: "Kelola Data Murid",
-      icon: "👥",
-    },
-    {
-      id: "kelola-data-konseling",
-      label: "Kelola Data Konseling",
-      icon: "💬",
-    },
-  ];
+  const menuItems = useMemo(
+    () => [
+      {
+        id: "kelola-data-murid",
+        label: "Kelola Data Murid",
+        icon: "/src/assets/icons/kelola-data-murid.png",
+      },
+      {
+        id: "kelola-data-konseling",
+        label: "Kelola Data Konseling",
+        icon: "/src/assets/icons/kelola-data-konseling.png",
+      },
+    ],
+    []
+  );
 
   return (
-    <div className="bg-blue-500 text-white w-64 min-h-screen p-4">
+    <div className="bg-[#6CCBFF] text-white w-64 min-h-screen p-4 rounded-br-2xl rounded-tr-2xl">
       {/* Logo Section */}
-      <div className="flex items-center mb-8">
+      <div className="flex items-center justify-center mb-2">
         <img
           src="/src/assets/edupath-logo.png"
           alt="EduPath Logo"
-          className="w-10 h-10 mr-3"
+          className="w-[110px] h-[95px]"
         />
-        <h2 className="text-xl font-bold">EduPath Admin</h2>
       </div>
 
       {/* Navigation Menu */}
@@ -38,13 +40,15 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
             <li key={item.id}>
               <button
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors duration-200 hover:bg-blue-600 ${
-                  activeTab === item.id
-                    ? "bg-blue-600 border-l-4 border-white"
-                    : "bg-transparent"
+                className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-[#4BB8FF] ${
+                  activeTab === item.id ? "bg-[#4BB8FF]" : "bg-transparent"
                 }`}
               >
-                <span className="text-xl mr-3">{item.icon}</span>
+                <img
+                  src={item.icon}
+                  alt={`${item.label} Icon`}
+                  className="w-12 h-12 mr-3"
+                />
                 <span className="font-medium">{item.label}</span>
               </button>
             </li>
@@ -54,9 +58,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
       {/* Logout Button */}
       <div className="absolute bottom-4 w-56">
-        <button className="w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors duration-200 hover:bg-blue-600 border-t border-blue-400 pt-4">
-          <span className="text-xl mr-3">🚪</span>
-          <span className="font-medium">Log Out</span>
+        <button className="w-full p-4 cursor-pointer">
+          <img
+            src="/src/assets/icons/log-out.png"
+            alt="Logout Icon"
+            className="w-full h-15"
+          />
         </button>
       </div>
     </div>
