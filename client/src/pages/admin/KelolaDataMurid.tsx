@@ -96,7 +96,7 @@ const KelolaDataMurid = () => {
     }
   };
 
-  const kelasOptions = ["Kelas 12", "Kelas 11", "Kelas10"];
+  const kelasOptions = ["X", "XI", "XII"];
 
   return (
     <div className="p-6">
@@ -134,7 +134,7 @@ const KelolaDataMurid = () => {
               <option value="all">Semua Kelas</option>
               {kelasOptions.map((kelas) => (
                 <option key={kelas} value={kelas}>
-                  {kelas}
+                  Kelas {kelas}
                 </option>
               ))}
             </select>
@@ -197,7 +197,7 @@ const KelolaDataMurid = () => {
 
                     <div>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {student.kelas || "Belum diatur"}
+                        {student.kelas ? `Kelas ${student.kelas}` : "Belum diatur"}
                       </span>
                     </div>
 
