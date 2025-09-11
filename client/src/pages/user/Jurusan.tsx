@@ -650,7 +650,9 @@ const Jurusan: React.FC = () => {
                   <tbody>
                     {results.map((p, index) => (
                       <tr
-                        key={`${p.prodi_id}-${p.universitas?.university_id || 'no-univ'}-${index}`}
+                        key={`${p.prodi_id}-${
+                          p.universitas?.university_id || "no-univ"
+                        }-${index}`}
                         onClick={() => handleProdiClick(p.prodi_id)}
                         className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
                           selectedProdi?.prodi_id === p.prodi_id

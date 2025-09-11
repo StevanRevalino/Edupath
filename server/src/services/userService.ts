@@ -20,6 +20,7 @@ export class UserService {
         email: user.email,
         role: user.role,
         kelas: user.kelas ? this.convertKelasToString(user.kelas) : null,
+        created_at: user.created_at,
       }));
 
       // Filter only students for the admin dashboard

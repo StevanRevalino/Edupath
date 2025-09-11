@@ -5,12 +5,13 @@ import { getToken } from "../../utils/authUtils";
 import { PencilIcon, TrashIcon } from "lucide-react";
 
 interface Student {
-  id: string;
-  nama: string;
-  kelas: string | null;
+  user_id: string;
+  firstname: string;
+  lastname: string;
   email: string;
   role: string;
-  createdAt: string;
+  kelas: string | null;
+  created_at: string;
 }
 
 const KelolaDataMurid = () => {
@@ -49,9 +50,10 @@ const KelolaDataMurid = () => {
   }, []);
 
   const filteredStudents = students.filter((student) => {
+    const fullName = `${student.firstname || ''} ${student.lastname || ''}`.trim();
     const matchesSearch =
-      student.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+      fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesKelas =
       selectedKelas === "all" || student.kelas === selectedKelas;
     return matchesSearch && matchesKelas;
@@ -79,7 +81,7 @@ const KelolaDataMurid = () => {
           },
         });
 
-        setStudents(students.filter((student) => student.id !== studentId));
+        setStudents(students.filter((student) => student.user_id !== studentId));
         toast.success("Data murid berhasil dihapus");
       } catch (error) {
         console.error("Error deleting user:", error);
@@ -173,42 +175,42 @@ const KelolaDataMurid = () => {
               ) : (
                 filteredStudents.map((student) => (
                   <div
-                    key={student.id}
+                    key={student.user_id}
                     className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
                   >
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-blue-600 font-semibold">
-                          {student.nama.charAt(0).toUpperCase()}
+                          {(student.firstname || 'N/A').charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="ml-3">
                         <div className="text-sm font-medium text-gray-900">
-                          {student.nama}
+                          {`${student.firstname || ''} ${student.lastname || ''}`.trim() || 'N/A'}
                         </div>
                       </div>
                     </div>
 
                     <div>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {student.kelas}
+                        {student.kelas || 'Belum diatur'}
                       </span>
                     </div>
 
-                    <div className="text-sm text-gray-500">{student.email}</div>
+                    <div className="text-sm text-gray-500">{student.email || 'N/A'}</div>
 
                     <div className="text-sm text-gray-500">
-                      {new Date(student.createdAt).toLocaleDateString("id-ID")}
+                      {new Date(student.created_at).toLocaleDateString("id-ID")}
                     </div>
 
                     <div className="flex items-center space-x-3">
                       <PencilIcon
                         className="w-5 h-5 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
-                        onClick={() => handleEdit(student.id)}
+                        onClick={() => handleEdit(student.user_id)}
                       />
                       <TrashIcon
                         className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition-colors"
-                        onClick={() => handleDelete(student.id)}
+                        onClick={() => handleDelete(student.user_id)}
                       />
                     </div>
                   </div>

@@ -16,6 +16,7 @@ export interface UserResponse {
   email: string;
   role: "ADMIN" | "STUDENT";
   kelas?: string | null;
+  created_at?: string;
 }
 
 export interface UpdateUserDTO {
