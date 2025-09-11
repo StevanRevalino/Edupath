@@ -50,10 +50,12 @@ const KelolaDataMurid = () => {
   }, []);
 
   const filteredStudents = students.filter((student) => {
-    const fullName = `${student.firstname || ''} ${student.lastname || ''}`.trim();
+    const fullName = `${student.firstname || ""} ${
+      student.lastname || ""
+    }`.trim();
     const matchesSearch =
       fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (student.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+      (student.email?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesKelas =
       selectedKelas === "all" || student.kelas === selectedKelas;
     return matchesSearch && matchesKelas;
@@ -81,7 +83,9 @@ const KelolaDataMurid = () => {
           },
         });
 
-        setStudents(students.filter((student) => student.user_id !== studentId));
+        setStudents(
+          students.filter((student) => student.user_id !== studentId)
+        );
         toast.success("Data murid berhasil dihapus");
       } catch (error) {
         console.error("Error deleting user:", error);
@@ -181,23 +185,27 @@ const KelolaDataMurid = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-blue-600 font-semibold">
-                          {(student.firstname || 'N/A').charAt(0).toUpperCase()}
+                          {(student.firstname || "N/A").charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="ml-3">
                         <div className="text-sm font-medium text-gray-900">
-                          {`${student.firstname || ''} ${student.lastname || ''}`.trim() || 'N/A'}
+                          {`${student.firstname || ""} ${
+                            student.lastname || ""
+                          }`.trim() || "N/A"}
                         </div>
                       </div>
                     </div>
 
                     <div>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {student.kelas || 'Belum diatur'}
+                        {student.kelas || "Belum diatur"}
                       </span>
                     </div>
 
-                    <div className="text-sm text-gray-500">{student.email || 'N/A'}</div>
+                    <div className="text-sm text-gray-500">
+                      {student.email || "N/A"}
+                    </div>
 
                     <div className="text-sm text-gray-500">
                       {new Date(student.created_at).toLocaleDateString("id-ID")}
