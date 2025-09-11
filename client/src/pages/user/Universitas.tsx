@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import { getToken } from "../../utils/authUtils";
 
 type UniversitasItem = {
   university_id: string;
@@ -65,7 +66,10 @@ const Universitas: React.FC = () => {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
       const url = `${API_URL}/api/universitas/${universityId}`;
-      const res = await axios.get(url);
+      const token = getToken();
+      const res = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = res.data?.data as UniversitasDetailType;
       console.log("Universitas Detail:", data);
       setSelectedUniversitas(data);
@@ -100,9 +104,11 @@ const Universitas: React.FC = () => {
         const API_URL =
           (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
         const url = `${API_URL}/api/universitas/search`;
+        const token = getToken();
         const res = await axios.get(url, {
           params: { nama: q.trim() },
           signal: ctrl.signal,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = (res.data?.data || []) as UniversitasItem[];
         const source = res.data?.source || "api";
@@ -364,9 +370,9 @@ const Universitas: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {results.map((u) => (
+                    {results.map((u, index) => (
                       <tr
-                        key={u.university_id}
+                        key={`${u.university_id}-${index}`}
                         onClick={() => handleUniversitasClick(u.university_id)}
                         className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
                           selectedUniversitas?.university_id === u.university_id
