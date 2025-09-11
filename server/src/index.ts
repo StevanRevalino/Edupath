@@ -6,7 +6,7 @@ import universitasRoutes from "./routes/universitasRoutes";
 import prodiRoutes from "./routes/prodiRoutes";
 import consultationRoutes from "./routes/consultationRoutes";
 import userRoutes from "./routes/userRoutes";
-import { seedDefaultAdmins } from "./configs/seeder";
+import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
 dotenv.config();
