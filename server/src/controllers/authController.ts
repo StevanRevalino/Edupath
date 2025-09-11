@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
-import { sendOtpEmail } from "../services/emailService";
+import {
+  sendOtpEmail,
+  sendVerificationOtpEmail,
+} from "../services/emailService";
 
 export class AuthController {
   private authService: AuthService;
@@ -167,6 +170,38 @@ export class AuthController {
       res.status(500).json({
         success: false,
         message: "Gagal mengirim OTP",
+      });
+    }
+  }
+
+  async sendVerificationOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          message: "Email wajib diisi",
+        });
+        return;
+      }
+
+      // Generate OTP (6 digit)
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Send verification email using the new template
+      await sendVerificationOtpEmail(email, otp);
+
+      res.status(200).json({
+        success: true,
+        data: { otp },
+        message: "Kode verifikasi berhasil dikirim ke email",
+      });
+    } catch (error: any) {
+      console.error("Send verification OTP error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengirim kode verifikasi",
       });
     }
   }

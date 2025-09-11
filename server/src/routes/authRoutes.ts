@@ -12,6 +12,7 @@ router.get("/me", authenticateToken, (req, res) => {
 router.post("/register", controller.register);
 router.post("/login", controller.login);
 router.post("/send-otp", controller.sendOtp);
+router.post("/send-verification-otp", controller.sendVerificationOtp);
 router.post("/forgot-password", controller.forgotPassword);
 router.put("/update-profile", authenticateToken, controller.updateProfile);
 
