@@ -128,7 +128,6 @@ export default function Register() {
           email,
         }
       );
-
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -171,7 +170,6 @@ export default function Register() {
           email,
         }
       );
-
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);
@@ -382,9 +380,9 @@ export default function Register() {
                 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
               >
                 {showPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 )}
               </button>
             </div>
@@ -420,9 +418,9 @@ export default function Register() {
                 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
               >
                 {showConfirmPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 )}
               </button>
             </div>

@@ -60,7 +60,16 @@ export default function OTPModal({
       toast.error("Kode OTP sudah kedaluwarsa");
       return;
     }
-    if (inputOtp.join("") === otp.trim()) {
+
+    const userOtp = inputOtp.join("");
+    const serverOtp = otp ? otp.toString().trim() : "";
+
+    if (!serverOtp) {
+      toast.error("OTP tidak tersedia, silakan kirim ulang");
+      return;
+    }
+
+    if (userOtp === serverOtp) {
       onVerifySuccess();
     } else {
       toast.error("Invalid OTP");

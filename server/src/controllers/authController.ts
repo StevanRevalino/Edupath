@@ -162,7 +162,7 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        data: { otp },
+        otp,
         message: "OTP berhasil dikirim ke email",
       });
     } catch (error: any) {
@@ -194,7 +194,7 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        data: { otp },
+        otp,
         message: "Kode verifikasi berhasil dikirim ke email",
       });
     } catch (error: any) {

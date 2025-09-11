@@ -151,7 +151,6 @@ export const sendVerificationOtpEmail = async (email: string, otp: string) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Verification email sent successfully:", info.messageId);
 
     return {
       success: true,
