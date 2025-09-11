@@ -50,9 +50,7 @@ const KelolaDataMurid = () => {
   }, []);
 
   const filteredStudents = students.filter((student) => {
-    const fullName = `${student.firstname || ""} ${
-      student.lastname || ""
-    }`.trim();
+    const fullName = `${student.firstname} ${student.lastname}`.trim();
     const matchesSearch =
       fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (student.email?.toLowerCase() || "").includes(searchTerm.toLowerCase());
