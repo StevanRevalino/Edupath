@@ -1,4 +1,7 @@
 import { useMemo, type FC } from "react";
+import { useNavigate } from "react-router-dom";
+import { clearAuthData } from "../utils/authUtils";
+import toast from "react-hot-toast";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -6,6 +9,23 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    try {
+      // Clear authentication data
+      clearAuthData();
+      
+      // Show success message
+      toast.success("Berhasil logout");
+      
+      // Redirect to login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Terjadi kesalahan saat logout");
+    }
+  };
   const menuItems = useMemo(
     () => [
       {
@@ -63,6 +83,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
             src="/src/assets/icons/log-out.png"
             alt="Logout Icon"
             className="w-full h-15"
+            onClick={handleLogout}
           />
         </button>
       </div>
