@@ -2,71 +2,103 @@ import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
 import { sendOtpEmail } from "../services/emailService";
 
-const authService = new AuthService();
-
 export class AuthController {
-  async register(req: Request, res: Response) {
+  private authService: AuthService;
+
+  constructor() {
+    this.authService = new AuthService();
+  }
+  async register(req: Request, res: Response): Promise<void> {
     try {
-      const user = await authService.register(req.body);
-      res.status(201).json({ message: "Berhasil register", user });
+      const user = await this.authService.register(req.body);
+      res.status(201).json({
+        success: true,
+        data: user,
+        message: "Berhasil register",
+      });
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  constructor() {
-    this.login = this.login.bind(this);
-  }
-
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response): Promise<void> {
     console.log("Login request received:", req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
       console.log("Missing email or password");
-      return res
-        .status(400)
-        .json({ message: "Email dan password wajib diisi" });
+      res.status(400).json({
+        success: false,
+        message: "Email dan password wajib diisi",
+      });
+      return;
     }
 
     try {
-      const result = await authService.login(email, password);
+      const result = await this.authService.login(email, password);
 
       if (!result) {
         console.log("Login failed: Invalid credentials");
-        return res.status(401).json({ message: "Email atau password salah" });
+        res.status(401).json({
+          success: false,
+          message: "Email atau password salah",
+        });
+        return;
       }
 
       console.log("Login successful for:", email);
-      res.json(result); // token + user
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: "Login successful",
+      });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 
-  async forgotPassword(req: Request, res: Response) {
+  async forgotPassword(req: Request, res: Response): Promise<void> {
     const { email, newPassword } = req.body;
 
-    if (!email || !newPassword)
-      return res
-        .status(400)
-        .json({ message: "Email dan password baru wajib diisi" });
+    if (!email || !newPassword) {
+      res.status(400).json({
+        success: false,
+        message: "Email dan password baru wajib diisi",
+      });
+      return;
+    }
 
     try {
-      await authService.forgotPassword(email, newPassword);
-      res.status(200).json({ message: "Password berhasil direset" });
+      await this.authService.forgotPassword(email, newPassword);
+      res.status(200).json({
+        success: true,
+        message: "Password berhasil direset",
+      });
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  async updateProfile(req: Request, res: Response) {
+  async updateProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.user_id;
 
       if (!userId) {
-        return res.status(401).json({ message: "User tidak terautentikasi" });
+        res.status(401).json({
+          success: false,
+          message: "User tidak terautentikasi",
+        });
+        return;
       }
 
       const { firstname, lastname, kelas } = req.body;
@@ -82,30 +114,41 @@ export class AuthController {
 
       // Cek apakah ada data yang akan diupdate
       if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({
+        res.status(400).json({
+          success: false,
           message: "Tidak ada data yang akan diperbarui",
         });
+        return;
       }
 
-      const updatedUser = await authService.updateProfile(userId, updateData);
+      const updatedUser = await this.authService.updateProfile(
+        userId,
+        updateData
+      );
 
       res.status(200).json({
+        success: true,
+        data: updatedUser,
         message: "Profil berhasil diperbarui",
-        user: updatedUser,
       });
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  async sendOtp(req: Request, res: Response) {
+  async sendOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({
+        res.status(400).json({
+          success: false,
           message: "Email wajib diisi",
         });
+        return;
       }
 
       // Generate OTP (6 digit)
@@ -115,12 +158,14 @@ export class AuthController {
       await sendOtpEmail(email, otp);
 
       res.status(200).json({
+        success: true,
+        data: { otp },
         message: "OTP berhasil dikirim ke email",
-        otp: otp, // In production, don't return OTP in response
       });
     } catch (error: any) {
       console.error("Send OTP error:", error);
       res.status(500).json({
+        success: false,
         message: "Gagal mengirim OTP",
       });
     }

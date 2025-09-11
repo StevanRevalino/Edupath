@@ -320,11 +320,6 @@ export class UniversitasService {
       return 25; // Very high score when short name is part of search
     }
 
-    // Check for special cases first (like 'binus' for 'bina nusantara')
-    if (this.isSpecialNickname(searchWord, univName.toLowerCase())) {
-      return 25;
-    }
-
     // Algorithm to detect common nickname patterns
     const univWords = univName
       .split(/\s+/)
@@ -422,30 +417,6 @@ export class UniversitasService {
       if (searchWord === (prefix + suffix).toLowerCase()) {
         return true;
       }
-    }
-
-    return false;
-  }
-
-  // Special cases for well-known university nicknames
-  private isSpecialNickname(searchWord: string, univName: string): boolean {
-    const specialCases: { [key: string]: string[] } = {
-      binus: ["bina nusantara"],
-      telkom: ["telkom", "telekomunikasi"],
-      trisakti: ["trisakti"],
-      atmajaya: ["atma jaya"],
-      petra: ["petra"],
-      tarumanagara: ["tarumanagara"],
-      ubaya: ["surabaya"],
-      uph: ["pelita harapan"],
-      umn: ["multimedia nusantara"],
-    };
-
-    // Direct match check
-    if (specialCases[searchWord]) {
-      return specialCases[searchWord].some((keyword) =>
-        univName.includes(keyword)
-      );
     }
 
     return false;

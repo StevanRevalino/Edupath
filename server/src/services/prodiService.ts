@@ -3,6 +3,37 @@ import { ProdiRepository } from "../repositories/prodiRepository";
 const prodiRepository = new ProdiRepository();
 
 export class ProdiService {
+  async getProdiDetailLocal(prodiId: string) {
+    try {
+      const result = await prodiRepository.findById(parseInt(prodiId));
+
+      if (!result) {
+        return null;
+      }
+
+      // Transform to match API format
+      const transformedResult = {
+        prodi_id: result.prodi_id.toString(),
+        nama_prodi: result.nama_prodi,
+        jenjang: result.jenjang,
+        kode_prodi: null,
+        bidang: null,
+        akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
+        status_akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
+        tanggal_berdiri: null,
+        tanggal_tutup: null,
+        status: "Aktif",
+        gelar: null,
+        singkatan_gelar: null,
+        deskripsi: null,
+      };
+
+      return transformedResult;
+    } catch (error) {
+      console.error("Error getting prodi detail locally:", error);
+      throw error;
+    }
+  }
   // Search prodi from local database
   async searchProdiLocal(query: string, limit: number = 20) {
     try {
@@ -181,38 +212,5 @@ export class ProdiService {
 
     // Apply limit after transformation
     return transformedResults.slice(0, limit);
-  }
-
-  // Get prodi detail from local database
-  async getProdiDetailLocal(prodiId: string) {
-    try {
-      const result = await prodiRepository.findById(parseInt(prodiId));
-
-      if (!result) {
-        return null;
-      }
-
-      // Transform to match API format
-      const transformedResult = {
-        prodi_id: result.prodi_id.toString(),
-        nama_prodi: result.nama_prodi,
-        jenjang: result.jenjang,
-        kode_prodi: null,
-        bidang: null,
-        akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
-        status_akreditasi: result.prodi_pt[0]?.akreditasi_prodi || null,
-        tanggal_berdiri: null,
-        tanggal_tutup: null,
-        status: "Aktif",
-        gelar: null,
-        singkatan_gelar: null,
-        deskripsi: null,
-      };
-
-      return transformedResult;
-    } catch (error) {
-      console.error("Error getting prodi detail locally:", error);
-      throw error;
-    }
   }
 }

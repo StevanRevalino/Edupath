@@ -1,22 +1,17 @@
 import { Request, Response } from "express";
-import { userRepository } from "../repositories/userRepository";
-import { userService } from "../services/userService";
+import { UserService } from "../services/userService";
 
-interface UserWithoutPassword {
-  user_id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: string;
-  kelas: number | null;
-  created_at: Date;
-}
+export class UserController {
+  private userService: UserService;
 
-export const userController = {
+  constructor() {
+    this.userService = new UserService();
+  }
+
   // Get all users
-  async getAllUsers(req: Request, res: Response) {
+  async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await userService.getAllUsers();
+      const users = await this.userService.getAllUsers();
 
       res.status(200).json({
         success: true,
@@ -30,20 +25,20 @@ export const userController = {
         message: "Internal server error",
       });
     }
-  },
+  }
 
   // Get user by ID
-  async getUserById(req: Request, res: Response) {
+  async getUserById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
-      const user = await userService.getUserById(id);
+      const user = await this.userService.getUserById(id);
 
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: "User not found",
         });
+        return;
       }
 
       res.status(200).json({
@@ -58,25 +53,27 @@ export const userController = {
         message: "Internal server error",
       });
     }
-  },
+  }
 
   // Update user
-  async updateUser(req: Request, res: Response) {
+  // Update user
+  async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
+      // Check if user exists first
+      const existingUser = await this.userService.getUserById(id);
       if (!existingUser) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: "User not found",
         });
+        return;
       }
 
       // Update user using service
-      const updatedUser = await userService.updateUser(id, updateData);
+      const updatedUser = await this.userService.updateUser(id, updateData);
 
       res.status(200).json({
         success: true,
@@ -90,23 +87,24 @@ export const userController = {
         message: "Internal server error",
       });
     }
-  },
+  }
 
   // Delete user
-  async deleteUser(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
+      // Check if user exists first
+      const existingUser = await this.userService.getUserById(id);
       if (!existingUser) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: "User not found",
         });
+        return;
       }
 
-      await userService.deleteUser(id);
+      await this.userService.deleteUser(id);
 
       res.status(200).json({
         success: true,
@@ -119,5 +117,5 @@ export const userController = {
         message: "Internal server error",
       });
     }
-  },
-};
+  }
+}

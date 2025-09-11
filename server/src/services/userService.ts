@@ -1,31 +1,25 @@
-import { userRepository } from "../repositories/userRepository";
-
-interface UserResponse {
-  id: string;
-  nama: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: string;
-  kelas: string | null;
-  createdAt: string;
-}
+import { UserRepository } from "../repositories/userRepository";
+import { UserResponse, UpdateUserDTO } from "../types/index";
 
 export class UserService {
+  private userRepository: UserRepository;
+
+  constructor() {
+    this.userRepository = new UserRepository();
+  }
+
   async getAllUsers(): Promise<UserResponse[]> {
     try {
-      const users = await userRepository.findAllUsers();
+      const users = await this.userRepository.findAllUsers();
 
       // Transform data to match frontend expectations
       const transformedUsers: UserResponse[] = users.map((user: any) => ({
-        id: user.user_id,
-        nama: `${user.firstname} ${user.lastname}`.trim(),
+        user_id: user.user_id,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
         role: user.role,
         kelas: user.kelas ? this.convertKelasToString(user.kelas) : null,
-        createdAt: user.created_at.toISOString(),
       }));
 
       // Filter only students for the admin dashboard
@@ -38,21 +32,19 @@ export class UserService {
 
   async getUserById(userId: string): Promise<UserResponse | null> {
     try {
-      const user = await userRepository.findById(userId);
+      const user = await this.userRepository.findById(userId);
 
       if (!user) {
         return null;
       }
 
       return {
-        id: user.user_id,
-        nama: `${user.firstname} ${user.lastname}`.trim(),
+        user_id: user.user_id,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
         role: user.role,
         kelas: user.kelas ? this.convertKelasToString(user.kelas) : null,
-        createdAt: user.created_at.toISOString(),
       };
     } catch (error) {
       console.error("Error in getUserById:", error);
@@ -70,11 +62,10 @@ export class UserService {
     }
   ): Promise<UserResponse> {
     try {
-      const updatedUser = await userRepository.updateUser(userId, data);
+      const updatedUser = await this.userRepository.updateUser(userId, data);
 
       return {
-        id: updatedUser.user_id,
-        nama: `${updatedUser.firstname} ${updatedUser.lastname}`.trim(),
+        user_id: updatedUser.user_id,
         firstname: updatedUser.firstname,
         lastname: updatedUser.lastname,
         email: updatedUser.email,
@@ -82,7 +73,6 @@ export class UserService {
         kelas: updatedUser.kelas
           ? this.convertKelasToString(updatedUser.kelas)
           : null,
-        createdAt: updatedUser.created_at.toISOString(),
       };
     } catch (error) {
       console.error("Error in updateUser:", error);
@@ -92,7 +82,7 @@ export class UserService {
 
   async deleteUser(userId: string): Promise<void> {
     try {
-      await userRepository.deleteUser(userId);
+      await this.userRepository.deleteUser(userId);
     } catch (error) {
       console.error("Error in deleteUser:", error);
       throw new Error("Failed to delete user");
@@ -101,29 +91,13 @@ export class UserService {
 
   private convertKelasToString(kelas: number): string {
     // Convert numeric kelas to readable format
-    // Assuming kelas numbering system:
-    // 10 = X, 11 = XI, 12 = XII
-    // And additional numbers for different classes (IPA/IPS)
+    // Simple mapping: 10 = X, 11 = XI, 12 = XII
     const kelasMap: { [key: number]: string } = {
-      // Kelas X
-      101: "X IPA 1",
-      102: "X IPA 2",
-      103: "X IPS 1",
-      104: "X IPS 2",
-      // Kelas XI
-      111: "XI IPA 1",
-      112: "XI IPA 2",
-      113: "XI IPS 1",
-      114: "XI IPS 2",
-      // Kelas XII
-      121: "XII IPA 1",
-      122: "XII IPA 2",
-      123: "XII IPS 1",
-      124: "XII IPS 2",
+      10: "X",
+      11: "XI",
+      12: "XII",
     };
 
     return kelasMap[kelas] || `Kelas ${kelas}`;
   }
 }
-
-export const userService = new UserService();
