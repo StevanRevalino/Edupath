@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import apiClient from "../../utils/apiClient";
 
 type ProdiItem = {
   prodi_id: string;
@@ -131,8 +130,10 @@ const Jurusan: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const url = `/prodi/detail/${prodiId}`;
-      const res = await apiClient.get(url);
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const url = `${API_URL}/api/prodi/detail/${prodiId}`;
+      const res = await axios.get(url);
       const data = res.data?.data as ProdiDetailType;
       console.log("Prodi Detail:", data);
       setSelectedProdi(data);
@@ -158,8 +159,12 @@ const Jurusan: React.FC = () => {
       setError("");
       setShowHistory(false); // Hide history when searching
       try {
-        const url = `/prodi/search/nama/${encodeURIComponent(q.trim())}`;
-        const res = await apiClient.get(url, {
+        const API_URL =
+          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+        const url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
+          q.trim()
+        )}`;
+        const res = await axios.get(url, {
           signal: ctrl.signal,
         });
         const data = (res.data?.data || []) as ProdiItem[];

@@ -209,8 +209,8 @@ const Home = () => {
       </div>
 
       {/* Analytics Section */}
-      <div className="mt-8 lg:mt-16 w-full border-3 border-red-700 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFEEEE] px-4 lg:px-10 py-4 lg:py-6 relative">
-        <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-red-700 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
+      <div className="mt-8 lg:mt-16 w-full border-3 border-[#003B73] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#e6f3ff] px-4 lg:px-10 py-4 lg:py-6 relative">
+        <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#003B73] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
           Analytics
         </div>
 
@@ -222,11 +222,11 @@ const Home = () => {
               Total tes diselesaikan
             </div>
             <div className="flex gap-4">
-              <div>
+              <div className="flex flex-col items-center">
                 <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
                   {totalTests}
                 </div>
-                <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
+                <div className="text-lg lg:text-xl font-bold">Tes</div>
               </div>
               <div className="text-sm lg:text-base">
                 Kamu telah mengerjakan <br />
@@ -283,15 +283,15 @@ const Home = () => {
 
           {/* Tes Terakhir */}
           <div className="lg:row-span-1">
-            <div className="text-xl lg:text-2xl font-bold mb-2">
+            <div className="text-2xl lg:text-3xl font-bold mb-2">
               Tes terakhir
             </div>
             <div className="flex gap-4">
-              <div>
+              <div className="flex flex-col items-center">
                 <div className="text-[#180085] text-4xl lg:text-6xl font-bold">
                   {totalTests}
                 </div>
-                <div className="text-lg lg:text-xl font-bold ml-3">Tes</div>
+                <div className="text-lg lg:text-xl font-bold">Hari</div>
               </div>
               <div className="text-sm lg:text-base">
                 Terakhir kali kamu mengerjakan <br />
@@ -303,7 +303,7 @@ const Home = () => {
 
           {/* Riwayat Tes */}
           <div className="lg:row-span-1">
-            <div className="text-xl lg:text-2xl font-bold mb-3">
+            <div className="text-base lg:text-lg font-bold mb-3">
               Riwayat Tes
             </div>
             <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
@@ -325,8 +325,8 @@ const Home = () => {
         {/* First Row: Jurusan + Ujian */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
           {/* Jurusan Section */}
-          <div className="w-full lg:w-[60%] h-fit border-3 border-[#90007D] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFE6FC] px-4 lg:px-10 py-4 lg:py-6 relative">
-            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#90007D] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
+          <div className="w-full lg:w-[60%] h-fit border-3 border-[#003B73] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#e6f3ff] px-4 lg:px-10 py-4 lg:py-6 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#003B73] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
               Jurusan
             </div>
 
@@ -338,7 +338,7 @@ const Home = () => {
                   placeholder="Jelajahi jurusan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#90007D] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
                 />
               </div>
 
@@ -373,8 +373,8 @@ const Home = () => {
           </div>
 
           {/* Ujian Section */}
-          <div className="w-full lg:w-[40%] h-fit border-3 border-yellow-500 rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFFBEB] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
-            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-yellow-500 rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg outline-none">
+          <div className="w-full lg:w-[40%] h-fit border-3 border-[#003B73] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#e6f3ff] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#003B73] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg outline-none">
               Ujian
             </div>
 
@@ -405,8 +405,8 @@ const Home = () => {
         {/* Second Row: Universitas + Konseling */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
           {/* Universitas Section */}
-          <div className="w-full lg:w-[60%] h-fit border-3 border-[#007B3A] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#E8F5E8] px-4 lg:px-10 py-4 lg:py-6 relative">
-            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#007B3A] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
+          <div className="w-full lg:w-[60%] h-fit border-3 border-[#003B73] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#e6f3ff] px-4 lg:px-10 py-4 lg:py-6 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#003B73] rounded-4xl px-3 lg:px-5 py-1 font-bold text-sm lg:text-lg">
               Universitas
             </div>
 
@@ -418,7 +418,7 @@ const Home = () => {
                   placeholder="Jelajahi universitas..."
                   value={universitySearchQuery}
                   onChange={(e) => setUniversitySearchQuery(e.target.value)}
-                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#007B3A] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                  className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
                 />
               </div>
 
@@ -454,15 +454,15 @@ const Home = () => {
           </div>
 
           {/* Konseling Section */}
-          <div className="w-full lg:w-[40%] h-fit border-3 border-[#FF6B35] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#FFF4F0] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
-            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#FF6B35] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
+          <div className="w-full lg:w-[40%] h-fit border-3 border-[#003B73] rounded-br-[40px] lg:rounded-br-[60px] rounded-tl-[40px] lg:rounded-tl-[60px] bg-[#e6f3ff] px-4 lg:px-10 pt-6 lg:pt-8 pb-4 lg:pb-5 relative">
+            <div className="absolute -top-4 lg:-top-6 left-8 lg:left-16 bg-white border-3 border-[#003B73] rounded-4xl px-3 lg:px-4 py-1 font-bold text-sm lg:text-lg">
               Konseling
             </div>
 
             <div className="flex items-center justify-start h-full min-h-[120px]">
               <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
                 <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
-                  <div className="p-4 lg:p-6 bg-[#FFF4F0] rounded-md">
+                  <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                     <Plus
                       size={24}
                       className="lg:hidden text-[#7E7E7E]"

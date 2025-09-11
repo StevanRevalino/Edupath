@@ -34,12 +34,11 @@ export default function Login() {
         email,
         password,
       });
-
-      const result = res.data;
+      console.log("Login Response:", res);
+      const result = res.data.data; 
       localStorage.setItem("user_id", result.user.user_id);
       localStorage.setItem("role", result.user.role);
       localStorage.setItem("token", result.token);
-      console.log(result);
 
       toast.success("Login berhasil!");
       if (result.user.role === "ADMIN") {
@@ -123,26 +122,28 @@ export default function Login() {
           </div>
 
           {/* Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) {
-                  setErrors((prev) => ({ ...prev, password: undefined }));
-                }
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
-            </button>
+          <div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) {
+                    setErrors((prev) => ({ ...prev, password: undefined }));
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
+              </button>
+            </div>
             {submitted && errors.password && (
               <p className="text-xs text-red-500 mt-1 px-2">
                 {errors.password}
