@@ -40,8 +40,6 @@ interface ProdiPTCSV {
 }
 
 async function seedLocalData(force: boolean = false) {
-  console.log("🌱 Starting to seed local data...");
-
   try {
     // Check if data already exists
     const existingCounts = {
@@ -56,10 +54,6 @@ async function seedLocalData(force: boolean = false) {
         existingCounts.prodi > 0 ||
         existingCounts.relations > 0)
     ) {
-      console.log("📊 Existing data found:");
-      console.log(`🏫 Universities: ${existingCounts.universities}`);
-      console.log(`📚 Prodi: ${existingCounts.prodi}`);
-      console.log(`🔗 Relations: ${existingCounts.relations}`);
       console.log(
         "⏭️  Skipping data seeding as data already exists. Use --force to override."
       );
