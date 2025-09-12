@@ -169,9 +169,7 @@ const KelolaDataMurid = () => {
               {filteredStudents.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center text-gray-500">
-                    {searchTerm || selectedKelas !== "all"
-                      ? "Tidak ada data yang sesuai dengan filter"
-                      : "Belum ada data murid"}
+                    Tidak ada data.
                   </div>
                 </div>
               ) : (
