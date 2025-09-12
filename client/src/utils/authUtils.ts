@@ -1,5 +1,4 @@
 // Auth utility functions for managing authentication state
-import toast from "react-hot-toast";
 
 export const clearAuthData = () => {
   console.log("🧹 Clearing all authentication data...");
@@ -51,31 +50,4 @@ export const setAuthData = (token: string, userId: string, role: string) => {
     userId,
     role,
   });
-};
-
-// Function to check if token is expired (client-side check)
-export const isTokenExpired = (token: string): boolean => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
-  } catch (error) {
-    return true; // If we can't decode, consider it expired
-  }
-};
-
-// Function to handle auth errors and redirect
-export const handleAuthError = (message?: string) => {
-  console.log("🚫 Auth error:", message);
-
-  // Clear auth data
-  clearAuthData();
-
-  // Show error message
-  toast.error(message || "Session expired. Please login again.");
-
-  // Only redirect if not already on login page
-  if (window.location.pathname !== "/login") {
-    window.location.href = "/login";
-  }
 };
