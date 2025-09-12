@@ -95,8 +95,8 @@ const KelolaDataMurid = () => {
   const kelasOptions = ["X", "XI", "XII"];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div className="max-h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
+      <div className="mb-6 flex-shrink-0">
         <h1 className="text-3xl font-bold mb-2">Kelola Data Murid</h1>
         <p className="text-gray-600">
           Kelola data murid yang sudah terdaftar di EduPath.
@@ -104,7 +104,7 @@ const KelolaDataMurid = () => {
       </div>
 
       {/* Search and Filter Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white rounded-lg shadow p-6 mb-6 flex-shrink-0">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,22 +139,24 @@ const KelolaDataMurid = () => {
       </div>
 
       {/* Students Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-29rem)] flex flex-col">
+        <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-lg font-semibold">
             Data Murid ({filteredStudents.length})
           </h2>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p className="mt-2 text-gray-600">Memuat data...</p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p className="mt-2 text-gray-600">Memuat data...</p>
+            </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            {/* Header */}
-            <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className=" flex flex-col overflow-hidden">
+            {/* Header - Fixed */}
+            <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
               <div>Nama</div>
               <div>Kelas</div>
               <div>Email</div>
@@ -162,63 +164,71 @@ const KelolaDataMurid = () => {
               <div>Action</div>
             </div>
 
-            {/* Data Rows */}
-            <div className="bg-white divide-y divide-gray-200">
+            {/* Data Rows - Scrollable */}
+            <div className="overflow-y-auto">
               {filteredStudents.length === 0 ? (
-                <div className="px-6 py-8 text-center text-gray-500">
-                  {searchTerm || selectedKelas !== "all"
-                    ? "Tidak ada data yang sesuai dengan filter"
-                    : "Belum ada data murid"}
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-gray-500">
+                    {searchTerm || selectedKelas !== "all"
+                      ? "Tidak ada data yang sesuai dengan filter"
+                      : "Belum ada data murid"}
+                  </div>
                 </div>
               ) : (
-                filteredStudents.map((student) => (
-                  <div
-                    key={student.user_id}
-                    className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-semibold">
-                          {(student.firstname || "N/A").charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900">
-                          {`${student.firstname || ""} ${
-                            student.lastname || ""
-                          }`.trim() || "N/A"}
+                <div className="bg-white divide-y divide-gray-200">
+                  {filteredStudents.map((student) => (
+                    <div
+                      key={student.user_id}
+                      className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
+                    >
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-semibold">
+                            {(student.firstname || "N/A")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {`${student.firstname || ""} ${
+                              student.lastname || ""
+                            }`.trim() || "N/A"}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {student.kelas
-                          ? `Kelas ${student.kelas}`
-                          : "Belum diatur"}
-                      </span>
-                    </div>
+                      <div>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {student.kelas
+                            ? `Kelas ${student.kelas}`
+                            : "Belum diatur"}
+                        </span>
+                      </div>
 
-                    <div className="text-sm text-gray-500">
-                      {student.email || "N/A"}
-                    </div>
+                      <div className="text-sm text-gray-500">
+                        {student.email || "N/A"}
+                      </div>
 
-                    <div className="text-sm text-gray-500">
-                      {new Date(student.created_at).toLocaleDateString("id-ID")}
-                    </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(student.created_at).toLocaleDateString(
+                          "id-ID"
+                        )}
+                      </div>
 
-                    <div className="flex items-center space-x-3">
-                      <PencilIcon
-                        className="w-5 h-5 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
-                        onClick={() => handleEdit(student.user_id)}
-                      />
-                      <TrashIcon
-                        className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition-colors"
-                        onClick={() => handleDelete(student.user_id)}
-                      />
+                      <div className="flex items-center space-x-3">
+                        <PencilIcon
+                          className="w-5 h-5 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
+                          onClick={() => handleEdit(student.user_id)}
+                        />
+                        <TrashIcon
+                          className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition-colors"
+                          onClick={() => handleDelete(student.user_id)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>

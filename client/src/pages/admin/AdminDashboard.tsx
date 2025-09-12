@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex-1 p-20">{getActiveTab()}</div>
+      <div className="flex-1 p-10">{getActiveTab()}</div>
     </div>
   );
 };
