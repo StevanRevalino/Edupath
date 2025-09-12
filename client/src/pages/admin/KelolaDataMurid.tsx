@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { getToken } from "../../utils/authUtils";
 import { PencilIcon, TrashIcon } from "lucide-react";
 
 interface Student {
@@ -26,7 +25,7 @@ const KelolaDataMurid = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const token = getToken();
+        const token = localStorage.getItem("token");
         const response = await axios.get(`${API_URL}/api/users`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,7 +66,7 @@ const KelolaDataMurid = () => {
   const handleDelete = async (studentId: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
       try {
-        const token = getToken();
+        const token = localStorage.getItem("token");
 
         if (!token) {
           toast.error("Token tidak ditemukan. Silakan login ulang.");

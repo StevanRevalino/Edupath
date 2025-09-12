@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { getToken } from "../../utils/authUtils";
 
 type ProdiItem = {
   prodi_id: string;
@@ -134,7 +133,7 @@ const Jurusan: React.FC = () => {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
       const url = `${API_URL}/api/prodi/detail/${prodiId}`;
-      const token = getToken();
+      const token = localStorage.getItem("token");
       const res = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -168,7 +167,7 @@ const Jurusan: React.FC = () => {
         const url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
           q.trim()
         )}`;
-        const token = getToken();
+        const token = localStorage.getItem("token");
         const res = await axios.get(url, {
           signal: ctrl.signal,
           headers: token ? { Authorization: `Bearer ${token}` } : {},

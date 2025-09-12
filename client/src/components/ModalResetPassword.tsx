@@ -10,7 +10,6 @@ import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../assets/warning-logo.png";
 import axios from "axios";
-import { clearAuthData } from "../utils/authUtils";
 
 interface Props {
   isOpen: boolean;
@@ -139,7 +138,9 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       // Immediately clear all auth data when password reset is successful
       console.log("🔄 Password reset successful, clearing auth data...");
-      clearAuthData();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("role");
 
       setSuccess(true);
       toast.success("Password berhasil direset! Silakan login kembali.");

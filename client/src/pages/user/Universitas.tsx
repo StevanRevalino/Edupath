@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { getToken } from "../../utils/authUtils";
 
 type UniversitasItem = {
   university_id: string;
@@ -66,7 +65,7 @@ const Universitas: React.FC = () => {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
       const url = `${API_URL}/api/universitas/${universityId}`;
-      const token = getToken();
+      const token = localStorage.getItem("token");
       const res = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -104,7 +103,7 @@ const Universitas: React.FC = () => {
         const API_URL =
           (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
         const url = `${API_URL}/api/universitas/search`;
-        const token = getToken();
+        const token = localStorage.getItem("token");
         const res = await axios.get(url, {
           params: { nama: q.trim() },
           signal: ctrl.signal,

@@ -1,6 +1,5 @@
 import { useMemo, type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthData } from "../utils/authUtils";
 import toast from "react-hot-toast";
 
 interface AdminSidebarProps {
@@ -14,12 +13,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const handleLogout = () => {
     try {
       // Clear authentication data
-      clearAuthData();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("role");
 
       // Show success message
-      toast.success("Berhasil logout");
-
-      // Redirect to login page
+      toast.success("Berhasil logout"); // Redirect to login page
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
