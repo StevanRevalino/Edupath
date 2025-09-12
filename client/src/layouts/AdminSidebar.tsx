@@ -21,7 +21,6 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       toast.success("Berhasil logout"); // Redirect to login page
       navigate("/login");
     } catch (error) {
-      console.error("Error during logout:", error);
       toast.error("Terjadi kesalahan saat logout");
     }
   };

@@ -34,7 +34,6 @@ const KelolaDataMurid = () => {
         });
         setStudents(response.data.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           toast.error("Session expired. Silakan login ulang.");
         } else {
@@ -59,7 +58,6 @@ const KelolaDataMurid = () => {
   });
 
   const handleEdit = (studentId: string) => {
-    console.log("Edit student:", studentId);
     // Implementasi edit functionality
   };
 
@@ -85,7 +83,6 @@ const KelolaDataMurid = () => {
         );
         toast.success("Data murid berhasil dihapus");
       } catch (error) {
-        console.error("Error deleting user:", error);
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           toast.error("Session expired. Silakan login ulang.");
         } else {

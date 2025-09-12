@@ -136,8 +136,6 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         newPassword,
       });
 
-      // Immediately clear all auth data when password reset is successful
-      console.log("🔄 Password reset successful, clearing auth data...");
       localStorage.removeItem("token");
       localStorage.removeItem("user_id");
       localStorage.removeItem("role");
@@ -150,7 +148,6 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
         // Force redirect to login page to ensure user logs in again
         const currentPath = window.location.pathname;
-        console.log("🚀 Redirecting from:", currentPath);
         if (currentPath !== "/login" && currentPath !== "/register") {
           window.location.href = "/login";
         }
