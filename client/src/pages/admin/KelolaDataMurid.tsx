@@ -20,157 +20,31 @@ const KelolaDataMurid = () => {
   const [selectedKelas, setSelectedKelas] = useState("all");
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // Dummy data for testing scroll
-  const dummyStudents: Student[] = [
-    {
-      user_id: "1",
-      firstname: "Ahmad",
-      lastname: "Rizki",
-      email: "ahmad.rizki@email.com",
-      role: "student",
-      kelas: "X",
-      created_at: "2024-01-15T08:00:00Z",
-    },
-    {
-      user_id: "2",
-      firstname: "Siti",
-      lastname: "Nurhaliza",
-      email: "siti.nurhaliza@email.com",
-      role: "student",
-      kelas: "XI",
-      created_at: "2024-01-16T09:30:00Z",
-    },
-    {
-      user_id: "3",
-      firstname: "Budi",
-      lastname: "Santoso",
-      email: "budi.santoso@email.com",
-      role: "student",
-      kelas: "XII",
-      created_at: "2024-01-17T10:15:00Z",
-    },
-    {
-      user_id: "4",
-      firstname: "Dewi",
-      lastname: "Sartika",
-      email: "dewi.sartika@email.com",
-      role: "student",
-      kelas: "X",
-      created_at: "2024-01-18T11:45:00Z",
-    },
-    {
-      user_id: "5",
-      firstname: "Raka",
-      lastname: "Pratama",
-      email: "raka.pratama@email.com",
-      role: "student",
-      kelas: "XI",
-      created_at: "2024-01-19T13:20:00Z",
-    },
-    {
-      user_id: "6",
-      firstname: "Indira",
-      lastname: "Maharani",
-      email: "indira.maharani@email.com",
-      role: "student",
-      kelas: "XII",
-      created_at: "2024-01-20T14:10:00Z",
-    },
-    {
-      user_id: "7",
-      firstname: "Fajar",
-      lastname: "Nugroho",
-      email: "fajar.nugroho@email.com",
-      role: "student",
-      kelas: "X",
-      created_at: "2024-01-21T15:30:00Z",
-    },
-    {
-      user_id: "8",
-      firstname: "Maya",
-      lastname: "Putri",
-      email: "maya.putri@email.com",
-      role: "student",
-      kelas: "XI",
-      created_at: "2024-01-22T16:45:00Z",
-    },
-    {
-      user_id: "9",
-      firstname: "Andi",
-      lastname: "Firmansyah",
-      email: "andi.firmansyah@email.com",
-      role: "student",
-      kelas: "XII",
-      created_at: "2024-01-23T08:15:00Z",
-    },
-    {
-      user_id: "10",
-      firstname: "Lestari",
-      lastname: "Wulandari",
-      email: "lestari.wulandari@email.com",
-      role: "student",
-      kelas: "X",
-      created_at: "2024-01-24T09:00:00Z",
-    },
-    {
-      user_id: "11",
-      firstname: "Yoga",
-      lastname: "Permana",
-      email: "yoga.permana@email.com",
-      role: "student",
-      kelas: "XI",
-      created_at: "2024-01-25T10:30:00Z",
-    },
-    {
-      user_id: "12",
-      firstname: "Citra",
-      lastname: "Kencana",
-      email: "citra.kencana@email.com",
-      role: "student",
-      kelas: "XII",
-      created_at: "2024-01-26T11:15:00Z",
-    },
-    {
-      user_id: "13",
-      firstname: "Dimas",
-      lastname: "Ardiansyah",
-      email: "dimas.ardiansyah@email.com",
-      role: "student",
-      kelas: "X",
-      created_at: "2024-01-27T12:45:00Z",
-    },
-    {
-      user_id: "14",
-      firstname: "Putri",
-      lastname: "Anggraini",
-      email: "putri.anggraini@email.com",
-      role: "student",
-      kelas: "XI",
-      created_at: "2024-01-28T13:20:00Z",
-    },
-    {
-      user_id: "15",
-      firstname: "Bayu",
-      lastname: "Setiawan",
-      email: "bayu.setiawan@email.com",
-      role: "student",
-      kelas: "XII",
-      created_at: "2024-01-29T14:00:00Z",
-    },
-  ];
-
-  // Load dummy data instead of API call
+  // Fetch users from API
   useEffect(() => {
-    const loadData = () => {
-      setLoading(true);
-      // Simulate loading delay
-      setTimeout(() => {
-        setStudents(dummyStudents);
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${API_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setStudents(response.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          toast.error("Session expired. Silakan login ulang.");
+        } else {
+          toast.error("Gagal mengambil data murid");
+        }
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
-    loadData();
+    fetchUsers();
   }, []);
 
   const filteredStudents = students.filter((student) => {
