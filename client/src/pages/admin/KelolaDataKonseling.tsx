@@ -71,6 +71,36 @@ const KelolaDataKonseling = () => {
           waktu: "15:00",
           catatan: "Merasa tidak termotivasi untuk belajar",
         },
+        {
+          id: "6",
+          studentName: "Siti Nurhaliza",
+          studentKelas: "XII IPS 2",
+          topik: "Persiapan UTBK",
+          status: "ongoing",
+          tanggalKonseling: "2024-03-14",
+          waktu: "14:00",
+          catatan: "Butuh strategi belajar untuk UTBK",
+        },
+        {
+          id: "7",
+          studentName: "Budi Santoso",
+          studentKelas: "XI IPA 1",
+          topik: "Masalah Akademik",
+          status: "completed",
+          tanggalKonseling: "2024-03-10",
+          waktu: "09:00",
+          catatan: "Kesulitan di mata pelajaran Fisika",
+        },
+        {
+          id: "8",
+          studentName: "Dewi Sartika",
+          studentKelas: "XI IPS 1",
+          topik: "Karir dan Masa Depan",
+          status: "pending",
+          tanggalKonseling: "2024-03-16",
+          waktu: "13:00",
+          catatan: "Bingung memilih antara kuliah atau bekerja",
+        },
       ];
       setConsultations(mockConsultations);
       setLoading(false);
@@ -139,89 +169,63 @@ const KelolaDataKonseling = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div className="max-h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
+      <div className="mb-3 flex-shrink-0">
         <h1 className="text-3xl font-bold mb-2">Kelola Data Konseling</h1>
         <p className="text-gray-600">
           Kelola dan pantau sesi konseling dengan murid.
         </p>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Konseling</p>
-              <p className="text-2xl font-bold">{consultations.length}</p>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600">📊</span>
-            </div>
+      {/* Statistics Cards - Simplified */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow p-3">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">Total</p>
+            <p className="text-lg font-bold">{consultations.length}</p>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Menunggu</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {consultations.filter((c) => c.status === "pending").length}
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-              <span className="text-yellow-600">⏳</span>
-            </div>
+        <div className="bg-white rounded-lg shadow p-3">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">Menunggu</p>
+            <p className="text-lg font-bold text-yellow-600">
+              {consultations.filter((c) => c.status === "pending").length}
+            </p>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Berlangsung</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {consultations.filter((c) => c.status === "ongoing").length}
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600">🔄</span>
-            </div>
+        <div className="bg-white rounded-lg shadow p-3">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">Berlangsung</p>
+            <p className="text-lg font-bold text-blue-600">
+              {consultations.filter((c) => c.status === "ongoing").length}
+            </p>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Selesai</p>
-              <p className="text-2xl font-bold text-green-600">
-                {consultations.filter((c) => c.status === "completed").length}
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600">✅</span>
-            </div>
+        <div className="bg-white rounded-lg shadow p-3">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">Selesai</p>
+            <p className="text-lg font-bold text-green-600">
+              {consultations.filter((c) => c.status === "completed").length}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      {/* Search and Filter Section - Simplified */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Cari Konseling
-            </label>
             <input
               type="text"
-              placeholder="Cari berdasarkan nama murid atau topik..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Cari nama murid atau topik..."
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="md:w-48">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Filter Status
-            </label>
+          <div className="md:w-40">
             <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -232,92 +236,88 @@ const KelolaDataKonseling = () => {
               <option value="cancelled">Dibatalkan</option>
             </select>
           </div>
-          <div className="md:w-32 flex items-end">
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-              + Jadwal Baru
+          <div className="md:w-28">
+            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm rounded-lg transition-colors">
+              + Jadwal
             </button>
           </div>
         </div>
       </div>
 
       {/* Consultations Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-24rem)] flex flex-col">
+        <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-lg font-semibold">
             Data Konseling ({filteredConsultations.length})
           </h2>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p className="mt-2 text-gray-600">Memuat data...</p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p className="mt-2 text-gray-600">Memuat data...</p>
+            </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Murid
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Topik
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Jadwal
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredConsultations.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-8 text-center text-gray-500"
+          <div className="flex flex-col overflow-hidden">
+            {/* Header - Fixed */}
+            <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
+              <div>Murid</div>
+              <div>Topik</div>
+              <div>Jadwal</div>
+              <div>Status</div>
+              <div>Action</div>
+            </div>
+
+            {/* Data Rows - Scrollable */}
+            <div className="overflow-y-auto">
+              {filteredConsultations.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-gray-500">
+                    {searchTerm || statusFilter !== "all"
+                      ? "Tidak ada data yang sesuai dengan filter"
+                      : "Belum ada data konseling"}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white">
+                  {filteredConsultations.map((consultation) => (
+                    <div
+                      key={consultation.id}
+                      className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
                     >
-                      {searchTerm || statusFilter !== "all"
-                        ? "Tidak ada data yang sesuai dengan filter"
-                        : "Belum ada data konseling"}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredConsultations.map((consultation) => (
-                    <tr key={consultation.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span className="text-purple-600 font-semibold">
-                              {consultation.studentName.charAt(0).toUpperCase()}
-                            </span>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-purple-600 font-semibold">
+                            {consultation.studentName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {consultation.studentName}
                           </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">
-                              {consultation.studentName}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {consultation.studentKelas}
-                            </div>
+                          <div className="text-sm text-gray-500">
+                            {consultation.studentKelas}
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
+                      </div>
+
+                      <div>
                         <div className="text-sm text-gray-900">
                           {consultation.topik}
                         </div>
                         {consultation.catatan && (
-                          <div className="text-sm text-gray-500 mt-1">
+                          <div
+                            className="text-sm text-gray-500 mt-1 truncate max-w-[200px]"
+                            title={consultation.catatan}
+                          >
                             {consultation.catatan}
                           </div>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      </div>
+
+                      <div className="text-sm text-gray-500">
                         <div>
                           {new Date(
                             consultation.tanggalKonseling
@@ -326,8 +326,9 @@ const KelolaDataKonseling = () => {
                         <div className="text-xs text-gray-400">
                           {consultation.waktu}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      </div>
+
+                      <div>
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
                             consultation.status
@@ -335,37 +336,33 @@ const KelolaDataKonseling = () => {
                         >
                           {getStatusText(consultation.status)}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-col space-y-1">
-                          <select
-                            value={consultation.status}
-                            onChange={(e) =>
-                              handleUpdateStatus(
-                                consultation.id,
-                                e.target.value
-                              )
-                            }
-                            className="text-xs border border-gray-300 rounded px-2 py-1"
-                          >
-                            <option value="pending">Menunggu</option>
-                            <option value="ongoing">Berlangsung</option>
-                            <option value="completed">Selesai</option>
-                            <option value="cancelled">Dibatalkan</option>
-                          </select>
-                          <button
-                            onClick={() => handleDelete(consultation.id)}
-                            className="text-red-600 hover:text-red-900 text-xs"
-                          >
-                            Hapus
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      </div>
+
+                      <div className="flex flex-col space-y-2">
+                        <select
+                          value={consultation.status}
+                          onChange={(e) =>
+                            handleUpdateStatus(consultation.id, e.target.value)
+                          }
+                          className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 outline-0"
+                        >
+                          <option value="pending">Menunggu</option>
+                          <option value="ongoing">Berlangsung</option>
+                          <option value="completed">Selesai</option>
+                          <option value="cancelled">Dibatalkan</option>
+                        </select>
+                        <button
+                          onClick={() => handleDelete(consultation.id)}
+                          className="text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition-colors"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

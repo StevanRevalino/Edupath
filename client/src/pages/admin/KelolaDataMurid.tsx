@@ -27,7 +27,6 @@ const KelolaDataMurid = () => {
     kelas: "",
   });
   const API_URL = import.meta.env.VITE_API_URL;
-
   // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
