@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { PencilIcon, TrashIcon } from "lucide-react";
+import TokenManager from "../../utils/tokenManager";
 
 interface Student {
   user_id: string;
@@ -25,18 +26,30 @@ const KelolaDataMurid = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
+        const token = TokenManager.getToken();
+
         const response = await axios.get(`${API_URL}/api/users`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
+
         setStudents(response.data.data);
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          toast.error("Session expired. Silakan login ulang.");
+        if (axios.isAxiosError(error)) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
+            toast.error("Session expired. Silakan login ulang.");
+            TokenManager.logout();
+            window.location.href = "/login";
+          } else {
+            toast.error("Gagal mengambil data murid");
+          }
         } else {
+          console.error("Error fetching users:", error);
           toast.error("Gagal mengambil data murid");
         }
       } finally {
@@ -46,7 +59,6 @@ const KelolaDataMurid = () => {
 
     fetchUsers();
   }, []);
-
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.lastname}`.trim();
     const matchesSearch =
@@ -58,18 +70,15 @@ const KelolaDataMurid = () => {
   });
 
   const handleEdit = (studentId: string) => {
-    // Implementasi edit functionality
+    // TODO: Implementasi edit functionality
+    console.log("Edit student:", studentId);
+    toast("Fitur edit belum diimplementasikan");
   };
 
   const handleDelete = async (studentId: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
       try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          toast.error("Token tidak ditemukan. Silakan login ulang.");
-          return;
-        }
+        const token = TokenManager.getToken();
 
         await axios.delete(`${API_URL}/api/users/${studentId}`, {
           headers: {
@@ -83,9 +92,19 @@ const KelolaDataMurid = () => {
         );
         toast.success("Data murid berhasil dihapus");
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          toast.error("Session expired. Silakan login ulang.");
+        if (axios.isAxiosError(error)) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
+            toast.error("Session expired. Silakan login ulang.");
+            TokenManager.logout();
+            window.location.href = "/login";
+          } else {
+            toast.error("Gagal menghapus data murid");
+          }
         } else {
+          console.error("Error deleting user:", error);
           toast.error("Gagal menghapus data murid");
         }
       }

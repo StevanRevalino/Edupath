@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import TokenManager from "../../utils/tokenManager";
 
 type ProdiItem = {
   prodi_id: string;
@@ -133,7 +134,7 @@ const Jurusan: React.FC = () => {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
       const url = `${API_URL}/api/prodi/detail/${prodiId}`;
-      const token = localStorage.getItem("token");
+      const token = TokenManager.getToken();
       const res = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -141,6 +142,11 @@ const Jurusan: React.FC = () => {
       console.log("Prodi Detail:", data);
       setSelectedProdi(data);
     } catch (e: any) {
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+        return;
+      }
       const msg =
         e?.response?.data?.message ||
         e?.message ||
@@ -167,7 +173,7 @@ const Jurusan: React.FC = () => {
         const url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
           q.trim()
         )}`;
-        const token = localStorage.getItem("token");
+        const token = TokenManager.getToken();
         const res = await axios.get(url, {
           signal: ctrl.signal,
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -195,6 +201,11 @@ const Jurusan: React.FC = () => {
         }
       } catch (e: any) {
         if (axios.isCancel(e)) return; // silently ignore canceled
+        if (e?.response?.status === 401 || e?.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+          return;
+        }
         const msg =
           e?.response?.data?.message || e?.message || "Terjadi kesalahan";
         setError(msg);
