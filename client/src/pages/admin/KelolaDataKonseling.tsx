@@ -1,14 +1,23 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import TokenManager from "../../utils/tokenManager";
 
 interface Consultation {
-  id: string;
-  studentName: string;
-  studentKelas: string;
-  topik: string;
-  status: "pending" | "ongoing" | "completed" | "cancelled";
-  tanggalKonseling: string;
-  waktu: string;
-  catatan?: string;
+  consultation_id: string;
+  murid_id: string;
+  topic: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  consultation_date: string;
+  consultation_time: string;
+  notes?: string;
+  created_at: string;
+  murid: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    kelas: number | null;
+  };
 }
 
 const KelolaDataKonseling = () => {
@@ -16,155 +25,132 @@ const KelolaDataKonseling = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const API_URL = import.meta.env.VITE_API_URL;
 
-  // Mock data - nanti bisa diganti dengan API call
+  // Fetch consultations from API
   useEffect(() => {
-    setTimeout(() => {
-      const mockConsultations: Consultation[] = [
-        {
-          id: "1",
-          studentName: "Ahmad Rizki",
-          studentKelas: "XII IPA 1",
-          topik: "Pemilihan Jurusan Kuliah",
-          status: "pending",
-          tanggalKonseling: "2024-03-15",
-          waktu: "10:00",
-          catatan: "Ingin konsultasi tentang jurusan teknik",
-        },
-        {
-          id: "2",
-          studentName: "Siti Nurhaliza",
-          studentKelas: "XII IPS 2",
-          topik: "Persiapan UTBK",
-          status: "ongoing",
-          tanggalKonseling: "2024-03-14",
-          waktu: "14:00",
-          catatan: "Butuh strategi belajar untuk UTBK",
-        },
-        {
-          id: "3",
-          studentName: "Budi Santoso",
-          studentKelas: "XI IPA 1",
-          topik: "Masalah Akademik",
-          status: "completed",
-          tanggalKonseling: "2024-03-10",
-          waktu: "09:00",
-          catatan: "Kesulitan di mata pelajaran Fisika",
-        },
-        {
-          id: "4",
-          studentName: "Dewi Sartika",
-          studentKelas: "XI IPS 1",
-          topik: "Karir dan Masa Depan",
-          status: "pending",
-          tanggalKonseling: "2024-03-16",
-          waktu: "13:00",
-          catatan: "Bingung memilih antara kuliah atau bekerja",
-        },
-        {
-          id: "5",
-          studentName: "Rudi Hartono",
-          studentKelas: "X IPA 2",
-          topik: "Motivasi Belajar",
-          status: "cancelled",
-          tanggalKonseling: "2024-03-12",
-          waktu: "15:00",
-          catatan: "Merasa tidak termotivasi untuk belajar",
-        },
-        {
-          id: "6",
-          studentName: "Siti Nurhaliza",
-          studentKelas: "XII IPS 2",
-          topik: "Persiapan UTBK",
-          status: "ongoing",
-          tanggalKonseling: "2024-03-14",
-          waktu: "14:00",
-          catatan: "Butuh strategi belajar untuk UTBK",
-        },
-        {
-          id: "7",
-          studentName: "Budi Santoso",
-          studentKelas: "XI IPA 1",
-          topik: "Masalah Akademik",
-          status: "completed",
-          tanggalKonseling: "2024-03-10",
-          waktu: "09:00",
-          catatan: "Kesulitan di mata pelajaran Fisika",
-        },
-        {
-          id: "8",
-          studentName: "Dewi Sartika",
-          studentKelas: "XI IPS 1",
-          topik: "Karir dan Masa Depan",
-          status: "pending",
-          tanggalKonseling: "2024-03-16",
-          waktu: "13:00",
-          catatan: "Bingung memilih antara kuliah atau bekerja",
-        },
-      ];
-      setConsultations(mockConsultations);
-      setLoading(false);
-    }, 1000);
+    const fetchConsultations = async () => {
+      try {
+        setLoading(true);
+        const token = TokenManager.getToken();
+
+        const response = await axios.get(`${API_URL}/api/consultations`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setConsultations(response.data.data || []);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
+            toast.error("Session expired. Silakan login ulang.");
+            TokenManager.logout();
+            window.location.href = "/login";
+          } else {
+            toast.error("Gagal mengambil data konseling");
+          }
+        } else {
+          console.error("Error fetching consultations:", error);
+          toast.error("Gagal mengambil data konseling");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConsultations();
   }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "ongoing":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "PENDING":
+        return "text-yellow-500";
+      case "ACCEPTED":
+        return "text-green-500";
+      case "DECLINED":
+        return "text-red-500";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "pending":
-        return "Menunggu";
-      case "ongoing":
-        return "Berlangsung";
-      case "completed":
-        return "Selesai";
-      case "cancelled":
-        return "Dibatalkan";
+      case "PENDING":
+        return "Pending";
+      case "ACCEPTED":
+        return "Accepted";
+      case "DECLINED":
+        return "Declined";
       default:
         return status;
     }
   };
 
+  const getKelasText = (kelas: number | null) => {
+    if (!kelas) return "Belum diatur";
+    const kelasMap: { [key: number]: string } = {
+      10: "X",
+      11: "XI",
+      12: "XII",
+    };
+    return kelasMap[kelas] || `Kelas ${kelas}`;
+  };
+
   const filteredConsultations = consultations.filter((consultation) => {
+    const fullName =
+      `${consultation.murid.firstname} ${consultation.murid.lastname}`.trim();
     const matchesSearch =
-      consultation.studentName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      consultation.topik.toLowerCase().includes(searchTerm.toLowerCase());
+      fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      consultation.topic.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || consultation.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const handleUpdateStatus = (consultationId: string, newStatus: string) => {
-    setConsultations(
-      consultations.map((consultation) =>
-        consultation.id === consultationId
-          ? { ...consultation, status: newStatus as Consultation["status"] }
-          : consultation
-      )
-    );
-  };
+  const handleUpdateStatus = async (
+    consultationId: string,
+    newStatus: string
+  ) => {
+    try {
+      const token = TokenManager.getToken();
 
-  const handleDelete = (consultationId: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data konseling ini?")) {
+      await axios.patch(
+        `${API_URL}/api/consultations/${consultationId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       setConsultations(
-        consultations.filter(
-          (consultation) => consultation.id !== consultationId
+        consultations.map((consultation) =>
+          consultation.consultation_id === consultationId
+            ? { ...consultation, status: newStatus as Consultation["status"] }
+            : consultation
         )
       );
+
+      toast.success("Status konseling berhasil diperbarui");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          toast.error("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          toast.error("Gagal memperbarui status konseling");
+        }
+      } else {
+        console.error("Error updating consultation:", error);
+        toast.error("Gagal memperbarui status konseling");
+      }
     }
   };
 
@@ -177,7 +163,7 @@ const KelolaDataKonseling = () => {
         </p>
       </div>
 
-      {/* Statistics Cards - Simplified */}
+      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 flex-shrink-0">
         <div className="bg-white rounded-lg shadow p-3">
           <div className="text-center">
@@ -187,31 +173,31 @@ const KelolaDataKonseling = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-3">
           <div className="text-center">
-            <p className="text-xs text-gray-500 mb-1">Menunggu</p>
+            <p className="text-xs text-gray-500 mb-1">Pending</p>
             <p className="text-lg font-bold text-yellow-600">
-              {consultations.filter((c) => c.status === "pending").length}
+              {consultations.filter((c) => c.status === "PENDING").length}
             </p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow p-3">
           <div className="text-center">
-            <p className="text-xs text-gray-500 mb-1">Berlangsung</p>
-            <p className="text-lg font-bold text-blue-600">
-              {consultations.filter((c) => c.status === "ongoing").length}
-            </p>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-3">
-          <div className="text-center">
-            <p className="text-xs text-gray-500 mb-1">Selesai</p>
+            <p className="text-xs text-gray-500 mb-1">Accepted</p>
             <p className="text-lg font-bold text-green-600">
-              {consultations.filter((c) => c.status === "completed").length}
+              {consultations.filter((c) => c.status === "ACCEPTED").length}
+            </p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-3">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">Declined</p>
+            <p className="text-lg font-bold text-red-600">
+              {consultations.filter((c) => c.status === "DECLINED").length}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter Section - Simplified */}
+      {/* Search and Filter Section */}
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex-shrink-0">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
@@ -230,16 +216,10 @@ const KelolaDataKonseling = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">Semua Status</option>
-              <option value="pending">Menunggu</option>
-              <option value="ongoing">Berlangsung</option>
-              <option value="completed">Selesai</option>
-              <option value="cancelled">Dibatalkan</option>
+              <option value="PENDING">Pending</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="DECLINED">Declined</option>
             </select>
-          </div>
-          <div className="md:w-28">
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm rounded-lg transition-colors">
-              + Jadwal
-            </button>
           </div>
         </div>
       </div>
@@ -284,35 +264,37 @@ const KelolaDataKonseling = () => {
                 <div className="bg-white">
                   {filteredConsultations.map((consultation) => (
                     <div
-                      key={consultation.id}
+                      key={consultation.consultation_id}
                       className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
                     >
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                           <span className="text-purple-600 font-semibold">
-                            {consultation.studentName.charAt(0).toUpperCase()}
+                            {consultation.murid.firstname
+                              .charAt(0)
+                              .toUpperCase()}
                           </span>
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
-                            {consultation.studentName}
+                            {`${consultation.murid.firstname} ${consultation.murid.lastname}`.trim()}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {consultation.studentKelas}
+                            {getKelasText(consultation.murid.kelas)}
                           </div>
                         </div>
                       </div>
 
                       <div>
                         <div className="text-sm text-gray-900">
-                          {consultation.topik}
+                          {consultation.topic}
                         </div>
-                        {consultation.catatan && (
+                        {consultation.notes && (
                           <div
-                            className="text-sm text-gray-500 mt-1 truncate max-w-[200px]"
-                            title={consultation.catatan}
+                            className="text-sm text-gray-500 mt-1 max-w-[200px]"
+                            title={consultation.notes}
                           >
-                            {consultation.catatan}
+                            {consultation.notes}
                           </div>
                         )}
                       </div>
@@ -320,43 +302,62 @@ const KelolaDataKonseling = () => {
                       <div className="text-sm text-gray-500">
                         <div>
                           {new Date(
-                            consultation.tanggalKonseling
+                            consultation.consultation_date
                           ).toLocaleDateString("id-ID")}
                         </div>
                         <div className="text-xs text-gray-400">
-                          {consultation.waktu}
+                          {consultation.consultation_time}
                         </div>
                       </div>
 
                       <div>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                          className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                             consultation.status
                           )}`}
                         >
-                          {getStatusText(consultation.status)}
+                          <span className="w-2 h-2 bg-current rounded-full opacity-60"></span>
+                          <span>{getStatusText(consultation.status)}</span>
                         </span>
                       </div>
 
-                      <div className="flex flex-col space-y-2">
-                        <select
-                          value={consultation.status}
-                          onChange={(e) =>
-                            handleUpdateStatus(consultation.id, e.target.value)
-                          }
-                          className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 outline-0"
-                        >
-                          <option value="pending">Menunggu</option>
-                          <option value="ongoing">Berlangsung</option>
-                          <option value="completed">Selesai</option>
-                          <option value="cancelled">Dibatalkan</option>
-                        </select>
-                        <button
-                          onClick={() => handleDelete(consultation.id)}
-                          className="text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition-colors"
-                        >
-                          Hapus
-                        </button>
+                      <div className="flex items-center space-x-2">
+                        {consultation.status === "PENDING" && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleUpdateStatus(
+                                  consultation.consultation_id,
+                                  "ACCEPTED"
+                                )
+                              }
+                              className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors"
+                            >
+                              <span className="w-2 h-2 bg-white rounded-full"></span>
+                              <span>Accept</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleUpdateStatus(
+                                  consultation.consultation_id,
+                                  "DECLINED"
+                                )
+                              }
+                              className="flex items-center space-x-1 px-3 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-colors"
+                            >
+                              <span className="w-2 h-2 bg-white rounded-full"></span>
+                              <span>Decline</span>
+                            </button>
+                          </>
+                        )}
+                        {consultation.status !== "PENDING" && (
+                          <span className="text-xs text-gray-500">
+                            {consultation.status === "ACCEPTED" &&
+                              "Sudah diterima"}
+                            {consultation.status === "DECLINED" &&
+                              "Sudah ditolak"}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
