@@ -105,13 +105,25 @@ const KelolaDataMurid = () => {
     try {
       const token = TokenManager.getToken();
 
+      // Convert kelas string to number for backend
+      const kelasMap: { [key: string]: number } = {
+        X: 10,
+        XI: 11,
+        XII: 12,
+      };
+
+      const updatePayload = {
+        firstname: editForm.firstname,
+        lastname: editForm.lastname,
+        kelas: editForm.kelas ? kelasMap[editForm.kelas] : null,
+      };
+
+      console.log("Update payload:", updatePayload);
+      console.log("Updating user:", selectedStudent.user_id);
+
       await axios.put(
         `${API_URL}/api/users/${selectedStudent.user_id}`,
-        {
-          firstname: editForm.firstname,
-          lastname: editForm.lastname,
-          kelas: editForm.kelas || null,
-        },
+        updatePayload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -124,7 +136,12 @@ const KelolaDataMurid = () => {
       setStudents(
         students.map((student) =>
           student.user_id === selectedStudent.user_id
-            ? { ...student, ...editForm }
+            ? {
+                ...student,
+                firstname: editForm.firstname,
+                lastname: editForm.lastname,
+                kelas: editForm.kelas,
+              }
             : student
         )
       );
