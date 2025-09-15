@@ -10,20 +10,28 @@ import Jurusan from "./pages/user/Jurusan";
 import Universitas from "./pages/user/Universitas";
 import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
+import TokenManager from "./utils/tokenManager";
+import useAuthMonitor from "./hooks/useAuthMonitor";
+import toast from "react-hot-toast";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const userId = localStorage.getItem("user_id");
-  if (!userId) return <Navigate to="/login" />;
+  const { isAuthenticated } = useAuthMonitor();
+
+  // Gunakan TokenManager untuk validasi yang lebih robust
+  if (!isAuthenticated()) {
+    toast.error("Session expired. Silakan login kembali.");
+    return <Navigate to="/login" />;
+  }
   return children;
 }
 
 function DefaultRoute() {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  if (!token) {
+  // Cek apakah token valid menggunakan TokenManager
+  if (!TokenManager.isAuthenticated()) {
     return <Navigate to="/login" />;
   }
+
+  const { role } = TokenManager.getUserData();
 
   if (role === "ADMIN") {
     return <Navigate to="/dashboard-admin" />;

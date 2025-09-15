@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, Mail, GraduationCap, Shield } from "lucide-react";
 import toast from "react-hot-toast";
+import TokenManager from "../../utils/tokenManager";
 
 interface UserProfile {
   user_id: string;
@@ -23,7 +24,7 @@ const Profil = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = TokenManager.getToken();
       if (!token) {
         navigate("/login");
         return;
@@ -57,11 +58,8 @@ const Profil = () => {
   };
 
   const handleLogout = () => {
-    // Clear all auth data from localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("role");
-
+    // Gunakan TokenManager untuk clear semua data auth
+    TokenManager.logout();
     toast.success("Berhasil logout");
     navigate("/login");
   };

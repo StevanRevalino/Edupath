@@ -6,6 +6,7 @@ import ModalResetPassword from "../../components/ModalResetPassword";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import TokenManager from "../../utils/tokenManager";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -35,10 +36,14 @@ export default function Login() {
         password,
       });
       console.log("Login Response:", res);
-      const result = res.data.data; 
-      localStorage.setItem("user_id", result.user.user_id);
-      localStorage.setItem("role", result.user.role);
-      localStorage.setItem("token", result.token);
+      const result = res.data.data;
+
+      // Clear data auth lama terlebih dahulu untuk menghindari konflik
+      TokenManager.clearAllAuthData();
+
+      // Gunakan TokenManager untuk menyimpan token dengan validasi expiry
+      TokenManager.setToken(result.token, 1); // Token berlaku 1 hari
+      TokenManager.setUserData(result.user.user_id, result.user.role);
 
       toast.success("Login berhasil!");
       if (result.user.role === "ADMIN") {
