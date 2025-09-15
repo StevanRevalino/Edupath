@@ -72,7 +72,7 @@ const KelolaDataMurid = () => {
   const handleEdit = (studentId: string) => {
     // TODO: Implementasi edit functionality
     console.log("Edit student:", studentId);
-    toast("Fitur edit belum diimplementasikan");
+    
   };
 
   const handleDelete = async (studentId: string) => {
@@ -132,7 +132,7 @@ const KelolaDataMurid = () => {
             <input
               type="text"
               placeholder="Cari berdasarkan nama atau email..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparen outline-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -142,7 +142,7 @@ const KelolaDataMurid = () => {
               Filter Kelas
             </label>
             <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
             >
@@ -192,15 +192,15 @@ const KelolaDataMurid = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white divide-y divide-gray-200">
+                <div className="bg-white">
                   {filteredStudents.map((student) => (
                     <div
                       key={student.user_id}
                       className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
                     >
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-semibold">
+                        <div className="w-10 h-10 bg-[#D0E5FF] rounded-full flex items-center justify-center">
+                          <span className="text-[#003B73] font-semibold">
                             {(student.firstname || "N/A")
                               .charAt(0)
                               .toUpperCase()}
@@ -216,7 +216,7 @@ const KelolaDataMurid = () => {
                       </div>
 
                       <div>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                           {student.kelas
                             ? `Kelas ${student.kelas}`
                             : "Belum diatur"}
@@ -240,7 +240,7 @@ const KelolaDataMurid = () => {
 
                       <div className="flex items-center space-x-3">
                         <PencilIcon
-                          className="w-5 h-5 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
+                          className="w-5 h-5 text-[#6CCBFF] cursor-pointer hover:text-[#6CCBFF]/80 transition-colors"
                           onClick={() => handleEdit(student.user_id)}
                         />
                         <TrashIcon
