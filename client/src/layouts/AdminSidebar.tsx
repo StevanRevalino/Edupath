@@ -15,7 +15,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const handleLogout = () => {
     try {
       // Clear authentication data
-      localStorage.removeItem("token");
+      localStorage.removeItem("token_data");
       localStorage.removeItem("user_id");
       localStorage.removeItem("role");
 

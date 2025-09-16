@@ -136,7 +136,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         newPassword,
       });
 
-      localStorage.removeItem("token");
+      localStorage.removeItem("token_data");
       localStorage.removeItem("user_id");
       localStorage.removeItem("role");
 
