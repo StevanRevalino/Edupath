@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { PencilIcon, X, Trash2 } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import TokenManager from "../../utils/tokenManager";
 
 interface Student {
@@ -206,6 +206,19 @@ const KelolaDataMurid = () => {
 
   const kelasOptions = ["X", "XI", "XII"];
 
+  const getKelasColor = (kelas: string | null) => {
+    switch (kelas) {
+      case "X":
+        return "bg-green-100 text-green-800";
+      case "XI":
+        return "bg-blue-100 text-blue-800";
+      case "XII":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
     <>
       <div className="max-h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
@@ -217,8 +230,8 @@ const KelolaDataMurid = () => {
         </div>
 
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6 flex-shrink-0">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6 flex-shrink-0">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Cari Murid
@@ -226,17 +239,17 @@ const KelolaDataMurid = () => {
               <input
                 type="text"
                 placeholder="Cari berdasarkan nama atau email..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparen outline-0"
+                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="md:w-48">
+            <div className="lg:w-48">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filter Kelas
               </label>
               <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
+                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
                 value={selectedKelas}
                 onChange={(e) => setSelectedKelas(e.target.value)}
               >
@@ -252,8 +265,8 @@ const KelolaDataMurid = () => {
         </div>
 
         {/* Students Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-24rem)] flex flex-col">
-          <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-20rem)] sm:max-h-[calc(100vh-24rem)] flex flex-col">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold">
               Data Murid ({filteredStudents.length})
             </h2>
@@ -267,76 +280,151 @@ const KelolaDataMurid = () => {
               </div>
             </div>
           ) : (
-            <div className=" flex flex-col overflow-hidden">
-              {/* Header - Fixed */}
-              <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
-                <div>Nama</div>
-                <div>Kelas</div>
-                <div>Email</div>
-                <div>Tanggal Daftar</div>
-                <div>Action</div>
+            <div className="flex flex-col overflow-hidden">
+              {/* Desktop Table View - Hidden on Mobile */}
+              <div className="hidden lg:flex flex-col overflow-hidden">
+                {/* Header - Fixed */}
+                <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
+                  <div>Nama</div>
+                  <div>Kelas</div>
+                  <div>Email</div>
+                  <div>Tanggal Daftar</div>
+                  <div>Action</div>
+                </div>
+
+                {/* Data Rows - Scrollable */}
+                <div className="overflow-y-auto">
+                  {filteredStudents.length === 0 ? (
+                    <div className="flex items-center justify-center h-32">
+                      <div className="text-center text-gray-500">
+                        Tidak ada data.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white">
+                      {filteredStudents.map((student) => (
+                        <div
+                          key={student.user_id}
+                          className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
+                        >
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-[#050051] font-bold">
+                                {(student.firstname || "N/A")
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="ml-3 min-w-0">
+                              <div className="text-md font-semibold text-gray-900">
+                                {`${student.firstname || ""} ${
+                                  student.lastname || ""
+                                }`.trim() || "N/A"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getKelasColor(
+                                student.kelas
+                              )}`}
+                            >
+                              {student.kelas
+                                ? `Kelas ${student.kelas}`
+                                : "Belum diatur"}
+                            </span>
+                          </div>
+
+                          <div className="text-sm text-gray-500">
+                            <span
+                              className="truncate block max-w-[200px]"
+                              title={student.email || "N/A"}
+                            >
+                              {student.email || "N/A"}
+                            </span>
+                          </div>
+
+                          <div className="text-sm text-gray-500">
+                            {new Date(student.created_at).toLocaleDateString(
+                              "id-ID"
+                            )}
+                          </div>
+
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => handleEdit(student.user_id)}
+                              className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                            >
+                              <span>Edit</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Data Rows - Scrollable */}
-              <div className="overflow-y-auto">
+              {/* Mobile Card View - Hidden on Desktop */}
+              <div className="lg:hidden overflow-y-auto">
                 {filteredStudents.length === 0 ? (
-                  <div className="flex items-center justify-center h-full">
+                  <div className="flex items-center justify-center h-32">
                     <div className="text-center text-gray-500">
                       Tidak ada data.
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white">
+                  <div className="p-4 space-y-4">
                     {filteredStudents.map((student) => (
                       <div
                         key={student.user_id}
-                        className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
+                        className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
                       >
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-[#D0E5FF] rounded-full flex items-center justify-center">
-                            <span className="text-[#003B73] font-semibold">
-                              {(student.firstname || "N/A")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">
-                              {`${student.firstname || ""} ${
-                                student.lastname || ""
-                              }`.trim() || "N/A"}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-[#050051] font-bold text-lg">
+                                {(student.firstname || "N/A")
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="ml-3 min-w-0 flex-1">
+                              <div className="text-lg font-semibold text-gray-900">
+                                {`${student.firstname || ""} ${
+                                  student.lastname || ""
+                                }`.trim() || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {new Date(
+                                  student.created_at
+                                ).toLocaleDateString("id-ID")}
+                              </div>
                             </div>
                           </div>
+                          <button
+                            onClick={() => handleEdit(student.user_id)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                          >
+                            <span>Edit</span>
+                          </button>
                         </div>
 
-                        <div>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium w-fit ${getKelasColor(
+                              student.kelas
+                            )}`}
+                          >
                             {student.kelas
                               ? `Kelas ${student.kelas}`
                               : "Belum diatur"}
                           </span>
-                        </div>
 
-                        <div className="text-sm text-gray-500">
-                          <span
-                            className="truncate block max-w-[200px]"
-                            title={student.email || "N/A"}
-                          >
+                          <div className="text-sm text-gray-500 break-all">
                             {student.email || "N/A"}
-                          </span>
-                        </div>
-
-                        <div className="text-sm text-gray-500">
-                          {new Date(student.created_at).toLocaleDateString(
-                            "id-ID"
-                          )}
-                        </div>
-
-                        <div className="flex items-center space-x-3">
-                          <PencilIcon
-                            className="w-5 h-5 text-[#6CCBFF] cursor-pointer hover:text-[#6CCBFF]/80 transition-colors"
-                            onClick={() => handleEdit(student.user_id)}
-                          />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -348,10 +436,10 @@ const KelolaDataMurid = () => {
         </div>
       </div>
 
-      {/* Modal Edit Student - Outside main container to avoid blur */}
+      {/* Modal Edit Student - Responsive */}
       {isModalOpen && selectedStudent && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Edit Data Murid</h3>
               <button
@@ -413,23 +501,24 @@ const KelolaDataMurid = () => {
                 </select>
               </div>
 
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 break-words">
                 <strong>Email:</strong> {selectedStudent?.email}
               </div>
             </div>
 
-            <div className="flex justify-between items-center mt-6 pt-4 border-t">
+            {/* Responsive Button Layout */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3">
               <button
                 onClick={() =>
                   selectedStudent && handleDelete(selectedStudent.user_id)
                 }
-                className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors order-2 sm:order-1"
               >
                 <Trash2 size={16} />
                 <span>Hapus</span>
               </button>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 order-1 sm:order-2">
                 <button
                   onClick={handleCloseModal}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
