@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { X, Trash2 } from "lucide-react";
 import TokenManager from "../../utils/tokenManager";
+import Swal from "sweetalert2";
 
 interface Student {
   user_id: string;
@@ -101,6 +102,22 @@ const KelolaDataMurid = () => {
   const handleUpdateStudent = async () => {
     if (!selectedStudent) return;
 
+    // Validasi form
+    if (!editForm.firstname.trim()) {
+      toast.error("Nama depan harus diisi");
+      return;
+    }
+
+    if (!editForm.lastname.trim()) {
+      toast.error("Nama belakang harus diisi");
+      return;
+    }
+
+    if (!editForm.kelas) {
+      toast.error("Kelas harus dipilih");
+      return;
+    }
+
     try {
       const token = TokenManager.getToken();
 
@@ -114,7 +131,10 @@ const KelolaDataMurid = () => {
       const updatePayload = {
         firstname: editForm.firstname,
         lastname: editForm.lastname,
-        kelas: editForm.kelas ? kelasMap[editForm.kelas] : null,
+        kelas:
+          editForm.kelas && kelasMap[editForm.kelas] !== undefined
+            ? kelasMap[editForm.kelas]
+            : null,
       };
 
       console.log("Update payload:", updatePayload);
@@ -164,44 +184,59 @@ const KelolaDataMurid = () => {
   };
 
   const handleDelete = async (studentId: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
-      try {
-        const token = TokenManager.getToken();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const token = TokenManager.getToken();
 
-        await axios.delete(`${API_URL}/api/users/${studentId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+          await axios.delete(`${API_URL}/api/users/${studentId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
 
-        setStudents(
-          students.filter((student) => student.user_id !== studentId)
-        );
-        toast.success("Data murid berhasil dihapus");
+          setStudents(
+            students.filter((student) => student.user_id !== studentId)
+          );
+          toast.success("Data murid berhasil dihapus");
 
-        // Tutup modal jika delete dipanggil dari modal
-        if (isModalOpen) {
-          handleCloseModal();
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            toast.error("Session expired. Silakan login ulang.");
-            TokenManager.logout();
-            window.location.href = "/login";
+          // Tutup modal jika delete dipanggil dari modal
+          if (isModalOpen) {
+            handleCloseModal();
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (
+              error.response?.status === 401 ||
+              error.response?.status === 403
+            ) {
+              toast.error("Session expired. Silakan login ulang.");
+              TokenManager.logout();
+              window.location.href = "/login";
+            } else {
+              toast.error("Gagal menghapus data murid");
+            }
           } else {
+            console.error("Error deleting user:", error);
             toast.error("Gagal menghapus data murid");
           }
-        } else {
-          console.error("Error deleting user:", error);
-          toast.error("Gagal menghapus data murid");
         }
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
       }
-    }
+    });
   };
 
   const kelasOptions = ["X", "XI", "XII"];
@@ -453,7 +488,7 @@ const KelolaDataMurid = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Depan
+                  Nama Depan <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -468,7 +503,7 @@ const KelolaDataMurid = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Belakang
+                  Nama Belakang <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -483,7 +518,7 @@ const KelolaDataMurid = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kelas
+                  Kelas <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={editForm.kelas}
@@ -507,12 +542,12 @@ const KelolaDataMurid = () => {
             </div>
 
             {/* Responsive Button Layout */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3 ">
               <button
                 onClick={() =>
                   selectedStudent && handleDelete(selectedStudent.user_id)
                 }
-                className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors order-2 sm:order-1"
+                className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors order-2 sm:order-1 cursor-pointer"
               >
                 <Trash2 size={16} />
                 <span>Hapus</span>
@@ -520,14 +555,15 @@ const KelolaDataMurid = () => {
 
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 order-1 sm:order-2">
                 <button
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Batal
-                </button>
-                <button
                   onClick={handleUpdateStudent}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  disabled={
+                    !editForm.firstname || !editForm.lastname || !editForm.kelas
+                  }
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    !editForm.firstname || !editForm.lastname || !editForm.kelas
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                  }`}
                 >
                   Simpan
                 </button>
