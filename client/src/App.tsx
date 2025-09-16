@@ -51,8 +51,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Dashboard User dengan header tetap */}
         <Route
           path="/user"
           element={
