@@ -5,49 +5,64 @@ import toast from "react-hot-toast";
 
 const useAuthMonitor = () => {
   const navigate = useNavigate();
-  const hasShownLogoutToast = useRef(false);
+  const hasShownToast = useRef<{
+    unauthorized: boolean;
+    expired: boolean;
+  }>({
+    unauthorized: false,
+    expired: false,
+  });
 
-  const handleLogout = useCallback(() => {
-    console.log(
-      "🔴 handleLogout called, hasShownLogoutToast:",
-      hasShownLogoutToast.current
-    );
-    TokenManager.logout();
+  const handleAuthFailure = useCallback(
+    (authStatus: "expired" | "unauthorized") => {
+      console.log("🔴 handleAuthFailure called, status:", authStatus);
+      TokenManager.logout();
 
-    // Only show toast if not already shown in this session
-    if (!hasShownLogoutToast.current) {
-      hasShownLogoutToast.current = true;
-      console.log("🍞 Showing logout toast");
-      toast.error("Session expired. Silakan login kembali.");
-    } else {
-      console.log("🚫 Toast already shown, skipping");
-    }
+      // Show appropriate toast based on auth status
+      if (authStatus === "expired" && !hasShownToast.current.expired) {
+        hasShownToast.current.expired = true;
+        toast.error("Session expired. Silakan login kembali.");
+      } else if (
+        authStatus === "unauthorized" &&
+        !hasShownToast.current.unauthorized
+      ) {
+        hasShownToast.current.unauthorized = true;
+        toast.error("Unauthorized. Silakan login terlebih dahulu.");
+      }
 
-    navigate("/login");
-  }, [navigate]);
+      navigate("/login");
+    },
+    [navigate]
+  );
 
   const checkTokenExpiry = useCallback(() => {
-    if (!TokenManager.isTokenValid()) {
-      handleLogout();
+    const authStatus = TokenManager.getAuthStatus();
+
+    if (authStatus !== "authenticated") {
+      handleAuthFailure(authStatus);
       return false;
     }
     return true;
-  }, [handleLogout]);
+  }, [handleAuthFailure]);
 
   const isAuthenticated = useCallback(() => {
-    const isAuth = TokenManager.isAuthenticated();
+    const authStatus = TokenManager.getAuthStatus();
 
-    // If not authenticated and haven't shown logout toast yet, trigger logout
-    if (!isAuth && !hasShownLogoutToast.current) {
-      handleLogout();
+    // If not authenticated, trigger appropriate action
+    if (authStatus !== "authenticated") {
+      handleAuthFailure(authStatus);
+      return false;
     }
 
-    return isAuth;
-  }, [handleLogout]);
+    return true;
+  }, [handleAuthFailure]);
 
-  // Reset toast flag when component mounts (new session)
+  // Reset toast flags when component mounts (new session)
   useEffect(() => {
-    hasShownLogoutToast.current = false;
+    hasShownToast.current = {
+      unauthorized: false,
+      expired: false,
+    };
   }, []);
 
   // Monitor token expiry setiap 30 detik
@@ -65,7 +80,7 @@ const useAuthMonitor = () => {
   return {
     isAuthenticated,
     checkTokenExpiry,
-    handleLogout,
+    handleAuthFailure,
   };
 };
 

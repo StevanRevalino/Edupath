@@ -24,21 +24,6 @@ class TokenManager {
     localStorage.setItem(this.TOKEN_DATA_KEY, JSON.stringify(tokenData));
   }
 
-  // Set token untuk testing dengan durasi dalam detik
-  static setTokenForTesting(token: string, expiresInSeconds: number): void {
-    const timestamp = Date.now();
-    const expiresIn = expiresInSeconds * 1000; // convert to milliseconds
-
-    const tokenData: TokenData = {
-      token,
-      timestamp,
-      expiresIn,
-    };
-
-    // Hanya simpan di token_data untuk menghindari duplikasi
-    localStorage.setItem(this.TOKEN_DATA_KEY, JSON.stringify(tokenData));
-  }
-
   // Get token jika masih valid
   static getToken(): string | null {
     if (!this.isTokenValid()) {
@@ -75,6 +60,41 @@ class TokenManager {
     }
   }
 
+  // Check status authentication dengan detail
+  static getAuthStatus(): "authenticated" | "expired" | "unauthorized" {
+    const tokenDataStr = localStorage.getItem(this.TOKEN_DATA_KEY);
+    const userId = localStorage.getItem(this.USER_ID_KEY);
+
+    // Tidak ada data sama sekali = unauthorized
+    if (!tokenDataStr || !userId) {
+      return "unauthorized";
+    }
+
+    try {
+      const tokenData: TokenData = JSON.parse(tokenDataStr);
+      const now = Date.now();
+      const tokenAge = now - tokenData.timestamp;
+
+      // Ada token tapi sudah expired
+      if (tokenAge >= tokenData.expiresIn) {
+        return "expired";
+      }
+
+      // Token valid
+      return "authenticated";
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+      return "unauthorized";
+    }
+  }
+
+  // Check apakah ada session data (pernah login)
+  static hasSessionData(): boolean {
+    const tokenDataStr = localStorage.getItem(this.TOKEN_DATA_KEY);
+    const userId = localStorage.getItem(this.USER_ID_KEY);
+    return !!(tokenDataStr && userId);
+  }
+
   // Set user data
   static setUserData(userId: string, role: string): void {
     localStorage.setItem(this.USER_ID_KEY, userId);
@@ -103,31 +123,8 @@ class TokenManager {
 
   // Check apakah user sedang login dan token valid
   static isAuthenticated(): boolean {
-    // Single check untuk menghindari multiple calls ke isTokenValid()
-    if (!this.isTokenValid()) {
-      this.clearAllAuthData();
-      return false;
-    }
-
-    try {
-      const tokenDataStr = localStorage.getItem(this.TOKEN_DATA_KEY);
-      const userId = localStorage.getItem(this.USER_ID_KEY);
-
-      if (!tokenDataStr || !userId) {
-        this.clearAllAuthData();
-        return false;
-      }
-
-      const tokenData: TokenData = JSON.parse(tokenDataStr);
-      return !!tokenData.token && !!userId;
-    } catch (error) {
-      console.error("Error checking authentication:", error);
-      this.clearAllAuthData();
-      return false;
-    }
-  }
-
-  // Logout dengan clear semua data
+    return this.getAuthStatus() === "authenticated";
+  } // Logout dengan clear semua data
   static logout(): void {
     this.clearAllAuthData();
   }
