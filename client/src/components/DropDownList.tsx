@@ -47,7 +47,7 @@ export default function DropdownList({
           }),
           placeholder: (base) => ({
             ...base,
-            color: "#757575", // Tailwind gray-400
+            color: "#757575",
           }),
           valueContainer: (base) => ({
             ...base,

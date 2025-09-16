@@ -5,7 +5,6 @@ interface TokenData {
 }
 
 class TokenManager {
-  private static readonly TOKEN_KEY = "token";
   private static readonly USER_ID_KEY = "user_id";
   private static readonly ROLE_KEY = "role";
   private static readonly TOKEN_DATA_KEY = "token_data";
@@ -104,9 +103,28 @@ class TokenManager {
 
   // Check apakah user sedang login dan token valid
   static isAuthenticated(): boolean {
-    const token = this.getToken();
-    const { userId } = this.getUserData();
-    return !!token && !!userId;
+    // Single check untuk menghindari multiple calls ke isTokenValid()
+    if (!this.isTokenValid()) {
+      this.clearAllAuthData();
+      return false;
+    }
+
+    try {
+      const tokenDataStr = localStorage.getItem(this.TOKEN_DATA_KEY);
+      const userId = localStorage.getItem(this.USER_ID_KEY);
+
+      if (!tokenDataStr || !userId) {
+        this.clearAllAuthData();
+        return false;
+      }
+
+      const tokenData: TokenData = JSON.parse(tokenDataStr);
+      return !!tokenData.token && !!userId;
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      this.clearAllAuthData();
+      return false;
+    }
   }
 
   // Logout dengan clear semua data

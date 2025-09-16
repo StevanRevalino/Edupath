@@ -1,9 +1,57 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import TokenManager from "../../utils/tokenManager";
 
 const Home = () => {
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // User data state
+  const [user, setUser] = useState<{
+    firstname: string;
+    lastname: string;
+    kelas: number | null;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (!TokenManager.isAuthenticated()) {
+          navigate("/login");
+          return;
+        }
+
+        const token = TokenManager.getToken();
+        const { userId } = TokenManager.getUserData();
+
+        const response = await axios.get(`${API_URL}/api/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setUser(response.data.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (
+          axios.isAxiosError(error) &&
+          (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+          TokenManager.logout();
+          navigate("/login");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate, API_URL]);
 
   // Static data for better performance - no API calls
   const allMajors = [
@@ -143,7 +191,22 @@ const Home = () => {
   const displayedUniversities = filteredUniversities.slice(0, 8);
   const hasMoreUniversities = filteredUniversities.length > 8;
 
-  // Handle university click - navigate to universitas page with selected university
+  // Helper function to get kelas text
+  const getKelasText = (kelas: number | null) => {
+    return `${kelas}`;
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="mt-2 text-gray-600">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
   const handleUniversityClick = (universityName: string) => {
     navigate("/universitas", { state: { selectedUniversity: universityName } });
   };
@@ -157,7 +220,7 @@ const Home = () => {
     <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
       <div className="flex flex-col items-start px-4 sm:px-8 lg:px-20 pt-6 lg:pt-10 gap-2">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-          Hello, Name!
+          Hello, {user?.firstname || "User"}!
         </h1>
 
         {/* Header Section */}
@@ -170,10 +233,12 @@ const Home = () => {
                 <div className="flex items-start border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
                   <div className="ml-2 lg:ml-4 flex flex-col items-center">
                     <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                      Nama Lengkap
+                      {user
+                        ? `${user.firstname} ${user.lastname}`.trim()
+                        : "Nama Lengkap"}
                     </div>
                     <div className="text-lg sm:text-xl font-semibold text-gray-700">
-                      Kelas XX
+                      Kelas {user ? getKelasText(user.kelas) : "XX"}
                     </div>
                   </div>
                 </div>

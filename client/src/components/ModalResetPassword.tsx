@@ -48,7 +48,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const handleVerifyEmail = async () => {
     try {
       await emailSchema.validate({ email }, { abortEarly: false });
-      setErrors({}); // reset errors
+      setErrors({});
 
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";

@@ -14,13 +14,11 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
   const handleLogout = () => {
     try {
-      // Clear authentication data
       localStorage.removeItem("token_data");
       localStorage.removeItem("user_id");
       localStorage.removeItem("role");
 
-      // Show success message
-      toast.success("Berhasil logout"); // Redirect to login page
+      toast.success("Berhasil logout");
       navigate("/login");
     } catch (error) {
       toast.error("Terjadi kesalahan saat logout");
@@ -29,7 +27,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
   const handleMenuItemClick = (tabId: string) => {
     setActiveTab(tabId);
-    setIsMobileMenuOpen(false); // Close mobile menu when item is selected
+    setIsMobileMenuOpen(false);
   };
   const menuItems = useMemo(
     () => [

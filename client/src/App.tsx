@@ -12,21 +12,17 @@ import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
 import TokenManager from "./utils/tokenManager";
 import useAuthMonitor from "./hooks/useAuthMonitor";
-import toast from "react-hot-toast";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuthMonitor();
 
-  // Gunakan TokenManager untuk validasi yang lebih robust
   if (!isAuthenticated()) {
-    toast.error("Session expired. Silakan login kembali.");
     return <Navigate to="/login" />;
   }
   return children;
 }
 
 function DefaultRoute() {
-  // Cek apakah token valid menggunakan TokenManager
   if (!TokenManager.isAuthenticated()) {
     return <Navigate to="/login" />;
   }
