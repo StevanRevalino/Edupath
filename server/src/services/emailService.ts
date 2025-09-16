@@ -1,27 +1,61 @@
 import nodemailer from "nodemailer";
 import { TransportOptions } from "nodemailer";
+import { google } from "googleapis";
 
-// Configure transporter with OAuth2
-const createTransporter = () => {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // use SSL
-    auth: {
-      type: "OAuth2",
-      user: process.env.MAIL_USERNAME,
-      pass: process.env.MAIL_PASSWORD,
-      clientId: process.env.OAUTH_CLIENTID,
-      clientSecret: process.env.OAUTH_CLIENT_SECRET,
-      refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-    },
-  } as TransportOptions);
-  return transporter;
+// Function to refresh access token
+const refreshAccessToken = async () => {
+  try {
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.OAUTH_CLIENTID,
+      process.env.OAUTH_CLIENT_SECRET,
+      "https://developers.google.com/oauthplayground"
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+    });
+
+    const { credentials } = await oauth2Client.refreshAccessToken();
+    const accessToken = credentials.access_token;
+
+    console.log("✅ Access token refreshed successfully");
+    return accessToken;
+  } catch (error) {
+    console.error("❌ Error refreshing access token:", error);
+    throw new Error("Failed to refresh access token");
+  }
+};
+
+// Configure transporter with OAuth2 and auto-refresh
+const createTransporter = async () => {
+  try {
+    // Always refresh access token before creating transporter
+    const accessToken = await refreshAccessToken();
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // use SSL
+      auth: {
+        type: "OAuth2",
+        user: process.env.MAIL_USERNAME,
+        clientId: process.env.OAUTH_CLIENTID,
+        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+        accessToken: accessToken,
+      },
+    } as TransportOptions);
+
+    return transporter;
+  } catch (error) {
+    console.error("❌ Error creating transporter:", error);
+    throw new Error("Failed to create email transporter");
+  }
 };
 
 export const sendOtpEmail = async (email: string, otp: string) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
 
     const mailOptions = {
       from: `EduPath <${process.env.MAIL_USERNAME}>`,
@@ -88,7 +122,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
 
 export const sendVerificationOtpEmail = async (email: string, otp: string) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
 
     const mailOptions = {
       from: `EduPath <${process.env.MAIL_USERNAME}>`,
@@ -98,55 +132,45 @@ export const sendVerificationOtpEmail = async (email: string, otp: string) => {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #6CCBFF; margin: 0;">EduPath</h1>
-            <p style="color: #475569; margin: 5px 0;">Your Learning Journey Starts Here</p>
           </div>
           
-          <div style="background-color: #f0f9ff; padding: 30px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #6CCBFF;">
-            <h2 style="color: #1e293b; margin-top: 0;">🎉 Welcome to EduPath!</h2>
+          <div style="background-color: #f0f9ff; padding: 30px; border-radius: 10px; margin-bottom: 20px;">
+            <h2 style="color: #1e293b; margin-top: 0;">Email Verification</h2>
             <p style="color: #475569; line-height: 1.6;">
-              Thank you for joining EduPath! To complete your registration and secure your account, 
-              please verify your email address using the OTP code below:
+              Welcome to EduPath! Please verify your email address to complete your registration.
+              Use the OTP code below:
             </p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <div style="background-color: #6CCBFF; color: white; padding: 15px 30px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 3px; display: inline-block; box-shadow: 0 4px 6px rgba(108, 203, 255, 0.3);">
+              <div style="background-color: #6CCBFF; color: white; padding: 15px 30px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 3px; display: inline-block;">
                 ${otp}
               </div>
             </div>
             
-            <p style="color: #ef4444; font-size: 14px; margin-bottom: 10px;">
-              ⚠️ This OTP will expire in 60 seconds for security reasons.
-            </p>
-            
-            <p style="color: #475569; font-size: 14px;">
-              Once verified, you'll have access to our comprehensive educational resources and personalized learning tools.
+            <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">
+              ⚠️ This OTP will expire in 10 minutes for security reasons.
             </p>
           </div>
           
           <div style="text-align: center; font-size: 12px; color: #94a3b8;">
-            <p>If you didn't create an account with EduPath, please ignore this email.</p>
-            <p>&copy; 2025 EduPath. Empowering Education for Everyone.</p>
+            <p>If you didn't create an account, please ignore this email.</p>
+            <p>&copy; 2025 EduPath. All rights reserved.</p>
           </div>
         </div>
       `,
       text: `
         EduPath - Email Verification
         
-        Welcome to EduPath!
-        
-        Thank you for joining EduPath! To complete your registration and secure your account,
-        please verify your email address using the OTP code below:
+        Welcome to EduPath! Please verify your email address to complete your registration.
+        Use the OTP code below:
         
         OTP Code: ${otp}
         
-        ⚠️ This OTP will expire in 60 seconds for security reasons.
+        ⚠️ This OTP will expire in 10 minutes for security reasons.
         
-        Once verified, you'll have access to our comprehensive educational resources 
-        and personalized learning tools.
+        If you didn't create an account, please ignore this email.
         
-        If you didn't create an account with EduPath, please ignore this email.
-        
-        © 2025 EduPath. Empowering Education for Everyone.
+        © 2025 EduPath. All rights reserved.
       `,
     };
 
