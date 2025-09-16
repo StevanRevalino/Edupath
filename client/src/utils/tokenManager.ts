@@ -124,7 +124,7 @@ class TokenManager {
   // Check apakah user sedang login dan token valid
   static isAuthenticated(): boolean {
     return this.getAuthStatus() === "authenticated";
-  } // Logout dengan clear semua data
+  }
   static logout(): void {
     this.clearAllAuthData();
   }
