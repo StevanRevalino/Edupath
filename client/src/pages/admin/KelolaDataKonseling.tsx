@@ -69,11 +69,11 @@ const KelolaDataKonseling = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "text-yellow-500";
+        return "text-yellow-500 font-semibold";
       case "ACCEPTED":
-        return "text-green-500";
+        return "text-green-500 font-semibold";
       case "DECLINED":
-        return "text-red-500";
+        return "text-red-500 font-semibold";
     }
   };
 
@@ -295,7 +295,7 @@ const KelolaDataKonseling = () => {
                           </div>
                           {consultation.notes && (
                             <div
-                              className="text-sm text-gray-500 mt-1 max-w-[200px] truncate"
+                              className="text-sm text-gray-500 mt-1 max-w-[200px]"
                               title={consultation.notes}
                             >
                               {consultation.notes}

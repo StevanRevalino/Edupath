@@ -479,7 +479,7 @@ const KelolaDataMurid = () => {
               <h3 className="text-lg font-semibold">Edit Data Murid</h3>
               <button
                 onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <X size={24} />
               </button>
