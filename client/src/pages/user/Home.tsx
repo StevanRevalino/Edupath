@@ -68,7 +68,7 @@ const Home = () => {
 
         const token = TokenManager.getToken();
 
-        const response = await axios.get(`${API_URL}/api/prodi?limit=100`, {
+        const response = await axios.get(`${API_URL}/api/prodi?limit=679`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -103,7 +103,7 @@ const Home = () => {
         const token = TokenManager.getToken();
 
         const response = await axios.get(
-          `${API_URL}/api/universitas?limit=100`,
+          `${API_URL}/api/universitas?limit=645`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

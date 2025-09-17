@@ -12,7 +12,7 @@ export class UniversitasController {
       const { page = "1", limit = "50", search = "" } = req.query as any;
       const take = Math.min(
         Math.max(parseInt(limit as string, 10) || 50, 1),
-        100
+        1000
       );
       const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
       const skip = (pageNum - 1) * take;
@@ -31,12 +31,10 @@ export class UniversitasController {
         limit: take,
       });
     } catch (e: any) {
-      res
-        .status(500)
-        .json({
-          message: "Gagal mengambil daftar universitas",
-          error: e.message,
-        });
+      res.status(500).json({
+        message: "Gagal mengambil daftar universitas",
+        error: e.message,
+      });
     }
   }
   async getUniversitasById(req: Request, res: Response) {
