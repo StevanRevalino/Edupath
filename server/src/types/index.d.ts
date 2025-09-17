@@ -9,6 +9,24 @@ export interface User {
   kelas?: number | null;
 }
 
+export interface UserResponse {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: "ADMIN" | "STUDENT";
+  kelas?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateUserDTO {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  role?: "ADMIN" | "STUDENT";
+  kelas?: number | null;
+}
+
 export interface JwtPayload {
   user_id: string;
   firstname: string;

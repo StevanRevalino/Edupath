@@ -11,12 +11,12 @@ const Header = () => {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   const menuItems = [
-    { label: "Home", path: "home" },
-    { label: "Tes", path: "tes" },
-    { label: "Jurusan", path: "jurusan" },
-    { label: "Universitas", path: "universitas" },
-    { label: "Konseling", path: "konseling" },
-    { label: "Profil", path: "profil" },
+    { label: "Home", path: "/home" },
+    { label: "Tes", path: "/tes" },
+    { label: "Jurusan", path: "/jurusan" },
+    { label: "Universitas", path: "/universitas" },
+    { label: "Konseling", path: "/konseling" },
+    { label: "Profil", path: "/profil" },
   ];
 
   // Handle click outside
@@ -51,7 +51,7 @@ const Header = () => {
         {/* Logo */}
         <div
           className="flex items-center space-x-4 cursor-pointer"
-          onClick={() => navigate("home")}
+          onClick={() => navigate("/home")}
         >
           <img
             src={logo}
@@ -65,16 +65,17 @@ const Header = () => {
           {menuItems
             .filter((item) => item.label !== "Profil")
             .map((item) => {
-              const itemPath = item.path.startsWith("/") ? item.path : `/${item.path}`;
-              const isActive = location.pathname === itemPath;
+              const isActive = location.pathname === item.path;
               return (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className={`cursor-pointer transition ${isActive ? "font-bold" : ""}`}
-          >
-            {item.label}
-          </button>
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={`cursor-pointer transition ${
+                    isActive ? "font-bold" : ""
+                  }`}
+                >
+                  {item.label}
+                </button>
               );
             })}
         </nav>

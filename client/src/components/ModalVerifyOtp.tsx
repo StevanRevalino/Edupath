@@ -20,12 +20,12 @@ export default function OTPModal({
   onResend,
 }: OTPModalProps) {
   const [inputOtp, setInputOtp] = useState(Array(6).fill(""));
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(30);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [resetTrigger, setResetTrigger] = useState(0);
 
   useEffect(() => {
-    setTimer(60);
+    setTimer(30);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -60,7 +60,16 @@ export default function OTPModal({
       toast.error("Kode OTP sudah kedaluwarsa");
       return;
     }
-    if (inputOtp.join("") === otp.trim()) {
+
+    const userOtp = inputOtp.join("");
+    const serverOtp = otp ? otp.toString().trim() : "";
+
+    if (!serverOtp) {
+      toast.error("OTP tidak tersedia, silakan kirim ulang");
+      return;
+    }
+
+    if (userOtp === serverOtp) {
       onVerifySuccess();
     } else {
       toast.error("Invalid OTP");

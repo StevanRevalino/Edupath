@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import universitasRoutes from "./routes/universitasRoutes";
 import prodiRoutes from "./routes/prodiRoutes";
-import searchHistoryRoutes from "./routes/searchHistoryRoutes";
-import { seedDefaultAdmins } from "./configs/seeder";
+import consultationRoutes from "./routes/consultationRoutes";
+import userRoutes from "./routes/userRoutes";
+import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
 dotenv.config();
@@ -41,7 +42,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);
-app.use("/api/search-history", searchHistoryRoutes);
+app.use("/api/consultations", consultationRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = 5000;
 

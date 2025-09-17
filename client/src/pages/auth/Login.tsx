@@ -6,6 +6,7 @@ import ModalResetPassword from "../../components/ModalResetPassword";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import TokenManager from "../../utils/tokenManager";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -34,12 +35,15 @@ export default function Login() {
         email,
         password,
       });
+      console.log("Login Response:", res);
+      const result = res.data.data;
 
-      const result = res.data;
-      localStorage.setItem("user_id", result.user.user_id);
-      localStorage.setItem("role", result.user.role);
-      localStorage.setItem("token", result.token);
-      console.log(result);
+      // Clear data auth lama terlebih dahulu untuk menghindari konflik
+      TokenManager.clearAllAuthData();
+
+      // Gunakan TokenManager untuk menyimpan token dengan validasi expiry
+      TokenManager.setToken(result.token, 1); // Token berlaku 1 hari
+      TokenManager.setUserData(result.user.user_id, result.user.role);
 
       toast.success("Login berhasil!");
       if (result.user.role === "ADMIN") {
@@ -123,26 +127,28 @@ export default function Login() {
           </div>
 
           {/* Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) {
-                  setErrors((prev) => ({ ...prev, password: undefined }));
-                }
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
-            </button>
+          <div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) {
+                    setErrors((prev) => ({ ...prev, password: undefined }));
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
+              </button>
+            </div>
             {submitted && errors.password && (
               <p className="text-xs text-red-500 mt-1 px-2">
                 {errors.password}

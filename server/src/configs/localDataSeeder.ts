@@ -40,14 +40,12 @@ interface ProdiPTCSV {
 }
 
 async function seedLocalData(force: boolean = false) {
-  console.log("🌱 Starting to seed local data...");
-
   try {
     // Check if data already exists
     const existingCounts = {
-      universities: await prisma.localUniversitas.count(),
-      prodi: await prisma.localProdi.count(),
-      relations: await prisma.localProdiPT.count(),
+      universities: await prisma.universitas.count(),
+      prodi: await prisma.prodi.count(),
+      relations: await prisma.prodiPT.count(),
     };
 
     if (
@@ -56,10 +54,6 @@ async function seedLocalData(force: boolean = false) {
         existingCounts.prodi > 0 ||
         existingCounts.relations > 0)
     ) {
-      console.log("📊 Existing data found:");
-      console.log(`🏫 Universities: ${existingCounts.universities}`);
-      console.log(`📚 Prodi: ${existingCounts.prodi}`);
-      console.log(`🔗 Relations: ${existingCounts.relations}`);
       console.log(
         "⏭️  Skipping data seeding as data already exists. Use --force to override."
       );
@@ -73,9 +67,9 @@ async function seedLocalData(force: boolean = false) {
         existingCounts.relations > 0)
     ) {
       console.log("🧹 Force flag detected, clearing existing data...");
-      await prisma.localProdiPT.deleteMany();
-      await prisma.localProdi.deleteMany();
-      await prisma.localUniversitas.deleteMany();
+      await prisma.prodiPT.deleteMany();
+      await prisma.prodi.deleteMany();
+      await prisma.universitas.deleteMany();
     } else {
       console.log("📝 No existing data found, proceeding with seeding...");
     }
@@ -115,7 +109,7 @@ async function seedLocalData(force: boolean = false) {
         rank_country: row.rank_country || null,
       }));
 
-    await prisma.localUniversitas.createMany({
+    await prisma.universitas.createMany({
       data: universitasToInsert,
       skipDuplicates: true,
     });
@@ -141,7 +135,7 @@ async function seedLocalData(force: boolean = false) {
         jenjang: row.jenjang || null,
       }));
 
-    await prisma.localProdi.createMany({
+    await prisma.prodi.createMany({
       data: prodiToInsert,
       skipDuplicates: true,
     });
@@ -192,7 +186,7 @@ async function seedLocalData(force: boolean = false) {
     for (let i = 0; i < prodiPTToInsert.length; i += batchSize) {
       const batch = prodiPTToInsert.slice(i, i + batchSize);
       try {
-        await prisma.localProdiPT.createMany({
+        await prisma.prodiPT.createMany({
           data: batch,
           skipDuplicates: true,
         });
@@ -214,9 +208,9 @@ async function seedLocalData(force: boolean = false) {
 
     // Print summary
     const counts = {
-      universities: await prisma.localUniversitas.count(),
-      prodi: await prisma.localProdi.count(),
-      relations: await prisma.localProdiPT.count(),
+      universities: await prisma.universitas.count(),
+      prodi: await prisma.prodi.count(),
+      relations: await prisma.prodiPT.count(),
     };
 
     console.log("\n📈 Final counts:");

@@ -1,90 +1,424 @@
-// import { UniversitasRepository } from "../repositories/universitasRepository";
-import {
-  searchPerguruanTinggi,
-  getPerguruanTinggiDetail,
-} from "../api/pddiktiClient";
-// const universitasRepository = new UniversitasRepository();
+import { UniversitasRepository } from "../repositories/universitasRepository";
+
+const universitasRepository = new UniversitasRepository();
 
 export class UniversitasService {
-
-  async getUniversitasById(university_id: string): Promise<any> {
+  // Get university detail by ID from local database
+  async getUniversitasById(universityId: string) {
     try {
-      // Use PDDIKTI API to get university details
-      const payload = await getPerguruanTinggiDetail(university_id);
+      const universitas = await universitasRepository.findById(
+        parseInt(universityId)
+      );
 
-      // Normalize the response to match expected format
-      const universitas = {
-        university_id: payload?.id_pt || university_id,
-        nama: payload?.nama_pt || "-",
-        nama_singkat: payload?.nm_singkat || null,
-        kelompok: payload?.kelompok || null,
-        pembina: payload?.pembina || null,
-        alamat: payload?.alamat || null,
-        kecamatan: payload?.kecamatan_pt || null,
-        kota: payload?.kab_kota_pt || null,
-        provinsi: payload?.provinsi_pt || null,
-        kode_pos: payload?.kode_pos || null,
-        lintang: payload?.lintang_pt || null,
-        bujur: payload?.bujur_pt || null,
-        email: payload?.email || null,
-        telepon: payload?.no_tel || null,
-        fax: payload?.no_fax || null,
-        website: payload?.website || null,
-        tanggal_berdiri: payload?.tgl_berdiri_pt || null,
-        akreditasi: payload?.akreditasi_pt || null,
-        status_akreditasi: payload?.status_akreditasi || null,
-        rank_qs: payload?.rank_qs || null,
-        rank_country: payload?.rank_country || null,
+      if (!universitas) {
+        throw new Error(
+          `Universitas dengan ID ${universityId} tidak ditemukan`
+        );
+      }
+
+      // Transform to match expected format
+      return {
+        university_id: universitas.university_id.toString(),
+        nama: universitas.nama,
+        nama_singkat: universitas.nama_singkat,
+        kelompok: null, // Not available in local database
+        pembina: null, // Not available in local database
+        alamat: universitas.alamat,
+        kecamatan: null, // Not available in local database
+        kota: universitas.kota,
+        provinsi: universitas.provinsi,
+        kode_pos: universitas.kode_pos,
+        lintang: null, // Not available in local database
+        bujur: null, // Not available in local database
+        email: universitas.email,
+        telepon: universitas.telepon,
+        fax: universitas.fax,
+        website: null, // Not available in local database
+        tanggal_berdiri: null, // Not available in local database
+        akreditasi: universitas.akreditasi,
+        status_akreditasi: universitas.status,
+        rank_qs: universitas.rank_qs ? parseFloat(universitas.rank_qs) : null,
+        rank_country: universitas.rank_country
+          ? parseFloat(universitas.rank_country)
+          : null,
       };
-
-      return universitas;
-    } catch (error: any) {
-      throw new Error(`Gagal mengambil data universitas: ${error.message}`);
+    } catch (error) {
+      console.error("Error getting universitas by ID:", error);
+      throw error;
     }
   }
 
-  async searchUniversitasByName(nama: string): Promise<any[]> {
+  // Search universitas from local database
+  async searchUniversitasLocal(query: string, limit: number = 20) {
     try {
-      // Fetch from external PDDIKTI API instead of DB
-      const payload = await searchPerguruanTinggi(nama);
-      // The API may return an array or an object with fields; try to normalize
-      const items: any[] = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.data)
-        ? payload.data
-        : [];
+      // Normalize query: trim, lowercase, split into words
+      const normalizedQuery = query.trim().toLowerCase();
+      const queryWords = normalizedQuery
+        .split(/\s+/)
+        .filter((word) => word.length >= 2);
 
-      // Map to a minimal shape with akreditasi from detail API
-      const mapped = await Promise.all(
-        items.map(async (it: any, idx: number) => {
-          let detailData = null;
+      // If single word or very short, use simple search
+      if (queryWords.length <= 1) {
+        return this.simpleUniversitasSearch(normalizedQuery, limit);
+      }
 
-          // If we have an ID, get full details including akreditasi
-          if (it?.id) {
-            try {
-              detailData = await getPerguruanTinggiDetail(it.id);
-            } catch (error) {
-              // If detail fetch fails, continue without detail data
-              console.warn(`Failed to fetch detail for university ${it.id}`);
-            }
-          }
+      // Multi-word search with intelligent matching
+      return this.multiWordUniversitasSearch(queryWords, limit);
+    } catch (error) {
+      console.error("Error searching universitas locally:", error);
+      throw error;
+    }
+  }
 
-          return {
-            university_id: it?.id,
-            nama: it?.nama || detailData?.nama_pt || "-",
-            nama_singkat: it?.nama_singkat  || null,
-            kota: detailData?.kab_kota_pt || null,
-            provinsi: detailData?.provinsi_pt || null,
-            akreditasi: detailData?.akreditasi_pt || null,
-            email: detailData?.email || null,
-            telepon: detailData?.no_tel || null,
-          };
-        })
+  // Simple search for single words (universitas)
+  private async simpleUniversitasSearch(query: string, limit: number) {
+    try {
+      // For advanced nickname search, we need to get more data for scoring
+      // First try exact name search
+      const nameResults = await universitasRepository.findMany({
+        nama: query, // Repository will handle the contains/insensitive search
+        limit: limit * 2, // Get some results for smart scoring
+      });
+
+      // Also get additional data for nickname matching if name search is limited
+      const allResults = await universitasRepository.findMany({
+        limit: 500, // Get more results for advanced nickname matching
+      });
+
+      // Combine results, prioritizing name matches
+      const combinedResults = [...nameResults];
+      const nameResultIds = new Set(nameResults.map((r) => r.university_id));
+
+      // Add non-duplicate results from all results for nickname matching
+      for (const result of allResults) {
+        if (!nameResultIds.has(result.university_id)) {
+          combinedResults.push(result);
+        }
+      }
+
+      console.log(
+        `Found ${nameResults?.length || 0} name matches and ${
+          combinedResults.length
+        } total results for query: ${query}`
       );
 
-      return mapped;
-    } catch (error: any) {
-      throw new Error(`Gagal mencari universitas: ${error.message}`);
+      if (!combinedResults || combinedResults.length === 0) {
+        return [];
+      }
+
+      // Apply smart scoring even for simple search
+      const scoredResults = [];
+
+      for (const univ of combinedResults) {
+        let score = 0;
+        const univName = univ.nama.toLowerCase();
+        const univShortName = univ.nama_singkat?.toLowerCase() || "";
+        const kota = univ.kota?.toLowerCase() || "";
+        const provinsi = univ.provinsi?.toLowerCase() || "";
+
+        // Smart nickname detection for single word
+        const nicknameScore = this.calculateNicknameScore(
+          query,
+          univName,
+          univShortName
+        );
+        if (nicknameScore > 0) {
+          score += nicknameScore;
+        }
+
+        // Higher score for exact matches in university name
+        if (univName.includes(query)) {
+          score += 10;
+        }
+        // Medium score for short name matches
+        if (univShortName.includes(query)) {
+          score += 8;
+        }
+        // Lower score for city/province matches
+        if (kota.includes(query) || provinsi.includes(query)) {
+          score += 3;
+        }
+
+        // Only include results that match at least one criterion
+        if (score > 0) {
+          scoredResults.push({
+            univ,
+            score,
+          });
+        }
+      }
+
+      // Sort by score (highest first) and apply limit
+      const sortedResults = scoredResults
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((item) => item.univ);
+
+      return this.transformUniversitasResults(sortedResults);
+    } catch (error) {
+      console.error("Error in simpleUniversitasSearch:", error);
+      throw error;
     }
+  }
+
+  // Multi-word search with intelligent matching (universitas)
+  private async multiWordUniversitasSearch(
+    queryWords: string[],
+    limit: number
+  ) {
+    // Get all potential matches
+    const allResults = await universitasRepository.findMany({
+      limit: 1000, // Get more results for multi-word matching
+    });
+
+    // Score and filter results
+    const scoredResults = [];
+
+    for (const univ of allResults) {
+      let score = 0;
+      const univName = univ.nama.toLowerCase();
+      const univShortName = univ.nama_singkat?.toLowerCase() || "";
+      const kota = univ.kota?.toLowerCase() || "";
+      const provinsi = univ.provinsi?.toLowerCase() || "";
+
+      // Calculate score based on word matches
+      for (const word of queryWords) {
+        // Smart nickname detection based on university name patterns
+        const nicknameScore = this.calculateNicknameScore(
+          word,
+          univName,
+          univShortName
+        );
+        if (nicknameScore > 0) {
+          score += nicknameScore;
+          continue;
+        }
+
+        // Higher score for exact matches in university name
+        if (univName.includes(word)) {
+          score += 10;
+        }
+        // Medium score for short name matches
+        if (univShortName.includes(word)) {
+          score += 8;
+        }
+        // Lower score for city/province matches
+        if (kota.includes(word) || provinsi.includes(word)) {
+          score += 3;
+        }
+        // Bonus for multiple word matches
+        if (score > 10) {
+          score += 2;
+        }
+      }
+
+      // Only include results that match at least one word
+      if (score > 0) {
+        scoredResults.push({
+          univ,
+          score,
+        });
+      }
+    }
+
+    // Sort by score (highest first) and transform
+    const sortedResults = scoredResults
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => item.univ);
+
+    return this.transformUniversitasResults(sortedResults);
+  }
+
+  // Transform universitas results to API format
+  private transformUniversitasResults(results: any[]) {
+    return results.map((univ) => ({
+      university_id: univ.university_id.toString(),
+      nama: univ.nama,
+      npsn: univ.npsn,
+      nama_singkat: univ.nama_singkat,
+      kode_pos: univ.kode_pos,
+      telepon: univ.telepon,
+      fax: univ.fax,
+      email: univ.email,
+      alamat: univ.alamat,
+      kota: univ.kota,
+      provinsi: univ.provinsi,
+      akreditasi: univ.akreditasi,
+      status: univ.status,
+      rank_qs: univ.rank_qs,
+      rank_country: univ.rank_country,
+      jumlah_prodi: univ._count?.prodi_pt || 0,
+    }));
+  }
+
+  // Get universitas detail from local database
+  async getUniversitasDetailLocal(universityId: string) {
+    try {
+      const result = await universitasRepository.findById(
+        parseInt(universityId)
+      );
+
+      if (!result) {
+        return null;
+      }
+
+      // Transform to match API format
+      const transformedResult = {
+        university_id: result.university_id.toString(),
+        nama: result.nama,
+        npsn: result.npsn,
+        nama_singkat: result.nama_singkat,
+        kode_pos: result.kode_pos,
+        telepon: result.telepon,
+        fax: result.fax,
+        email: result.email,
+        alamat: result.alamat,
+        kota: result.kota,
+        provinsi: result.provinsi,
+        akreditasi: result.akreditasi,
+        status: result.status,
+        rank_qs: result.rank_qs,
+        rank_country: result.rank_country,
+        prodi: result.prodi_pt.map((pt: any) => ({
+          prodi_id: pt.prodi.prodi_id.toString(),
+          nama_prodi: pt.prodi.nama_prodi,
+          jenjang: pt.prodi.jenjang,
+          akreditasi: pt.akreditasi_prodi,
+        })),
+      };
+
+      return transformedResult;
+    } catch (error) {
+      console.error("Error getting universitas detail locally:", error);
+      throw error;
+    }
+  }
+
+  // Smart nickname detection algorithm
+  private calculateNicknameScore(
+    searchWord: string,
+    univName: string,
+    univShortName: string
+  ): number {
+    // If short name exists and matches exactly, high score
+    if (univShortName && univShortName === searchWord) {
+      return 30; // Highest score for exact short name match
+    }
+
+    // Check if search word matches existing short name patterns
+    if (univShortName && univShortName.includes(searchWord)) {
+      return 25; // Very high score for partial short name match
+    }
+
+    // Check if short name is contained in search word (for longer searches)
+    if (
+      univShortName &&
+      searchWord.length >= 4 &&
+      searchWord.includes(univShortName)
+    ) {
+      return 25; // Very high score when short name is part of search
+    }
+
+    // Algorithm to detect common nickname patterns
+    const univWords = univName
+      .split(/\s+/)
+      .filter(
+        (word) =>
+          word.length > 2 &&
+          ![
+            "universitas",
+            "institut",
+            "sekolah",
+            "politeknik",
+            "akademi",
+            "dan",
+            "di",
+            "negeri",
+          ].includes(word.toLowerCase())
+      );
+
+    // Check if search word is a significant part of any university word
+    for (const word of univWords) {
+      const lowerWord = word.toLowerCase();
+
+      // Exact match with significant words
+      if (lowerWord === searchWord) {
+        return 25; // Increased score for exact match
+      }
+
+      // Check if search word is contained in university word (minimum 3 chars)
+      if (searchWord.length >= 3 && lowerWord.includes(searchWord)) {
+        // Higher score if search word is substantial part of the university word
+        const matchRatio = searchWord.length / lowerWord.length;
+        if (matchRatio >= 0.6) {
+          return 22; // High score for substantial match
+        } else if (matchRatio >= 0.4) {
+          return 18; // Medium score
+        } else {
+          return 15; // Lower score but still significant
+        }
+      }
+
+      // Check if university word starts with search word (prefix match)
+      if (searchWord.length >= 3 && lowerWord.startsWith(searchWord)) {
+        return 20;
+      }
+
+      // Check common abbreviation patterns
+      if (
+        searchWord.length >= 3 &&
+        this.isLikelyAbbreviation(searchWord, lowerWord)
+      ) {
+        return 16;
+      }
+    }
+
+    // Try to match acronyms (first letters of important words)
+    const acronym = univWords
+      .map((word) => word.charAt(0).toLowerCase())
+      .join("");
+
+    if (searchWord === acronym && acronym.length >= 2) {
+      return 25; // Very high score for perfect acronym match
+    }
+
+    // Check partial acronym matches
+    if (searchWord.length >= 2 && acronym.includes(searchWord)) {
+      return 20;
+    }
+
+    // Check for common university type prefixes
+    if (
+      searchWord.startsWith("un") &&
+      univName.toLowerCase().includes("universitas")
+    ) {
+      // Extract the main part after 'un'
+      const mainPart = searchWord.substring(2);
+      for (const word of univWords) {
+        if (word.toLowerCase().startsWith(mainPart)) {
+          return 20;
+        }
+      }
+    }
+
+    return 0; // No nickname match found
+  }
+
+  // Helper method to detect likely abbreviations
+  private isLikelyAbbreviation(searchWord: string, univWord: string): boolean {
+    // Check if search word could be formed by taking first few chars + last few chars
+    if (searchWord.length >= 3 && univWord.length >= 6) {
+      const prefix = univWord.substring(0, Math.ceil(searchWord.length / 2));
+      const suffix = univWord.substring(
+        univWord.length - Math.floor(searchWord.length / 2)
+      );
+
+      if (searchWord === (prefix + suffix).toLowerCase()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

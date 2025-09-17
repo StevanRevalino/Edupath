@@ -19,7 +19,7 @@ export default function Register() {
   const [otp, setOtp] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(30);
   const [submitted, setSubmitted] = useState(false);
   const kelasOptions = [
     { value: "10", label: "Kelas 10" },
@@ -122,10 +122,12 @@ export default function Register() {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
-        email,
-      });
-
+      const response = await axios.post(
+        `${API_URL}/api/auth/send-verification-otp`,
+        {
+          email,
+        }
+      );
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -162,10 +164,12 @@ export default function Register() {
       const API_URL =
         (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
-        email,
-      });
-
+      const response = await axios.post(
+        `${API_URL}/api/auth/send-verification-otp`,
+        {
+          email,
+        }
+      );
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);
@@ -200,7 +204,7 @@ export default function Register() {
   }, [showModal]);
 
   useEffect(() => {
-    if (timer === 60) {
+    if (timer === 30) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 1) {
@@ -376,9 +380,9 @@ export default function Register() {
                 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
               >
                 {showPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 )}
               </button>
             </div>
@@ -414,9 +418,9 @@ export default function Register() {
                 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
               >
                 {showConfirmPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6" />
+                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6" />
+                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
                 )}
               </button>
             </div>

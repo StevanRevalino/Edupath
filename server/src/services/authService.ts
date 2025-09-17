@@ -3,7 +3,7 @@ import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 const userRepository = new UserRepository();
 const generateCustomUserId = async (): Promise<string> => {
@@ -67,10 +67,8 @@ export class AuthService {
         kelas: user.kelas,
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" } // expire dalam 1 jam
-    );
-
-    // Kirim token + data user (jangan kirim password!)
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" } as SignOptions
+    );    // Kirim token + data user (jangan kirim password!)
     return {
       message: "Login berhasil",
       token,
