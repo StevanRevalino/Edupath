@@ -2,6 +2,7 @@ import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -13,16 +14,26 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("token_data");
-      localStorage.removeItem("user_id");
-      localStorage.removeItem("role");
+    Swal.fire({
+      title: "Yakin ingin logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Logout",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      try {
+        localStorage.removeItem("token_data");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("role");
 
-      toast.success("Berhasil logout");
-      navigate("/login");
-    } catch (error) {
-      toast.error("Terjadi kesalahan saat logout");
-    }
+        toast.success("Berhasil logout");
+        navigate("/login");
+      } catch (error) {
+        toast.error("Terjadi kesalahan saat logout");
+      }
+    });
   };
 
   const handleMenuItemClick = (tabId: string) => {
