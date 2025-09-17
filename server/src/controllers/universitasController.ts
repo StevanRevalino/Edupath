@@ -6,6 +6,39 @@ const universitasService = new UniversitasPddiktiService();
 const localService = new UniversitasService();
 
 export class UniversitasController {
+  // Get all universitas with optional pagination and search
+  async getAllUniversitas(req: Request, res: Response) {
+    try {
+      const { page = "1", limit = "50", search = "" } = req.query as any;
+      const take = Math.min(
+        Math.max(parseInt(limit as string, 10) || 50, 1),
+        100
+      );
+      const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
+      const skip = (pageNum - 1) * take;
+
+      const { data, total } = await localService.getAllUniversitasLocal({
+        search: search as string,
+        skip,
+        take,
+      });
+
+      res.json({
+        message: "Berhasil mengambil daftar universitas",
+        data,
+        total,
+        page: pageNum,
+        limit: take,
+      });
+    } catch (e: any) {
+      res
+        .status(500)
+        .json({
+          message: "Gagal mengambil daftar universitas",
+          error: e.message,
+        });
+    }
+  }
   async getUniversitasById(req: Request, res: Response) {
     try {
       const { id } = req.params;
