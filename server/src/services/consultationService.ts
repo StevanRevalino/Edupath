@@ -100,6 +100,52 @@ export class ConsultationService {
     }
   }
 
+  // Get students with accepted consultations for live chat
+  async getStudentsWithAcceptedConsultations() {
+    try {
+      const acceptedConsultations = await consultationRepository.findMany({
+        status: ConsultationStatus.ACCEPTED,
+      });
+
+      // Extract unique murid_ids
+      const uniqueMuridIds = [
+        ...new Set(acceptedConsultations.map((c) => c.murid_id)),
+      ];
+
+      // Get student details for each unique murid
+      const students = await Promise.all(
+        uniqueMuridIds.map(async (muridId) => {
+          const student = await userRepository.findById(muridId);
+          if (student) {
+            // Get the latest accepted consultation for this student
+            const latestConsultation = acceptedConsultations
+              .filter((c) => c.murid_id === muridId)
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime()
+              )[0];
+
+            return {
+              user_id: student.user_id,
+              firstname: student.firstname,
+              lastname: student.lastname,
+              kelas: student.kelas,
+              latestConsultationTopic: latestConsultation?.topic,
+              latestConsultationDate: latestConsultation?.consultation_date,
+            };
+          }
+          return null;
+        })
+      );
+
+      // Filter out null values
+      return students.filter((student) => student !== null);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Get consultation by ID
   async getConsultationById(consultation_id: string) {
     try {

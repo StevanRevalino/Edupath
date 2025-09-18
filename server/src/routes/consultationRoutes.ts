@@ -19,6 +19,15 @@ router.get(
   consultationController.getAllConsultations.bind(consultationController)
 );
 
+// Get students with accepted consultations for live chat
+router.get(
+  "/accepted-students",
+  authenticateToken,
+  consultationController.getStudentsWithAcceptedConsultations.bind(
+    consultationController
+  )
+);
+
 // Get consultation statistics (for admin dashboard)
 router.get(
   "/stats",

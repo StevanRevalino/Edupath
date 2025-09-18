@@ -52,74 +52,53 @@ const KelolaLiveChat = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  // Fetch chat users (students who have sent messages or all students)
+  // Fetch chat users (students who have accepted consultations)
   useEffect(() => {
     const fetchChatUsers = async () => {
       try {
         setLoading(true);
         const token = TokenManager.getToken();
 
-        // For now, fetch all students - in real implementation,
-        // this would fetch students with chat history
-        const response = await axios.get(`${API_URL}/api/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        // Fetch students with accepted consultations
+        const response = await axios.get(
+          `${API_URL}/api/consultations/accepted-students`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-        // Filter only students (role = 'USER') and prioritize US005
-        const students = response.data.data
-          .filter((user: any) => user.role === "USER")
-          .map((user: any) => {
-            // Special handling for US005 - active chat with BK001
-            if (user.user_id === "US005") {
-              return {
-                user_id: user.user_id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                kelas: user.kelas,
-                lastMessage:
-                  "Halo Bu, saya butuh bantuan untuk memilih jurusan kuliah",
-                lastMessageTime: "Baru saja",
-                unreadCount: 1,
-                isOnline: true,
-              };
-            }
-            // Other students with mock data
-            const index = students?.length || 0;
-            return {
-              user_id: user.user_id,
-              firstname: user.firstname,
-              lastname: user.lastname,
-              kelas: user.kelas,
-              lastMessage:
-                index % 3 === 0
-                  ? "Halo Bu, ada yang ingin saya tanyakan"
-                  : index % 3 === 1
-                  ? "Terima kasih Bu atas sarannya"
-                  : undefined,
-              lastMessageTime:
-                index % 3 === 0
-                  ? "2 jam lalu"
-                  : index % 3 === 1
-                  ? "Kemarin"
-                  : undefined,
-              unreadCount: index % 5 === 0 ? 1 : 0,
-              isOnline: Math.random() > 0.6,
-            };
-          })
-          .sort((a: any, b: any) => {
-            // Sort US005 to the top
-            if (a.user_id === "US005") return -1;
-            if (b.user_id === "US005") return 1;
-            return 0;
-          });
+        // Transform the data to match our ChatUser interface
+        const students = response.data.data.map((student: any) => ({
+          user_id: student.user_id,
+          firstname: student.firstname,
+          lastname: student.lastname,
+          kelas: student.kelas,
+          lastMessage: `Konseling tentang: ${student.latestConsultationTopic}`,
+          lastMessageTime: "Baru saja",
+          unreadCount: 0,
+          isOnline: Math.random() > 0.6, // Random online status for demo
+        }));
 
         setChatUsers(students);
       } catch (error) {
         console.error("Error fetching chat users:", error);
-        toast.error("Gagal mengambil data chat");
+        if (axios.isAxiosError(error)) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
+            toast.error("Session expired. Silakan login ulang.");
+            TokenManager.logout();
+            window.location.href = "/login";
+          } else {
+            toast.error("Gagal mengambil data chat");
+          }
+        } else {
+          toast.error("Gagal mengambil data chat");
+        }
       } finally {
         setLoading(false);
       }
@@ -314,7 +293,12 @@ const KelolaLiveChat = () => {
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Live Chat</h2>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Live Chat</h2>
+              <p className="text-sm text-gray-600">
+                Murid dengan konseling ter-accept ({chatUsers.length})
+              </p>
+            </div>
             <MessageCircle className="text-blue-500" size={24} />
           </div>
 
@@ -340,6 +324,8 @@ const KelolaLiveChat = () => {
             <div className="p-4 text-center text-gray-500">
               {searchTerm
                 ? "Tidak ada siswa yang ditemukan"
+                : chatUsers.length === 0
+                ? "Belum ada murid dengan konseling yang di-accept"
                 : "Belum ada chat aktif"}
             </div>
           ) : (
@@ -501,8 +487,8 @@ const KelolaLiveChat = () => {
 
             {/* Message Input */}
             <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-end space-x-2">
-                <div className="flex-1">
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 flex items-center">
                   <textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}

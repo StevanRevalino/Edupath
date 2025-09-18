@@ -160,7 +160,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                         <img
                           src={item.icon}
                           alt={`${item.label} Icon`}
-                          className="w-8 h-8 mr-3"
+                          className="w-8 h-9 mr-3"
                         />
                         <span className="font-medium text-sm">
                           {item.label}
@@ -180,9 +180,8 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                   <img
                     src="/src/assets/icons/log-out.png"
                     alt="Logout Icon"
-                    className="w-8 h-8 mr-3"
+                    className="w-48 mx-auto"
                   />
-                  <span className="font-medium text-sm">Logout</span>
                 </button>
               </div>
             </div>

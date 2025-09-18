@@ -103,6 +103,26 @@ export class ConsultationController {
     }
   }
 
+  // Get students with accepted consultations for live chat
+  async getStudentsWithAcceptedConsultations(req: Request, res: Response) {
+    try {
+      const students =
+        await consultationService.getStudentsWithAcceptedConsultations();
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil data murid dengan konseling ter-accept",
+        data: students,
+        count: students.length,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengambil data murid",
+      });
+    }
+  }
+
   // Get consultation by ID
   async getConsultationById(req: Request, res: Response) {
     try {
