@@ -303,7 +303,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex items-center justify-center lg:justify-start w-full ml-0 lg:ml-3">
-                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md text-sm lg:mb-10 xl:mb-0 cursor-pointer">
+                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md font-semibold text-sm lg:mb-10 xl:mb-0 cursor-pointer">
                   Ubah profil
                 </button>
               </div>
