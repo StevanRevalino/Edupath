@@ -522,7 +522,10 @@ const Home = () => {
             </div>
 
             <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+              <button
+                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                onClick={() => navigate("/tes")}
+              >
                 <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
                   <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                     <Plus
@@ -614,7 +617,10 @@ const Home = () => {
             </div>
 
             <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+              <button
+                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                onClick={() => navigate("/konseling")}
+              >
                 <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
                   <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                     <Plus
