@@ -55,7 +55,8 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
       const mockMessages: ChatMessage[] = [
         {
           id: "1",
-          message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
+          message:
+            "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
           senderId: "BK001",
           senderName: "Ibu Sarah (BK001)",
           timestamp: "2024-01-15T09:00:00Z",
@@ -71,12 +72,13 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
         },
         {
           id: "3",
-          message: "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
+          message:
+            "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
           senderId: "BK001",
           senderName: "Ibu Sarah (BK001)",
           timestamp: "2024-01-15T09:03:00Z",
           isFromAdmin: true,
-        }
+        },
       ];
 
       setChatMessages(mockMessages);
@@ -114,11 +116,12 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
           "Hmm, menarik. Bisa ceritakan lebih detail tentang mata pelajaran favorit kamu?",
           "Saya akan bantu kamu analisis kemampuan dan minat. Sudah pernah ikut tes minat bakat di aplikasi ini?",
           "Terima kasih sudah berbagi. Untuk jurusan yang kamu minati, ada beberapa universitas yang bisa jadi pilihan.",
-          "Bagus! Saya akan berikan beberapa saran berdasarkan profil kamu."
+          "Bagus! Saya akan berikan beberapa saran berdasarkan profil kamu.",
         ];
-        
-        const randomResponse = bkResponses[Math.floor(Math.random() * bkResponses.length)];
-        
+
+        const randomResponse =
+          bkResponses[Math.floor(Math.random() * bkResponses.length)];
+
         const bkResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
           message: randomResponse,

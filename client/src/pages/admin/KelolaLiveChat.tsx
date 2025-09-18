@@ -79,7 +79,8 @@ const KelolaLiveChat = () => {
                 firstname: user.firstname,
                 lastname: user.lastname,
                 kelas: user.kelas,
-                lastMessage: "Halo Bu, saya butuh bantuan untuk memilih jurusan kuliah",
+                lastMessage:
+                  "Halo Bu, saya butuh bantuan untuk memilih jurusan kuliah",
                 lastMessageTime: "Baru saja",
                 unreadCount: 1,
                 isOnline: true,
@@ -137,7 +138,8 @@ const KelolaLiveChat = () => {
         mockMessages = [
           {
             id: "1",
-            message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
+            message:
+              "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
             senderId: "BK001",
             senderName: "Ibu Sarah (BK001)",
             timestamp: "2024-01-15T09:00:00Z",
@@ -155,7 +157,8 @@ const KelolaLiveChat = () => {
           },
           {
             id: "3",
-            message: "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
+            message:
+              "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
             senderId: "BK001",
             senderName: "Ibu Sarah (BK001)",
             timestamp: "2024-01-15T09:03:00Z",
@@ -163,7 +166,8 @@ const KelolaLiveChat = () => {
           },
           {
             id: "4",
-            message: "Saya kelas 12 Bu, suka matematika dan komputer. Tapi masih bingung antara teknik informatika atau sistem informasi",
+            message:
+              "Saya kelas 12 Bu, suka matematika dan komputer. Tapi masih bingung antara teknik informatika atau sistem informasi",
             senderId: userId,
             senderName: selectedUser
               ? `${selectedUser.firstname} ${selectedUser.lastname}`
@@ -247,10 +251,11 @@ const KelolaLiveChat = () => {
       );
 
       // Show specific message for US005
-      const toastMessage = selectedUser.user_id === "US005" 
-        ? "Pesan terkirim ke US005" 
-        : "Pesan terkirim";
-      
+      const toastMessage =
+        selectedUser.user_id === "US005"
+          ? "Pesan terkirim ke US005"
+          : "Pesan terkirim";
+
       toast.success(toastMessage);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -347,8 +352,8 @@ const KelolaLiveChat = () => {
                     ? "bg-blue-50 border-blue-200"
                     : ""
                 } ${
-                  user.user_id === "US005" 
-                    ? "border-l-4 border-l-green-500" 
+                  user.user_id === "US005"
+                    ? "border-l-4 border-l-green-500"
                     : ""
                 }`}
               >
@@ -434,7 +439,9 @@ const KelolaLiveChat = () => {
                       Kelas {getKelasText(selectedUser.kelas)} •{" "}
                       {selectedUser.isOnline ? "Online" : "Offline"}
                       {selectedUser.user_id === "US005" && (
-                        <span className="ml-2 text-blue-600">• Chat Aktif dengan BK001</span>
+                        <span className="ml-2 text-blue-600">
+                          • Chat Aktif dengan BK001
+                        </span>
                       )}
                     </p>
                   </div>
