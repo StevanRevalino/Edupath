@@ -52,6 +52,11 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         label: "Kelola Data Konseling",
         icon: "/src/assets/icons/kelola-data-konseling.png",
       },
+      {
+        id: "kelola-live-chat",
+        label: "Chat Murid",
+        icon: "/src/assets/icons/kelola-chat-murid.png",
+      },
     ],
     []
   );
@@ -84,7 +89,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                     <img
                       src={item.icon}
                       alt={`${item.label} Icon`}
-                      className="w-12 h-12 mr-3"
+                      className="w-12 h-14 mr-3"
                     />
                     <span className="font-medium">{item.label}</span>
                   </button>
