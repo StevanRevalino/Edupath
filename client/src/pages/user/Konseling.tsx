@@ -42,11 +42,12 @@ const Konseling = () => {
   const [selectedTimeEnd, setSelectedTimeEnd] = useState<string>("");
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
+  const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     message: "",
-    expertName: "Dr. Ahmad", // Default expert
+    expertName: "", // Will be set when admins are loaded
   });
 
   const handleInputChange = (
@@ -61,7 +62,59 @@ const Konseling = () => {
   // Fetch consultations when component mounts
   useEffect(() => {
     fetchConsultations();
+    fetchAdmins();
   }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const token = TokenManager.getToken();
+      const response = await fetch('http://localhost:5000/api/users/admins', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setAdmins(data.data);
+          
+          // Set default expert to first admin if available
+          if (data.data.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              expertName: data.data[0].user_id
+            }));
+          }
+        }
+      } else {
+        // Fallback to mock data if API fails
+        const fallbackAdmins = [
+          { user_id: 'ADMIN001', firstname: 'Dr. Ahmad', lastname: 'Santoso' },
+          { user_id: 'ADMIN002', firstname: 'Dr. Sari', lastname: 'Indrawati' },
+        ];
+        setAdmins(fallbackAdmins);
+        setFormData(prev => ({
+          ...prev,
+          expertName: fallbackAdmins[0].user_id
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+      // Fallback with mock data
+      const fallbackAdmins = [
+        { user_id: 'ADMIN001', firstname: 'Dr. Ahmad', lastname: 'Santoso' },
+        { user_id: 'ADMIN002', firstname: 'Dr. Sari', lastname: 'Indrawati' },
+      ];
+      setAdmins(fallbackAdmins);
+      setFormData(prev => ({
+        ...prev,
+        expertName: fallbackAdmins[0].user_id
+      }));
+    }
+  };
 
   const fetchConsultations = async () => {
     try {
@@ -107,10 +160,10 @@ const Konseling = () => {
       }
 
       const consultationData = {
-        admin_id: "ADMIN001", // You'll need to get the actual admin ID based on the selected expert
+        admin_id: formData.expertName, // Use selected admin ID
         topic: formData.message,
         consultation_date: consultationDateTime.toISOString(),
-        notes: `Scheduled for ${selectedTimeStart} - ${selectedTimeEnd} WIB. Expert: ${formData.expertName}`,
+        notes: `Scheduled for ${selectedTimeStart} - ${selectedTimeEnd} WIB. Expert: ${admins.find(admin => admin.user_id === formData.expertName)?.firstname || 'Unknown'} ${admins.find(admin => admin.user_id === formData.expertName)?.lastname || ''}`,
       };
 
       const response = await consultationService.createConsultation(
@@ -125,7 +178,7 @@ const Konseling = () => {
         setSelectedTimeEnd("");
         setFormData({
           message: "",
-          expertName: "Dr. Ahmad",
+          expertName: admins.length > 0 ? admins[0].user_id : "",
         });
         // Refresh consultations list
         fetchConsultations();
@@ -536,10 +589,18 @@ const Konseling = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
-                  <option value="Lorem Lorem">Lorem Lorem</option>
-                  <option value="Dr. Ahmad">Dr. Ahmad</option>
-                  <option value="Dr. Sari">Dr. Sari</option>
-                  <option value="Dr. Budi">Dr. Budi</option>
+                  {admins.length === 0 ? (
+                    <option value="">Loading experts...</option>
+                  ) : (
+                    <>
+                      <option value="" disabled>Pilih Ahli</option>
+                      {admins.map((admin) => (
+                        <option key={admin.user_id} value={admin.user_id}>
+                          {admin.firstname} {admin.lastname}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
               </div>
 

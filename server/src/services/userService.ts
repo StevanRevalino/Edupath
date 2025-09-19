@@ -31,6 +31,31 @@ export class UserService {
     }
   }
 
+  async getAllAdmins(): Promise<UserResponse[]> {
+    try {
+      const users = await this.userRepository.findAllUsers();
+
+      const transformedUsers = users.map((user: any) => ({
+        user_id: user.user_id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        phone: user.phone,
+        school: user.school,
+        grade: user.grade,
+        role: user.role,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      }));
+
+      // Filter only admins for consultation dropdown
+      return transformedUsers.filter((user: any) => user.role === "ADMIN");
+    } catch (error) {
+      console.error("Error in getAllAdmins:", error);
+      throw new Error("Failed to fetch admin users");
+    }
+  }
+
   async getUserById(userId: string): Promise<UserResponse | null> {
     try {
       const user = await this.userRepository.findById(userId);

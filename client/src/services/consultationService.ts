@@ -1,6 +1,6 @@
 import TokenManager from "../utils/tokenManager";
 
-const API_BASE_URL = "http://localhost:3000/api"; // Adjust based on your server configuration
+const API_BASE_URL = "http://localhost:5000/api"; // Adjust based on your server configuration
 
 export interface CreateConsultationRequest {
   admin_id: string;

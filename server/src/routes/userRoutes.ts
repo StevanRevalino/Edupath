@@ -10,6 +10,7 @@ router.use(authenticateToken);
 
 // User routes
 router.get("/", userController.getAllUsers.bind(userController)); // GET /api/users
+router.get("/admins", userController.getAllAdmins.bind(userController)); // GET /api/users/admins
 router.get("/:id", userController.getUserById.bind(userController)); // GET /api/users/:id
 router.put("/:id", userController.updateUser.bind(userController)); // PUT /api/users/:id
 router.delete("/:id", userController.deleteUser.bind(userController)); // DELETE /api/users/:id
