@@ -68,11 +68,11 @@ const Konseling = () => {
   const fetchAdmins = async () => {
     try {
       const token = TokenManager.getToken();
-      const response = await fetch('http://localhost:5000/api/users/admins', {
-        method: 'GET',
+      const response = await fetch("http://localhost:5000/api/users/admins", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -80,38 +80,38 @@ const Konseling = () => {
         const data = await response.json();
         if (data.success && data.data) {
           setAdmins(data.data);
-          
+
           // Set default expert to first admin if available
           if (data.data.length > 0) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
-              expertName: data.data[0].user_id
+              expertName: data.data[0].user_id,
             }));
           }
         }
       } else {
         // Fallback to mock data if API fails
         const fallbackAdmins = [
-          { user_id: 'ADMIN001', firstname: 'Dr. Ahmad', lastname: 'Santoso' },
-          { user_id: 'ADMIN002', firstname: 'Dr. Sari', lastname: 'Indrawati' },
+          { user_id: "ADMIN001", firstname: "Dr. Ahmad", lastname: "Santoso" },
+          { user_id: "ADMIN002", firstname: "Dr. Sari", lastname: "Indrawati" },
         ];
         setAdmins(fallbackAdmins);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          expertName: fallbackAdmins[0].user_id
+          expertName: fallbackAdmins[0].user_id,
         }));
       }
     } catch (error) {
-      console.error('Error fetching admins:', error);
+      console.error("Error fetching admins:", error);
       // Fallback with mock data
       const fallbackAdmins = [
-        { user_id: 'ADMIN001', firstname: 'Dr. Ahmad', lastname: 'Santoso' },
-        { user_id: 'ADMIN002', firstname: 'Dr. Sari', lastname: 'Indrawati' },
+        { user_id: "ADMIN001", firstname: "Dr. Ahmad", lastname: "Santoso" },
+        { user_id: "ADMIN002", firstname: "Dr. Sari", lastname: "Indrawati" },
       ];
       setAdmins(fallbackAdmins);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        expertName: fallbackAdmins[0].user_id
+        expertName: fallbackAdmins[0].user_id,
       }));
     }
   };
@@ -160,10 +160,17 @@ const Konseling = () => {
       }
 
       const consultationData = {
+        murid_id: userData.userId, // Add required murid_id
         admin_id: formData.expertName, // Use selected admin ID
         topic: formData.message,
         consultation_date: consultationDateTime.toISOString(),
-        notes: `Scheduled for ${selectedTimeStart} - ${selectedTimeEnd} WIB. Expert: ${admins.find(admin => admin.user_id === formData.expertName)?.firstname || 'Unknown'} ${admins.find(admin => admin.user_id === formData.expertName)?.lastname || ''}`,
+        notes: `Scheduled for ${selectedTimeStart} - ${selectedTimeEnd} WIB. Expert: ${
+          admins.find((admin) => admin.user_id === formData.expertName)
+            ?.firstname || "Unknown"
+        } ${
+          admins.find((admin) => admin.user_id === formData.expertName)
+            ?.lastname || ""
+        }`,
       };
 
       const response = await consultationService.createConsultation(
@@ -593,7 +600,9 @@ const Konseling = () => {
                     <option value="">Loading experts...</option>
                   ) : (
                     <>
-                      <option value="" disabled>Pilih Ahli</option>
+                      <option value="" disabled>
+                        Pilih Ahli
+                      </option>
                       {admins.map((admin) => (
                         <option key={admin.user_id} value={admin.user_id}>
                           {admin.firstname} {admin.lastname}

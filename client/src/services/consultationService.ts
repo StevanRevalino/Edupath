@@ -3,6 +3,7 @@ import TokenManager from "../utils/tokenManager";
 const API_BASE_URL = "http://localhost:5000/api"; // Adjust based on your server configuration
 
 export interface CreateConsultationRequest {
+  murid_id: string;
   admin_id: string;
   topic: string;
   consultation_date: string; // ISO string format
