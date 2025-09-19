@@ -2,10 +2,14 @@ import { Request, Response } from "express";
 import { UniversitasPddiktiService } from "../services/universitasPddiktiService";
 import { UniversitasService } from "../services/universitasService";
 
-const universitasService = new UniversitasPddiktiService();
-const localService = new UniversitasService();
-
 export class UniversitasController {
+  private universitasService: UniversitasPddiktiService;
+  private localService: UniversitasService;
+
+  constructor() {
+    this.universitasService = new UniversitasPddiktiService();
+    this.localService = new UniversitasService();
+  }
   // Get all universitas with optional pagination and search
   async getAllUniversitas(req: Request, res: Response) {
     try {
@@ -17,7 +21,7 @@ export class UniversitasController {
       const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
       const skip = (pageNum - 1) * take;
 
-      const { data, total } = await localService.getAllUniversitasLocal({
+      const { data, total } = await this.localService.getAllUniversitasLocal({
         search: search as string,
         skip,
         take,
@@ -48,7 +52,7 @@ export class UniversitasController {
       }
 
       // Use local data service instead of external API
-      const universitas = await localService.getUniversitasById(id.trim());
+      const universitas = await this.localService.getUniversitasById(id.trim());
       res.status(200).json({
         message: "Berhasil mengambil data universitas",
         data: universitas,
@@ -84,7 +88,7 @@ export class UniversitasController {
       }
 
       // Use local database (from CSV dataset) with smart search
-      const localData = await localService.searchUniversitasLocal(
+      const localData = await this.localService.searchUniversitasLocal(
         nama.trim(),
         15
       );

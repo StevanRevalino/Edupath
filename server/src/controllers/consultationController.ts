@@ -2,9 +2,12 @@ import { Request, Response } from "express";
 import { ConsultationService } from "../services/consultationService";
 import { ConsultationStatus } from "@prisma/client";
 
-const consultationService = new ConsultationService();
-
 export class ConsultationController {
+  private consultationService: ConsultationService;
+
+  constructor() {
+    this.consultationService = new ConsultationService();
+  }
   // Create a new consultation
   async createConsultation(req: Request, res: Response) {
     try {
@@ -36,7 +39,7 @@ export class ConsultationController {
         });
       }
 
-      const consultation = await consultationService.createConsultation({
+      const consultation = await this.consultationService.createConsultation({
         murid_id,
         admin_id,
         topic,
@@ -84,7 +87,7 @@ export class ConsultationController {
         filters.offset = parseInt(offset as string);
       }
 
-      const consultations = await consultationService.getAllConsultations(
+      const consultations = await this.consultationService.getAllConsultations(
         filters
       );
 
@@ -107,7 +110,7 @@ export class ConsultationController {
   async getStudentsWithAcceptedConsultations(req: Request, res: Response) {
     try {
       const students =
-        await consultationService.getStudentsWithAcceptedConsultations();
+        await this.consultationService.getStudentsWithAcceptedConsultations();
 
       return res.status(200).json({
         success: true,
@@ -135,7 +138,7 @@ export class ConsultationController {
         });
       }
 
-      const consultation = await consultationService.getConsultationById(id);
+      const consultation = await this.consultationService.getConsultationById(id);
 
       return res.status(200).json({
         success: true,
@@ -180,7 +183,7 @@ export class ConsultationController {
       }
 
       const updatedConsultation =
-        await consultationService.updateConsultationStatus({
+        await this.consultationService.updateConsultationStatus({
           consultation_id: id,
           status: status as ConsultationStatus,
           notes,
@@ -221,7 +224,7 @@ export class ConsultationController {
         });
       }
 
-      const consultations = await consultationService.getConsultationsByStatus(
+      const consultations = await this.consultationService.getConsultationsByStatus(
         status.toUpperCase() as ConsultationStatus
       );
 
@@ -253,7 +256,7 @@ export class ConsultationController {
       }
 
       const consultations =
-        await consultationService.getConsultationsForStudent(student_id);
+        await this.consultationService.getConsultationsForStudent(student_id);
 
       return res.status(200).json({
         success: true,
@@ -282,7 +285,7 @@ export class ConsultationController {
         });
       }
 
-      const consultations = await consultationService.getConsultationsForAdmin(
+      const consultations = await this.consultationService.getConsultationsForAdmin(
         admin_id
       );
 
@@ -314,7 +317,7 @@ export class ConsultationController {
         });
       }
 
-      const result = await consultationService.getConsultationsForStudentByName(
+      const result = await this.consultationService.getConsultationsForStudentByName(
         firstname,
         lastname as string
       );
@@ -345,7 +348,7 @@ export class ConsultationController {
         });
       }
 
-      const result = await consultationService.deleteConsultation(id);
+      const result = await this.consultationService.deleteConsultation(id);
 
       return res.status(200).json({
         success: true,
@@ -362,7 +365,7 @@ export class ConsultationController {
   // Get consultation statistics
   async getConsultationStats(req: Request, res: Response) {
     try {
-      const stats = await consultationService.getConsultationStats();
+      const stats = await this.consultationService.getConsultationStats();
 
       return res.status(200).json({
         success: true,

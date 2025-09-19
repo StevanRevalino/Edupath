@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 interface CreateUserDTO {
   user_id: string;
   firstname: string;
@@ -12,16 +10,21 @@ interface CreateUserDTO {
 }
 
 export class UserRepository {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
   async findByEmail(email: string) {
-    return prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    return this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
   }
 
   async create(data: CreateUserDTO) {
-    return prisma.user.create({ data });
+    return this.prisma.user.create({ data });
   }
 
   async updatePassword(email: string, hashedPassword: string) {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { email },
       data: { password: hashedPassword },
     });
@@ -31,14 +34,14 @@ export class UserRepository {
     userId: string,
     data: { firstname?: string; lastname?: string; kelas?: number }
   ) {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { user_id: userId },
       data: data,
     });
   }
 
   async findById(userId: string) {
-    return prisma.user.findUnique({ where: { user_id: userId } });
+    return this.prisma.user.findUnique({ where: { user_id: userId } });
   }
 
   async findByName(firstname: string, lastname?: string) {
@@ -57,7 +60,7 @@ export class UserRepository {
       };
     }
 
-    return prisma.user.findMany({
+    return this.prisma.user.findMany({
       where,
       select: {
         user_id: true,
@@ -71,7 +74,7 @@ export class UserRepository {
 
   // New methods for user management
   async findAllUsers() {
-    return prisma.user.findMany({
+    return this.prisma.user.findMany({
       orderBy: {
         created_at: "desc",
       },
@@ -79,14 +82,14 @@ export class UserRepository {
   }
 
   async updateUser(userId: string, data: Partial<CreateUserDTO>) {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { user_id: userId },
       data: data,
     });
   }
 
   async deleteUser(userId: string) {
-    return prisma.user.delete({
+    return this.prisma.user.delete({
       where: { user_id: userId },
     });
   }

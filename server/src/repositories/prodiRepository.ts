@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 interface CreateProdiDTO {
   prodi_id: number;
   nama_prodi: string;
@@ -33,14 +31,19 @@ interface ProdiPTFilters {
 }
 
 export class ProdiRepository {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
   // Create prodi
   async create(data: CreateProdiDTO) {
-    return prisma.prodi.create({ data });
+    return this.prisma.prodi.create({ data });
   }
 
   // Create many prodi
   async createMany(data: CreateProdiDTO[]) {
-    return prisma.prodi.createMany({
+    return this.prisma.prodi.createMany({
       data,
       skipDuplicates: true,
     });
@@ -48,7 +51,7 @@ export class ProdiRepository {
 
   // Find by ID
   async findById(prodi_id: number) {
-    return prisma.prodi.findUnique({
+    return this.prisma.prodi.findUnique({
       where: { prodi_id },
       include: {
         prodi_pt: {
@@ -75,7 +78,7 @@ export class ProdiRepository {
       where.jenjang = filters.jenjang;
     }
 
-    return prisma.prodi.findMany({
+    return this.prisma.prodi.findMany({
       where,
       include: {
         _count: {
@@ -94,7 +97,7 @@ export class ProdiRepository {
 
   // Search by nama prodi
   async searchByNama(query: string, limit: number = 10) {
-    return prisma.prodi.findMany({
+    return this.prisma.prodi.findMany({
       where: {
         nama_prodi: {
           contains: query,
@@ -115,7 +118,7 @@ export class ProdiRepository {
 
   // Update prodi
   async update(prodi_id: number, data: Partial<CreateProdiDTO>) {
-    return prisma.prodi.update({
+    return this.prisma.prodi.update({
       where: { prodi_id },
       data,
     });
@@ -123,7 +126,7 @@ export class ProdiRepository {
 
   // Delete prodi
   async delete(prodi_id: number) {
-    return prisma.prodi.delete({
+    return this.prisma.prodi.delete({
       where: { prodi_id },
     });
   }
@@ -143,12 +146,12 @@ export class ProdiRepository {
       where.jenjang = filters.jenjang;
     }
 
-    return prisma.prodi.count({ where });
+    return this.prisma.prodi.count({ where });
   }
 
   // Get all jenjang
   async getAllJenjang() {
-    const result = await prisma.prodi.findMany({
+    const result = await this.prisma.prodi.findMany({
       select: { jenjang: true },
       where: {
         jenjang: { not: null },
@@ -165,7 +168,7 @@ export class ProdiRepository {
 
   // Check if exists by ID
   async exists(prodi_id: number): Promise<boolean> {
-    const count = await prisma.prodi.count({
+    const count = await this.prisma.prodi.count({
       where: { prodi_id },
     });
     return count > 0;
@@ -175,7 +178,7 @@ export class ProdiRepository {
 
   // Create prodi-universitas relation
   async createProdiPT(data: CreateProdiPTDTO) {
-    return prisma.prodiPT.create({
+    return this.prisma.prodiPT.create({
       data,
       include: {
         prodi: true,
@@ -186,7 +189,7 @@ export class ProdiRepository {
 
   // Create many prodi-universitas relations
   async createManyProdiPT(data: CreateProdiPTDTO[]) {
-    return prisma.prodiPT.createMany({
+    return this.prisma.prodiPT.createMany({
       data,
       skipDuplicates: true,
     });
@@ -208,7 +211,7 @@ export class ProdiRepository {
       where.akreditasi_prodi = filters.akreditasi_prodi;
     }
 
-    return prisma.prodiPT.findMany({
+    return this.prisma.prodiPT.findMany({
       where,
       include: {
         prodi: true,
@@ -235,7 +238,7 @@ export class ProdiRepository {
 
   // Find ProdiPT by ID
   async findProdiPTById(id: number) {
-    return prisma.prodiPT.findUnique({
+    return this.prisma.prodiPT.findUnique({
       where: { id },
       include: {
         prodi: true,
@@ -246,7 +249,7 @@ export class ProdiRepository {
 
   // Update ProdiPT
   async updateProdiPT(id: number, data: Partial<CreateProdiPTDTO>) {
-    return prisma.prodiPT.update({
+    return this.prisma.prodiPT.update({
       where: { id },
       data,
       include: {
@@ -258,7 +261,7 @@ export class ProdiRepository {
 
   // Delete ProdiPT
   async deleteProdiPT(id: number) {
-    return prisma.prodiPT.delete({
+    return this.prisma.prodiPT.delete({
       where: { id },
     });
   }
@@ -268,7 +271,7 @@ export class ProdiRepository {
     prodi_id: number,
     university_id: number
   ): Promise<boolean> {
-    const count = await prisma.prodiPT.count({
+    const count = await this.prisma.prodiPT.count({
       where: {
         prodi_id,
         university_id,
@@ -293,6 +296,6 @@ export class ProdiRepository {
       where.akreditasi_prodi = filters.akreditasi_prodi;
     }
 
-    return prisma.prodiPT.count({ where });
+    return this.prisma.prodiPT.count({ where });
   }
 }

@@ -1,8 +1,11 @@
 import { UniversitasRepository } from "../repositories/universitasRepository";
 
-const universitasRepository = new UniversitasRepository();
-
 export class UniversitasService {
+  private universitasRepository: UniversitasRepository;
+
+  constructor() {
+    this.universitasRepository = new UniversitasRepository();
+  }
   // Get all universitas with optional search and pagination
   async getAllUniversitasLocal({
     search = "",
@@ -27,7 +30,7 @@ export class UniversitasService {
       }
 
       // Get all universitas without search
-      const allUniversitas = await universitasRepository.findMany({
+      const allUniversitas = await this.universitasRepository.findMany({
         limit: 1000, // Get reasonable amount
       });
 
@@ -70,7 +73,7 @@ export class UniversitasService {
   // Get university detail by ID from local database
   async getUniversitasById(universityId: string) {
     try {
-      const universitas = await universitasRepository.findById(
+      const universitas = await this.universitasRepository.findById(
         parseInt(universityId)
       );
 
@@ -139,13 +142,13 @@ export class UniversitasService {
     try {
       // For advanced nickname search, we need to get more data for scoring
       // First try exact name search
-      const nameResults = await universitasRepository.findMany({
+      const nameResults = await this.universitasRepository.findMany({
         nama: query, // Repository will handle the contains/insensitive search
         limit: limit * 2, // Get some results for smart scoring
       });
 
       // Also get additional data for nickname matching if name search is limited
-      const allResults = await universitasRepository.findMany({
+      const allResults = await this.universitasRepository.findMany({
         limit: 500, // Get more results for advanced nickname matching
       });
 
@@ -231,7 +234,7 @@ export class UniversitasService {
     limit: number
   ) {
     // Get all potential matches
-    const allResults = await universitasRepository.findMany({
+    const allResults = await this.universitasRepository.findMany({
       limit: 1000, // Get more results for multi-word matching
     });
 
@@ -319,7 +322,7 @@ export class UniversitasService {
   // Get universitas detail from local database
   async getUniversitasDetailLocal(universityId: string) {
     try {
-      const result = await universitasRepository.findById(
+      const result = await this.universitasRepository.findById(
         parseInt(universityId)
       );
 

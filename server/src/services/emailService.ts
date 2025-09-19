@@ -2,35 +2,36 @@ import nodemailer from "nodemailer";
 import { TransportOptions } from "nodemailer";
 import { google } from "googleapis";
 
-// Function to refresh access token
-const refreshAccessToken = async () => {
-  try {
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.OAUTH_CLIENTID,
-      process.env.OAUTH_CLIENT_SECRET,
-      "https://developers.google.com/oauthplayground"
-    );
+export class EmailService {
+  // Private method to refresh access token
+  private async refreshAccessToken(): Promise<string> {
+    try {
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.OAUTH_CLIENTID,
+        process.env.OAUTH_CLIENT_SECRET,
+        "https://developers.google.com/oauthplayground"
+      );
 
-    oauth2Client.setCredentials({
-      refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-    });
+      oauth2Client.setCredentials({
+        refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+      });
 
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    const accessToken = credentials.access_token;
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      const accessToken = credentials.access_token;
 
-    console.log("✅ Access token refreshed successfully");
-    return accessToken;
-  } catch (error) {
-    console.error("❌ Error refreshing access token:", error);
-    throw new Error("Failed to refresh access token");
+      console.log("✅ Access token refreshed successfully");
+      return accessToken as string;
+    } catch (error) {
+      console.error("❌ Error refreshing access token:", error);
+      throw new Error("Failed to refresh access token");
+    }
   }
-};
 
-// Configure transporter with OAuth2 and auto-refresh
-const createTransporter = async () => {
+  // Private method to create transporter with OAuth2 and auto-refresh
+  private async createTransporter() {
   try {
     // Always refresh access token before creating transporter
-    const accessToken = await refreshAccessToken();
+    const accessToken = await this.refreshAccessToken();
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -51,11 +52,11 @@ const createTransporter = async () => {
     console.error("❌ Error creating transporter:", error);
     throw new Error("Failed to create email transporter");
   }
-};
+  }
 
-export const sendOtpEmail = async (email: string, otp: string) => {
-  try {
-    const transporter = await createTransporter();
+  async sendOtpEmail(email: string, otp: string) {
+    try {
+      const transporter = await this.createTransporter();
 
     const mailOptions = {
       from: `EduPath <${process.env.MAIL_USERNAME}>`,
@@ -118,11 +119,11 @@ export const sendOtpEmail = async (email: string, otp: string) => {
     console.error("Error sending email:", error);
     throw new Error("Failed to send email");
   }
-};
+  }
 
-export const sendVerificationOtpEmail = async (email: string, otp: string) => {
-  try {
-    const transporter = await createTransporter();
+  async sendVerificationOtpEmail(email: string, otp: string) {
+    try {
+      const transporter = await this.createTransporter();
 
     const mailOptions = {
       from: `EduPath <${process.env.MAIL_USERNAME}>`,
@@ -184,4 +185,10 @@ export const sendVerificationOtpEmail = async (email: string, otp: string) => {
     console.error("Error sending verification email:", error);
     throw new Error("Failed to send verification email");
   }
-};
+  }
+}
+
+// Export singleton instance for backwards compatibility
+export const emailService = new EmailService();
+export const sendOtpEmail = emailService.sendOtpEmail.bind(emailService);
+export const sendVerificationOtpEmail = emailService.sendVerificationOtpEmail.bind(emailService);
