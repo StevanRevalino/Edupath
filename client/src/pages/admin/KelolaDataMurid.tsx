@@ -128,45 +128,57 @@ const KelolaDataMurid = () => {
         XII: 12,
       };
 
-      const updatePayload = {
-        firstname: editForm.firstname,
-        lastname: editForm.lastname,
-        kelas:
-          editForm.kelas && kelasMap[editForm.kelas] !== undefined
-            ? kelasMap[editForm.kelas]
-            : null,
-      };
+      Swal.fire({
+        title: "Apakah anda ingin menyimpan perubahan?",
+        showDenyButton: true,
+        confirmButtonText: "Simpan",
+        denyButtonText: `Jangan Simpan`,
+        confirmButtonColor: "#3085d6",
+        denyButtonColor: "#d33",
+        icon: "question",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const updatePayload = {
+            firstname: editForm.firstname,
+            lastname: editForm.lastname,
+            kelas:
+              editForm.kelas && kelasMap[editForm.kelas] !== undefined
+                ? kelasMap[editForm.kelas]
+                : null,
+          };
 
-      console.log("Update payload:", updatePayload);
-      console.log("Updating user:", selectedStudent.user_id);
+          await axios.put(
+            `${API_URL}/api/users/${selectedStudent.user_id}`,
+            updatePayload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-      await axios.put(
-        `${API_URL}/api/users/${selectedStudent.user_id}`,
-        updatePayload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          // Update state lokal
+          setStudents(
+            students.map((student) =>
+              student.user_id === selectedStudent.user_id
+                ? {
+                    ...student,
+                    firstname: editForm.firstname,
+                    lastname: editForm.lastname,
+                    kelas: editForm.kelas,
+                  }
+                : student
+            )
+          );
+
+          toast.success("Data murid berhasil diperbarui");
+          handleCloseModal();
+        } else if (result.isDenied) {
+          toast.error("Perubahan tidak disimpan");
+          handleCloseModal();
         }
-      );
-
-      // Update state lokal
-      setStudents(
-        students.map((student) =>
-          student.user_id === selectedStudent.user_id
-            ? {
-                ...student,
-                firstname: editForm.firstname,
-                lastname: editForm.lastname,
-                kelas: editForm.kelas,
-              }
-            : student
-        )
-      );
-
-      toast.success("Data murid berhasil diperbarui");
-      handleCloseModal();
+      });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401 || error.response?.status === 403) {

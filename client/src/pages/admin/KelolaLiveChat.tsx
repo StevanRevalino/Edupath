@@ -20,7 +20,6 @@ interface ChatUser {
   lastMessage?: string;
   lastMessageTime?: string;
   unreadCount?: number;
-  isOnline?: boolean;
 }
 
 interface ChatMessage {
@@ -79,7 +78,6 @@ const KelolaLiveChat = () => {
           lastMessage: `Konseling tentang: ${student.latestConsultationTopic}`,
           lastMessageTime: "Baru saja",
           unreadCount: 0,
-          isOnline: Math.random() > 0.6, // Random online status for demo
         }));
 
         setChatUsers(students);
@@ -325,7 +323,7 @@ const KelolaLiveChat = () => {
               {searchTerm
                 ? "Tidak ada siswa yang ditemukan"
                 : chatUsers.length === 0
-                ? "Belum ada murid dengan konseling yang di-accept"
+                ? "Tidak ada data siswa"
                 : "Belum ada chat aktif"}
             </div>
           ) : (
@@ -350,9 +348,6 @@ const KelolaLiveChat = () => {
                       {user.firstname.charAt(0)}
                       {user.lastname.charAt(0)}
                     </div>
-                    {user.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
                   </div>
 
                   {/* User Info */}
@@ -408,9 +403,6 @@ const KelolaLiveChat = () => {
                       {selectedUser.firstname.charAt(0)}
                       {selectedUser.lastname.charAt(0)}
                     </div>
-                    {selectedUser.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">
@@ -422,13 +414,7 @@ const KelolaLiveChat = () => {
                       )}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Kelas {getKelasText(selectedUser.kelas)} •{" "}
-                      {selectedUser.isOnline ? "Online" : "Offline"}
-                      {selectedUser.user_id === "US005" && (
-                        <span className="ml-2 text-blue-600">
-                          • Chat Aktif dengan BK001
-                        </span>
-                      )}
+                      Kelas {getKelasText(selectedUser.kelas)}
                     </p>
                   </div>
                 </div>

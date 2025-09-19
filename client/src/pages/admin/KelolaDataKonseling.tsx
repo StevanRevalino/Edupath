@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
+import Swal from "sweetalert2";
 
 interface Consultation {
   consultation_id: string;
@@ -116,28 +117,46 @@ const KelolaDataKonseling = () => {
     newStatus: string
   ) => {
     try {
-      const token = TokenManager.getToken();
+      Swal.fire({
+        title: "Apakah Anda yakin?",
+        text: `Anda akan mengubah status konseling menjadi "${getStatusText(
+          newStatus
+        )}".`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, ubah status",
+        cancelButtonText: "Batal",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const token = TokenManager.getToken();
 
-      await axios.patch(
-        `${API_URL}/api/consultations/${consultationId}/status`,
-        { status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          await axios.patch(
+            `${API_URL}/api/consultations/${consultationId}/status`,
+            { status: newStatus },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          setConsultations(
+            consultations.map((consultation) =>
+              consultation.consultation_id === consultationId
+                ? {
+                    ...consultation,
+                    status: newStatus as Consultation["status"],
+                  }
+                : consultation
+            )
+          );
+
+          toast.success("Status konseling berhasil diperbarui");
         }
-      );
-
-      setConsultations(
-        consultations.map((consultation) =>
-          consultation.consultation_id === consultationId
-            ? { ...consultation, status: newStatus as Consultation["status"] }
-            : consultation
-        )
-      );
-
-      toast.success("Status konseling berhasil diperbarui");
+      });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401 || error.response?.status === 403) {
