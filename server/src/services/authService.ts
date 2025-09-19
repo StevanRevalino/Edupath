@@ -73,7 +73,7 @@ export class AuthService {
       },
       process.env.JWT_SECRET as string,
       { expiresIn: process.env.JWT_EXPIRES_IN || "1d" } as SignOptions
-    );    // Kirim token + data user (jangan kirim password!)
+    ); // Kirim token + data user (jangan kirim password!)
     return {
       message: "Login berhasil",
       token,

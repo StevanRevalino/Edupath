@@ -138,7 +138,9 @@ export class ConsultationController {
         });
       }
 
-      const consultation = await this.consultationService.getConsultationById(id);
+      const consultation = await this.consultationService.getConsultationById(
+        id
+      );
 
       return res.status(200).json({
         success: true,
@@ -224,9 +226,10 @@ export class ConsultationController {
         });
       }
 
-      const consultations = await this.consultationService.getConsultationsByStatus(
-        status.toUpperCase() as ConsultationStatus
-      );
+      const consultations =
+        await this.consultationService.getConsultationsByStatus(
+          status.toUpperCase() as ConsultationStatus
+        );
 
       return res.status(200).json({
         success: true,
@@ -285,9 +288,8 @@ export class ConsultationController {
         });
       }
 
-      const consultations = await this.consultationService.getConsultationsForAdmin(
-        admin_id
-      );
+      const consultations =
+        await this.consultationService.getConsultationsForAdmin(admin_id);
 
       return res.status(200).json({
         success: true,
@@ -317,10 +319,11 @@ export class ConsultationController {
         });
       }
 
-      const result = await this.consultationService.getConsultationsForStudentByName(
-        firstname,
-        lastname as string
-      );
+      const result =
+        await this.consultationService.getConsultationsForStudentByName(
+          firstname,
+          lastname as string
+        );
 
       return res.status(200).json({
         success: true,

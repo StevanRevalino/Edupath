@@ -29,40 +29,40 @@ export class EmailService {
 
   // Private method to create transporter with OAuth2 and auto-refresh
   private async createTransporter() {
-  try {
-    // Always refresh access token before creating transporter
-    const accessToken = await this.refreshAccessToken();
+    try {
+      // Always refresh access token before creating transporter
+      const accessToken = await this.refreshAccessToken();
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // use SSL
-      auth: {
-        type: "OAuth2",
-        user: process.env.MAIL_USERNAME,
-        clientId: process.env.OAUTH_CLIENTID,
-        clientSecret: process.env.OAUTH_CLIENT_SECRET,
-        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    } as TransportOptions);
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // use SSL
+        auth: {
+          type: "OAuth2",
+          user: process.env.MAIL_USERNAME,
+          clientId: process.env.OAUTH_CLIENTID,
+          clientSecret: process.env.OAUTH_CLIENT_SECRET,
+          refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+          accessToken: accessToken,
+        },
+      } as TransportOptions);
 
-    return transporter;
-  } catch (error) {
-    console.error("❌ Error creating transporter:", error);
-    throw new Error("Failed to create email transporter");
-  }
+      return transporter;
+    } catch (error) {
+      console.error("❌ Error creating transporter:", error);
+      throw new Error("Failed to create email transporter");
+    }
   }
 
   async sendOtpEmail(email: string, otp: string) {
     try {
       const transporter = await this.createTransporter();
 
-    const mailOptions = {
-      from: `EduPath <${process.env.MAIL_USERNAME}>`,
-      to: email,
-      subject: "Reset Password - OTP Code",
-      html: `
+      const mailOptions = {
+        from: `EduPath <${process.env.MAIL_USERNAME}>`,
+        to: email,
+        subject: "Reset Password - OTP Code",
+        html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #2563eb; margin: 0;">EduPath</h1>
@@ -92,7 +92,7 @@ export class EmailService {
           </div>
         </div>
       `,
-      text: `
+        text: `
         EduPath - Reset Password Request
         
         Hi there! We received a request to reset your password.
@@ -106,30 +106,30 @@ export class EmailService {
         
         © 2025 EduPath. All rights reserved.
       `,
-    };
+      };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully:", info.messageId);
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully:", info.messageId);
 
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to send email");
-  }
+      return {
+        success: true,
+        messageId: info.messageId,
+      };
+    } catch (error) {
+      console.error("Error sending email:", error);
+      throw new Error("Failed to send email");
+    }
   }
 
   async sendVerificationOtpEmail(email: string, otp: string) {
     try {
       const transporter = await this.createTransporter();
 
-    const mailOptions = {
-      from: `EduPath <${process.env.MAIL_USERNAME}>`,
-      to: email,
-      subject: "Email Verification - OTP Code",
-      html: `
+      const mailOptions = {
+        from: `EduPath <${process.env.MAIL_USERNAME}>`,
+        to: email,
+        subject: "Email Verification - OTP Code",
+        html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #6CCBFF; margin: 0;">EduPath</h1>
@@ -159,7 +159,7 @@ export class EmailService {
           </div>
         </div>
       `,
-      text: `
+        text: `
         EduPath - Email Verification
         
         Welcome to EduPath! Please verify your email address to complete your registration.
@@ -173,22 +173,23 @@ export class EmailService {
         
         © 2025 EduPath. All rights reserved.
       `,
-    };
+      };
 
-    const info = await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
 
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error("Error sending verification email:", error);
-    throw new Error("Failed to send verification email");
-  }
+      return {
+        success: true,
+        messageId: info.messageId,
+      };
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      throw new Error("Failed to send verification email");
+    }
   }
 }
 
 // Export singleton instance for backwards compatibility
 export const emailService = new EmailService();
 export const sendOtpEmail = emailService.sendOtpEmail.bind(emailService);
-export const sendVerificationOtpEmail = emailService.sendVerificationOtpEmail.bind(emailService);
+export const sendVerificationOtpEmail =
+  emailService.sendVerificationOtpEmail.bind(emailService);

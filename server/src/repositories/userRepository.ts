@@ -16,7 +16,9 @@ export class UserRepository {
     this.prisma = new PrismaClient();
   }
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    return this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
   }
 
   async create(data: CreateUserDTO) {

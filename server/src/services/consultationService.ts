@@ -26,7 +26,8 @@ export class ConsultationService {
   }
 
   private async generateCustomConsultationId(): Promise<string> {
-    const lastConsultation = await this.consultationRepository.findLastConsultation();
+    const lastConsultation =
+      await this.consultationRepository.findLastConsultation();
 
     let lastNumber = 0;
 
@@ -178,11 +179,12 @@ export class ConsultationService {
         throw new Error("Konseling tidak ditemukan");
       }
 
-      const updatedConsultation = await this.consultationRepository.updateStatus({
-        consultation_id: data.consultation_id,
-        status: data.status,
-        notes: data.notes || existingConsultation.notes || undefined,
-      });
+      const updatedConsultation =
+        await this.consultationRepository.updateStatus({
+          consultation_id: data.consultation_id,
+          status: data.status,
+          notes: data.notes || existingConsultation.notes || undefined,
+        });
 
       return updatedConsultation;
     } catch (error) {
@@ -221,7 +223,10 @@ export class ConsultationService {
   async getConsultationsForStudentByName(firstname: string, lastname?: string) {
     try {
       // Find students with matching name
-      const students = await this.userRepository.findByName(firstname, lastname);
+      const students = await this.userRepository.findByName(
+        firstname,
+        lastname
+      );
 
       if (students.length === 0) {
         throw new Error("Tidak ada siswa ditemukan dengan nama tersebut");
