@@ -23,15 +23,14 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       confirmButtonText: "Ya, Logout",
       cancelButtonText: "Batal",
     }).then((result) => {
-      try {
+      if (result.isConfirmed) {
+        // Hapus token dari localStorage
         localStorage.removeItem("token_data");
-        localStorage.removeItem("user_id");
         localStorage.removeItem("role");
+        localStorage.removeItem("user_id");
 
         toast.success("Berhasil logout");
         navigate("/login");
-      } catch (error) {
-        toast.error("Terjadi kesalahan saat logout");
       }
     });
   };

@@ -1,120 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { ChevronLeft, Clock, X, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import conselingHeroIcon from "../../assets/icons/Conseling-hero-icon.png";
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import {
   consultationService,
   type Consultation,
 } from "../../services/consultationService";
-import TokenManager from "../../utils/tokenManager";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-
-// Generate time slots
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let hour = 8; hour <= 17; hour++) {
-    slots.push(`${hour.toString().padStart(2, "0")}:00`);
-    if (hour < 17) {
-      slots.push(`${hour.toString().padStart(2, "0")}:30`);
-    }
-  }
-  return slots;
-};
-
-const timeSlots = generateTimeSlots();
+import ModalJadwalkanKonseling from "../../components/ModalJadwalkanKonseling";
 
 const Konseling = () => {
   const [showModal, setShowModal] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
-    new Date()
-  );
-  const [selectedTimeStart, setSelectedTimeStart] = useState<string>("");
-  const [selectedTimeEnd, setSelectedTimeEnd] = useState<string>("");
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
-  const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    message: "",
-    expertName: "", // Will be set when admins are loaded
-  });
-
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   // Fetch consultations when component mounts
   useEffect(() => {
     fetchConsultations();
-    fetchAdmins();
   }, []);
-
-  const fetchAdmins = async () => {
-    try {
-      const token = TokenManager.getToken();
-      const response = await fetch("http://localhost:5000/api/users/admins", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setAdmins(data.data);
-
-          // Set default expert to first admin if available
-          if (data.data.length > 0) {
-            setFormData((prev) => ({
-              ...prev,
-              expertName: data.data[0].user_id,
-            }));
-          }
-        }
-      } else {
-        // Fallback to mock data if API fails
-        const fallbackAdmins = [
-          { user_id: "ADMIN001", firstname: "Dr. Ahmad", lastname: "Santoso" },
-          { user_id: "ADMIN002", firstname: "Dr. Sari", lastname: "Indrawati" },
-        ];
-        setAdmins(fallbackAdmins);
-        setFormData((prev) => ({
-          ...prev,
-          expertName: fallbackAdmins[0].user_id,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching admins:", error);
-      // Fallback with mock data
-      const fallbackAdmins = [
-        { user_id: "ADMIN001", firstname: "Dr. Ahmad", lastname: "Santoso" },
-        { user_id: "ADMIN002", firstname: "Dr. Sari", lastname: "Indrawati" },
-      ];
-      setAdmins(fallbackAdmins);
-      setFormData((prev) => ({
-        ...prev,
-        expertName: fallbackAdmins[0].user_id,
-      }));
-    }
-  };
 
   const fetchConsultations = async () => {
     try {
@@ -131,79 +33,14 @@ const Konseling = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      setSubmitting(true);
-
-      // Validate form data
-      if (
-        !selectedDate ||
-        !selectedTimeStart ||
-        !selectedTimeEnd ||
-        !formData.message
-      ) {
-        alert("Please fill in all required fields");
-        return;
-      }
-
-      // Combine date and time for consultation_date
-      const consultationDateTime = new Date(selectedDate);
-      const [hours, minutes] = selectedTimeStart.split(":");
-      consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      // Get user ID from token
-      const userData = TokenManager.getUserData();
-
-      if (!userData.userId) {
-        alert("User not authenticated");
-        return;
-      }
-
-      const consultationData = {
-        murid_id: userData.userId, // Add required murid_id
-        admin_id: formData.expertName, // Use selected admin ID
-        topic: formData.message,
-        consultation_date: consultationDateTime.toISOString(),
-        notes: `Scheduled for ${selectedTimeStart} - ${selectedTimeEnd} WIB. Expert: ${
-          admins.find((admin) => admin.user_id === formData.expertName)
-            ?.firstname || "Unknown"
-        } ${
-          admins.find((admin) => admin.user_id === formData.expertName)
-            ?.lastname || ""
-        }`,
-      };
-
-      const response = await consultationService.createConsultation(
-        consultationData
-      );
-
-      if (response.success) {
-        alert("Consultation scheduled successfully!");
-        setShowModal(false);
-        setSelectedDate(new Date());
-        setSelectedTimeStart("");
-        setSelectedTimeEnd("");
-        setFormData({
-          message: "",
-          expertName: admins.length > 0 ? admins[0].user_id : "",
-        });
-        // Refresh consultations list
-        fetchConsultations();
-      } else {
-        alert(response.message || "Failed to schedule consultation");
-      }
-    } catch (error) {
-      console.error("Error creating consultation:", error);
-      alert("Failed to schedule consultation. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleModalSuccess = () => {
+    fetchConsultations(); // Refresh consultations when modal succeeds
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       {/* Sesi Konseling Section */}
-      <div className="min-h-screen bg-gray-50 px-4 sm:px-6 md:px-12 py-12">
+      <div className="min-h-screen bg-gray-100 px-4 sm:px-6 md:px-12 pt-12">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-12">
             Sesi Konseling
@@ -219,10 +56,21 @@ const Konseling = () => {
                 </h3>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="w-full bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-600"
+                  className="w-full bg-gray-100 border-2 border-dashed border-[#00437A] rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer"
                 >
-                  <span className="text-2xl mr-3">+</span>
-                  <span className="text-sm">
+                  <div className="p-2 lg:p-4 bg-[#E9E9E9] rounded-md flex">
+                    <Plus
+                      size={24}
+                      className="lg:hidden text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
+                    <Plus
+                      size={32}
+                      className="hidden lg:block text-[#7E7E7E]"
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <span className="text-sm lg:text-base">
                     Jadwalkan sesi bimbingan konseling baru...
                   </span>
                 </button>
@@ -233,7 +81,7 @@ const Konseling = () => {
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
                   Riwayat Konseling
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain">
                   {loading ? (
                     <div className="text-center py-4">
                       <p className="text-gray-500">Loading consultations...</p>
@@ -243,7 +91,7 @@ const Konseling = () => {
                       <div
                         key={consultation.consultation_id}
                         onClick={() => setSelectedConsultation(consultation)}
-                        className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-colors cursor-pointer"
+                        className="bg-blue-50 border-[#00437A] border-2 rounded-tl-3xl rounded-br-3xl p-4 hover:bg-blue-100 transition-colors cursor-pointer"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span
@@ -300,7 +148,7 @@ const Konseling = () => {
 
             {/* Right Column - Info Panel */}
             <div className="bg-white rounded-xl shadow-md p-6 h-fit">
-              <h3 className="text-xl font-bold text-gray-800 text-center mb-6">
+              <h3 className="text-3xl font-bold text-gray-800 text-center mb-6">
                 Info tentang sesi
               </h3>
 
@@ -382,7 +230,7 @@ const Konseling = () => {
                     {selectedConsultation.notes && (
                       <div>
                         <label className="text-sm font-medium text-gray-600">
-                          Catatan:
+                          Deskripsi:
                         </label>
                         <p className="text-sm text-gray-800">
                           {selectedConsultation.notes}
@@ -428,205 +276,11 @@ const Konseling = () => {
       </div>
 
       {/* Modal for Jadwalkan Konseling */}
-      {showModal && (
-        <div className="fixed inset-0 bg-opacity-30 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
-            {/* Close button */}
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* Modal Header */}
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                Jadwalkan Konseling
-              </h3>
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-                  <Clock className="w-10 h-10 text-white" />
-                </div>
-              </div>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-4">
-              {/* Date Input - Calendar Popover */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hari / tanggal
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !selectedDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {selectedDate ? (
-                        format(selectedDate, "PPPP", { locale: id })
-                      ) : (
-                        <span>Pilih tanggal</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      disabled={(date) => date < new Date()}
-                      captionLayout="dropdown"
-                      className="rounded-md border"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Time Input - Time Picker Popover */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Start Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Waktu Mulai
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedTimeStart && "text-muted-foreground"
-                        )}
-                      >
-                        <Clock className="mr-2 h-4 w-4" />
-                        {selectedTimeStart || "Pilih waktu"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                        {timeSlots.map((time) => (
-                          <Button
-                            key={time}
-                            variant={
-                              selectedTimeStart === time ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setSelectedTimeStart(time)}
-                            className="h-10"
-                          >
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* End Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Waktu Selesai
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedTimeEnd && "text-muted-foreground"
-                        )}
-                      >
-                        <Clock className="mr-2 h-4 w-4" />
-                        {selectedTimeEnd || "Pilih waktu"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                        {timeSlots.map((time) => (
-                          <Button
-                            key={time}
-                            variant={
-                              selectedTimeEnd === time ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setSelectedTimeEnd(time)}
-                            className="h-10"
-                            disabled={
-                              !!(selectedTimeStart && time <= selectedTimeStart)
-                            }
-                          >
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              {/* Message Textarea */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Perihal
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  placeholder="Tuliskan pesan Anda..."
-                />
-              </div>
-
-              {/* Expert Name Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Ahli
-                </label>
-                <select
-                  name="expertName"
-                  value={formData.expertName}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  {admins.length === 0 ? (
-                    <option value="">Loading experts...</option>
-                  ) : (
-                    <>
-                      <option value="" disabled>
-                        Pilih Ahli
-                      </option>
-                      {admins.map((admin) => (
-                        <option key={admin.user_id} value={admin.user_id}>
-                          {admin.firstname} {admin.lastname}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-4">
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="w-full bg-[#6CCBFF] hover:bg-[#6CCBFF]/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-2xl transition-all"
-                >
-                  {submitting ? "Menjadwalkan..." : "Simpan perubahan"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ModalJadwalkanKonseling
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
