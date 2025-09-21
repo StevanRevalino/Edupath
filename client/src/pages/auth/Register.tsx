@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
+import loginBackground from "../../assets/login-background.png";
 
 type OptionType = {
   value: string | number;
@@ -222,14 +223,16 @@ export default function Register() {
     <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
       {/* Kiri: Logo */}
       <div className="hidden lg:flex w-1/2 items-center justify-center">
-        <div className="w-[200px] h-[120px] xl:w-[250px] xl:h-[150px] bg-gray-300 flex items-center justify-center text-lg xl:text-xl font-medium">
-          Edupath Logo
-        </div>
+        <img
+          src={loginBackground}
+          alt="Login Background"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Kanan: Form */}
       <div
-        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-30 lg:rounded-tl-[50px] lg:rounded-bl-[50px] min-h-screen lg:min-h-auto"
+        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-30 min-h-screen lg:min-h-auto"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleRegisterSubmit();

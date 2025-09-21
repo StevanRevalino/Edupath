@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
+import loginBackground from "../../assets/login-background.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -82,14 +83,16 @@ export default function Login() {
     <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
       {/* Kiri: Logo */}
       <div className="hidden lg:flex w-1/2 items-center justify-center">
-        <div className="w-[200px] h-[120px] xl:w-[250px] xl:h-[150px] bg-gray-300 flex items-center justify-center text-lg xl:text-xl font-medium">
-          Edupath Logo
-        </div>
+        <img
+          src={loginBackground}
+          alt="Login Background"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Kanan: Form Login */}
       <div
-        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-40 lg:rounded-tl-[50px] lg:rounded-bl-[50px] min-h-screen lg:min-h-auto"
+        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-40 min-h-screen lg:min-h-auto"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleLogin();
