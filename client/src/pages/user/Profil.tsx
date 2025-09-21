@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Mail, GraduationCap, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 import TokenManager from "../../utils/tokenManager";
+import SidebarProfil from "../../components/Profil/Sidebar-Profil";
+import MainContainer from "../../components/Profil/Main-Container";
+import HeaderProfil from "../../assets/icons/Header-Profil.png";
 
 interface UserProfile {
   user_id: string;
@@ -58,7 +60,6 @@ const Profil = () => {
   };
 
   const handleLogout = () => {
-    // Gunakan TokenManager untuk clear semua data auth
     TokenManager.logout();
     toast.success("Berhasil logout");
     navigate("/login");
@@ -66,77 +67,102 @@ const Profil = () => {
 
   if (loading) {
     return (
-      <div className="pt-16 flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="bg-gray-100 relative -mb-24 w-full min-h-screen flex flex-col items-center justify-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-[#00437A]"></div>
+        <div className="font-semibold text-[#00437A] flex justify-center">
+          Loading
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="pt-16 px-4 max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Profil Saya</h1>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-          >
-            <LogOut size={20} />
-            Logout
-          </button>
-        </div>
+    <div className="bg-gray-100 relative -mb-24">
+      {/* Header Background - Positioned absolutely behind content */}
+      <div className="absolute -top-20">
+        <img src={HeaderProfil} alt="Header Profil" className="w-full h-auto" />
+      </div>
 
-        {userProfile && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-              <User className="text-blue-600" size={20} />
+      {/* Main Content - Positioned relatively to be above background */}
+      <div className="relative z-1 flex">
+        {/* Sidebar Menu */}
+        <SidebarProfil onLogout={handleLogout} />
+
+        {/* Main Content */}
+        <MainContainer isProfilePage={true}>
+          {/* Profile Header - Fixed horizontal alignment */}
+          <div className="flex items-center mb-8 gap-2">
+            <h1 className="text-3xl font-bold text-gray-800">Profil saya</h1>
+            <button className="bg-[#D6F4FF] hover:bg-[#bde6ee] cursor-pointer border-[#00437A] border-3 text-[#00437A] px-5 py-1 rounded-full text-sm font-medium">
+              Ubah
+            </button>
+          </div>
+
+          {userProfile && (
+            <div className="space-y-8 pl-10">
+              {/* Identitas Section */}
               <div>
-                <label className="text-sm text-gray-600">Nama Lengkap</label>
-                <p className="font-medium text-gray-800">
-                  {userProfile.firstname} {userProfile.lastname}
-                </p>
-              </div>
-            </div>
+                <div className="flex justify-start mb-5">
+                  <div className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-semibold">
+                    Identitas
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-              <Mail className="text-blue-600" size={20} />
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <p className="font-medium text-gray-800">{userProfile.email}</p>
-              </div>
-            </div>
+                <div className="space-y-6 text-left">
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-2">
+                      Nama lengkap
+                    </label>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {userProfile.firstname} {userProfile.lastname}
+                    </p>
+                  </div>
 
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-              <Shield className="text-blue-600" size={20} />
-              <div>
-                <label className="text-sm text-gray-600">Role</label>
-                <p className="font-medium text-gray-800">{userProfile.role}</p>
-              </div>
-            </div>
-
-            {userProfile.kelas && (
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <GraduationCap className="text-blue-600" size={20} />
-                <div>
-                  <label className="text-sm text-gray-600">Kelas</label>
-                  <p className="font-medium text-gray-800">
-                    Kelas {userProfile.kelas}
-                  </p>
+                  {userProfile.kelas && (
+                    <div>
+                      <label className="block text-gray-600 text-sm mb-2">
+                        Kelas
+                      </label>
+                      <p className="text-2xl font-bold text-gray-800">
+                        {userProfile.kelas}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
 
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-              <User className="text-blue-600" size={20} />
+              {/* Akun Section */}
               <div>
-                <label className="text-sm text-gray-600">User ID</label>
-                <p className="font-medium text-gray-800">
-                  {userProfile.user_id}
-                </p>
+                <div className="flex justify-start mb-5 pt-2">
+                  <button className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-medium bg-white">
+                    Akun
+                  </button>
+                </div>
+
+                <div className="space-y-6 text-left">
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-2">
+                      Email
+                    </label>
+                    <p className="text-lg text-gray-800">
+                      {userProfile.email.replace(
+                        /^(.{2}).*(@.*)$/,
+                        "$1*******$2"
+                      )}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-2">
+                      Password
+                    </label>
+                    <p className="text-lg text-gray-800">••••••••••</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </MainContainer>
       </div>
     </div>
   );

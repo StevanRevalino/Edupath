@@ -12,6 +12,8 @@ import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
 import TokenManager from "./utils/tokenManager";
 import useAuthMonitor from "./hooks/useAuthMonitor";
+import AboutUs from "./pages/user/AboutUs";
+import ContactUs from "./pages/user/ContactUs";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuthMonitor();
@@ -122,6 +124,26 @@ function App() {
           }
         >
           <Route index element={<Profil />} />
+        </Route>
+        <Route
+          path="/about-us"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AboutUs />} />
+        </Route>
+        <Route
+          path="/contact-us"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ContactUs />} />
         </Route>
       </Routes>
     </BrowserRouter>
