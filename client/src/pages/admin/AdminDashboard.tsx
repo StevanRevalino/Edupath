@@ -2,6 +2,7 @@ import { useState } from "react";
 import AdminSidebar from "../../layouts/AdminSidebar";
 import KelolaDataMurid from "./KelolaDataMurid";
 import KelolaDataKonseling from "./KelolaDataKonseling";
+import KelolaLiveChat from "./KelolaLiveChat";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("kelola-data-murid");
@@ -12,6 +13,8 @@ const AdminDashboard = () => {
         return <KelolaDataMurid />;
       case "kelola-data-konseling":
         return <KelolaDataKonseling />;
+      case "kelola-live-chat":
+        return <KelolaLiveChat />;
       default:
         return <KelolaDataMurid />;
     }

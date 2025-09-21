@@ -1,7 +1,5 @@
 import { PrismaClient, ConsultationStatus } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 interface CreateConsultationDTO {
   consultation_id: string;
   murid_id: string;
@@ -26,9 +24,14 @@ interface ConsultationFilters {
 }
 
 export class ConsultationRepository {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
   // Create consultation
   async create(data: CreateConsultationDTO) {
-    return prisma.consultation.create({
+    return this.prisma.consultation.create({
       data,
       include: {
         murid: {
@@ -54,7 +57,7 @@ export class ConsultationRepository {
 
   // Find by ID
   async findById(consultation_id: string) {
-    return prisma.consultation.findUnique({
+    return this.prisma.consultation.findUnique({
       where: { consultation_id },
       include: {
         murid: {
@@ -94,7 +97,7 @@ export class ConsultationRepository {
       where.admin_id = filters.admin_id;
     }
 
-    return prisma.consultation.findMany({
+    return this.prisma.consultation.findMany({
       where,
       include: {
         murid: {
@@ -140,7 +143,7 @@ export class ConsultationRepository {
 
   // Update status
   async updateStatus(data: UpdateConsultationStatusDTO) {
-    return prisma.consultation.update({
+    return this.prisma.consultation.update({
       where: { consultation_id: data.consultation_id },
       data: {
         status: data.status,
@@ -170,7 +173,7 @@ export class ConsultationRepository {
 
   // Delete consultation
   async delete(consultation_id: string) {
-    return prisma.consultation.delete({
+    return this.prisma.consultation.delete({
       where: { consultation_id },
     });
   }
@@ -178,14 +181,14 @@ export class ConsultationRepository {
   // Get statistics
   async getStats() {
     const [total, pending, accepted, declined] = await Promise.all([
-      prisma.consultation.count(),
-      prisma.consultation.count({
+      this.prisma.consultation.count(),
+      this.prisma.consultation.count({
         where: { status: ConsultationStatus.PENDING },
       }),
-      prisma.consultation.count({
+      this.prisma.consultation.count({
         where: { status: ConsultationStatus.ACCEPTED },
       }),
-      prisma.consultation.count({
+      this.prisma.consultation.count({
         where: { status: ConsultationStatus.DECLINED },
       }),
     ]);
@@ -200,7 +203,7 @@ export class ConsultationRepository {
 
   // Find last consultation for generating ID
   async findLastConsultation() {
-    return prisma.consultation.findFirst({
+    return this.prisma.consultation.findFirst({
       orderBy: { consultation_id: "desc" },
       where: {
         consultation_id: {

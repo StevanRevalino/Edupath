@@ -19,4 +19,11 @@ router.get(
   universitasController.getUniversitasById.bind(universitasController)
 );
 
+// GET /api/universitas - Get all universitas with optional pagination (requires authentication)
+router.get(
+  "/",
+  authenticateToken,
+  universitasController.getAllUniversitas.bind(universitasController)
+);
+
 export default router;

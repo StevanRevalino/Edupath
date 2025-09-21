@@ -1,11 +1,76 @@
 import { ProdiRepository } from "../repositories/prodiRepository";
 
-const prodiRepository = new ProdiRepository();
-
 export class ProdiService {
+  private prodiRepository: ProdiRepository;
+
+  constructor() {
+    this.prodiRepository = new ProdiRepository();
+  }
+  // Get all prodi with optional search and pagination
+  async getAllProdiLocal({
+    search = "",
+    skip = 0,
+    take = 50,
+  }: {
+    search?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    try {
+      if (search && search.trim().length > 0) {
+        // Use existing search functionality if search term provided
+        const searchResults = await this.searchProdiLocal(search.trim(), take);
+        return {
+          data: searchResults,
+          total: searchResults.length,
+        };
+      }
+
+      // Get all prodi without search
+      const allProdi = await this.prodiRepository.findMany({
+        limit: 1000, // Get reasonable amount
+      });
+
+      // Get detailed results with relations
+      const detailedProdi = await Promise.all(
+        allProdi.slice(skip, skip + take).map(async (prodi) => {
+          const detailed = await this.prodiRepository.findById(prodi.prodi_id);
+          if (!detailed) return null;
+
+          // Transform to consistent format
+          return {
+            prodi_id: detailed.prodi_id.toString(),
+            nama_prodi: detailed.nama_prodi,
+            jenjang: detailed.jenjang,
+            kode_prodi: null,
+            bidang: null,
+            akreditasi: detailed.prodi_pt[0]?.akreditasi_prodi || null,
+            status_akreditasi: detailed.prodi_pt[0]?.akreditasi_prodi || null,
+            tanggal_berdiri: null,
+            tanggal_tutup: null,
+            status: "Aktif",
+            gelar: null,
+            singkatan_gelar: null,
+            deskripsi: null,
+          };
+        })
+      );
+
+      const filteredResults = detailedProdi.filter(Boolean);
+
+      return {
+        data: filteredResults,
+        total: allProdi.length,
+      };
+    } catch (error) {
+      console.error("Error getting all prodi locally:", error);
+      throw error;
+    }
+  }
+
   async getProdiDetailLocal(prodiId: string) {
     try {
-      const result = await prodiRepository.findById(parseInt(prodiId));
+      const result = await this.prodiRepository.findById(parseInt(prodiId));
 
       if (!result) {
         return null;
@@ -59,7 +124,7 @@ export class ProdiService {
   // Simple search for single words
   private async simpleSearch(query: string, limit: number) {
     // First, search by prodi name (higher priority)
-    const prodiNameResults = await prodiRepository.findMany({
+    const prodiNameResults = await this.prodiRepository.findMany({
       nama_prodi: query,
       limit: 1000, // Get more results for processing
     });
@@ -67,7 +132,7 @@ export class ProdiService {
     // Get the detailed results with relations
     const prodiNameResultsWithRelations = await Promise.all(
       prodiNameResults.map(async (prodi) => {
-        return await prodiRepository.findById(prodi.prodi_id);
+        return await this.prodiRepository.findById(prodi.prodi_id);
       })
     );
 
@@ -76,9 +141,9 @@ export class ProdiService {
     // we'll get all prodi and filter by university
     const allProdiWithUniversities = await Promise.all(
       (
-        await prodiRepository.findMany({ limit: 1000 })
+        await this.prodiRepository.findMany({ limit: 1000 })
       ).map(async (prodi) => {
-        return await prodiRepository.findById(prodi.prodi_id);
+        return await this.prodiRepository.findById(prodi.prodi_id);
       })
     );
 
@@ -115,12 +180,12 @@ export class ProdiService {
   // Multi-word search with intelligent matching
   private async multiWordSearch(queryWords: string[], limit: number) {
     // Get all potential matches from repository
-    const allProdi = await prodiRepository.findMany({ limit: 2000 });
+    const allProdi = await this.prodiRepository.findMany({ limit: 2000 });
 
     // Get detailed results with relations
     const allResults = await Promise.all(
       allProdi.map(async (prodi) => {
-        return await prodiRepository.findById(prodi.prodi_id);
+        return await this.prodiRepository.findById(prodi.prodi_id);
       })
     );
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
 import SidebarProfil from "../../components/Profil/Sidebar-Profil";
 import MainContainer from "../../components/Profil/Main-Container";
@@ -32,27 +33,24 @@ const Profil = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/auth/me", {
+      const response = await axios.get("http://localhost:5000/api/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
-      if (response.status === 401 || response.status === 403) {
+      setUserProfile(response.data.user);
+    } catch (error: any) {
+      console.error("Error fetching profile:", error);
+
+      // Handle specific axios error responses
+      if (error.response?.status === 401 || error.response?.status === 403) {
         toast.error("Token expired. Silakan login kembali.");
         handleLogout();
         return;
       }
 
-      if (response.ok) {
-        const data = await response.json();
-        setUserProfile(data.user);
-      } else {
-        throw new Error("Failed to fetch profile");
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
       toast.error("Gagal mengambil data profil");
     } finally {
       setLoading(false);

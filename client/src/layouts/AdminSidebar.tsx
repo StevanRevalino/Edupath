@@ -2,6 +2,8 @@ import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
+import Swal from "sweetalert2";
+import questionIcon from "../assets/question-logo.png";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -13,16 +15,27 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("token_data");
-      localStorage.removeItem("user_id");
-      localStorage.removeItem("role");
+    Swal.fire({
+      title: "Yakin ingin logout?",
+      imageUrl: questionIcon,
+      imageWidth: 80,
+      imageHeight: 90,
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Logout",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Hapus token dari localStorage
+        localStorage.removeItem("token_data");
+        localStorage.removeItem("role");
+        localStorage.removeItem("user_id");
 
-      toast.success("Berhasil logout");
-      navigate("/login");
-    } catch (error) {
-      toast.error("Terjadi kesalahan saat logout");
-    }
+        toast.success("Berhasil logout");
+        navigate("/login");
+      }
+    });
   };
 
   const handleMenuItemClick = (tabId: string) => {
@@ -40,6 +53,11 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         id: "kelola-data-konseling",
         label: "Kelola Data Konseling",
         icon: "/src/assets/icons/kelola-data-konseling.png",
+      },
+      {
+        id: "kelola-live-chat",
+        label: "Chat Murid",
+        icon: "/src/assets/icons/kelola-chat-murid.png",
       },
     ],
     []
@@ -73,7 +91,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                     <img
                       src={item.icon}
                       alt={`${item.label} Icon`}
-                      className="w-12 h-12 mr-3"
+                      className="w-12 h-14 mr-3"
                     />
                     <span className="font-medium">{item.label}</span>
                   </button>
@@ -144,7 +162,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                         <img
                           src={item.icon}
                           alt={`${item.label} Icon`}
-                          className="w-8 h-8 mr-3"
+                          className="w-8 h-9 mr-3"
                         />
                         <span className="font-medium text-sm">
                           {item.label}
@@ -164,9 +182,8 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                   <img
                     src="/src/assets/icons/log-out.png"
                     alt="Logout Icon"
-                    className="w-8 h-8 mr-3"
+                    className="w-48 mx-auto"
                   />
-                  <span className="font-medium text-sm">Logout</span>
                 </button>
               </div>
             </div>

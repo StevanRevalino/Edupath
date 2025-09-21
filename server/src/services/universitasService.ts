@@ -1,12 +1,79 @@
 import { UniversitasRepository } from "../repositories/universitasRepository";
 
-const universitasRepository = new UniversitasRepository();
-
 export class UniversitasService {
+  private universitasRepository: UniversitasRepository;
+
+  constructor() {
+    this.universitasRepository = new UniversitasRepository();
+  }
+  // Get all universitas with optional search and pagination
+  async getAllUniversitasLocal({
+    search = "",
+    skip = 0,
+    take = 50,
+  }: {
+    search?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    try {
+      if (search && search.trim().length > 0) {
+        // Use existing search functionality if search term provided
+        const searchResults = await this.searchUniversitasLocal(
+          search.trim(),
+          take
+        );
+        return {
+          data: searchResults,
+          total: searchResults.length,
+        };
+      }
+
+      // Get all universitas without search
+      const allUniversitas = await this.universitasRepository.findMany({
+        limit: 1000, // Get reasonable amount
+      });
+
+      // Apply pagination and transform results
+      const paginatedUniversitas = allUniversitas.slice(skip, skip + take);
+
+      const transformedResults = paginatedUniversitas.map((univ) => ({
+        university_id: univ.university_id.toString(),
+        nama: univ.nama,
+        nama_singkat: univ.nama_singkat,
+        kelompok: null,
+        pembina: null,
+        alamat: univ.alamat,
+        kecamatan: null,
+        kota: univ.kota,
+        provinsi: univ.provinsi,
+        kode_pos: univ.kode_pos,
+        lintang: null,
+        bujur: null,
+        email: univ.email,
+        telepon: univ.telepon,
+        fax: univ.fax,
+        website: null,
+        tanggal_berdiri: null,
+        akreditasi: univ.akreditasi,
+        status_akreditasi: univ.status,
+        rank_qs: univ.rank_qs ? parseFloat(univ.rank_qs) : null,
+        rank_country: univ.rank_country ? parseFloat(univ.rank_country) : null,
+      }));
+
+      return {
+        data: transformedResults,
+        total: allUniversitas.length,
+      };
+    } catch (error) {
+      console.error("Error getting all universitas locally:", error);
+      throw error;
+    }
+  }
   // Get university detail by ID from local database
   async getUniversitasById(universityId: string) {
     try {
-      const universitas = await universitasRepository.findById(
+      const universitas = await this.universitasRepository.findById(
         parseInt(universityId)
       );
 
@@ -75,13 +142,13 @@ export class UniversitasService {
     try {
       // For advanced nickname search, we need to get more data for scoring
       // First try exact name search
-      const nameResults = await universitasRepository.findMany({
+      const nameResults = await this.universitasRepository.findMany({
         nama: query, // Repository will handle the contains/insensitive search
         limit: limit * 2, // Get some results for smart scoring
       });
 
       // Also get additional data for nickname matching if name search is limited
-      const allResults = await universitasRepository.findMany({
+      const allResults = await this.universitasRepository.findMany({
         limit: 500, // Get more results for advanced nickname matching
       });
 
@@ -167,7 +234,7 @@ export class UniversitasService {
     limit: number
   ) {
     // Get all potential matches
-    const allResults = await universitasRepository.findMany({
+    const allResults = await this.universitasRepository.findMany({
       limit: 1000, // Get more results for multi-word matching
     });
 
@@ -255,7 +322,7 @@ export class UniversitasService {
   // Get universitas detail from local database
   async getUniversitasDetailLocal(universityId: string) {
     try {
-      const result = await universitasRepository.findById(
+      const result = await this.universitasRepository.findById(
         parseInt(universityId)
       );
 

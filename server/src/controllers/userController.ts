@@ -27,6 +27,25 @@ export class UserController {
     }
   }
 
+  // Get all admin users
+  async getAllAdmins(req: Request, res: Response): Promise<void> {
+    try {
+      const admins = await this.userService.getAllAdmins();
+
+      res.status(200).json({
+        success: true,
+        data: admins,
+        message: "Admin users retrieved successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+
   // Get user by ID
   async getUserById(req: Request, res: Response): Promise<void> {
     try {

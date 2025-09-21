@@ -3,10 +3,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
+import UserLiveChat from "../../components/UserLiveChat";
 
 const Home = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
+
+  // Chat state
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // User data state
   const [user, setUser] = useState<{
@@ -14,7 +18,14 @@ const Home = () => {
     lastname: string;
     kelas: number | null;
   } | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Prodi/Jurusan data state
+  const [allMajors, setAllMajors] = useState<string[]>([]);
+  const [majorsLoading, setMajorsLoading] = useState(true);
+
+  // Universitas data state
+  const [allUniversities, setAllUniversities] = useState<string[]>([]);
+  const [universitiesLoading, setUniversitiesLoading] = useState(true);
 
   // Fetch user data
   useEffect(() => {
@@ -45,60 +56,82 @@ const Home = () => {
           TokenManager.logout();
           navigate("/login");
         }
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchUserData();
   }, [navigate, API_URL]);
 
-  // Static data for better performance - no API calls
-  const allMajors = [
-    "Teknik Informatika",
-    "Sistem Informasi",
-    "Manajemen",
-    "Akuntansi",
-    "Teknik Sipil",
-    "Kedokteran",
-    "Psikologi",
-    "Hukum",
-    "Ekonomi",
-    "Arsitektur",
-    "Teknik Mesin",
-    "Farmasi",
-    "Teknik Elektro",
-    "Ilmu Komunikasi",
-    "Desain Komunikasi Visual",
-    "Matematika",
-    "Fisika",
-    "Kimia",
-    "Biologi",
-    "Sastra Inggris",
-  ];
+  // Fetch prodi data
+  useEffect(() => {
+    const fetchProdiData = async () => {
+      try {
+        if (!TokenManager.isAuthenticated()) {
+          return;
+        }
 
-  const allUniversities = [
-    "Universitas Indonesia",
-    "Institut Teknologi Bandung",
-    "Universitas Gadjah Mada",
-    "Institut Teknologi Sepuluh Nopember",
-    "Universitas Bina Nusantara",
-    "Universitas Brawijaya",
-    "Universitas Diponegoro",
-    "Universitas Padjadjaran",
-    "Bina Nusantara",
-    "Universitas Trisakti",
-    "Universitas Pelita Harapan",
-    "Universitas Tarumanagara",
-    "Institut Pertanian Bogor",
-    "Universitas Sebelas Maret",
-    "Universitas Hasanuddin",
-    "Universitas Negeri Yogyakarta",
-    "Universitas Sumatera Utara",
-    "Universitas Andalas",
-    "Universitas Riau",
-    "Universitas Lampung",
-  ];
+        const token = TokenManager.getToken();
+
+        const response = await axios.get(`${API_URL}/api/prodi?limit=679`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        // Extract prodi names for display
+        const prodiNames = response.data.data.map(
+          (prodi: any) => prodi.nama_prodi
+        );
+        setAllMajors(prodiNames);
+      } catch (error) {
+        console.error("Error fetching prodi data:", error);
+        // If API fails, keep empty array and show error state
+        setAllMajors([]);
+      } finally {
+        setMajorsLoading(false);
+      }
+    };
+
+    fetchProdiData();
+  }, [API_URL]);
+
+  // Fetch universitas data
+  useEffect(() => {
+    const fetchUniversitasData = async () => {
+      try {
+        if (!TokenManager.isAuthenticated()) {
+          return;
+        }
+
+        const token = TokenManager.getToken();
+
+        const response = await axios.get(
+          `${API_URL}/api/universitas?limit=645`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        // Extract universitas names for display
+        const universitasNames = response.data.data.map(
+          (univ: any) => univ.nama
+        );
+        setAllUniversities(universitasNames);
+      } catch (error) {
+        console.error("Error fetching universitas data:", error);
+        // If API fails, keep empty array and show error state
+        setAllUniversities([]);
+      } finally {
+        setUniversitiesLoading(false);
+      }
+    };
+
+    fetchUniversitasData();
+  }, [API_URL]);
 
   const infoItems = [
     { label: "Tentang kami" },
@@ -109,53 +142,94 @@ const Home = () => {
     { label: "Info beasiswa" },
   ];
 
-  // Dummy data untuk universitas - will be replaced by API data
-  const universities = allUniversities;
+  // Helper function to generate color for any string
+  const getColorForString = (str: string): string => {
+    // Predefined colors for common majors and universities
+    const predefinedColors: Record<string, string> = {
+      // Common majors colors
+      "Teknik Informatika": "bg-[#1E40AF]",
+      "Sistem Informasi": "bg-[#8B0000]",
+      Manajemen: "bg-[#FF00E5]",
+      Akuntansi: "bg-[#3C3782]",
+      "Teknik Sipil": "bg-[#B7D200]",
+      Kedokteran: "bg-[#059669]",
+      Psikologi: "bg-[#DC2626]",
+      Hukum: "bg-[#1F2937]",
+      Ekonomi: "bg-[#0891B2]",
+      Arsitektur: "bg-[#7C3AED]",
+      "Teknik Mesin": "bg-[#4B5563]",
+      Farmasi: "bg-[#7C2D12]",
+      "Teknik Elektro": "bg-[#991B1B]",
+      "Ilmu Komunikasi": "bg-[#7E22CE]",
+      "Desain Komunikasi Visual": "bg-[#EC4899]",
+      Matematika: "bg-[#5B21B6]",
+      Fisika: "bg-[#BE123C]",
+      Kimia: "bg-[#047857]",
+      Biologi: "bg-[#C2410C]",
+      "Sastra Inggris": "bg-[#6366F1]",
 
-  const colorMap: Record<string, string> = {
-    // Majors colors
-    "Teknik Informatika": "bg-[#1E40AF]",
-    "Sistem Informasi": "bg-[#8B0000]",
-    Manajemen: "bg-[#FF00E5]",
-    Akuntansi: "bg-[#3C3782]",
-    "Teknik Sipil": "bg-[#B7D200]",
-    Kedokteran: "bg-[#059669]",
-    Psikologi: "bg-[#DC2626]",
-    Hukum: "bg-[#1F2937]",
-    Ekonomi: "bg-[#0891B2]",
-    Arsitektur: "bg-[#7C3AED]",
-    "Teknik Mesin": "bg-[#4B5563]",
-    Farmasi: "bg-[#7C2D12]",
-    "Teknik Elektro": "bg-[#991B1B]",
-    "Ilmu Komunikasi": "bg-[#7E22CE]",
-    "Desain Komunikasi Visual": "bg-[#EC4899]",
-    Matematika: "bg-[#5B21B6]",
-    Fisika: "bg-[#BE123C]",
-    Kimia: "bg-[#047857]",
-    Biologi: "bg-[#C2410C]",
-    "Sastra Inggris": "bg-[#6366F1]",
+      // Universities colors
+      "Universitas Indonesia": "bg-[#B91C1C]",
+      "Institut Teknologi Bandung": "bg-[#BE123C]",
+      "Universitas Gadjah Mada": "bg-[#C2410C]",
+      "Institut Teknologi Sepuluh Nopember": "bg-[#1F2937]",
+      "Universitas Bina Nusantara": "bg-[#1E3A8A]",
+      "Universitas Brawijaya": "bg-[#047857]",
+      "Universitas Diponegoro": "bg-[#DC2626]",
+      "Universitas Padjadjaran": "bg-[#F59E0B]",
+      "Bina Nusantara": "bg-[#1E40AF]",
+      "Universitas Trisakti": "bg-[#7C3AED]",
+      "Universitas Pelita Harapan": "bg-[#7C2D12]",
+      "Universitas Tarumanagara": "bg-[#059669]",
+      "Institut Pertanian Bogor": "bg-[#3C3782]",
+      "Universitas Sebelas Maret": "bg-[#8B0000]",
+      "Universitas Hasanuddin": "bg-[#EF4444]",
+      "Universitas Negeri Yogyakarta": "bg-[#B31507]",
+      "Universitas Sumatera Utara": "bg-[#00B7F3]",
+      "Universitas Andalas": "bg-[#FF00E5]",
+      "Universitas Riau": "bg-[#F0544F]",
+      "Universitas Lampung": "bg-[#10B981]",
+    };
 
-    // Universities colors
-    "Universitas Indonesia": "bg-[#B91C1C]",
-    "Institut Teknologi Bandung": "bg-[#BE123C]",
-    "Universitas Gadjah Mada": "bg-[#C2410C]",
-    "Institut Teknologi Sepuluh Nopember": "bg-[#1F2937]",
-    "Universitas Bina Nusantara": "bg-[#1E3A8A]",
-    "Universitas Brawijaya": "bg-[#047857]",
-    "Universitas Diponegoro": "bg-[#DC2626]",
-    "Universitas Padjadjaran": "bg-[#F59E0B]",
-    "Bina Nusantara": "bg-[#1E40AF]",
-    "Universitas Trisakti": "bg-[#7C3AED]",
-    "Universitas Pelita Harapan": "bg-[#7C2D12]",
-    "Universitas Tarumanagara": "bg-[#059669]",
-    "Institut Pertanian Bogor": "bg-[#3C3782]",
-    "Universitas Sebelas Maret": "bg-[#8B0000]",
-    "Universitas Hasanuddin": "bg-[#EF4444]",
-    "Universitas Negeri Yogyakarta": "bg-[#B31507]",
-    "Universitas Sumatera Utara": "bg-[#00B7F3]",
-    "Universitas Andalas": "bg-[#FF00E5]",
-    "Universitas Riau": "bg-[#F0544F]",
-    "Universitas Lampung": "bg-[#10B981]",
+    // Return predefined color if exists
+    if (predefinedColors[str]) {
+      return predefinedColors[str];
+    }
+
+    // Generate color based on string hash
+    const colors = [
+      "bg-[#1E40AF]",
+      "bg-[#8B0000]",
+      "bg-[#FF00E5]",
+      "bg-[#3C3782]",
+      "bg-[#B7D200]",
+      "bg-[#059669]",
+      "bg-[#DC2626]",
+      "bg-[#1F2937]",
+      "bg-[#0891B2]",
+      "bg-[#7C3AED]",
+      "bg-[#4B5563]",
+      "bg-[#7C2D12]",
+      "bg-[#991B1B]",
+      "bg-[#7E22CE]",
+      "bg-[#EC4899]",
+      "bg-[#5B21B6]",
+      "bg-[#BE123C]",
+      "bg-[#047857]",
+      "bg-[#C2410C]",
+      "bg-[#6366F1]",
+    ];
+
+    // Simple hash function to generate consistent color
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+
+    const colorIndex = Math.abs(hash) % colors.length;
+    return colors[colorIndex];
   };
 
   const [showAll, setShowAll] = useState(false);
@@ -183,7 +257,7 @@ const Home = () => {
   const hasMoreExplore = filteredExploreMajors.length > 8;
 
   // Filter universities based on search query
-  const filteredUniversities = universities.filter((university) =>
+  const filteredUniversities = allUniversities.filter((university) =>
     university.toLowerCase().includes(universitySearchQuery.toLowerCase())
   );
 
@@ -196,17 +270,6 @@ const Home = () => {
     return `${kelas}`;
   };
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <p className="mt-2 text-gray-600">Memuat data...</p>
-        </div>
-      </div>
-    );
-  }
   const handleUniversityClick = (universityName: string) => {
     navigate("/universitas", { state: { selectedUniversity: universityName } });
   };
@@ -244,7 +307,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex items-center justify-center lg:justify-start w-full ml-0 lg:ml-3">
-                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md text-sm lg:mb-10 xl:mb-0 cursor-pointer">
+                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md font-semibold text-sm lg:mb-10 xl:mb-0 cursor-pointer">
                   Ubah profil
                 </button>
               </div>
@@ -308,28 +371,36 @@ const Home = () => {
                 Riwayat Penjurusan
               </div>
               <div className="flex flex-wrap justify-start gap-2 lg:gap-3">
-                {displayedTags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold hover:opacity-80 cursor-pointer ${
-                      colorMap[tag] || "bg-[#888]"
-                    }`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {hasMore && (
+                {majorsLoading ? (
+                  <div className="text-gray-500 text-sm">Memuat data...</div>
+                ) : displayedTags.length > 0 ? (
                   <>
-                    <span className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500">
-                      ...
-                    </span>
-                    <button
-                      onClick={() => setShowAll(true)}
-                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer"
-                    >
-                      Lihat lainnya...
-                    </button>
+                    {displayedTags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold hover:opacity-80 cursor-pointer ${getColorForString(
+                          tag
+                        )}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {hasMore && (
+                      <>
+                        <span className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500">
+                          ...
+                        </span>
+                        <button
+                          onClick={() => setShowAll(true)}
+                          className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer"
+                        >
+                          Lihat lainnya...
+                        </button>
+                      </>
+                    )}
                   </>
+                ) : (
+                  <div className="text-gray-500 text-sm">Belum ada riwayat</div>
                 )}
               </div>
             </div>
@@ -409,28 +480,39 @@ const Home = () => {
 
               {/* Major Tags */}
               <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
-                {displayedExploreMajors.map((major, idx) => (
-                  <span
-                    key={idx}
-                    onClick={() => handleMajorClick(major)}
-                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
-                      colorMap[major] || "bg-[#888]"
-                    }`}
-                  >
-                    {major}
-                  </span>
-                ))}
-                {hasMoreExplore && (
-                  <button
-                    onClick={() => navigate("/jurusan")}
-                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                  >
-                    Lihat semua jurusan...
-                  </button>
-                )}
-                {filteredExploreMajors.length === 0 && searchQuery && (
+                {majorsLoading ? (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Memuat data jurusan...
+                  </div>
+                ) : displayedExploreMajors.length > 0 ? (
+                  <>
+                    {displayedExploreMajors.map((major, idx) => (
+                      <span
+                        key={idx}
+                        onClick={() => handleMajorClick(major)}
+                        className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${getColorForString(
+                          major
+                        )}`}
+                      >
+                        {major}
+                      </span>
+                    ))}
+                    {hasMoreExplore && (
+                      <button
+                        onClick={() => navigate("/jurusan")}
+                        className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                      >
+                        Lihat semua jurusan...
+                      </button>
+                    )}
+                  </>
+                ) : searchQuery ? (
                   <div className="text-gray-500 text-sm lg:text-base italic">
                     Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Belum ada data jurusan
                   </div>
                 )}
               </div>
@@ -444,7 +526,10 @@ const Home = () => {
             </div>
 
             <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+              <button
+                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                onClick={() => navigate("/tes")}
+              >
                 <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
                   <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                     <Plus
@@ -489,29 +574,40 @@ const Home = () => {
 
               {/* University Tags */}
               <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
-                {displayedUniversities.map((university, idx) => (
-                  <span
-                    key={idx}
-                    onClick={() => handleUniversityClick(university)}
-                    className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
-                      colorMap[university] || "bg-[#007B3A]"
-                    }`}
-                  >
-                    {university}
-                  </span>
-                ))}
-                {hasMoreUniversities && (
-                  <button
-                    onClick={() => navigate("/universitas")}
-                    className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                  >
-                    Lihat semua universitas...
-                  </button>
-                )}
-                {filteredUniversities.length === 0 && universitySearchQuery && (
+                {universitiesLoading ? (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Memuat data universitas...
+                  </div>
+                ) : displayedUniversities.length > 0 ? (
+                  <>
+                    {displayedUniversities.map((university, idx) => (
+                      <span
+                        key={idx}
+                        onClick={() => handleUniversityClick(university)}
+                        className={`text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity ${getColorForString(
+                          university
+                        )}`}
+                      >
+                        {university}
+                      </span>
+                    ))}
+                    {hasMoreUniversities && (
+                      <button
+                        onClick={() => navigate("/universitas")}
+                        className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                      >
+                        Lihat semua universitas...
+                      </button>
+                    )}
+                  </>
+                ) : universitySearchQuery ? (
                   <div className="text-gray-500 text-sm lg:text-base italic">
                     Tidak ada universitas yang ditemukan untuk "
                     {universitySearchQuery}"
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Belum ada data universitas
                   </div>
                 )}
               </div>
@@ -525,7 +621,10 @@ const Home = () => {
             </div>
 
             <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer">
+              <button
+                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                onClick={() => navigate("/konseling")}
+              >
                 <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
                   <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
                     <Plus
@@ -548,6 +647,35 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Chat Button */}
+      {!isChatOpen && (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 z-40"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+            />
+          </svg>
+        </button>
+      )}
+
+      {/* Live Chat Component */}
+      <UserLiveChat
+        isOpen={isChatOpen}
+        onToggle={() => setIsChatOpen(!isChatOpen)}
+      />
     </div>
   );
 };

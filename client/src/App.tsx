@@ -14,6 +14,7 @@ import TokenManager from "./utils/tokenManager";
 import useAuthMonitor from "./hooks/useAuthMonitor";
 import AboutUs from "./pages/user/AboutUs";
 import ContactUs from "./pages/user/ContactUs";
+import ScrollToTop from "./components/ScrollToTop";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuthMonitor();
@@ -41,6 +42,7 @@ function DefaultRoute() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<DefaultRoute />} />
         <Route path="/register" element={<Register />} />

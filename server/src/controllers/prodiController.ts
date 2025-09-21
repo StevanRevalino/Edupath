@@ -2,10 +2,44 @@ import { Request, Response } from "express";
 import { ProdiPddiktiService } from "../services/prodiPddiktiService";
 import { ProdiService } from "../services/prodiService";
 
-const pddiktiservice = new ProdiPddiktiService();
-const localService = new ProdiService();
-
 export class ProdiController {
+  private pddiktiService: ProdiPddiktiService;
+  private localService: ProdiService;
+
+  constructor() {
+    this.pddiktiService = new ProdiPddiktiService();
+    this.localService = new ProdiService();
+  }
+  // Get all prodi with optional pagination and search
+  async getAllProdi(req: Request, res: Response) {
+    try {
+      const { page = "1", limit = "50", search = "" } = req.query as any;
+      const take = Math.min(
+        Math.max(parseInt(limit as string, 10) || 50, 1),
+        1000
+      );
+      const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
+      const skip = (pageNum - 1) * take;
+
+      const { data, total } = await this.localService.getAllProdiLocal({
+        search: search as string,
+        skip,
+        take,
+      });
+
+      res.json({
+        message: "Berhasil mengambil daftar prodi",
+        data,
+        total,
+        page: pageNum,
+        limit: take,
+      });
+    } catch (e: any) {
+      res
+        .status(500)
+        .json({ message: "Gagal mengambil daftar prodi", error: e.message });
+    }
+  }
   // // API-based endpoints using PDDIKTI
   // async list(req: Request, res: Response) {
   //   try {
@@ -74,7 +108,7 @@ export class ProdiController {
       //   console.warn("API failed, trying local database:", apiError);
 
       // Use local database (from CSV dataset)
-      const localProdi = await localService.getProdiDetailLocal(id);
+      const localProdi = await this.localService.getProdiDetailLocal(id);
       if (localProdi) {
         res.json({
           message: "Berhasil mengambil detail prodi (dataset lokal)",
@@ -112,7 +146,7 @@ export class ProdiController {
       //   console.warn("API failed, trying local database:", apiError);
 
       // Use local database (from CSV dataset) with limit 15
-      const localData = await localService.searchProdiLocal(nama, 15);
+      const localData = await this.localService.searchProdiLocal(nama, 15);
       res.json({
         message: `Berhasil mencari prodi dengan nama: ${nama} (dataset lokal)`,
         data: localData,
