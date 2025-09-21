@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
 import Swal from "sweetalert2";
+import questionIcon from "../../assets/question-logo.png";
 
 interface Consultation {
   consultation_id: string;
@@ -122,7 +123,9 @@ const KelolaDataKonseling = () => {
         text: `Anda akan mengubah status konseling menjadi "${getStatusText(
           newStatus
         )}".`,
-        icon: "warning",
+        imageUrl: questionIcon,
+        imageWidth: 80,
+        imageHeight: 90,
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",

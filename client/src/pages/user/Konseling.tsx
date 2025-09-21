@@ -28,6 +28,7 @@ const Konseling = () => {
     } catch (error) {
       console.error("Error fetching consultations:", error);
       // You can add a toast notification here
+      // toast.error("Gagal memuat data konsultasi");
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ const Konseling = () => {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span
-                            className={`text-white text-xs px-2 py-1 rounded ${
+                            className={`text-white text-xs font-semibold px-2 py-1 rounded ${
                               consultation.status === "COMPLETED"
                                 ? "bg-green-600"
                                 : consultation.status === "ACCEPTED"
@@ -160,7 +161,7 @@ const Konseling = () => {
 
                   <div className="space-y-4">
                     <div className="border-b pb-3">
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-base font-semibold text-gray-600">
                         Status:
                       </label>
                       <p
@@ -185,7 +186,7 @@ const Konseling = () => {
                     </div>
 
                     <div className="border-b pb-3">
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-base font-semibold text-gray-600">
                         Tanggal & Waktu:
                       </label>
                       <p className="text-sm text-gray-800">
@@ -210,7 +211,7 @@ const Konseling = () => {
                     </div>
 
                     <div className="border-b pb-3">
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-base font-semibold text-gray-600">
                         Konselor:
                       </label>
                       <p className="text-sm text-gray-800">
@@ -219,7 +220,7 @@ const Konseling = () => {
                     </div>
 
                     <div className="border-b pb-3">
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-base font-semibold text-gray-600">
                         Topik:
                       </label>
                       <p className="text-sm text-gray-800">
@@ -229,7 +230,7 @@ const Konseling = () => {
 
                     {selectedConsultation.notes && (
                       <div>
-                        <label className="text-sm font-medium text-gray-600">
+                        <label className="text-base font-semibold text-gray-600">
                           Deskripsi:
                         </label>
                         <p className="text-sm text-gray-800">

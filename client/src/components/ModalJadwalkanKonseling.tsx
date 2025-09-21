@@ -14,6 +14,11 @@ import clockLogo from "../assets/icons/clock-Icon.png";
 import { consultationService } from "../services/consultationService";
 import TokenManager from "../utils/tokenManager";
 import toast from "react-hot-toast";
+import axios from "axios";
+import {
+  konselingSchema,
+  type KonselingFormData,
+} from "../schema/KonselingSchema";
 
 // Generate time slots
 const generateTimeSlots = () => {
@@ -56,6 +61,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const [endTimeOpen, setEndTimeOpen] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     message: "",
     expertName: "",
@@ -81,29 +87,26 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const fetchAdmins = async () => {
     try {
       const token = TokenManager.getToken();
-      const response = await fetch("http://localhost:5000/api/users/admins", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setAdmins(data.data);
-
-          // Set default expert to first admin if available
-          if (data.data.length > 0) {
-            setFormData((prev) => ({
-              ...prev,
-              expertName: data.data[0].user_id,
-            }));
-          }
+      const response = await axios.get(
+        "http://localhost:5000/api/users/admins",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } else {
-        console.error("Failed to fetch admins");
+      );
+
+      if (response.data.success && response.data.data) {
+        setAdmins(response.data.data);
+
+        // Set default expert to first admin if available
+        if (response.data.data.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            expertName: response.data.data[0].user_id,
+          }));
+        }
       }
     } catch (error) {
       console.error("Error fetching admins:", error);
@@ -113,20 +116,23 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
+      setErrors({}); // Clear previous errors
 
-      // Validate form data
-      if (
-        !selectedDate ||
-        !selectedTimeStart ||
-        !selectedTimeEnd ||
-        !formData.message
-      ) {
-        toast.error("Please fill in all required fields");
-        return;
-      }
+      // Prepare data for validation
+      const validationData: KonselingFormData = {
+        selectedDate: selectedDate || new Date(),
+        selectedTimeStart,
+        selectedTimeEnd,
+        message: formData.message,
+        notes: formData.notes,
+        expertName: formData.expertName,
+      };
+
+      // Validate using Yup schema
+      await konselingSchema.validate(validationData, { abortEarly: false });
 
       // Combine date and time for consultation_date
-      const consultationDateTime = new Date(selectedDate);
+      const consultationDateTime = new Date(selectedDate!);
       const [hours, minutes] = selectedTimeStart.split(":");
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
@@ -134,7 +140,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       const userData = TokenManager.getUserData();
 
       if (!userData.userId) {
-        alert("User not authenticated");
+        toast.error("User not authenticated");
         return;
       }
 
@@ -151,7 +157,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       );
 
       if (response.success) {
-        alert("Consultation scheduled successfully!");
+        toast.success("Konsultasi berhasil dijadwalkan!");
         // Reset form
         setSelectedDate(new Date());
         setSelectedTimeStart("");
@@ -161,14 +167,28 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
           expertName: admins.length > 0 ? admins[0].user_id : "",
           notes: "",
         });
+        setErrors({});
         onSuccess(); // Call parent callback to refresh data
         onClose(); // Close modal
       } else {
-        alert(response.message || "Failed to schedule consultation");
+        toast.error(response.message || "Gagal menjadwalkan konsultasi");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating consultation:", error);
-      alert("Failed to schedule consultation. Please try again.");
+
+      // Handle Yup validation errors
+      if (error.name === "ValidationError") {
+        const validationErrors: Record<string, string> = {};
+        error.inner.forEach((err: any) => {
+          if (err.path) {
+            validationErrors[err.path] = err.message;
+          }
+        });
+        setErrors(validationErrors);
+        toast.error("Mohon periksa input Anda");
+      } else {
+        toast.error("Gagal menjadwalkan konsultasi. Silakan coba lagi.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -184,6 +204,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       expertName: admins.length > 0 ? admins[0].user_id : "",
       notes: "",
     });
+    setErrors({});
     onClose();
   };
 
@@ -223,7 +244,8 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
+                    !selectedDate && "text-muted-foreground",
+                    errors.selectedDate && "border-red-500"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -241,6 +263,10 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   onSelect={(date) => {
                     setSelectedDate(date);
                     setDateOpen(false);
+                    // Clear error when user selects a date
+                    if (errors.selectedDate) {
+                      setErrors((prev) => ({ ...prev, selectedDate: "" }));
+                    }
                   }}
                   disabled={(date) => date < new Date()}
                   captionLayout="dropdown"
@@ -248,6 +274,9 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                 />
               </PopoverContent>
             </Popover>
+            {errors.selectedDate && (
+              <p className="text-red-500 text-xs mt-1">{errors.selectedDate}</p>
+            )}
           </div>
 
           {/* Time Input - Time Picker Popover */}
@@ -257,14 +286,15 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
             </label>
             <div className="flex gap-1 items-center">
               {/* Start Time */}
-              <div>
+              <div className="flex-1">
                 <Popover open={startTimeOpen} onOpenChange={setStartTimeOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !selectedTimeStart && "text-muted-foreground"
+                        !selectedTimeStart && "text-muted-foreground",
+                        errors.selectedTimeStart && "border-red-500"
                       )}
                     >
                       <Clock className="mr-2 h-4 w-4" />
@@ -283,6 +313,13 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                           onClick={() => {
                             setSelectedTimeStart(time);
                             setStartTimeOpen(false);
+                            // Clear error when user selects time
+                            if (errors.selectedTimeStart) {
+                              setErrors((prev) => ({
+                                ...prev,
+                                selectedTimeStart: "",
+                              }));
+                            }
                           }}
                           className="h-10"
                         >
@@ -295,14 +332,15 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
               </div>
               <Minus />
               {/* End Time */}
-              <div>
+              <div className="flex-1">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !selectedTimeEnd && "text-muted-foreground"
+                        !selectedTimeEnd && "text-muted-foreground",
+                        errors.selectedTimeEnd && "border-red-500"
                       )}
                     >
                       <Clock className="mr-2 h-4 w-4" />
@@ -318,7 +356,16 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                             selectedTimeEnd === time ? "default" : "outline"
                           }
                           size="sm"
-                          onClick={() => setSelectedTimeEnd(time)}
+                          onClick={() => {
+                            setSelectedTimeEnd(time);
+                            // Clear error when user selects time
+                            if (errors.selectedTimeEnd) {
+                              setErrors((prev) => ({
+                                ...prev,
+                                selectedTimeEnd: "",
+                              }));
+                            }
+                          }}
                           className="h-10"
                           disabled={
                             !!(selectedTimeStart && time <= selectedTimeStart)
@@ -332,6 +379,11 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                 </Popover>
               </div>
             </div>
+            {(errors.selectedTimeStart || errors.selectedTimeEnd) && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.selectedTimeStart || errors.selectedTimeEnd}
+              </p>
+            )}
           </div>
 
           {/* Message Textarea */}
@@ -342,22 +394,47 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
             <textarea
               name="message"
               value={formData.message}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                handleInputChange(e);
+                // Clear error when user types
+                if (errors.message) {
+                  setErrors((prev) => ({ ...prev, message: "" }));
+                }
+              }}
               rows={1}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className={cn(
+                "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none",
+                errors.message && "border-red-500"
+              )}
               placeholder="Tuliskan Topic Anda..."
             />
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            {errors.message && (
+              <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+            )}
+
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
               Deskripsi
             </label>
             <textarea
               name="notes"
               value={formData.notes}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                handleInputChange(e);
+                // Clear error when user types
+                if (errors.notes) {
+                  setErrors((prev) => ({ ...prev, notes: "" }));
+                }
+              }}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className={cn(
+                "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none",
+                errors.notes && "border-red-500"
+              )}
               placeholder="Tuliskan Deskripsi Anda..."
             />
+            {errors.notes && (
+              <p className="text-red-500 text-xs mt-1">{errors.notes}</p>
+            )}
           </div>
 
           {/* Expert Name Dropdown */}
@@ -368,8 +445,17 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
             <select
               name="expertName"
               value={formData.expertName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              onChange={(e) => {
+                handleInputChange(e);
+                // Clear error when user selects
+                if (errors.expertName) {
+                  setErrors((prev) => ({ ...prev, expertName: "" }));
+                }
+              }}
+              className={cn(
+                "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white",
+                errors.expertName && "border-red-500"
+              )}
             >
               {admins.length === 0 ? (
                 <option value="">Loading experts...</option>
@@ -386,6 +472,9 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                 </>
               )}
             </select>
+            {errors.expertName && (
+              <p className="text-red-500 text-xs mt-1">{errors.expertName}</p>
+            )}
           </div>
 
           {/* Submit Button */}

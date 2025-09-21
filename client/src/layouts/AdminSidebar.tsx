@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
 import Swal from "sweetalert2";
+import questionIcon from "../assets/question-logo.png";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -16,7 +17,9 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const handleLogout = () => {
     Swal.fire({
       title: "Yakin ingin logout?",
-      icon: "warning",
+      imageUrl: questionIcon,
+      imageWidth: 80,
+      imageHeight: 90,
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",

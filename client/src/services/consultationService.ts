@@ -1,6 +1,29 @@
+import axios from "axios";
 import TokenManager from "../utils/tokenManager";
 
 const API_BASE_URL = "http://localhost:5000/api"; // Adjust based on your server configuration
+
+// Create axios instance
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add request interceptor to include token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = TokenManager.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export interface CreateConsultationRequest {
   murid_id: string;
@@ -29,31 +52,15 @@ export interface ApiResponse<T> {
 }
 
 class ConsultationService {
-  private getAuthHeaders() {
-    const token = TokenManager.getToken();
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
   async createConsultation(
     consultationData: CreateConsultationRequest
   ): Promise<ApiResponse<Consultation>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/consultations`, {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(consultationData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create consultation");
-      }
-
-      return data;
+      const response = await axiosInstance.post(
+        "/consultations",
+        consultationData
+      );
+      return response.data;
     } catch (error) {
       console.error("Error creating consultation:", error);
       throw error;
@@ -62,18 +69,8 @@ class ConsultationService {
 
   async getConsultations(): Promise<ApiResponse<Consultation[]>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/consultations`, {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch consultations");
-      }
-
-      return data;
+      const response = await axiosInstance.get("/consultations");
+      return response.data;
     } catch (error) {
       console.error("Error fetching consultations:", error);
       throw error;
@@ -84,21 +81,10 @@ class ConsultationService {
     status: string
   ): Promise<ApiResponse<Consultation[]>> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/consultations/status/${status}`,
-        {
-          method: "GET",
-          headers: this.getAuthHeaders(),
-        }
+      const response = await axiosInstance.get(
+        `/consultations/status/${status}`
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch consultations");
-      }
-
-      return data;
+      return response.data;
     } catch (error) {
       console.error("Error fetching consultations by status:", error);
       throw error;
