@@ -282,6 +282,8 @@ export class ChatService {
                   messages: {
                     where: {
                       is_read: false,
+                      // unread kalau dikirim murid (bukan admin)
+                      sender: { role: "STUDENT" },
                     },
                   },
                 },

@@ -3,7 +3,6 @@ import {
   Search,
   Send,
   MessageCircle,
-  Clock,
   Phone,
   Video,
   MoreVertical,
@@ -19,9 +18,9 @@ interface ChatUser {
   kelas: number | null;
   lastMessage?: string;
   lastMessageTime?: string;
-  unreadCount?: number;
   room_id?: string;
   consultation_id?: string;
+  unreadCount?: number;
 }
 
 interface ChatMessage {
@@ -30,7 +29,7 @@ interface ChatMessage {
   senderId: string;
   senderName: string;
   timestamp: string;
-  isFromAdmin: boolean;
+  isFromAdmin: boolean; // retained because backend still returns it, but not used for alignment
 }
 
 const KelolaLiveChat = () => {
@@ -41,8 +40,10 @@ const KelolaLiveChat = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const API_URL = import.meta.env.VITE_API_URL;
+  const currentUserId = TokenManager.getUserData().userId || "";
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -96,6 +97,7 @@ const KelolaLiveChat = () => {
   // Fetch chat messages for selected user
   const fetchChatMessages = async (userId: string) => {
     try {
+      setMessagesLoading(true);
       const token = TokenManager.getToken();
 
       // First, find the user's consultation to get consultation_id
@@ -136,6 +138,9 @@ const KelolaLiveChat = () => {
             setChatMessages([]);
           }
 
+          // Setelah pesan berhasil di-load, reset unreadCount user tsb (supaya dot merah hilang)
+          setChatUsers(prev => prev.map(u => u.user_id === selectedUserData.user_id ? { ...u, unreadCount: 0 } : u));
+
           // Update the selected user with room_id
           setSelectedUser((prev) =>
             prev ? { ...prev, room_id: roomId } : null
@@ -171,19 +176,16 @@ const KelolaLiveChat = () => {
           isFromAdmin: true,
         },
       ]);
+    } finally {
+      setMessagesLoading(false);
     }
   };
 
   const handleUserSelect = (user: ChatUser) => {
+    // Optimistic: set selectedUser & kosongkan unread (dot langsung hilang) sebelum fetch
     setSelectedUser(user);
+    setChatUsers(prev => prev.map(u => u.user_id === user.user_id ? { ...u, unreadCount: 0 } : u));
     fetchChatMessages(user.user_id);
-
-    // Mark messages as read
-    setChatUsers((prev) =>
-      prev.map((u) =>
-        u.user_id === user.user_id ? { ...u, unreadCount: 0 } : u
-      )
-    );
   };
 
   const handleSendMessage = async () => {
@@ -244,7 +246,8 @@ const KelolaLiveChat = () => {
                 ? {
                     ...user,
                     lastMessage: newMessage,
-                    lastMessageTime: "Baru saja",
+                    // Simpan dalam bentuk ISO agar formatter bisa bekerja dengan benar
+                    lastMessageTime: new Date().toISOString(),
                   }
                 : user
             )
@@ -277,6 +280,23 @@ const KelolaLiveChat = () => {
     }
   };
 
+  // Placeholder: jika nanti ada realtime, panggil fungsi ini ketika pesan baru dari murid diterima.
+  const handleIncomingMessageFromStudent = (roomId: string, message: ChatMessage) => {
+    // Jika bukan chat yang sedang dibuka, tambah unread
+    if (!selectedUser || selectedUser.room_id !== roomId) {
+      setChatUsers(prev => prev.map(u => u.room_id === roomId ? { ...u, unreadCount: (u.unreadCount || 0) + 1, lastMessage: message.message, lastMessageTime: new Date().toISOString() } : u));
+    } else {
+      // Sedang dibuka, langsung append ke messages
+      setChatMessages(prev => [...prev, message]);
+      // Update last message display
+      setChatUsers(prev => prev.map(u => u.room_id === roomId ? { ...u, lastMessage: message.message, lastMessageTime: new Date().toISOString() } : u));
+    }
+  };
+
+  // NOTE: handleIncomingMessageFromStudent akan dipakai saat implementasi realtime (Socket.io)
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  void handleIncomingMessageFromStudent; // hindari unused warning tanpa deklarasi variabel
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -292,11 +312,36 @@ const KelolaLiveChat = () => {
       (user.kelas && user.kelas.toString().includes(searchTerm))
   );
 
+  const isValidDate = (d: Date) => !isNaN(d.getTime());
+
   const formatTime = (timestamp: string) => {
+    if (!timestamp) return "";
     const date = new Date(timestamp);
+    if (!isValidDate(date)) return "";
     return date.toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
+    });
+  };
+
+  const formatLastMessageTime = (timestamp?: string) => {
+    if (!timestamp) return "";
+    const messageDate = new Date(timestamp);
+    if (!isValidDate(messageDate)) return ""; // Hindari Invalid Date
+    const now = new Date();
+    const diffInMinutes = Math.floor(
+      (now.getTime() - messageDate.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return "Baru saja";
+    if (diffInMinutes < 60) return `${diffInMinutes} menit lalu`;
+    if (diffInMinutes < 1440)
+      return `${Math.floor(diffInMinutes / 60)} jam lalu`;
+
+    // Jika lebih dari 1 hari, tampilkan tanggal (dd Mon)
+    return messageDate.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
     });
   };
 
@@ -395,12 +440,14 @@ const KelolaLiveChat = () => {
                             {user.user_id}
                           </span>
                         )}
+                        {typeof user.unreadCount === 'number' && user.unreadCount > 0 && (
+                          <span
+                            className="ml-2 inline-block w-3 h-3 rounded-full bg-red-500"
+                            title="Pesan baru dari siswa"
+                            aria-label="Pesan baru dari siswa"
+                          />
+                        )}
                       </h3>
-                      {user.unreadCount && user.unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                          {user.unreadCount}
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600">
@@ -408,7 +455,7 @@ const KelolaLiveChat = () => {
                       </p>
                       {user.lastMessageTime && (
                         <span className="text-xs text-gray-400">
-                          {user.lastMessageTime}
+                          {formatLastMessageTime(user.lastMessageTime)}
                         </span>
                       )}
                     </div>
@@ -471,38 +518,57 @@ const KelolaLiveChat = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {chatMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.isFromAdmin ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[70%] ${
-                      message.isFromAdmin ? "order-2" : "order-1"
-                    }`}
-                  >
-                    <div
-                      className={`p-3 rounded-lg ${
-                        message.isFromAdmin
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      <p className="text-sm">{message.message}</p>
+              {messagesLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex gap-2">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse" />
+                      </div>
                     </div>
-                    <div
-                      className={`flex items-center mt-1 text-xs text-gray-500 ${
-                        message.isFromAdmin ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <Clock size={12} className="mr-1" />
-                      {formatTime(message.timestamp)}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                chatMessages.map((message) => {
+                  // Fallback alignment: jika senderId kosong / tidak cocok & flag isFromAdmin true, anggap milik admin
+                  const isMine = message.senderId
+                    ? message.senderId === currentUserId
+                    : message.isFromAdmin;
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        isMine ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[70%] ${
+                          isMine ? "order-2" : "order-1"
+                        }`}
+                      >
+                        <div
+                          className={`p-3 rounded-lg ${
+                            isMine
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-200 text-gray-800"
+                          }`}
+                        >
+                          <p className="text-sm">{message.message}</p>
+                        </div>
+                        <div
+                          className={`flex items-center mt-1 text-xs text-gray-500 ${
+                            isMine ? "justify-end" : "justify-start"
+                          }`}
+                        >
+                          {formatTime(message.timestamp)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
               <div ref={messagesEndRef} />
             </div>
 
