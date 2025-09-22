@@ -1,0 +1,176 @@
+import { Request, Response } from "express";
+import { ChatService } from "../services/chatService";
+
+export class ChatController {
+  private chatService: ChatService;
+
+  constructor() {
+    this.chatService = new ChatService();
+  }
+
+  // Get chat users for admin (students with accepted consultations)
+  async getChatUsers(req: Request, res: Response) {
+    try {
+      const students =
+        await this.chatService.getStudentsWithAcceptedConsultations();
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil data chat users",
+        data: students,
+        count: students.length,
+      });
+    } catch (error: any) {
+      console.error("Error in getChatUsers:", error);
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || "Terjadi kesalahan saat mengambil data chat users",
+      });
+    }
+  }
+
+  // Get or create chat room for a consultation
+  async getChatRoom(req: Request, res: Response) {
+    try {
+      const { consultationId } = req.params;
+
+      if (!consultationId) {
+        return res.status(400).json({
+          success: false,
+          message: "Consultation ID is required",
+        });
+      }
+
+      const chatRoom = await this.chatService.getOrCreateChatRoom(
+        consultationId
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil chat room",
+        data: chatRoom,
+      });
+    } catch (error: any) {
+      console.error("Error in getChatRoom:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengambil chat room",
+      });
+    }
+  }
+
+  // Get chat messages for a room
+  async getChatMessages(req: Request, res: Response) {
+    try {
+      const { roomId } = req.params;
+      const userId = req.user?.user_id;
+
+      if (!roomId) {
+        return res.status(400).json({
+          success: false,
+          message: "Room ID is required",
+        });
+      }
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
+      const messages = await this.chatService.getChatMessages(roomId, userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil pesan chat",
+        data: messages,
+        count: messages.length,
+      });
+    } catch (error: any) {
+      console.error("Error in getChatMessages:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengambil pesan chat",
+      });
+    }
+  }
+
+  // Send a new message
+  async sendMessage(req: Request, res: Response) {
+    try {
+      const { roomId } = req.params;
+      const { message } = req.body;
+      const userId = req.user?.user_id;
+
+      if (!roomId) {
+        return res.status(400).json({
+          success: false,
+          message: "Room ID is required",
+        });
+      }
+
+      if (!message || !message.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Message is required",
+        });
+      }
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
+      const newMessage = await this.chatService.sendMessage(
+        roomId,
+        userId,
+        message
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: "Pesan berhasil dikirim",
+        data: newMessage,
+      });
+    } catch (error: any) {
+      console.error("Error in sendMessage:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengirim pesan",
+      });
+    }
+  }
+
+  // Get chat rooms for admin
+  async getAdminChatRooms(req: Request, res: Response) {
+    try {
+      const userId = req.user?.user_id;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
+      const chatRooms = await this.chatService.getChatRoomsForAdmin(userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil chat rooms",
+        data: chatRooms,
+        count: chatRooms.length,
+      });
+    } catch (error: any) {
+      console.error("Error in getAdminChatRooms:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengambil chat rooms",
+      });
+    }
+  }
+}

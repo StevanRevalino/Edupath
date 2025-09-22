@@ -312,12 +312,12 @@ const KelolaDataKonseling = () => {
                         </div>
 
                         <div>
-                          <div className="text-sm text-gray-900">
+                          <div className="text-sm text-gray-900 tex-wrap overflow-hidden text-ellipsis">
                             {consultation.topic}
                           </div>
                           {consultation.notes && (
                             <div
-                              className="text-sm text-gray-500 mt-1 max-w-[200px]"
+                              className="text-sm text-gray-500 mt-1 max-w-[200px] text-wrap overflow-hidden text-ellipsis"
                               title={consultation.notes}
                             >
                               {consultation.notes}

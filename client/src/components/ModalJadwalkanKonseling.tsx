@@ -263,7 +263,6 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   onSelect={(date) => {
                     setSelectedDate(date);
                     setDateOpen(false);
-                    // Clear error when user selects a date
                     if (errors.selectedDate) {
                       setErrors((prev) => ({ ...prev, selectedDate: "" }));
                     }

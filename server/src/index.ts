@@ -6,6 +6,7 @@ import universitasRoutes from "./routes/universitasRoutes";
 import prodiRoutes from "./routes/prodiRoutes";
 import consultationRoutes from "./routes/consultationRoutes";
 import userRoutes from "./routes/userRoutes";
+import chatRoutes from "./routes/chatRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
@@ -44,6 +45,7 @@ app.use("/api/universitas", universitasRoutes);
 app.use("/api/prodi", prodiRoutes);
 app.use("/api/consultations", consultationRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/chat", chatRoutes);
 
 const PORT = 5000;
 

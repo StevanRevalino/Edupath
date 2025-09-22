@@ -20,6 +20,7 @@ interface ChatUser {
   lastMessage?: string;
   lastMessageTime?: string;
   unreadCount?: number;
+  room_id?: string;
 }
 
 interface ChatMessage {
@@ -58,29 +59,15 @@ const KelolaLiveChat = () => {
         setLoading(true);
         const token = TokenManager.getToken();
 
-        // Fetch students with accepted consultations
-        const response = await axios.get(
-          `${API_URL}/api/consultations/accepted-students`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        // Use the new chat endpoint
+        const response = await axios.get(`${API_URL}/api/chat/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-        // Transform the data to match our ChatUser interface
-        const students = response.data.data.map((student: any) => ({
-          user_id: student.user_id,
-          firstname: student.firstname,
-          lastname: student.lastname,
-          kelas: student.kelas,
-          lastMessage: `Konseling tentang: ${student.latestConsultationTopic}`,
-          lastMessageTime: "Baru saja",
-          unreadCount: 0,
-        }));
-
-        setChatUsers(students);
+        setChatUsers(response.data.data);
       } catch (error) {
         console.error("Error fetching chat users:", error);
         if (axios.isAxiosError(error)) {
@@ -108,79 +95,54 @@ const KelolaLiveChat = () => {
   // Fetch chat messages for selected user
   const fetchChatMessages = async (userId: string) => {
     try {
-      let mockMessages: ChatMessage[] = [];
+      const token = TokenManager.getToken();
+      
+      // First, find the user's consultation to get room_id
+      const selectedUserData = chatUsers.find(user => user.user_id === userId);
+      
+      if (selectedUserData && selectedUserData.room_id) {
+        // Fetch messages from the chat room
+        const response = await axios.get(
+          `${API_URL}/api/chat/messages/${selectedUserData.room_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      // Special conversation history for US005 with BK001
-      if (userId === "US005") {
-        mockMessages = [
-          {
-            id: "1",
-            message:
-              "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
-            senderId: "BK001",
-            senderName: "Ibu Sarah (BK001)",
-            timestamp: "2024-01-15T09:00:00Z",
-            isFromAdmin: true,
-          },
-          {
-            id: "2",
-            message: "Halo Bu, saya butuh bantuan untuk memilih jurusan kuliah",
-            senderId: userId,
-            senderName: selectedUser
-              ? `${selectedUser.firstname} ${selectedUser.lastname}`
-              : "Student",
-            timestamp: "2024-01-15T09:02:00Z",
-            isFromAdmin: false,
-          },
-          {
-            id: "3",
-            message:
-              "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
-            senderId: "BK001",
-            senderName: "Ibu Sarah (BK001)",
-            timestamp: "2024-01-15T09:03:00Z",
-            isFromAdmin: true,
-          },
-          {
-            id: "4",
-            message:
-              "Saya kelas 12 Bu, suka matematika dan komputer. Tapi masih bingung antara teknik informatika atau sistem informasi",
-            senderId: userId,
-            senderName: selectedUser
-              ? `${selectedUser.firstname} ${selectedUser.lastname}`
-              : "Student",
-            timestamp: "2024-01-15T09:05:00Z",
-            isFromAdmin: false,
-          },
-        ];
+        if (response.data.success) {
+          setChatMessages(response.data.data);
+        }
       } else {
-        // Default conversation for other students
-        mockMessages = [
+        // If no room_id, show empty chat or create default messages
+        setChatMessages([
           {
             id: "1",
-            message: "Halo Bu, ada yang ingin saya tanyakan",
-            senderId: userId,
-            senderName: selectedUser
-              ? `${selectedUser.firstname} ${selectedUser.lastname}`
-              : "Student",
-            timestamp: "2024-01-15T09:30:00Z",
-            isFromAdmin: false,
-          },
-          {
-            id: "2",
-            message: "Halo! Tentu, saya Ibu Sarah. Ada yang bisa saya bantu?",
+            message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
             senderId: "BK001",
             senderName: "Ibu Sarah (BK001)",
-            timestamp: "2024-01-15T09:32:00Z",
+            timestamp: new Date().toISOString(),
             isFromAdmin: true,
           },
-        ];
+        ]);
       }
-
-      setChatMessages(mockMessages);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       toast.error("Gagal mengambil pesan chat");
+      
+      // Fallback to mock messages
+      setChatMessages([
+        {
+          id: "1",
+          message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
+          senderId: "BK001",
+          senderName: "Ibu Sarah (BK001)",
+          timestamp: new Date().toISOString(),
+          isFromAdmin: true,
+        },
+      ]);
     }
   };
 
@@ -201,39 +163,69 @@ const KelolaLiveChat = () => {
 
     setSendingMessage(true);
     try {
-      // BK001 (Ibu Sarah) sending message to student
-      const bkMessage: ChatMessage = {
-        id: Date.now().toString(),
-        message: newMessage,
-        senderId: "BK001",
-        senderName: "Ibu Sarah (BK001)",
-        timestamp: new Date().toISOString(),
-        isFromAdmin: true,
-      };
+      const token = TokenManager.getToken();
+      const selectedUserData = chatUsers.find(user => user.user_id === selectedUser.user_id);
+      
+      if (selectedUserData && selectedUserData.room_id) {
+        // Send message via API
+        const response = await axios.post(
+          `${API_URL}/api/chat/messages/${selectedUserData.room_id}`,
+          {
+            message: newMessage,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      setChatMessages((prev) => [...prev, bkMessage]);
-      setNewMessage("");
+        if (response.data.success) {
+          // Add the new message to the chat
+          setChatMessages((prev) => [...prev, response.data.data]);
+          setNewMessage("");
 
-      // Update last message in chat users list
-      setChatUsers((prev) =>
-        prev.map((user) =>
-          user.user_id === selectedUser.user_id
-            ? {
-                ...user,
-                lastMessage: newMessage,
-                lastMessageTime: "Baru saja",
-              }
-            : user
-        )
-      );
+          // Update last message in chat users list
+          setChatUsers((prev) =>
+            prev.map((user) =>
+              user.user_id === selectedUser.user_id
+                ? {
+                    ...user,
+                    lastMessage: newMessage,
+                    lastMessageTime: "Baru saja",
+                  }
+                : user
+            )
+          );
+        }
+      } else {
+        // Fallback to local state if no room_id
+        const bkMessage: ChatMessage = {
+          id: Date.now().toString(),
+          message: newMessage,
+          senderId: "BK001",
+          senderName: "Ibu Sarah (BK001)",
+          timestamp: new Date().toISOString(),
+          isFromAdmin: true,
+        };
 
-      // Show specific message for US005
-      const toastMessage =
-        selectedUser.user_id === "US005"
-          ? "Pesan terkirim ke US005"
-          : "Pesan terkirim";
+        setChatMessages((prev) => [...prev, bkMessage]);
+        setNewMessage("");
 
-      toast.success(toastMessage);
+        // Update last message in chat users list
+        setChatUsers((prev) =>
+          prev.map((user) =>
+            user.user_id === selectedUser.user_id
+              ? {
+                  ...user,
+                  lastMessage: newMessage,
+                  lastMessageTime: "Baru saja",
+                }
+              : user
+          )
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Gagal mengirim pesan");

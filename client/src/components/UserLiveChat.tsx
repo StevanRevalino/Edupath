@@ -138,8 +138,6 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
           setUnreadCount((prev) => prev + 1);
         }
       }, 2000 + Math.random() * 1000); // 2-3 seconds delay
-
-      toast.success("Pesan terkirim ke Ibu Sarah");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Gagal mengirim pesan");

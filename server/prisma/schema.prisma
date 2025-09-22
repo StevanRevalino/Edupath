@@ -23,16 +23,23 @@ enum Role {
 }
 
 model User {
-  user_id              String          @id
-  firstname            String
-  lastname             String
-  email                String          @unique
-  password             String
-  role                 Role            @default(STUDENT)
-  kelas                Int?
-  created_at           DateTime        @default(now())
-  consultationsAsMurid Consultation[]  @relation("ConsultationMurid")
-  consultationsAsAdmin Consultation[]  @relation("ConsultationAdmin")
+  user_id    String   @id
+  firstname  String
+  lastname   String
+  email      String   @unique
+  password   String
+  role       Role     @default(STUDENT)
+  kelas      Int?
+  created_at DateTime @default(now())
+
+  // Consultation relationships
+  consultationsAsMurid Consultation[] @relation("ConsultationMurid")
+  consultationsAsAdmin Consultation[] @relation("ConsultationAdmin")
+
+  // Chat relationships
+  chatRoomsAsMurid ChatRoom[]    @relation("ChatRoomMurid")
+  chatRoomsAsAdmin ChatRoom[]    @relation("ChatRoomAdmin")
+  sentMessages     ChatMessage[] @relation("ChatMessageSender")
 }
 
 model Universitas {
@@ -92,6 +99,7 @@ enum ConsultationStatus {
   PENDING
   ACCEPTED
   DECLINED
+  COMPLETED
 }
 
 model Consultation {
@@ -107,8 +115,50 @@ model Consultation {
   murid User @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
   admin User @relation("ConsultationAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
 
+  // Relationship to chat room
+  chatRoom ChatRoom?
+
   @@index([murid_id])
   @@index([admin_id])
   @@index([status])
   @@index([consultation_date])
+}
+
+// Chat Room model - represents a conversation between a student and admin
+model ChatRoom {
+  room_id         String   @id @default(cuid())
+  consultation_id String   @unique
+  murid_id        String
+  admin_id        String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relationships
+  consultation Consultation  @relation(fields: [consultation_id], references: [consultation_id], onDelete: Cascade)
+  murid        User          @relation("ChatRoomMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
+  admin        User          @relation("ChatRoomAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
+  messages     ChatMessage[]
+
+  @@index([murid_id])
+  @@index([admin_id])
+  @@index([is_active])
+}
+
+// Chat Message model - individual messages in a chat room
+model ChatMessage {
+  message_id String   @id @default(cuid())
+  room_id    String
+  sender_id  String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  // Relationships
+  chatRoom ChatRoom @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+  sender   User     @relation("ChatMessageSender", fields: [sender_id], references: [user_id], onDelete: Cascade)
+
+  @@index([room_id])
+  @@index([sender_id])
+  @@index([created_at])
 }
