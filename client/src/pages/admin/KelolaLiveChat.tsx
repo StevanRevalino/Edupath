@@ -96,10 +96,12 @@ const KelolaLiveChat = () => {
   const fetchChatMessages = async (userId: string) => {
     try {
       const token = TokenManager.getToken();
-      
+
       // First, find the user's consultation to get room_id
-      const selectedUserData = chatUsers.find(user => user.user_id === userId);
-      
+      const selectedUserData = chatUsers.find(
+        (user) => user.user_id === userId
+      );
+
       if (selectedUserData && selectedUserData.room_id) {
         // Fetch messages from the chat room
         const response = await axios.get(
@@ -120,7 +122,8 @@ const KelolaLiveChat = () => {
         setChatMessages([
           {
             id: "1",
-            message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
+            message:
+              "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
             senderId: "BK001",
             senderName: "Ibu Sarah (BK001)",
             timestamp: new Date().toISOString(),
@@ -131,12 +134,13 @@ const KelolaLiveChat = () => {
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       toast.error("Gagal mengambil pesan chat");
-      
+
       // Fallback to mock messages
       setChatMessages([
         {
           id: "1",
-          message: "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
+          message:
+            "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
           senderId: "BK001",
           senderName: "Ibu Sarah (BK001)",
           timestamp: new Date().toISOString(),
@@ -164,8 +168,10 @@ const KelolaLiveChat = () => {
     setSendingMessage(true);
     try {
       const token = TokenManager.getToken();
-      const selectedUserData = chatUsers.find(user => user.user_id === selectedUser.user_id);
-      
+      const selectedUserData = chatUsers.find(
+        (user) => user.user_id === selectedUser.user_id
+      );
+
       if (selectedUserData && selectedUserData.room_id) {
         // Send message via API
         const response = await axios.post(
