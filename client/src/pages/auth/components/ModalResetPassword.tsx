@@ -3,12 +3,12 @@ import { useRef, useState } from "react";
 import {
   resetPasswordSchema,
   emailSchema,
-} from "../schema/ResetPasswordSchema";
+} from "../../../schema/ResetPasswordSchema";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
-import warningLogo from "../assets/warning-logo.png";
+import warningLogo from "../../../assets/warning-logo.png";
 import axios from "axios";
 
 interface Props {

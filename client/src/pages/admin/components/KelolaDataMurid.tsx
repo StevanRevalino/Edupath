@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { X, Trash2 } from "lucide-react";
-import TokenManager from "../../utils/tokenManager";
+import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
-import questionIcon from "../../assets/question-logo.png";
-import warningIcon from "../../assets/warning-logo.png";
+import questionIcon from "../../../assets/question-logo.png";
+import warningIcon from "../../../assets/warning-logo.png";
+import PageHeader from "../../../components/PageHeader";
+import SearchFilterBar from "../../../components/SearchFilterBar";
+import DataTableContainer from "../../../components/DataTableContainer";
 
 interface Student {
   user_id: string;
@@ -271,218 +274,184 @@ const KelolaDataMurid = () => {
   return (
     <>
       <div className="max-h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
-        <div className="mb-6 flex-shrink-0">
-          <h1 className="text-3xl font-bold mb-2">Kelola Data Murid</h1>
-          <p className="text-gray-600">
-            Kelola data murid yang sudah terdaftar di EduPath.
-          </p>
-        </div>
+        <PageHeader
+          title="Kelola Data Murid"
+          description="Kelola data murid yang sudah terdaftar di EduPath."
+          className="mb-6"
+        />
 
-        {/* Search and Filter Section */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6 flex-shrink-0">
-          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cari Murid
-              </label>
-              <input
-                type="text"
-                placeholder="Cari berdasarkan nama atau email..."
-                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="lg:w-48">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter Kelas
-              </label>
-              <select
-                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
-                value={selectedKelas}
-                onChange={(e) => setSelectedKelas(e.target.value)}
-              >
-                <option value="all">Semua Kelas</option>
-                {kelasOptions.map((kelas) => (
-                  <option key={kelas} value={kelas}>
-                    Kelas {kelas}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+        <SearchFilterBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Cari berdasarkan nama atau email..."
+          filterValue={selectedKelas}
+          onFilterChange={setSelectedKelas}
+          filterLabel="Filter Kelas"
+          filterWidth="lg:w-48"
+          filterOptions={[
+            { value: "all", label: "Semua Kelas" },
+            ...kelasOptions.map((kelas) => ({
+              value: kelas,
+              label: `Kelas ${kelas}`,
+            })),
+          ]}
+          className="mb-4 sm:mb-6"
+        />
 
-        {/* Students Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-20rem)] sm:max-h-[calc(100vh-24rem)] flex flex-col">
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex-shrink-0">
-            <h2 className="text-lg font-semibold">
-              Data Murid ({filteredStudents.length})
-            </h2>
-          </div>
-
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <p className="mt-2 text-gray-600">Memuat data...</p>
-              </div>
+        <DataTableContainer
+          title="Data Murid"
+          count={filteredStudents.length}
+          loading={loading}
+        >
+          {/* Desktop Table View - Hidden on Mobile */}
+          <div className="hidden lg:flex flex-col overflow-hidden">
+            {/* Header - Fixed */}
+            <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
+              <div>Nama</div>
+              <div>Kelas</div>
+              <div>Email</div>
+              <div>Tanggal Daftar</div>
+              <div>Action</div>
             </div>
-          ) : (
-            <div className="flex flex-col overflow-hidden">
-              {/* Desktop Table View - Hidden on Mobile */}
-              <div className="hidden lg:flex flex-col overflow-hidden">
-                {/* Header - Fixed */}
-                <div className="bg-gray-50 grid grid-cols-5 gap-4 px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider flex-shrink-0 border-b border-gray-200">
-                  <div>Nama</div>
-                  <div>Kelas</div>
-                  <div>Email</div>
-                  <div>Tanggal Daftar</div>
-                  <div>Action</div>
+
+            {/* Data Rows - Scrollable */}
+            <div className="overflow-y-auto">
+              {filteredStudents.length === 0 ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="text-center text-gray-500">
+                    Tidak ada data.
+                  </div>
                 </div>
+              ) : (
+                <div className="bg-white">
+                  {filteredStudents.map((student) => (
+                    <div
+                      key={student.user_id}
+                      className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
+                    >
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[#050051] font-bold">
+                            {(student.firstname || "N/A")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="ml-3 min-w-0">
+                          <div className="text-md font-semibold text-gray-900">
+                            {`${student.firstname || ""} ${
+                              student.lastname || ""
+                            }`.trim() || "N/A"}
+                          </div>
+                        </div>
+                      </div>
 
-                {/* Data Rows - Scrollable */}
-                <div className="overflow-y-auto">
-                  {filteredStudents.length === 0 ? (
-                    <div className="flex items-center justify-center h-32">
-                      <div className="text-center text-gray-500">
-                        Tidak ada data.
+                      <div>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getKelasColor(
+                            student.kelas
+                          )}`}
+                        >
+                          {student.kelas
+                            ? `Kelas ${student.kelas}`
+                            : "Belum diatur"}
+                        </span>
+                      </div>
+
+                      <div className="text-sm text-gray-500">
+                        <span
+                          className="truncate block max-w-[200px]"
+                          title={student.email || "N/A"}
+                        >
+                          {student.email || "N/A"}
+                        </span>
+                      </div>
+
+                      <div className="text-sm text-gray-500">
+                        {new Date(student.created_at).toLocaleDateString(
+                          "id-ID"
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => handleEdit(student.user_id)}
+                          className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                        >
+                          <span>Edit</span>
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="bg-white">
-                      {filteredStudents.map((student) => (
-                        <div
-                          key={student.user_id}
-                          className="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 items-center"
-                        >
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-[#050051] font-bold">
-                                {(student.firstname || "N/A")
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="ml-3 min-w-0">
-                              <div className="text-md font-semibold text-gray-900">
-                                {`${student.firstname || ""} ${
-                                  student.lastname || ""
-                                }`.trim() || "N/A"}
-                              </div>
-                            </div>
-                          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-                          <div>
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getKelasColor(
-                                student.kelas
-                              )}`}
-                            >
-                              {student.kelas
-                                ? `Kelas ${student.kelas}`
-                                : "Belum diatur"}
-                            </span>
+          {/* Mobile Card View - Hidden on Desktop */}
+          <div className="lg:hidden overflow-y-auto">
+            {filteredStudents.length === 0 ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-center text-gray-500">Tidak ada data.</div>
+              </div>
+            ) : (
+              <div className="p-4 space-y-4">
+                {filteredStudents.map((student) => (
+                  <div
+                    key={student.user_id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[#050051] font-bold text-lg">
+                            {(student.firstname || "N/A")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="ml-3 min-w-0 flex-1">
+                          <div className="text-lg font-semibold text-gray-900">
+                            {`${student.firstname || ""} ${
+                              student.lastname || ""
+                            }`.trim() || "N/A"}
                           </div>
-
-                          <div className="text-sm text-gray-500">
-                            <span
-                              className="truncate block max-w-[200px]"
-                              title={student.email || "N/A"}
-                            >
-                              {student.email || "N/A"}
-                            </span>
-                          </div>
-
                           <div className="text-sm text-gray-500">
                             {new Date(student.created_at).toLocaleDateString(
                               "id-ID"
                             )}
                           </div>
-
-                          <div className="flex items-center space-x-3">
-                            <button
-                              onClick={() => handleEdit(student.user_id)}
-                              className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
-                            >
-                              <span>Edit</span>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Mobile Card View - Hidden on Desktop */}
-              <div className="lg:hidden overflow-y-auto">
-                {filteredStudents.length === 0 ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="text-center text-gray-500">
-                      Tidak ada data.
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 space-y-4">
-                    {filteredStudents.map((student) => (
-                      <div
-                        key={student.user_id}
-                        className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div className="w-12 h-12 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-[#050051] font-bold text-lg">
-                                {(student.firstname || "N/A")
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="ml-3 min-w-0 flex-1">
-                              <div className="text-lg font-semibold text-gray-900">
-                                {`${student.firstname || ""} ${
-                                  student.lastname || ""
-                                }`.trim() || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {new Date(
-                                  student.created_at
-                                ).toLocaleDateString("id-ID")}
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleEdit(student.user_id)}
-                            className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
-                          >
-                            <span>Edit</span>
-                          </button>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium w-fit ${getKelasColor(
-                              student.kelas
-                            )}`}
-                          >
-                            {student.kelas
-                              ? `Kelas ${student.kelas}`
-                              : "Belum diatur"}
-                          </span>
-
-                          <div className="text-sm text-gray-500 break-all">
-                            {student.email || "N/A"}
-                          </div>
                         </div>
                       </div>
-                    ))}
+                      <button
+                        onClick={() => handleEdit(student.user_id)}
+                        className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                      >
+                        <span>Edit</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium w-fit ${getKelasColor(
+                          student.kelas
+                        )}`}
+                      >
+                        {student.kelas
+                          ? `Kelas ${student.kelas}`
+                          : "Belum diatur"}
+                      </span>
+
+                      <div className="text-sm text-gray-500 break-all">
+                        {student.email || "N/A"}
+                      </div>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </DataTableContainer>
       </div>
 
       {/* Modal Edit Student - Responsive */}

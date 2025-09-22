@@ -51,6 +51,13 @@ router.get(
   )
 );
 
+// Get consultation by ID
+router.get(
+  "/:id",
+  authenticateToken,
+  consultationController.getConsultationById.bind(consultationController)
+);
+
 // Update consultation status (accept/decline)
 router.patch(
   "/:id/status",

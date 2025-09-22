@@ -8,7 +8,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import axios from "axios";
-import TokenManager from "../../utils/tokenManager";
+import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 
 interface ChatUser {

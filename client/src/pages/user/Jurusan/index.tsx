@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import TokenManager from "../../utils/tokenManager";
+import TokenManager from "../../../utils/tokenManager";
 
 type ProdiItem = {
   prodi_id: string;

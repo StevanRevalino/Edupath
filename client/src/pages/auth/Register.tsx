@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, Eye, EyeOff } from "lucide-react";
-import OtpModal from "../../components/ModalVerifyOtp";
+import OtpModal from "./components/ModalVerifyOtp";
 import DropdownList from "../../components/DropDownList";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
-import loginBackground from "../../assets/login-background.png";
+import AuthLayout from "../../components/AuthLayout";
+import AuthInput from "../../components/AuthInput";
+import AuthEmailInput from "../../components/AuthEmailInput";
+import AuthPasswordInput from "../../components/AuthPasswordInput";
+import AuthButton from "../../components/AuthButton";
 
 type OptionType = {
   value: string | number;
@@ -21,7 +24,6 @@ export default function Register() {
   const [showModal, setShowModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [timer, setTimer] = useState(30);
-  const [submitted, setSubmitted] = useState(false);
   const kelasOptions = [
     { value: "10", label: "Kelas 10" },
     { value: "11", label: "Kelas 11" },
@@ -34,8 +36,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isFormValid =
     firstName.trim() !== "" &&
@@ -50,7 +50,6 @@ export default function Register() {
     isVerified;
 
   const handleRegisterSubmit = async () => {
-    setSubmitted(true);
     setErrors({});
 
     const formData = {
@@ -220,240 +219,141 @@ export default function Register() {
   }, [timer]);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
-      {/* Kiri: Logo */}
-      <div className="hidden lg:flex w-1/2 items-center justify-center">
-        <img
-          src={loginBackground}
-          alt="Login Background"
-          className="w-full h-full object-cover"
+    <AuthLayout
+      title="Create an account"
+      subtitle="Yuk, jadi anggota EduFamily!"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleRegisterSubmit();
+        }
+      }}
+    >
+      {/* First & Last Name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <AuthInput
+          placeholder="Nama awal"
+          value={firstName}
+          onChange={(e) => {
+            setFirstName(e.target.value);
+            if (errors.firstName) {
+              setErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors.firstName;
+                return newErrors;
+              });
+            }
+          }}
+          error={errors.firstName}
+        />
+        <AuthInput
+          placeholder="Nama akhir"
+          value={lastName}
+          onChange={(e) => {
+            setLastName(e.target.value);
+            if (errors.lastName) {
+              setErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors.lastName;
+                return newErrors;
+              });
+            }
+          }}
+          error={errors.lastName}
         />
       </div>
 
-      {/* Kanan: Form */}
-      <div
-        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-30 min-h-screen lg:min-h-auto"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleRegisterSubmit();
+      {/* Kelas */}
+      <DropdownList
+        options={kelasOptions}
+        value={kelas}
+        onChange={(option) => {
+          setKelas(option);
+          if (errors.kelas) {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors.kelas;
+              return newErrors;
+            });
           }
         }}
-      >
-        <div className="w-full mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-bold text-center mb-2">
-            Create an account
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl mb-2 text-gray-900 text-center">
-            Yuk, jadi anggota EduFamily!
-          </p>
-        </div>
+        placeholder="Kelas"
+        error={errors.kelas}
+        className="outline-none"
+      />
 
-        {/* Form */}
-        <div className="w-full flex flex-col gap-4 sm:gap-5 bg-[#f5f5f5] px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
-          {/* First & Last Name */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <input
-                type="text"
-                placeholder="Nama awal"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={firstName}
-                onChange={(e) => {
-                  setFirstName(e.target.value);
-                  if (errors.firstName) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.firstName;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
-              {errors.firstName && (
-                <p className="text-xs text-red-500 mt-1 px-2">
-                  {errors.firstName}
-                </p>
-              )}
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Nama akhir"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                  if (errors.lastName) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.lastName;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
-              {errors.lastName && (
-                <p className="text-xs text-red-500 mt-1 px-2">
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
-          </div>
+      {/* Email */}
+      <AuthEmailInput
+        placeholder="Email"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          if (errors.email) {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors.email;
+              return newErrors;
+            });
+          }
+        }}
+        error={errors.email}
+        isVerified={isVerified}
+        onVerify={handleVerifyEmail}
+        verifyButtonText="Verifikasi"
+      />
 
-          {/* Kelas */}
-          <DropdownList
-            options={kelasOptions}
-            value={kelas}
-            onChange={(option) => {
-              setKelas(option);
-              if (errors.kelas) {
-                setErrors((prev) => {
-                  const newErrors = { ...prev };
-                  delete newErrors.kelas;
-                  return newErrors;
-                });
-              }
-            }}
-            placeholder="Kelas"
-            error={errors.kelas}
-            className="outline-none"
-          />
+      {/* Password */}
+      <AuthPasswordInput
+        placeholder="Password"
+        value={password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (errors.password) {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors.password;
+              return newErrors;
+            });
+          }
+        }}
+        error={errors.password}
+      />
 
-          {/* Email */}
-          <div className="flex flex-col">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.email;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
+      {/* Konfirmasi Password */}
+      <AuthPasswordInput
+        placeholder="Konfirmasi Password"
+        value={confirmPassword}
+        onChange={(e) => {
+          setConfirmPassword(e.target.value);
+          if (errors.confirmPassword) {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors.confirmPassword;
+              return newErrors;
+            });
+          }
+        }}
+        error={errors.confirmPassword}
+      />
 
-              {!isVerified ? (
-                <button
-                  onClick={handleVerifyEmail}
-                  className="bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white px-4 sm:px-3 py-2.5 sm:py-2 rounded-full text-md sm:text-lg font-semibold cursor-pointer whitespace-nowrap flex-shrink-0"
-                >
-                  Verifikasi
-                </button>
-              ) : (
-                <div className="flex items-center justify-center sm:justify-start w-fit h-fit">
-                  <CheckCircle className="text-green-500 w-8 h-8" />
-                </div>
-              )}
-            </div>
+      <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
+        <p className="text-center text-xs sm:text-sm">
+          Sudah punya akun?{" "}
+          <a href="/login" className="text-blue-600 underline">
+            Log in!
+          </a>
+        </p>
 
-            {errors.email && (
-              <p className="text-xs text-red-500 mt-1 px-2">{errors.email}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 sm:pr-14 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.password;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
-              >
-                {showPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
-                ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-xs text-red-500 mt-1 px-2">
-                {errors.password}
-              </p>
-            )}
-          </div>
-
-          {/* Konfirmasi Password */}
-          <div>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Konfirmasi Password"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 sm:pr-14 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  if (errors.confirmPassword) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.confirmPassword;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex-shrink-0"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
-                ) : (
-                  <Eye size={20} className="sm:w-6 sm:h-6 cursor-pointer" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-500 mt-1 px-2">
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
-            <p className="text-center text-xs sm:text-sm">
-              Sudah punya akun?{" "}
-              <a href="/login" className="text-blue-600 underline">
-                Log in!
-              </a>
-            </p>
-
-            <button
-              onClick={handleRegisterSubmit}
-              className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 font-semibold rounded-full shadow-lg transition-colors cursor-pointer ${
-                isFormValid
-                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
-                  : "bg-gray-300 text-gray-500"
-              }`}
-            >
-              <div className="text-lg sm:text-xl lg:text-2xl">Daftar akun</div>
-            </button>
-          </div>
-        </div>
+        <AuthButton
+          onClick={handleRegisterSubmit}
+          disabled={!isFormValid}
+          className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl ${
+            isFormValid
+              ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+              : "bg-gray-300 text-gray-500"
+          }`}
+        >
+          Daftar akun
+        </AuthButton>
       </div>
 
       {/* Modal OTP */}
@@ -471,6 +371,6 @@ export default function Register() {
           resetTrigger={otpResetTrigger}
         />
       )}
-    </div>
+    </AuthLayout>
   );
 }

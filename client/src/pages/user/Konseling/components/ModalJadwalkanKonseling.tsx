@@ -10,15 +10,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import clockLogo from "../assets/icons/clock-Icon.png";
-import { consultationService } from "../services/consultationService";
-import TokenManager from "../utils/tokenManager";
+import clockLogo from "../../../../assets/icons/clock-icon.png";
+import { consultationService } from "../../../../services/consultationService";
+import TokenManager from "../../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import axios from "axios";
 import {
   konselingSchema,
   type KonselingFormData,
-} from "../schema/KonselingSchema";
+} from "../../../../schema/KonselingSchema";
 
 // Generate time slots
 const generateTimeSlots = () => {

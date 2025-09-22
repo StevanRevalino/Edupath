@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
-import TokenManager from "../../utils/tokenManager";
-import SidebarProfil from "../../components/Profil/Sidebar-Profil";
-import MainContainer from "../../components/Profil/Main-Container";
-import HeaderProfil from "../../assets/icons/Header-Profil.png";
+import TokenManager from "../../../utils/tokenManager";
+import ProfilePageLayout from "../../../components/ProfilePageLayout";
 
 interface UserProfile {
   user_id: string;
@@ -64,30 +62,13 @@ const Profil = () => {
   };
 
   if (loading) {
-    return (
-      <div className="bg-gray-100 relative -mb-24 w-full min-h-screen flex flex-col items-center justify-center gap-3">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-[#00437A]"></div>
-        <div className="font-semibold text-[#00437A] flex justify-center">
-          Loading
-        </div>
-      </div>
-    );
+    return <ProfilePageLayout showLoading={true} />;
   }
 
   return (
-    <div className="bg-gray-100 relative -mb-24">
-      {/* Header Background - Positioned absolutely behind content */}
-      <div className="absolute -top-20">
-        <img src={HeaderProfil} alt="Header Profil" className="w-full h-auto" />
-      </div>
-
-      {/* Main Content - Positioned relatively to be above background */}
-      <div className="relative z-1 flex">
-        {/* Sidebar Menu */}
-        <SidebarProfil onLogout={handleLogout} />
-
-        {/* Main Content */}
-        <MainContainer isProfilePage={true}>
+    <ProfilePageLayout isProfilePage={true}>
+      {userProfile && (
+        <>
           {/* Profile Header - Fixed horizontal alignment */}
           <div className="flex items-center mb-8 gap-2">
             <h1 className="text-3xl font-bold text-gray-800">Profil saya</h1>
@@ -96,8 +77,7 @@ const Profil = () => {
             </button>
           </div>
 
-          {userProfile && (
-            <div className="space-y-8 pl-10">
+          <div className="space-y-8 pl-10">
               {/* Identitas Section */}
               <div>
                 <div className="flex justify-start mb-5">
@@ -159,10 +139,9 @@ const Profil = () => {
                 </div>
               </div>
             </div>
-          )}
-        </MainContainer>
-      </div>
-    </div>
+          </>
+        )}
+    </ProfilePageLayout>
   );
 };
 

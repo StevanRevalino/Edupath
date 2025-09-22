@@ -1,8 +1,8 @@
 import { useState } from "react";
 import AdminSidebar from "../../layouts/AdminSidebar";
-import KelolaDataMurid from "./KelolaDataMurid";
-import KelolaDataKonseling from "./KelolaDataKonseling";
-import KelolaLiveChat from "./KelolaLiveChat";
+import KelolaDataMurid from "./components/KelolaDataMurid";
+import KelolaDataKonseling from "./components/KelolaDataKonseling";
+import KelolaLiveChat from "./components/KelolaLiveChat";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("kelola-data-murid");

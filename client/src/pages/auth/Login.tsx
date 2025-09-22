@@ -2,17 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginSchema } from "../../schema/LoginSchema";
 import { ValidationError } from "yup";
-import ModalResetPassword from "../../components/ModalResetPassword";
+import ModalResetPassword from "./components/ModalResetPassword";
 import toast from "react-hot-toast";
-import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
-import loginBackground from "../../assets/login-background.png";
+import AuthLayout from "../../components/AuthLayout";
+import AuthInput from "../../components/AuthInput";
+import AuthPasswordInput from "../../components/AuthPasswordInput";
+import AuthButton from "../../components/AuthButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
@@ -80,129 +81,86 @@ export default function Login() {
   }, [serverError]);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-white lg:bg-blue-100">
-      {/* Kiri: Logo */}
-      <div className="hidden lg:flex w-1/2 items-center justify-center">
-        <img
-          src={loginBackground}
-          alt="Login Background"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Kanan: Form Login */}
-      <div
-        className="w-full lg:w-1/2 bg-white flex flex-col justify-center py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-20 2xl:px-40 min-h-screen lg:min-h-auto"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleLogin();
+    <AuthLayout
+      title="Log in"
+      subtitle="Masuk menggunakan akun terdaftar."
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleLogin();
+        }
+      }}
+    >
+      {/* Email */}
+      <AuthInput
+        type="email"
+        label=""
+        placeholder="Email"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          if (errors.email) {
+            setErrors((prev) => ({ ...prev, email: undefined }));
           }
         }}
-      >
-        <div className="w-full mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-bold text-center mb-2">
-            Log in
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl mb-2 text-gray-900 text-center">
-            Masuk menggunakan akun terdaftar.
-          </p>
-        </div>
+        error={submitted && errors.email ? errors.email : undefined}
+      />
 
-        {/* Form */}
-        <div className="w-full flex flex-col gap-4 sm:gap-5 bg-[#f5f5f5] px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
-          {/* Email */}
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (errors.email) {
-                  setErrors((prev) => ({ ...prev, email: undefined }));
-                }
-              }}
-            />
-            {submitted && errors.email && (
-              <p className="text-xs text-red-500 mt-1 px-2">{errors.email}</p>
-            )}
-          </div>
+      {/* Password */}
+      <AuthPasswordInput
+        placeholder="Password"
+        value={password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (errors.password) {
+            setErrors((prev) => ({ ...prev, password: undefined }));
+          }
+        }}
+        error={submitted && errors.password ? errors.password : undefined}
+      />
 
-          {/* Password */}
-          <div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-lg bg-white focus:outline-none text-base sm:text-lg"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) {
-                    setErrors((prev) => ({ ...prev, password: undefined }));
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={28} /> : <Eye size={28} />}
-              </button>
-            </div>
-            {submitted && errors.password && (
-              <p className="text-xs text-red-500 mt-1 px-2">
-                {errors.password}
-              </p>
-            )}
-          </div>
+      {/* Lupa Password */}
+      <div className="flex justify-end">
+        <a
+          href="#"
+          className="text-xs sm:text-sm text-blue-600 underline"
+          onClick={(e) => {
+            e.preventDefault();
+            setOpenModalVerifyOtp(true);
+          }}
+        >
+          Lupa password?
+        </a>
 
-          {/* Lupa Password */}
-          <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs sm:text-sm text-blue-600 underline"
-              onClick={(e) => {
-                e.preventDefault();
-                setOpenModalVerifyOtp(true);
-              }}
-            >
-              Lupa password?
-            </a>
-
-            {openModalVerifyOtp && (
-              <ModalResetPassword
-                isOpen={openModalVerifyOtp}
-                onClose={() => setOpenModalVerifyOtp(false)}
-              />
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
-            {/* Daftar Link */}
-            <p className="text-center text-xs sm:text-sm">
-              Tidak punya akun?{" "}
-              <a href="/register" className="text-blue-600 underline">
-                Daftar!
-              </a>
-            </p>
-
-            {/* Tombol Masuk */}
-            <button
-              onClick={handleLogin}
-              className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 font-semibold rounded-full shadow-lg transition-colors cursor-pointer ${
-                email && password
-                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
-                  : "bg-gray-300 text-gray-500"
-              }`}
-            >
-              <div className="text-lg sm:text-xl lg:text-2xl">Masuk</div>
-            </button>
-          </div>
-        </div>
+        {openModalVerifyOtp && (
+          <ModalResetPassword
+            isOpen={openModalVerifyOtp}
+            onClose={() => setOpenModalVerifyOtp(false)}
+          />
+        )}
       </div>
-    </div>
+
+      <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
+        {/* Daftar Link */}
+        <p className="text-center text-xs sm:text-sm">
+          Tidak punya akun?{" "}
+          <a href="/register" className="text-blue-600 underline">
+            Daftar!
+          </a>
+        </p>
+
+        {/* Tombol Masuk */}
+        <AuthButton
+          onClick={handleLogin}
+          disabled={!email || !password}
+          className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl ${
+            email && password
+              ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+              : "bg-gray-300 text-gray-500"
+          }`}
+        >
+          Masuk
+        </AuthButton>
+      </div>
+    </AuthLayout>
   );
 }

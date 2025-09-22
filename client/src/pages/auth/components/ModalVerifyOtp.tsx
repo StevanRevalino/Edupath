@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mail } from "lucide-react";
 import toast from "react-hot-toast";
-import warningLogo from "../assets/warning-logo.png";
+import warningLogo from "../../../assets/warning-logo.png";
 
 interface OTPModalProps {
   email: string;
