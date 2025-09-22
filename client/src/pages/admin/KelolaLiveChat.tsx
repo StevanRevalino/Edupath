@@ -298,10 +298,12 @@ const KelolaLiveChat = () => {
     // PENTING: Fungsi ini hanya boleh dipanggil untuk pesan dari STUDENT
     // Pastikan pesan bukan dari admin sebelum memproses unread
     if (message.isFromAdmin) {
-      console.warn("handleIncomingMessageFromStudent called with admin message, ignoring");
+      console.warn(
+        "handleIncomingMessageFromStudent called with admin message, ignoring"
+      );
       return;
     }
-    
+
     // Jika bukan chat yang sedang dibuka, tambah unread
     if (!selectedUser || selectedUser.room_id !== roomId) {
       setChatUsers((prev) =>
@@ -575,7 +577,8 @@ const KelolaLiveChat = () => {
               ) : (
                 chatMessages.map((message) => {
                   // Robust alignment logic: prioritize isFromAdmin flag for better reliability
-                  const isMine = message.isFromAdmin || (message.senderId === currentUserId);
+                  const isMine =
+                    message.isFromAdmin || message.senderId === currentUserId;
                   return (
                     <div
                       key={message.id}
