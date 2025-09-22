@@ -21,6 +21,7 @@ interface ChatUser {
   lastMessageTime?: string;
   unreadCount?: number;
   room_id?: string;
+  consultation_id?: string;
 }
 
 interface ChatMessage {
@@ -97,15 +98,15 @@ const KelolaLiveChat = () => {
     try {
       const token = TokenManager.getToken();
 
-      // First, find the user's consultation to get room_id
+      // First, find the user's consultation to get consultation_id
       const selectedUserData = chatUsers.find(
         (user) => user.user_id === userId
       );
 
-      if (selectedUserData && selectedUserData.room_id) {
-        // Fetch messages from the chat room
-        const response = await axios.get(
-          `${API_URL}/api/chat/messages/${selectedUserData.room_id}`,
+      if (selectedUserData && selectedUserData.consultation_id) {
+        // Get or create chat room first
+        const roomResponse = await axios.get(
+          `${API_URL}/api/chat/room/${selectedUserData.consultation_id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -114,18 +115,41 @@ const KelolaLiveChat = () => {
           }
         );
 
-        if (response.data.success) {
-          setChatMessages(response.data.data);
+        if (roomResponse.data.success) {
+          const chatRoom = roomResponse.data.data;
+          const roomId = chatRoom.room_id;
+
+          // Now fetch messages from the chat room
+          const messagesResponse = await axios.get(
+            `${API_URL}/api/chat/messages/${roomId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (messagesResponse.data.success) {
+            setChatMessages(messagesResponse.data.data);
+          } else {
+            setChatMessages([]);
+          }
+
+          // Update the selected user with room_id
+          setSelectedUser((prev) =>
+            prev ? { ...prev, room_id: roomId } : null
+          );
         }
       } else {
-        // If no room_id, show empty chat or create default messages
+        // If no consultation_id, show empty chat
         setChatMessages([
           {
-            id: "1",
+            id: "welcome-1",
             message:
-              "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
-            senderId: "BK001",
-            senderName: "Ibu Sarah (BK001)",
+              "Halo! Saya admin EduPath. Chat room akan dibuat ketika ada konsultasi yang diterima.",
+            senderId: "admin",
+            senderName: "Admin EduPath",
             timestamp: new Date().toISOString(),
             isFromAdmin: true,
           },
@@ -135,14 +159,14 @@ const KelolaLiveChat = () => {
       console.error("Error fetching chat messages:", error);
       toast.error("Gagal mengambil pesan chat");
 
-      // Fallback to mock messages
+      // Fallback to welcome message
       setChatMessages([
         {
-          id: "1",
+          id: "error-1",
           message:
-            "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
-          senderId: "BK001",
-          senderName: "Ibu Sarah (BK001)",
+            "Maaf, terjadi kesalahan saat mengambil pesan chat. Silakan coba lagi.",
+          senderId: "admin",
+          senderName: "Admin EduPath",
           timestamp: new Date().toISOString(),
           isFromAdmin: true,
         },
@@ -168,14 +192,35 @@ const KelolaLiveChat = () => {
     setSendingMessage(true);
     try {
       const token = TokenManager.getToken();
-      const selectedUserData = chatUsers.find(
-        (user) => user.user_id === selectedUser.user_id
-      );
 
-      if (selectedUserData && selectedUserData.room_id) {
+      // Make sure we have room_id in selectedUser
+      if (!selectedUser.room_id && selectedUser.consultation_id) {
+        // Try to get/create chat room first
+        const roomResponse = await axios.get(
+          `${API_URL}/api/chat/room/${selectedUser.consultation_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (roomResponse.data.success) {
+          const roomId = roomResponse.data.data.room_id;
+          setSelectedUser((prev) =>
+            prev ? { ...prev, room_id: roomId } : null
+          );
+        } else {
+          toast.error("Gagal membuat chat room");
+          return;
+        }
+      }
+
+      if (selectedUser.room_id) {
         // Send message via API
         const response = await axios.post(
-          `${API_URL}/api/chat/messages/${selectedUserData.room_id}`,
+          `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
           {
             message: newMessage,
           },
@@ -204,37 +249,29 @@ const KelolaLiveChat = () => {
                 : user
             )
           );
+
+          toast.success("Pesan berhasil dikirim");
+        } else {
+          toast.error("Gagal mengirim pesan");
         }
       } else {
-        // Fallback to local state if no room_id
-        const bkMessage: ChatMessage = {
-          id: Date.now().toString(),
-          message: newMessage,
-          senderId: "BK001",
-          senderName: "Ibu Sarah (BK001)",
-          timestamp: new Date().toISOString(),
-          isFromAdmin: true,
-        };
-
-        setChatMessages((prev) => [...prev, bkMessage]);
-        setNewMessage("");
-
-        // Update last message in chat users list
-        setChatUsers((prev) =>
-          prev.map((user) =>
-            user.user_id === selectedUser.user_id
-              ? {
-                  ...user,
-                  lastMessage: newMessage,
-                  lastMessageTime: "Baru saja",
-                }
-              : user
-          )
+        toast.error(
+          "Chat room tidak ditemukan. Pastikan konsultasi sudah diterima."
         );
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Gagal mengirim pesan");
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast.error("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          toast.error(error.response?.data?.message || "Gagal mengirim pesan");
+        }
+      } else {
+        toast.error("Gagal mengirim pesan");
+      }
     } finally {
       setSendingMessage(false);
     }

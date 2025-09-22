@@ -297,6 +297,7 @@ export class ChatService {
         firstname: consultation.murid.firstname,
         lastname: consultation.murid.lastname,
         kelas: consultation.murid.kelas,
+        consultation_id: consultation.consultation_id, // Add this field
         latestConsultationTopic: consultation.topic,
         room_id: consultation.chatRoom?.room_id,
         lastMessage:
