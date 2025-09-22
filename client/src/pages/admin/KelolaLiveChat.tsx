@@ -139,7 +139,13 @@ const KelolaLiveChat = () => {
           }
 
           // Setelah pesan berhasil di-load, reset unreadCount user tsb (supaya dot merah hilang)
-          setChatUsers(prev => prev.map(u => u.user_id === selectedUserData.user_id ? { ...u, unreadCount: 0 } : u));
+          setChatUsers((prev) =>
+            prev.map((u) =>
+              u.user_id === selectedUserData.user_id
+                ? { ...u, unreadCount: 0 }
+                : u
+            )
+          );
 
           // Update the selected user with room_id
           setSelectedUser((prev) =>
@@ -184,7 +190,11 @@ const KelolaLiveChat = () => {
   const handleUserSelect = (user: ChatUser) => {
     // Optimistic: set selectedUser & kosongkan unread (dot langsung hilang) sebelum fetch
     setSelectedUser(user);
-    setChatUsers(prev => prev.map(u => u.user_id === user.user_id ? { ...u, unreadCount: 0 } : u));
+    setChatUsers((prev) =>
+      prev.map((u) =>
+        u.user_id === user.user_id ? { ...u, unreadCount: 0 } : u
+      )
+    );
     fetchChatMessages(user.user_id);
   };
 
@@ -281,15 +291,46 @@ const KelolaLiveChat = () => {
   };
 
   // Placeholder: jika nanti ada realtime, panggil fungsi ini ketika pesan baru dari murid diterima.
-  const handleIncomingMessageFromStudent = (roomId: string, message: ChatMessage) => {
+  const handleIncomingMessageFromStudent = (
+    roomId: string,
+    message: ChatMessage
+  ) => {
+    // PENTING: Fungsi ini hanya boleh dipanggil untuk pesan dari STUDENT
+    // Pastikan pesan bukan dari admin sebelum memproses unread
+    if (message.isFromAdmin) {
+      console.warn("handleIncomingMessageFromStudent called with admin message, ignoring");
+      return;
+    }
+    
     // Jika bukan chat yang sedang dibuka, tambah unread
     if (!selectedUser || selectedUser.room_id !== roomId) {
-      setChatUsers(prev => prev.map(u => u.room_id === roomId ? { ...u, unreadCount: (u.unreadCount || 0) + 1, lastMessage: message.message, lastMessageTime: new Date().toISOString() } : u));
+      setChatUsers((prev) =>
+        prev.map((u) =>
+          u.room_id === roomId
+            ? {
+                ...u,
+                unreadCount: (u.unreadCount || 0) + 1,
+                lastMessage: message.message,
+                lastMessageTime: new Date().toISOString(),
+              }
+            : u
+        )
+      );
     } else {
       // Sedang dibuka, langsung append ke messages
-      setChatMessages(prev => [...prev, message]);
+      setChatMessages((prev) => [...prev, message]);
       // Update last message display
-      setChatUsers(prev => prev.map(u => u.room_id === roomId ? { ...u, lastMessage: message.message, lastMessageTime: new Date().toISOString() } : u));
+      setChatUsers((prev) =>
+        prev.map((u) =>
+          u.room_id === roomId
+            ? {
+                ...u,
+                lastMessage: message.message,
+                lastMessageTime: new Date().toISOString(),
+              }
+            : u
+        )
+      );
     }
   };
 
@@ -440,13 +481,14 @@ const KelolaLiveChat = () => {
                             {user.user_id}
                           </span>
                         )}
-                        {typeof user.unreadCount === 'number' && user.unreadCount > 0 && (
-                          <span
-                            className="ml-2 inline-block w-3 h-3 rounded-full bg-red-500"
-                            title="Pesan baru dari siswa"
-                            aria-label="Pesan baru dari siswa"
-                          />
-                        )}
+                        {typeof user.unreadCount === "number" &&
+                          user.unreadCount > 0 && (
+                            <span
+                              className="ml-2 inline-block w-3 h-3 rounded-full bg-red-500"
+                              title="Pesan baru dari siswa"
+                              aria-label="Pesan baru dari siswa"
+                            />
+                          )}
                       </h3>
                     </div>
                     <div className="flex items-center justify-between">
@@ -532,10 +574,8 @@ const KelolaLiveChat = () => {
                 </div>
               ) : (
                 chatMessages.map((message) => {
-                  // Fallback alignment: jika senderId kosong / tidak cocok & flag isFromAdmin true, anggap milik admin
-                  const isMine = message.senderId
-                    ? message.senderId === currentUserId
-                    : message.isFromAdmin;
+                  // Robust alignment logic: prioritize isFromAdmin flag for better reliability
+                  const isMine = message.isFromAdmin || (message.senderId === currentUserId);
                   return (
                     <div
                       key={message.id}
