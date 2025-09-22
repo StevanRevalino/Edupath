@@ -12,10 +12,10 @@ interface ProfilePageLayoutProps {
   showLoading?: boolean;
 }
 
-const ProfilePageLayout = ({ 
-  children, 
-  isProfilePage = false, 
-  showLoading = false 
+const ProfilePageLayout = ({
+  children,
+  isProfilePage = false,
+  showLoading = false,
 }: ProfilePageLayoutProps) => {
   const navigate = useNavigate();
 
@@ -46,9 +46,7 @@ const ProfilePageLayout = ({
       {/* Main Content */}
       <div className="relative z-1 flex">
         <SidebarProfil onLogout={handleLogout} />
-        <MainContainer isProfilePage={isProfilePage}>
-          {children}
-        </MainContainer>
+        <MainContainer isProfilePage={isProfilePage}>{children}</MainContainer>
       </div>
     </div>
   );

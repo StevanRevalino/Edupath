@@ -5,9 +5,7 @@ export default function ContactUs() {
     <ProfilePageLayout>
       <div className="space-y-5 p-10 pb-5">
         {/* Header */}
-        <h1 className="text-4xl font-bold text-[#00437A] mb-8">
-          Hubungi Kami
-        </h1>
+        <h1 className="text-4xl font-bold text-[#00437A] mb-8">Hubungi Kami</h1>
 
         {/* Contact Information */}
         <div className="grid gap-5 pl-5">

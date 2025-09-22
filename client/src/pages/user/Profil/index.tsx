@@ -78,69 +78,69 @@ const Profil = () => {
           </div>
 
           <div className="space-y-8 pl-10">
-              {/* Identitas Section */}
-              <div>
-                <div className="flex justify-start mb-5">
-                  <div className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-semibold">
-                    Identitas
-                  </div>
-                </div>
-
-                <div className="space-y-6 text-left">
-                  <div>
-                    <label className="block text-gray-600 text-sm mb-2">
-                      Nama lengkap
-                    </label>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {userProfile.firstname} {userProfile.lastname}
-                    </p>
-                  </div>
-
-                  {userProfile.kelas && (
-                    <div>
-                      <label className="block text-gray-600 text-sm mb-2">
-                        Kelas
-                      </label>
-                      <p className="text-2xl font-bold text-gray-800">
-                        {userProfile.kelas}
-                      </p>
-                    </div>
-                  )}
+            {/* Identitas Section */}
+            <div>
+              <div className="flex justify-start mb-5">
+                <div className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-semibold">
+                  Identitas
                 </div>
               </div>
 
-              {/* Akun Section */}
-              <div>
-                <div className="flex justify-start mb-5 pt-2">
-                  <button className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-medium bg-white">
-                    Akun
-                  </button>
+              <div className="space-y-6 text-left">
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">
+                    Nama lengkap
+                  </label>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {userProfile.firstname} {userProfile.lastname}
+                  </p>
                 </div>
 
-                <div className="space-y-6 text-left">
+                {userProfile.kelas && (
                   <div>
                     <label className="block text-gray-600 text-sm mb-2">
-                      Email
+                      Kelas
                     </label>
-                    <p className="text-lg text-gray-800">
-                      {userProfile.email.replace(
-                        /^(.{2}).*(@.*)$/,
-                        "$1*******$2"
-                      )}
+                    <p className="text-2xl font-bold text-gray-800">
+                      {userProfile.kelas}
                     </p>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-gray-600 text-sm mb-2">
-                      Password
-                    </label>
-                    <p className="text-lg text-gray-800">••••••••••</p>
-                  </div>
+            {/* Akun Section */}
+            <div>
+              <div className="flex justify-start mb-5 pt-2">
+                <button className="border-3 border-[#00437A] text-[#00437A] px-5 py-1 rounded-full text-sm font-medium bg-white">
+                  Akun
+                </button>
+              </div>
+
+              <div className="space-y-6 text-left">
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">
+                    Email
+                  </label>
+                  <p className="text-lg text-gray-800">
+                    {userProfile.email.replace(
+                      /^(.{2}).*(@.*)$/,
+                      "$1*******$2"
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">
+                    Password
+                  </label>
+                  <p className="text-lg text-gray-800">••••••••••</p>
                 </div>
               </div>
             </div>
-          </>
-        )}
+          </div>
+        </>
+      )}
     </ProfilePageLayout>
   );
 };
