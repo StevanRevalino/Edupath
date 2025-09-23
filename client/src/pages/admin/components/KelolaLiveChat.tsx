@@ -48,7 +48,10 @@ const KelolaLiveChat = () => {
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" , block: "nearest" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
   };
 
   useEffect(() => {
@@ -247,7 +250,7 @@ const KelolaLiveChat = () => {
 
     setSendingMessage(true);
     const messageText = newMessage.trim();
-    
+
     try {
       const token = TokenManager.getToken();
 
@@ -340,13 +343,13 @@ const KelolaLiveChat = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      
+
       // Remove optimistic message and restore input on error
       setChatMessages((prev) =>
         prev.filter((msg) => !msg.id.startsWith("temp-"))
       );
       setNewMessage(messageText);
-      
+
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           toast.error("Session expired. Silakan login ulang.");

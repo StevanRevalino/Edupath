@@ -142,7 +142,8 @@ class ChatService {
   }
 
   // Start polling for new messages
-  startPolling(roomId: string, intervalMs: number = 3000) { // Reduced from 5s to 3s for better responsiveness
+  startPolling(roomId: string, intervalMs: number = 3000) {
+    // Reduced from 5s to 3s for better responsiveness
     this.stopPolling();
     this.currentRoomId = roomId;
 

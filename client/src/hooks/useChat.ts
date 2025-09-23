@@ -71,19 +71,23 @@ export const useChat = ({
     // Set up message handler
     const handleMessages = (newMessages: Message[]) => {
       // Only update if messages actually changed to avoid unnecessary re-renders
-      setMessages(prev => {
+      setMessages((prev) => {
         // Simple comparison by length and last message ID
         if (prev.length !== newMessages.length) {
           return newMessages;
         }
-        
+
         const lastPrev = prev[prev.length - 1];
         const lastNew = newMessages[newMessages.length - 1];
-        
-        if (!lastPrev || !lastNew || lastPrev.message_id !== lastNew.message_id) {
+
+        if (
+          !lastPrev ||
+          !lastNew ||
+          lastPrev.message_id !== lastNew.message_id
+        ) {
           return newMessages;
         }
-        
+
         return prev; // No change, keep previous state
       });
     };
@@ -123,24 +127,22 @@ export const useChat = ({
       };
 
       // Add to messages immediately for better UX
-      setMessages(prev => [...prev, optimisticMessage]);
+      setMessages((prev) => [...prev, optimisticMessage]);
 
       // Send to server
       const newMessage = await chatService.sendMessage(roomId, messageText);
-      
+
       if (newMessage) {
         // Replace optimistic message with real message from server
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.message_id === optimisticMessage.message_id 
-              ? newMessage 
-              : msg
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.message_id === optimisticMessage.message_id ? newMessage : msg
           )
         );
       } else {
         // Remove optimistic message if sending failed
-        setMessages(prev => 
-          prev.filter(msg => msg.message_id !== optimisticMessage.message_id)
+        setMessages((prev) =>
+          prev.filter((msg) => msg.message_id !== optimisticMessage.message_id)
         );
         throw new Error("Failed to send message");
       }
