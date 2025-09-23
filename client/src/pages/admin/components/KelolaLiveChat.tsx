@@ -291,7 +291,7 @@ const KelolaLiveChat = () => {
 
         // Add to messages immediately for better UX
         setChatMessages((prev) => [...prev, optimisticMessage]);
-        setNewMessage(""); // Clear input immediately
+        setNewMessage("");
 
         // Send message via API
         const response = await axios.post(
