@@ -42,17 +42,63 @@ const KelolaLiveChat = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const API_URL = import.meta.env.VITE_API_URL;
   const currentUserId = TokenManager.getUserData().userId || "";
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" , block: "nearest" });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
+
+  // Polling for message updates when a user is selected
+  useEffect(() => {
+    if (selectedUser && selectedUser.room_id) {
+      // Start polling for new messages every 3 seconds (reduced for better responsiveness)
+      pollingIntervalRef.current = setInterval(async () => {
+        try {
+          const token = TokenManager.getToken();
+          const messagesResponse = await axios.get(
+            `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (messagesResponse.data.success) {
+            const newMessages = messagesResponse.data.data;
+            // Only update if messages are different
+            setChatMessages((prevMessages) => {
+              if (
+                JSON.stringify(prevMessages) !== JSON.stringify(newMessages)
+              ) {
+                return newMessages;
+              }
+              return prevMessages;
+            });
+          }
+        } catch (error) {
+          console.error("Error polling messages:", error);
+          // Don't show toast for polling errors to avoid spam
+        }
+      }, 3000); // Poll every 3 seconds instead of 5
+    }
+
+    // Cleanup function
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [selectedUser, API_URL]);
 
   // Fetch chat users (students who have accepted consultations)
   useEffect(() => {
@@ -137,8 +183,6 @@ const KelolaLiveChat = () => {
           } else {
             setChatMessages([]);
           }
-
-          // Setelah pesan berhasil di-load, reset unreadCount user tsb (supaya dot merah hilang)
           setChatUsers((prev) =>
             prev.map((u) =>
               u.user_id === selectedUserData.user_id
@@ -202,6 +246,8 @@ const KelolaLiveChat = () => {
     if (!newMessage.trim() || !selectedUser || sendingMessage) return;
 
     setSendingMessage(true);
+    const messageText = newMessage.trim();
+    
     try {
       const token = TokenManager.getToken();
 
@@ -230,11 +276,25 @@ const KelolaLiveChat = () => {
       }
 
       if (selectedUser.room_id) {
+        // Optimistic update: Add message to UI immediately
+        const optimisticMessage: ChatMessage = {
+          id: `temp-${Date.now()}`,
+          message: messageText,
+          senderId: currentUserId,
+          senderName: "Admin EduPath",
+          timestamp: new Date().toISOString(),
+          isFromAdmin: true,
+        };
+
+        // Add to messages immediately for better UX
+        setChatMessages((prev) => [...prev, optimisticMessage]);
+        setNewMessage(""); // Clear input immediately
+
         // Send message via API
         const response = await axios.post(
           `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
           {
-            message: newMessage,
+            message: messageText,
           },
           {
             headers: {
@@ -245,9 +305,12 @@ const KelolaLiveChat = () => {
         );
 
         if (response.data.success) {
-          // Add the new message to the chat
-          setChatMessages((prev) => [...prev, response.data.data]);
-          setNewMessage("");
+          // Replace optimistic message with real message from server
+          setChatMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === optimisticMessage.id ? response.data.data : msg
+            )
+          );
 
           // Update last message in chat users list
           setChatUsers((prev) =>
@@ -255,16 +318,19 @@ const KelolaLiveChat = () => {
               user.user_id === selectedUser.user_id
                 ? {
                     ...user,
-                    lastMessage: newMessage,
+                    lastMessage: messageText,
                     // Simpan dalam bentuk ISO agar formatter bisa bekerja dengan benar
                     lastMessageTime: new Date().toISOString(),
                   }
                 : user
             )
           );
-
-          toast.success("Pesan berhasil dikirim");
         } else {
+          // Remove optimistic message if sending failed
+          setChatMessages((prev) =>
+            prev.filter((msg) => msg.id !== optimisticMessage.id)
+          );
+          setNewMessage(messageText); // Restore input
           toast.error("Gagal mengirim pesan");
         }
       } else {
@@ -274,6 +340,13 @@ const KelolaLiveChat = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      
+      // Remove optimistic message and restore input on error
+      setChatMessages((prev) =>
+        prev.filter((msg) => !msg.id.startsWith("temp-"))
+      );
+      setNewMessage(messageText);
+      
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           toast.error("Session expired. Silakan login ulang.");

@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { ChatService } from "../services/chatService";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class ChatController {
   private chatService: ChatService;
@@ -34,11 +37,42 @@ export class ChatController {
   async getChatRoom(req: Request, res: Response) {
     try {
       const { consultationId } = req.params;
+      const userId = req.user?.user_id;
 
       if (!consultationId) {
         return res.status(400).json({
           success: false,
           message: "Consultation ID is required",
+        });
+      }
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
+      // Get consultation first to validate access
+      const consultation = await prisma.consultation.findUnique({
+        where: { consultation_id: consultationId },
+      });
+
+      if (!consultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Consultation not found",
+        });
+      }
+
+      // Check if user has access to this consultation
+      if (
+        consultation.murid_id !== userId &&
+        consultation.admin_id !== userId
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You don't have access to this consultation",
         });
       }
 

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   Send,
   MessageCircle,
-  Clock,
   X,
   Minimize2,
   Maximize2,
@@ -34,7 +33,10 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
   };
 
   useEffect(() => {
@@ -44,49 +46,9 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
   // Load chat history on component mount
   useEffect(() => {
     if (isOpen) {
-      loadChatHistory();
       setUnreadCount(0);
     }
   }, [isOpen]);
-
-  const loadChatHistory = async () => {
-    try {
-      // Connect US005 directly with BK001 - Mock conversation history
-      const mockMessages: ChatMessage[] = [
-        {
-          id: "1",
-          message:
-            "Halo! Saya Ibu Sarah, Guru BK di sekolah. Ada yang ingin kamu konsultasikan?",
-          senderId: "BK001",
-          senderName: "Ibu Sarah (BK001)",
-          timestamp: "2024-01-15T09:00:00Z",
-          isFromAdmin: true,
-        },
-        {
-          id: "2",
-          message: "Halo Bu, saya butuh bantuan untuk memilih jurusan kuliah",
-          senderId: "US005",
-          senderName: "Saya",
-          timestamp: "2024-01-15T09:02:00Z",
-          isFromAdmin: false,
-        },
-        {
-          id: "3",
-          message:
-            "Tentu! Saya senang bisa membantu. Sekarang kamu kelas berapa dan apa minat kamu?",
-          senderId: "BK001",
-          senderName: "Ibu Sarah (BK001)",
-          timestamp: "2024-01-15T09:03:00Z",
-          isFromAdmin: true,
-        },
-      ];
-
-      setChatMessages(mockMessages);
-    } catch (error) {
-      console.error("Error loading chat history:", error);
-      toast.error("Gagal memuat riwayat chat");
-    }
-  };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || sendingMessage) return;
@@ -238,7 +200,6 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
                         message.isFromAdmin ? "justify-start" : "justify-end"
                       }`}
                     >
-                      <Clock size={10} className="mr-1" />
                       {formatTime(message.timestamp)}
                     </div>
                   </div>

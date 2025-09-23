@@ -1,66 +1,73 @@
-import { useEffect, useRef } from "react";
-import { ArrowLeft, Send, MessageCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Send, Loader } from "lucide-react";
 import { type Consultation } from "../../../../services/consultationService";
-
-interface ChatMessage {
-  id: string;
-  message: string;
-  senderId: string;
-  senderName: string;
-  timestamp: string;
-  isFromAdmin: boolean;
-}
+import { useChat } from "../../../../hooks/useChat";
 
 interface ChatViewProps {
   consultation: Consultation;
-  messages: ChatMessage[];
-  newMessage: string;
-  messagesLoading: boolean;
-  sendingMessage: boolean;
   currentUserId: string;
   onBack: () => void;
-  onSendMessage: () => void;
-  onMessageChange: (message: string) => void;
 }
 
-const ChatView = ({
-  consultation,
-  messages,
-  newMessage,
-  messagesLoading,
-  sendingMessage,
-  currentUserId,
-  onBack,
-  onSendMessage,
-  onMessageChange,
-}: ChatViewProps) => {
+const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Use real-time chat hook
+  const {
+    messages,
+    sending: sendingMessage,
+    sendMessage,
+    error,
+  } = useChat({
+    consultationId: consultation.consultation_id,
+    userId: currentUserId,
+    enabled: true,
+  });
+
+  // Local state for message input
+  const [newMessage, setNewMessage] = useState("");
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
   };
 
   // Only auto-scroll when new messages are added, not when chat is first opened
   useEffect(() => {
-    if (messages.length > 0 && !messagesLoading) {
+    if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messages, messagesLoading]);
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || sendingMessage) return;
+
+    try {
+      await sendMessage(newMessage.trim());
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSendMessage();
+      handleSendMessage();
     }
   };
 
   const formatTime = (timestamp: string) => {
     if (!timestamp) return "";
+
     const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return "";
+    if (isNaN(date.getTime())) {
+      return "";
+    }
+
     return date.toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
@@ -88,42 +95,31 @@ const ChatView = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-        {messagesLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex gap-2">
-                <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"
+      >
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <MessageCircle size={48} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
-              Belum ada pesan
-            </h3>
-            <p className="text-gray-500 text-sm">
-              Mulai percakapan dengan mengirim pesan pertama
-            </p>
+        )}
+
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <Loader className="animate-spin mb-2" />
+            Memuat pesan...
           </div>
         ) : (
           messages.map((message) => {
             // Student's messages go to the right, admin's to the left
-            const isMine =
-              !message.isFromAdmin && message.senderId === currentUserId;
+            const isMine = message.senderId === currentUserId;
             return (
               <div
-                key={message.id}
+                key={message.message_id}
                 className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[70%] ${isMine ? "order-2" : "order-1"}`}
-                >
+                <div className={`max-w-[70%]`}>
                   <div
                     className={`p-3 rounded-lg ${
                       isMine
@@ -154,7 +150,7 @@ const ChatView = ({
           <div className="flex-1 flex items-center">
             <textarea
               value={newMessage}
-              onChange={(e) => onMessageChange(e.target.value)}
+              onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ketik pesan..."
               rows={1}
@@ -163,7 +159,7 @@ const ChatView = ({
             />
           </div>
           <button
-            onClick={onSendMessage}
+            onClick={handleSendMessage}
             disabled={!newMessage.trim() || sendingMessage}
             className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >

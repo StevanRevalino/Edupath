@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import {
@@ -12,15 +11,6 @@ import ConsultationInfo from "./components/ConsultationInfo";
 import ChatView from "./components/ChatView";
 import ScheduleConsultation from "./components/ScheduleConsultation";
 
-interface ChatMessage {
-  id: string;
-  message: string;
-  senderId: string;
-  senderName: string;
-  timestamp: string;
-  isFromAdmin: boolean;
-}
-
 const Konseling = () => {
   const [showModal, setShowModal] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -30,12 +20,6 @@ const Konseling = () => {
 
   // Chat state
   const [showChat, setShowChat] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [messagesLoading, setMessagesLoading] = useState(false);
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [roomId, setRoomId] = useState<string | null>(null);
-  const API_URL = import.meta.env.VITE_API_URL;
   const currentUserId = TokenManager.getUserData().userId || "";
 
   // Fetch consultations when component mounts
@@ -67,13 +51,10 @@ const Konseling = () => {
   useEffect(() => {
     if (selectedConsultation) {
       setShowChat(false);
-      setChatMessages([]);
-      setNewMessage("");
-      setRoomId(null);
     }
   }, [selectedConsultation]);
 
-  // Fetch chat room and messages when consultation is selected and chat is opened
+  // Open chat for accepted consultations
   const openChat = async (consultation: Consultation) => {
     if (consultation.status !== "ACCEPTED") {
       toast.error("Chat hanya tersedia untuk konsultasi yang sudah diterima");
@@ -81,116 +62,6 @@ const Konseling = () => {
     }
 
     setShowChat(true);
-    setMessagesLoading(true);
-
-    try {
-      const token = TokenManager.getToken();
-
-      // Get or create chat room
-      const roomResponse = await axios.get(
-        `${API_URL}/api/chat/room/${consultation.consultation_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (roomResponse.data.success) {
-        const chatRoom = roomResponse.data.data;
-        const fetchedRoomId = chatRoom.room_id;
-        setRoomId(fetchedRoomId);
-
-        // Now fetch messages from the chat room
-        const messagesResponse = await axios.get(
-          `${API_URL}/api/chat/messages/${fetchedRoomId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (messagesResponse.data.success) {
-          setChatMessages(messagesResponse.data.data);
-        } else {
-          setChatMessages([]);
-        }
-      } else {
-        toast.error("Gagal membuat chat room");
-      }
-    } catch (error) {
-      console.error("Error fetching chat room:", error);
-      toast.error("Gagal mengambil data chat");
-
-      // Fallback message
-      setChatMessages([
-        {
-          id: "error-1",
-          message:
-            "Maaf, terjadi kesalahan saat mengambil pesan chat. Silakan coba lagi.",
-          senderId: "system",
-          senderName: "System",
-          timestamp: new Date().toISOString(),
-          isFromAdmin: true,
-        },
-      ]);
-    } finally {
-      setMessagesLoading(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !roomId || sendingMessage) return;
-
-    setSendingMessage(true);
-    try {
-      const token = TokenManager.getToken();
-
-      // Send message via API
-      const response = await axios.post(
-        `${API_URL}/api/chat/messages/${roomId}`,
-        {
-          message: newMessage,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data.success) {
-        // Add the new message to the chat
-        setChatMessages((prev) => [...prev, response.data.data]);
-        setNewMessage("");
-        toast.success("Pesan berhasil dikirim");
-      } else {
-        toast.error("Gagal mengirim pesan");
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error(error.response?.data?.message || "Gagal mengirim pesan");
-        }
-      } else {
-        toast.error("Gagal mengirim pesan");
-      }
-    } finally {
-      setSendingMessage(false);
-    }
-  };
-
-  const handleMessageChange = (message: string) => {
-    setNewMessage(message);
   };
 
   return (
@@ -256,14 +127,8 @@ const Konseling = () => {
               ) : selectedConsultation ? (
                 <ChatView
                   consultation={selectedConsultation}
-                  messages={chatMessages}
-                  newMessage={newMessage}
-                  messagesLoading={messagesLoading}
-                  sendingMessage={sendingMessage}
                   currentUserId={currentUserId}
                   onBack={() => setShowChat(false)}
-                  onSendMessage={handleSendMessage}
-                  onMessageChange={handleMessageChange}
                 />
               ) : null}
             </div>
