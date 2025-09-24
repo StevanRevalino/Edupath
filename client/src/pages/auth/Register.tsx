@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
-import AuthLayout from "../../components/AuthLayout";
-import AuthInput from "../../components/AuthInput";
-import AuthEmailInput from "../../components/AuthEmailInput";
-import AuthPasswordInput from "../../components/AuthPasswordInput";
-import AuthButton from "../../components/AuthButton";
+import AuthLayout from "./components/AuthLayout";
+import AuthInput from "./components/AuthInput";
+import AuthEmailInput from "./components/AuthEmailInput";
+import AuthPasswordInput from "./components/AuthPasswordInput";
+import AuthButton from "./components/AuthButton";
 
 type OptionType = {
   value: string | number;

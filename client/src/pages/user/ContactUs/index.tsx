@@ -1,4 +1,4 @@
-import ProfilePageLayout from "../../../components/ProfilePageLayout";
+import ProfilePageLayout from "../Profil/components/ProfilePageLayout";
 
 export default function ContactUs() {
   return (

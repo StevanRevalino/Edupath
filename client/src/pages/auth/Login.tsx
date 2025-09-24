@@ -6,10 +6,10 @@ import ModalResetPassword from "./components/ModalResetPassword";
 import toast from "react-hot-toast";
 import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
-import AuthLayout from "../../components/AuthLayout";
-import AuthInput from "../../components/AuthInput";
-import AuthPasswordInput from "../../components/AuthPasswordInput";
-import AuthButton from "../../components/AuthButton";
+import AuthLayout from "./components/AuthLayout";
+import AuthInput from "./components/AuthInput";
+import AuthPasswordInput from "./components/AuthPasswordInput";
+import AuthButton from "./components/AuthButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");

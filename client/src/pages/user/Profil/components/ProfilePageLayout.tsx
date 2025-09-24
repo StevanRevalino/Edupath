@@ -1,10 +1,10 @@
 import { type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import TokenManager from "../utils/tokenManager";
-import HeaderProfil from "../assets/icons/Header-Profil.png";
-import SidebarProfil from "../pages/user/Profil/components/Sidebar-Profil";
-import MainContainer from "../pages/user/Profil/components/Main-Container";
+import TokenManager from "../../../../utils/tokenManager";
+import HeaderProfil from "../../../../assets/Header-Profil.png";
+import SidebarProfil from "./Sidebar-Profil";
+import MainContainer from "./Main-Container";
 
 interface ProfilePageLayoutProps {
   children?: ReactNode;

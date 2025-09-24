@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
-import ProfilePageLayout from "../../../components/ProfilePageLayout";
+import ProfilePageLayout from "./components/ProfilePageLayout";
 
 interface UserProfile {
   user_id: string;

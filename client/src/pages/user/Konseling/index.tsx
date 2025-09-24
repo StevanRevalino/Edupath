@@ -10,6 +10,7 @@ import ConsultationCard from "./components/ConsultationCard";
 import ConsultationInfo from "./components/ConsultationInfo";
 import ChatView from "./components/ChatView";
 import ScheduleConsultation from "./components/ScheduleConsultation";
+import ConselingHero from "../../../assets/consultation-hero.png";
 
 const Konseling = () => {
   const [showModal, setShowModal] = useState(false);
@@ -65,9 +66,49 @@ const Konseling = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* Hero Section */}
+      <div className="absolute -top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
+        {/* Gambar background */}
+        <img
+          src={ConselingHero}
+          alt="Hero Konseling"
+          className="w-full h-full object-cover rounded-b-4xl"
+        />
+
+        {/* Overlay konten kiri */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
+            <div className="max-w-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold">
+                Konseling
+              </h1>
+              <p className="mt-3 text-sm sm:text-base lg:text-lg opacity-95">
+                Bicara dengan pihak profesional sekarang. <br />
+                Pastikan bahwa jurusanmu sesuai!
+              </p>
+
+              <button
+                onClick={() => setShowModal(true)}
+                className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
+                     text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
+                     hover:brightness-95 active:brightness-90 transition"
+              >
+                Jadwalkan sesi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Optional: gradient gelap tipis dari kiri biar teks lebih kontras */}
+        <div
+          className="absolute inset-0 pointer-events-none rounded-b-4xl
+                  bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
+        />
+      </div>
+
       {/* Sesi Konseling Section */}
-      <div className="min-h-screen bg-gray-100 px-4 sm:px-6 md:px-12 pt-12">
+      <div className="min-h-screen bg-gray-100 pt-64 sm:pt-80 lg:pt-[520px] relative px-5 lg:px-10">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-12">
             Sesi Konseling
