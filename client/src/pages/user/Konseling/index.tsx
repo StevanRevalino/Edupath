@@ -131,8 +131,8 @@ const Konseling = () => {
       {/* Mengapa Konseling (setelah hero) */}
       <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-64 sm:pt-80 lg:pt-[520px] pb-6">
         <div
-          className="relative rounded-[24px] border-2 border-[#0B4F85] bg-white/80 backdrop-blur-[1px]
-                  px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+          className="relative rounded-[24px] bg-[#EDF5FF] backdrop-blur-[1px]
+                  px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
         >
           {/* corner accents */}
           <div
