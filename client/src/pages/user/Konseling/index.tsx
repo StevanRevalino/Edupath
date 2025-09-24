@@ -11,6 +11,9 @@ import ConsultationInfo from "./components/ConsultationInfo";
 import ChatView from "./components/ChatView";
 import ScheduleConsultation from "./components/ScheduleConsultation";
 import ConselingHero from "../../../assets/consultation-hero.png";
+import conseling1 from "../../../assets/conseling-1.png";
+import conseling2 from "../../../assets/conseling-2.png";
+import conseling3 from "../../../assets/conseling-3.png";
 
 const Konseling = () => {
   const [showModal, setShowModal] = useState(false);
@@ -22,6 +25,24 @@ const Konseling = () => {
   // Chat state
   const [showChat, setShowChat] = useState(false);
   const currentUserId = TokenManager.getUserData().userId || "";
+
+  const items = [
+    {
+      img: conseling1,
+      title: "Kesesuaian antara Minat, Bakat, dan Jurusan",
+      desc: "Ahli dapat menggunakan tes psikologi atau asesmen minat bakat untuk membantumu memahami kekuatan, kelemahan, dan kecenderungan alami kamu.",
+    },
+    {
+      img: conseling2,
+      title: "Wawasan Karier Jangka Panjang",
+      desc: "Seorang konselor berpengalaman tidak hanya membahas jurusan, tapi juga prospek kerja, tren industri, dan bagaimana sebuah jurusan bisa mengarahkanmu ke karier tertentu.",
+    },
+    {
+      img: conseling3,
+      title: "Tidak Ada Penyesalan di Tengah Jalan",
+      desc: "Dengan sesi konsultasi, kamu bisa lebih siap membuat keputusan sejak awal, menghemat waktu, tenaga, dan biaya selama masa studi.",
+    },
+  ];
 
   // Fetch consultations when component mounts
   useEffect(() => {
@@ -68,7 +89,7 @@ const Konseling = () => {
   return (
     <div className="min-h-screen bg-gray-100 relative">
       {/* Hero Section */}
-      <div className="absolute -top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
+      <section className="absolute -top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
         {/* Gambar background */}
         <img
           src={ConselingHero}
@@ -105,12 +126,54 @@ const Konseling = () => {
           className="absolute inset-0 pointer-events-none rounded-b-4xl
                   bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
         />
-      </div>
+      </section>
+
+      {/* Mengapa Konseling (setelah hero) */}
+      <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-64 sm:pt-80 lg:pt-[520px] pb-6">
+        <div
+          className="relative rounded-[24px] border-2 border-[#0B4F85] bg-white/80 backdrop-blur-[1px]
+                  px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+        >
+          {/* corner accents */}
+          <div
+            className="pointer-events-none absolute -top-6 -left-6 h-12 w-12
+                    border-t-2 border-l-2 border-[#0B4F85] rounded-tl-[20px]"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-6 -right-6 h-12 w-12
+                    border-b-2 border-r-2 border-[#0B4F85] rounded-br-[20px]"
+          />
+
+          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-[#0B4F85] mb-8">
+            Mengapa Konseling?
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {items.map((it, i) => (
+              <div key={i} className="text-center px-2">
+                <img
+                  src={it.img}
+                  alt={it.title}
+                  className="mx-auto w-24 h-24 md:w-32 md:h-32 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <h4 className="mt-4 font-extrabold text-[#0B4F85]">
+                  {it.title}
+                </h4>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                  {it.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Sesi Konseling Section */}
-      <div className="min-h-screen bg-gray-100 pt-64 sm:pt-80 lg:pt-[520px] relative px-5 lg:px-10">
+      <section className="min-h-screen bg-gray-100 pt-8 sm:pt-12 lg:pt-24 relative px-5 lg:px-10">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-2 md:mb-6 lg:mb-12">
             Sesi Konseling
           </h2>
 
@@ -175,7 +238,7 @@ const Konseling = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Modal for Jadwalkan Konseling */}
       <ModalJadwalkanKonseling
