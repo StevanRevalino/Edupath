@@ -4,7 +4,6 @@ interface SectionCardProps {
   title: string;
   children: ReactNode;
   className?: string;
-  headerVariant?: "normal" | "info";
 }
 
 const SectionCard = ({

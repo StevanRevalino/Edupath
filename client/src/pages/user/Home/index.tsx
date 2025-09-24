@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import SectionCard from "./components/SectionCard";
-import ColoredTag from "./components/ColoredTag";
-import { getColorForString } from "../../../utils/colorUtils";
+import UnivAndProdiTag from "./components/univAndProdiTag";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -227,7 +226,6 @@ const Home = () => {
           {/* Info Section */}
           <SectionCard
             title="Info"
-            headerVariant="info"
             className="w-full lg:w-auto justify-start"
           >
             <div className="grid grid-cols-3 sm:grid-cols-6 lg:flex lg:flex-row gap-2 lg:gap-4 items-start">
@@ -281,10 +279,9 @@ const Home = () => {
                 ) : displayedTags.length > 0 ? (
                   <>
                     {displayedTags.map((tag, idx) => (
-                      <ColoredTag
+                      <UnivAndProdiTag
                         key={idx}
                         text={tag}
-                        getColor={getColorForString}
                         onClick={() => {}}
                       />
                     ))}
@@ -383,10 +380,9 @@ const Home = () => {
               ) : displayedExploreMajors.length > 0 ? (
                 <>
                   {displayedExploreMajors.map((major, idx) => (
-                    <ColoredTag
+                    <UnivAndProdiTag
                       key={idx}
                       text={major}
-                      getColor={getColorForString}
                       onClick={() => handleMajorClick(major)}
                     />
                   ))}
@@ -467,10 +463,9 @@ const Home = () => {
               ) : displayedUniversities.length > 0 ? (
                 <>
                   {displayedUniversities.map((university, idx) => (
-                    <ColoredTag
+                    <UnivAndProdiTag
                       key={idx}
                       text={university}
-                      getColor={getColorForString}
                       onClick={() => handleUniversityClick(university)}
                     />
                   ))}
