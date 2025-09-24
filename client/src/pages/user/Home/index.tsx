@@ -152,6 +152,7 @@ const Home = () => {
 
   // Simple placeholder data for analytics (to be replaced with real API data later)
   const totalTests = 0;
+  const tesTerakhir = "12/12/2025";
   const topRecommendationMajor =
     allMajors.length > 0 ? allMajors[0] : "Belum ada data";
   const topRecommendationPercentage = 0;
@@ -235,7 +236,7 @@ const Home = () => {
                   key={index}
                   className="flex flex-col items-center text-center text-xs lg:text-[13px] font-bold w-full lg:w-[110px] mt-1 cursor-pointer"
                 >
-                  <div className="w-16 h-12 sm:w-20 sm:h-16 lg:w-24 lg:h-20 bg-white rounded-2xl lg:rounded-3xl border-1 border-[#003B73] mb-1" />
+                  <div className="w-16 h-12 sm:w-20 sm:h-16 lg:w-24 lg:h-20 bg-white rounded-2xl lg:rounded-xl mb-1 shadow-gray-300 shadow-[4px_4px_8px_rgba(0,0,0,0.3)]" />
                   <span className="leading-tight">{item.label}</span>
                 </div>
               ))}
@@ -324,17 +325,15 @@ const Home = () => {
             <div className="text-2xl lg:text-3xl font-bold mb-2">
               Tes terakhir
             </div>
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="text-[#180085] text-4xl lg:text-6xl font-bold">
-                  {totalTests}
-                </div>
-                <div className="text-lg lg:text-xl font-bold">Hari</div>
-              </div>
+            <div className="flex flex-col gap-4">
               <div className="text-sm lg:text-base">
                 Terakhir kali kamu mengerjakan <br />
                 tes minat bakat adalah pada: <br />
-                <strong>Belum ada data.</strong>
+              </div>
+              <div className="flex flex-col items-start">
+                <div className="text-[#180085] text-3xl lg:text-5xl font-bold">
+                  {tesTerakhir}
+                </div>
               </div>
             </div>
           </div>
