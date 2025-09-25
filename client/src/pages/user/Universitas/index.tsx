@@ -8,6 +8,8 @@ import React, {
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
+import UnivAndProdiTag from "@/components/UnivAndProdiTag";
+import { geocode } from "../../../services/GeoCoderService";
 
 type UniversitasItem = {
   university_id: string;
@@ -31,8 +33,6 @@ type UniversitasDetailType = {
   kota?: string | null;
   provinsi?: string | null;
   kode_pos?: string | null;
-  lintang?: number | null;
-  bujur?: number | null;
   email?: string | null;
   telepon?: string | null;
   fax?: string | null;
@@ -70,8 +70,29 @@ const Universitas: React.FC = () => {
       const res = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      const data = res.data?.data as UniversitasDetailType;
-      console.log("Universitas Detail:", data);
+      let data = res.data?.data as UniversitasDetailType;
+      console.log("Fetched universitas detail (raw):", data);
+
+      const fullAddressParts = [
+        data.alamat || "",
+        data.kota || "",
+        data.provinsi || "",
+        data.kode_pos || "",
+      ]
+        .map((s) => (s || "").trim())
+        .filter(Boolean);
+
+      const fullAddress = fullAddressParts.join(", ");
+      console.log("Geocoding address:", fullAddress);
+
+      const geo = await geocode(fullAddress);
+      if (geo.success && geo.data) {
+        data = {
+          ...data,
+          alamat: fullAddress,
+        };
+      }
+
       setSelectedUniversitas(data);
     } catch (e: any) {
       if (e?.response?.status === 401 || e?.response?.status === 403) {
@@ -227,62 +248,38 @@ const Universitas: React.FC = () => {
                   {[
                     {
                       label: "UGM",
-                      color: "bg-red-100 text-red-800",
-                      icon: "🎓",
                     },
                     {
-                      label: "UI Depok",
-                      color: "bg-blue-100 text-blue-800",
-                      icon: "🏛️",
+                      label: "UI",
                     },
                     {
-                      label: "ITB Bandung",
-                      color: "bg-green-100 text-green-800",
-                      icon: "⚙️",
+                      label: "ITB ",
                     },
                     {
-                      label: "Binus Jakarta",
-                      color: "bg-purple-100 text-purple-800",
-                      icon: "💼",
+                      label: "Binus",
                     },
                     {
-                      label: "ITS Surabaya",
-                      color: "bg-yellow-100 text-yellow-800",
-                      icon: "🔬",
+                      label: "ITS",
                     },
                     {
-                      label: "Unair",
-                      color: "bg-pink-100 text-pink-800",
-                      icon: "⚕️",
+                      label: "UNPAD",
                     },
                     {
-                      label: "UNS Solo",
-                      color: "bg-indigo-100 text-indigo-800",
-                      icon: "📚",
+                      label: "UNAIR",
+                    },
+                    {
+                      label: "UPH",
                     },
                   ].map((tag, index) => (
-                    <button
-                      key={tag.label}
-                      onClick={() => {
-                        setQuery(tag.label);
-                        search(tag.label);
-                      }}
-                      className={`px-3 py-2 rounded-full text-xs font-medium hover:opacity-80 hover:scale-105 transition-all duration-200 flex items-center gap-1 animate-fade-in ${tag.color}`}
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <span className="text-sm">{tag.icon}</span>
-                      {tag.label}
-                    </button>
+                    <UnivAndProdiTag
+                      key={index}
+                      text={tag.label}
+                      className={` cursor-pointer hover:opacity-80`}
+                      onClick={() => search(tag.label)}
+                    />
                   ))}
                 </div>
               </div>
-            )}
-
-            {!query && (
-              <p className="text-gray-500 text-sm mb-4">
-                Mulai dengan mengetik nama universitas atau pilih dari pencarian
-                populer di atas.
-              </p>
             )}
 
             {error && (
@@ -345,30 +342,7 @@ const Universitas: React.FC = () => {
 
             {results.length > 0 && !loading && (
               <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
-                  <span className="inline-flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    Klik pada universitas untuk melihat detail
-                  </span>
-                </div>
+                <div className="mb-2 flex items-center justify-between text-sm text-gray-600"></div>
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-50">
                     <tr>
@@ -687,37 +661,45 @@ const Universitas: React.FC = () => {
                 )}
 
                 {/* Map Link */}
-                {selectedUniversitas.lintang && selectedUniversitas.bujur && (
-                  <div className="px-6 py-4 border-t border-gray-200">
-                    <a
-                      href={`https://www.google.com/maps?q=${selectedUniversitas.lintang},${selectedUniversitas.bujur}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                {selectedUniversitas?.alamat && (
+                    <div className="px-6 py-4 border-t border-gray-200 space-y-4">
+                      {/* Embed Map */}
+                      <iframe
+                        src={`https://maps.google.com/maps?q=${selectedUniversitas.alamat}&z=15&output=embed`}
+                        width="100%"
+                        height="300"
+                        className="rounded-lg border"
+                      ></iframe>
+                      {/* Button open in Google Maps */}
+                      <a
+                        href={`https://www.google.com/maps?q=${selectedUniversitas.alamat}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      Lihat di Google Maps
-                    </a>
-                  </div>
-                )}
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        Lihat di Google Maps
+                      </a>
+                    </div>
+                  )}
               </div>
             ) : (
               // Empty Detail State

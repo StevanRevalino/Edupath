@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import SectionCard from "./components/SectionCard";
-import UnivAndProdiTag from "./components/univAndProdiTag";
+import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -196,7 +196,7 @@ const Home = () => {
         </h1>
 
         {/* Header Section */}
-        <div className="flex flex-col 2xl:flex-row lg:justify-between w-full justify-start lg:items-center space-y-8 lg:space-y-2">
+        <div className="flex flex-col 2xl:flex-row xl:justify-between w-full justify-start lg:items-center space-y-8 lg:space-y-2">
           {/* Profile Section */}
           <div className="flex flex-col items-start lg:items-start justify-start w-full ">
             <div className="flex flex-col w-fit items-start mb-2 lg:mb-0">
@@ -204,7 +204,7 @@ const Home = () => {
                 <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
                 <div className="flex items-start border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
                   <div className="ml-2 lg:ml-4 flex flex-col items-center">
-                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                    <div className="text-md sm:text-xl md:text-2xl lg:text-3xl font-bold">
                       {user
                         ? `${user.firstname} ${user.lastname}`.trim()
                         : "Nama Lengkap"}

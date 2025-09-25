@@ -7,6 +7,7 @@ import prodiRoutes from "./routes/prodiRoutes";
 import consultationRoutes from "./routes/consultationRoutes";
 import userRoutes from "./routes/userRoutes";
 import chatRoutes from "./routes/chatRoutes";
+import geoCodeRoutes from "./routes/geoCoderRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
@@ -46,6 +47,7 @@ app.use("/api/prodi", prodiRoutes);
 app.use("/api/consultations", consultationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/geocode", geoCodeRoutes);
 
 const PORT = 5000;
 
