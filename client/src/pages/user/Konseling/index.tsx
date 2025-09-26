@@ -10,7 +10,8 @@ import ConsultationCard from "./components/ConsultationCard";
 import ConsultationInfo from "./components/ConsultationInfo";
 import ChatView from "./components/ChatView";
 import ScheduleConsultation from "./components/ScheduleConsultation";
-import ConselingHero from "../../../assets/consultation-hero.png";
+import HeroSectionBG from "../../../assets/hero-section.png";
+import ConselingIcon from "../../../assets/icons/conseling-icon.png";
 import conseling1 from "../../../assets/conseling-1.png";
 import conseling2 from "../../../assets/conseling-2.png";
 import conseling3 from "../../../assets/conseling-3.png";
@@ -89,47 +90,62 @@ const Konseling = () => {
   return (
     <div className="min-h-screen bg-gray-100 relative">
       {/* Hero Section */}
-      <section className="absolute -top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
+      <section className="absolute hidden sm:block -top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
         {/* Gambar background */}
         <img
-          src={ConselingHero}
+          src={HeroSectionBG}
           alt="Hero Konseling"
           className="w-full h-full object-cover rounded-b-4xl"
         />
 
-        {/* Overlay konten kiri */}
+        {/* Overlay konten */}
         <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
-            <div className="max-w-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold">
-                Konseling
-              </h1>
-              <p className="mt-3 text-sm sm:text-base lg:text-lg opacity-95">
-                Bicara dengan pihak profesional sekarang. <br />
-                Pastikan bahwa jurusanmu sesuai!
-              </p>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-20 lg:px-12 pt-10">
+            {/* Konten */}
+            <div className="flex items-center">
+              {/* Kiri: teks */}
+              <div className="flex-1/2 pl-8 md:pl-10 lg:pl-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold">
+                  Konseling
+                </h1>
+                <p className="mt-3 text-sm sm:text-base lg:text-lg opacity-95">
+                  Bicara dengan pihak profesional sekarang. <br />
+                  Pastikan bahwa jurusanmu sesuai!
+                </p>
 
-              <button
-                onClick={() => setShowModal(true)}
-                className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
                      text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
                      hover:brightness-95 active:brightness-90 transition"
-              >
-                Jadwalkan sesi
-              </button>
+                >
+                  Jadwalkan sesi
+                </button>
+              </div>
+
+              {/* Kanan: ikon */}
+              <div className="flex flex-1/2 justify-center">
+                <img
+                  src={ConselingIcon}
+                  alt="Ilustrasi Konseling"
+                  className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Optional: gradient gelap tipis dari kiri biar teks lebih kontras */}
+        {/* Gradient overlay */}
         <div
           className="absolute inset-0 pointer-events-none rounded-b-4xl
-                  bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
+              bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
         />
       </section>
 
       {/* Mengapa Konseling (setelah hero) */}
-      <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-64 sm:pt-80 lg:pt-[520px] pb-6">
+      <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-8 sm:pt-80 lg:pt-[520px] pb-6">
         <div
           className="relative rounded-[24px] bg-[#EDF5FF] backdrop-blur-[1px]
                   px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"

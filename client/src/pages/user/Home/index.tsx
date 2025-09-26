@@ -5,6 +5,7 @@ import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
+import HeroSectionBG from "../../../assets/hero-section.png";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -77,14 +78,12 @@ const Home = () => {
           },
         });
 
-        // Extract prodi names for display
         const prodiNames = response.data.data.map(
           (prodi: any) => prodi.nama_prodi
         );
         setAllMajors(prodiNames);
       } catch (error) {
         console.error("Error fetching prodi data:", error);
-        // If API fails, keep empty array and show error state
         setAllMajors([]);
       } finally {
         setMajorsLoading(false);
@@ -114,14 +113,12 @@ const Home = () => {
           }
         );
 
-        // Extract universitas names for display
         const universitasNames = response.data.data.map(
           (univ: any) => univ.nama
         );
         setAllUniversities(universitasNames);
       } catch (error) {
         console.error("Error fetching universitas data:", error);
-        // If API fails, keep empty array and show error state
         setAllUniversities([]);
       } finally {
         setUniversitiesLoading(false);
@@ -132,143 +129,155 @@ const Home = () => {
   }, [API_URL]);
 
   const infoItems = [
-    { label: "Tentang kami" },
-    { label: "Apa itu tes minat & bakat?" },
-    { label: "Telusuri jurusan" },
-    { label: "Hubungi kami" },
+    { label: "Tentang Kami" },
+    { label: "Telusuri Jurusan" },
     { label: "Rekomendasi Universitas" },
-    { label: "Info beasiswa" },
+    { label: "Apa itu Tes Minat Bakat?" },
+    { label: "Informasi Beasiswa" },
+    { label: "Hubungi Kami" },
   ];
 
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [universitySearchQuery, setUniversitySearchQuery] = useState("");
 
-  // Use first 8 majors for history tags display
   const historyTags = allMajors.slice(0, 8);
   const displayedTags = showAll ? historyTags : historyTags.slice(0, 5);
   const hasMore = historyTags.length > 5 && !showAll;
 
-  // Simple placeholder data for analytics (to be replaced with real API data later)
+  // placeholder analytics
   const totalTests = 0;
   const tesTerakhir = "12/12/2025";
   const topRecommendationMajor =
     allMajors.length > 0 ? allMajors[0] : "Belum ada data";
   const topRecommendationPercentage = 0;
 
-  // Filter majors based on search query
-  const filteredExploreMajors = allMajors.filter((major) =>
-    major.toLowerCase().includes(searchQuery.toLowerCase())
+  // filters
+  const filteredExploreMajors = allMajors.filter((m) =>
+    m.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Always show only 8 items for home page preview
   const displayedExploreMajors = filteredExploreMajors.slice(0, 8);
   const hasMoreExplore = filteredExploreMajors.length > 8;
 
-  // Filter universities based on search query
-  const filteredUniversities = allUniversities.filter((university) =>
-    university.toLowerCase().includes(universitySearchQuery.toLowerCase())
+  const filteredUniversities = allUniversities.filter((u) =>
+    u.toLowerCase().includes(universitySearchQuery.toLowerCase())
   );
-
-  // Always show only 8 items for home page preview
   const displayedUniversities = filteredUniversities.slice(0, 8);
   const hasMoreUniversities = filteredUniversities.length > 8;
 
-  // Helper function to get kelas text
-  const getKelasText = (kelas: number | null) => {
-    return `${kelas}`;
-  };
-
-  const handleUniversityClick = (universityName: string) => {
-    navigate("/universitas", { state: { selectedUniversity: universityName } });
-  };
-
-  // Handle major click - navigate to jurusan page with selected major
-  const handleMajorClick = (majorName: string) => {
-    navigate("/jurusan", { state: { selectedMajor: majorName } });
-  };
+  const getKelasText = (kelas: number | null) => `${kelas}`;
+  const handleUniversityClick = (name: string) =>
+    navigate("/universitas", { state: { selectedUniversity: name } });
+  const handleMajorClick = (name: string) =>
+    navigate("/jurusan", { state: { selectedMajor: name } });
 
   return (
-    <div className="px-4 sm:px-8 lg:px-16 xl:px-24">
-      <div className="flex flex-col items-start px-4 sm:px-8 lg:px-20 pt-6 lg:pt-10 gap-2">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-          Hello, {user?.firstname || "User"}!
-        </h1>
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* HERO SECTION */}
+      <section className="hidden sm:block absolute -top-10 lg:-top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
+        {/* Gambar background */}
+        <img
+          src={HeroSectionBG}
+          alt="Hero Home"
+          className="w-full h-full object-cover rounded-b-4xl"
+        />
 
-        {/* Header Section */}
-        <div className="flex flex-col 2xl:flex-row xl:justify-between w-full justify-start lg:items-center space-y-8 lg:space-y-2">
-          {/* Profile Section */}
-          <div className="flex flex-col items-start lg:items-start justify-start w-full ">
-            <div className="flex flex-col w-fit items-start mb-2 lg:mb-0">
-              <div className="relative flex items-center py-4 lg:py-6">
-                <div className="absolute left-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-white border-3 border-[#003B73]" />
-                <div className="flex items-start border-3 border-[#003B73] rounded-full pl-28 sm:pl-32 lg:pl-34 pr-6 lg:pr-8 py-4 lg:py-6 min-w-[300px] sm:min-w-[350px] lg:min-w-[380px]">
-                  <div className="ml-2 lg:ml-4 flex flex-col items-center">
-                    <div className="text-md sm:text-xl md:text-2xl lg:text-3xl font-bold">
-                      {user
-                        ? `${user.firstname} ${user.lastname}`.trim()
-                        : "Nama Lengkap"}
-                    </div>
-                    <div className="text-lg sm:text-xl font-semibold text-gray-700">
+        {/* Overlay konten */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
+            {/* Grid kiri-kanan: kiri (greeting), kanan (kartu info) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+              {/* Kiri: avatar + sapaan + deskripsi + tombol */}
+              <div className="max-w-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+                <div className="flex items-center gap-4">
+                  <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-white/95 shadow-inner ring-2 ring-white/50" />
+                  <div>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold">
+                      Hello, {user?.firstname ? `${user.firstname}!` : "Name!"}
+                    </h1>
+                    <p className="text-white/95 font-semibold -mt-0.5">
                       Kelas {user ? getKelasText(user.kelas) : "XX"}
-                    </div>
+                    </p>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start w-full ml-0 lg:ml-3">
-                <button className="bg-[#003B73] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md font-semibold text-sm lg:mb-10 xl:mb-0 cursor-pointer">
+
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg opacity-95">
+                  Yuk, jelajahi minat dan bakatmu, temukan jurusan dan
+                  universitas terbaik untuk masa depanmu bersama{" "}
+                  <strong>EduPath</strong>!
+                </p>
+
+                <button
+                  className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
+                       text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
+                       hover:brightness-95 active:brightness-90 transition"
+                >
                   Ubah profil
                 </button>
               </div>
+
+              {/* Kanan: grid 2×3 kartu info */}
+              <div className="hidden lg:grid grid-cols-3 gap-x-6 gap-y-8 content-start">
+                {infoItems.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center text-center"
+                  >
+                    <div className="h-20 w-20 lg:h-24 lg:w-24 rounded-2xl bg-white/95 shadow-md" />
+                    <span className="mt-2 text-[11px] lg:text-xs font-semibold text-white drop-shadow">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* Info Section */}
-          <SectionCard
-            title="Info"
-            className="w-full lg:w-auto justify-start"
-          >
-            <div className="grid grid-cols-3 sm:grid-cols-6 lg:flex lg:flex-row gap-2 lg:gap-4 items-start">
-              {infoItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-center text-xs lg:text-[13px] font-bold w-full lg:w-[110px] mt-1 cursor-pointer"
-                >
-                  <div className="w-16 h-12 sm:w-20 sm:h-16 lg:w-24 lg:h-20 bg-white rounded-2xl lg:rounded-xl mb-1 shadow-gray-300 shadow-[4px_4px_8px_rgba(0,0,0,0.3)]" />
-                  <span className="leading-tight">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
         </div>
-      </div>
 
-      {/* Analytics Section */}
-      <SectionCard title="Analytics" className="mt-8 lg:mt-16 w-full">
-        {/* Content Grid - Stack on mobile, grid on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 lg:gap-x-6 lg:gap-y-2">
-          {/* Total Tes */}
-          <div className="lg:row-span-1">
-            <div className="text-2xl lg:text-3xl font-bold mb-2">
-              Total tes diselesaikan
-            </div>
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
-                  {totalTests}
-                </div>
-                <div className="text-lg lg:text-xl font-bold">Tes</div>
+        {/* Gradient gelap tipis dari kiri biar teks lebih kontras */}
+        <div
+          className="absolute inset-0 pointer-events-none rounded-b-4xl
+               bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
+        />
+      </section>
+
+      <div className="relative px-4 sm:px-8 lg:px-10 xl:px-24  sm:pt-80 lg:pt-[520px] pb-6">
+        {/* INFO (mobile only) */}
+        <SectionCard title="Info" className="block lg:hidden w-full mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            {infoItems.map((item, i) => (
+              <div key={i} className="flex flex-col items-center text-center">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white shadow-md" />
+                <span className="mt-1 sm:mt-2 text-[10px] sm:text-[11px] font-semibold text-gray-700">
+                  {item.label}
+                </span>
               </div>
-              <div className="text-sm lg:text-base">
-                Kamu telah mengerjakan <br />
-                tes minat bakat sebanyak <br />
-                <strong>{totalTests} kali!</strong>
-              </div>
-            </div>
+            ))}
           </div>
+        </SectionCard>
+        {/* ANALYTICS */}
+        <SectionCard title="Analytics" className="mt-8 lg:mt-12 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 lg:gap-6">
+            {/* Total Tes */}
+            <div>
+              <div className="text-2xl lg:text-3xl font-bold mb-2">
+                Total tes diselesaikan
+              </div>
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
+                    {totalTests}
+                  </div>
+                  <div className="text-lg lg:text-xl font-bold">Tes</div>
+                </div>
+                <div className="text-sm lg:text-base">
+                  Kamu telah mengerjakan <br /> tes minat bakat sebanyak <br />
+                  <strong>{totalTests} kali!</strong>
+                </div>
+              </div>
+            </div>
 
-          {/* Riwayat Penjurusan + Rekomendasi */}
-          <div className="lg:row-span-1">
+            {/* Riwayat Penjurusan + Rekomendasi */}
             <div>
               <div className="text-base lg:text-lg font-bold mb-3">
                 Riwayat Penjurusan
@@ -303,224 +312,208 @@ const Home = () => {
                   <div className="text-gray-500 text-sm">Belum ada riwayat</div>
                 )}
               </div>
-            </div>
-            <div className="text-end mt-4">
-              <div className="text-lg lg:text-2xl font-bold">
-                ({topRecommendationPercentage}%) Jurusan paling cocok
-              </div>
-              <div className="text-green-700 text-2xl lg:text-4xl font-bold">
-                {topRecommendationMajor}
-              </div>
-              <div className="text-xs lg:text-sm mt-1">
-                Rekomendasi tertinggimu saat ini!
-              </div>
-            </div>
-          </div>
 
-          {/* Tes Terakhir */}
-          <div className="lg:row-span-1">
-            <div className="text-2xl lg:text-3xl font-bold mb-2">
-              Tes terakhir
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="text-sm lg:text-base">
-                Terakhir kali kamu mengerjakan <br />
-                tes minat bakat adalah pada: <br />
+              <div className="text-end mt-4">
+                <div className="text-lg lg:text-2xl font-bold">
+                  ({topRecommendationPercentage}%) Jurusan paling cocok
+                </div>
+                <div className="text-green-700 text-2xl lg:text-4xl font-bold">
+                  {topRecommendationMajor}
+                </div>
+                <div className="text-xs lg:text-sm mt-1">
+                  Rekomendasi tertinggimu saat ini!
+                </div>
               </div>
-              <div className="flex flex-col items-start">
+            </div>
+
+            {/* Tes Terakhir */}
+            <div>
+              <div className="text-2xl lg:text-3xl font-bold mb-2">
+                Tes terakhir
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="text-sm lg:text-base">
+                  Terakhir kali kamu mengerjakan <br />
+                  tes minat bakat adalah pada:
+                </div>
                 <div className="text-[#180085] text-3xl lg:text-5xl font-bold">
                   {tesTerakhir}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Riwayat Tes */}
-          <div className="lg:row-span-1">
-            <div className="text-base lg:text-lg font-bold mb-3">
-              Riwayat Tes
-            </div>
-            <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
-              <div className="bg-white rounded-3xl shadow-md p-3 lg:p-4 flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px] sm:max-w-[300px] lg:max-w-[280px] text-center">
-                <div className="text-gray-500 text-sm lg:text-base">
-                  Belum ada riwayat tes
-                </div>
-                <div className="text-xs lg:text-sm mt-2">
-                  Mulai tes pertama Anda untuk melihat riwayat di sini
+            {/* Riwayat Tes */}
+            <div>
+              <div className="text-base lg:text-lg font-bold mb-3">
+                Riwayat Tes
+              </div>
+              <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
+                <div className="bg-white rounded-3xl shadow-md p-3 lg:p-4 flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px] sm:max-w-[300px] lg:max-w-[280px] text-center">
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Belum ada riwayat tes
+                  </div>
+                  <div className="text-xs lg:text-sm mt-2">
+                    Mulai tes pertama Anda untuk melihat riwayat di sini
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </SectionCard>
+        </SectionCard>
 
-      {/* Bottom Sections */}
-      <div className="flex flex-col mt-8 lg:mt-16 gap-8 lg:gap-16">
-        {/* First Row: Jurusan + Ujian */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
-          {/* Jurusan Section */}
-          <SectionCard title="Jurusan" className="w-full lg:w-[60%] h-fit">
-            {/* Search Bar */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Jelajahi jurusan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
-              />
-            </div>
+        {/* BOTTOM SECTIONS */}
+        <div className="flex flex-col mt-8 lg:mt-12 gap-8 lg:gap-16">
+          {/* Jurusan + Ujian */}
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
+            <SectionCard title="Jurusan" className="w-full lg:w-[60%] h-fit">
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Jelajahi jurusan..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                />
+              </div>
 
-            {/* Major Tags */}
-            <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
-              {majorsLoading ? (
-                <div className="text-gray-500 text-sm lg:text-base">
-                  Memuat data jurusan...
-                </div>
-              ) : displayedExploreMajors.length > 0 ? (
-                <>
-                  {displayedExploreMajors.map((major, idx) => (
-                    <UnivAndProdiTag
-                      key={idx}
-                      text={major}
-                      onClick={() => handleMajorClick(major)}
-                    />
-                  ))}
-                  {hasMoreExplore && (
-                    <button
-                      onClick={() => navigate("/jurusan")}
-                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                    >
-                      Lihat semua jurusan...
-                    </button>
-                  )}
-                </>
-              ) : searchQuery ? (
-                <div className="text-gray-500 text-sm lg:text-base italic">
-                  Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
-                </div>
-              ) : (
-                <div className="text-gray-500 text-sm lg:text-base">
-                  Belum ada data jurusan
-                </div>
-              )}
-            </div>
-          </SectionCard>
-
-          {/* Ujian Section */}
-          <SectionCard
-            title="Ujian"
-            className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
-          >
-            <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button
-                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
-                onClick={() => navigate("/tes")}
-              >
-                <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
-                  <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
-                    <Plus
-                      size={24}
-                      className="lg:hidden text-[#7E7E7E]"
-                      strokeWidth={2}
-                    />
-                    <Plus
-                      size={32}
-                      className="hidden lg:block text-[#7E7E7E]"
-                      strokeWidth={2}
-                    />
+              <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
+                {majorsLoading ? (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Memuat data jurusan...
                   </div>
-                  <div className="text-gray-500 text-base lg:text-lg italic">
-                    Lakukan tes baru...
+                ) : displayedExploreMajors.length > 0 ? (
+                  <>
+                    {displayedExploreMajors.map((major, idx) => (
+                      <UnivAndProdiTag
+                        key={idx}
+                        text={major}
+                        onClick={() => handleMajorClick(major)}
+                      />
+                    ))}
+                    {hasMoreExplore && (
+                      <button
+                        onClick={() => navigate("/jurusan")}
+                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                      >
+                        Lihat semua jurusan...
+                      </button>
+                    )}
+                  </>
+                ) : searchQuery ? (
+                  <div className="text-gray-500 text-sm lg:text-base italic">
+                    Tidak ada jurusan yang ditemukan untuk "{searchQuery}"
                   </div>
-                </div>
-              </button>
-            </div>
-          </SectionCard>
-        </div>
-
-        {/* Second Row: Universitas + Konseling */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
-          {/* Universitas Section */}
-          <SectionCard title="Universitas" className="w-full lg:w-[60%] h-fit">
-            {/* Search Bar */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Jelajahi universitas..."
-                value={universitySearchQuery}
-                onChange={(e) => setUniversitySearchQuery(e.target.value)}
-                className="w-full px-3 lg:px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
-              />
-            </div>
-
-            {/* University Tags */}
-            <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
-              {universitiesLoading ? (
-                <div className="text-gray-500 text-sm lg:text-base">
-                  Memuat data universitas...
-                </div>
-              ) : displayedUniversities.length > 0 ? (
-                <>
-                  {displayedUniversities.map((university, idx) => (
-                    <UnivAndProdiTag
-                      key={idx}
-                      text={university}
-                      onClick={() => handleUniversityClick(university)}
-                    />
-                  ))}
-                  {hasMoreUniversities && (
-                    <button
-                      onClick={() => navigate("/universitas")}
-                      className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
-                    >
-                      Lihat semua universitas...
-                    </button>
-                  )}
-                </>
-              ) : universitySearchQuery ? (
-                <div className="text-gray-500 text-sm lg:text-base italic">
-                  Tidak ada universitas yang ditemukan untuk "
-                  {universitySearchQuery}"
-                </div>
-              ) : (
-                <div className="text-gray-500 text-sm lg:text-base">
-                  Belum ada data universitas
-                </div>
-              )}
-            </div>
-          </SectionCard>
-
-          {/* Konseling Section */}
-          <SectionCard
-            title="Konseling"
-            className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
-          >
-            <div className="flex items-center justify-start h-full min-h-[120px]">
-              <button
-                className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
-                onClick={() => navigate("/konseling")}
-              >
-                <div className="flex items-center gap-3 lg:gap-5 h-full justify-start">
-                  <div className="p-4 lg:p-6 bg-[#E9E9E9] rounded-md">
-                    <Plus
-                      size={24}
-                      className="lg:hidden text-[#7E7E7E]"
-                      strokeWidth={2}
-                    />
-                    <Plus
-                      size={32}
-                      className="hidden lg:block text-[#7E7E7E]"
-                      strokeWidth={2}
-                    />
+                ) : (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Belum ada data jurusan
                   </div>
-                  <div className="text-[#7E7E7E] text-base lg:text-lg italic">
-                    Jadwalkan sesi konseling...
+                )}
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              title="Ujian"
+              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
+            >
+              <div className="flex items-center justify-start h-full min-h-[120px]">
+                <button
+                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                  onClick={() => navigate("/tes")}
+                >
+                  <div className="flex items-center gap-5 h-full justify-start">
+                    <div className="p-6 bg-[#E9E9E9] rounded-md">
+                      <Plus
+                        size={32}
+                        className="text-[#7E7E7E]"
+                        strokeWidth={2}
+                      />
+                    </div>
+                    <div className="text-gray-500 text-lg italic">
+                      Lakukan tes baru...
+                    </div>
                   </div>
-                </div>
-              </button>
-            </div>
-          </SectionCard>
+                </button>
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Universitas + Konseling */}
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
+            <SectionCard
+              title="Universitas"
+              className="w-full lg:w-[60%] h-fit"
+            >
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Jelajahi universitas..."
+                  value={universitySearchQuery}
+                  onChange={(e) => setUniversitySearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
+                {universitiesLoading ? (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Memuat data universitas...
+                  </div>
+                ) : displayedUniversities.length > 0 ? (
+                  <>
+                    {displayedUniversities.map((u, idx) => (
+                      <UnivAndProdiTag
+                        key={idx}
+                        text={u}
+                        onClick={() => handleUniversityClick(u)}
+                      />
+                    ))}
+                    {hasMoreUniversities && (
+                      <button
+                        onClick={() => navigate("/universitas")}
+                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                      >
+                        Lihat semua universitas...
+                      </button>
+                    )}
+                  </>
+                ) : universitySearchQuery ? (
+                  <div className="text-gray-500 text-sm lg:text-base italic">
+                    Tidak ada universitas yang ditemukan untuk "
+                    {universitySearchQuery}"
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm lg:text-base">
+                    Belum ada data universitas
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              title="Konseling"
+              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
+            >
+              <div className="flex items-center justify-start h-full min-h-[120px]">
+                <button
+                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                  onClick={() => navigate("/konseling")}
+                >
+                  <div className="flex items-center gap-5 h-full justify-start">
+                    <div className="p-6 bg-[#E9E9E9] rounded-md">
+                      <Plus
+                        size={32}
+                        className="text-[#7E7E7E]"
+                        strokeWidth={2}
+                      />
+                    </div>
+                    <div className="text-[#7E7E7E] text-lg italic">
+                      Jadwalkan sesi konseling...
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </SectionCard>
+          </div>
         </div>
       </div>
     </div>
