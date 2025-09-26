@@ -9,7 +9,6 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
-import { geocode } from "../../../services/GeoCoderService";
 
 type UniversitasItem = {
   university_id: string;
@@ -84,14 +83,6 @@ const Universitas: React.FC = () => {
 
       const fullAddress = fullAddressParts.join(", ");
       console.log("Geocoding address:", fullAddress);
-
-      const geo = await geocode(fullAddress);
-      if (geo.success && geo.data) {
-        data = {
-          ...data,
-          alamat: fullAddress,
-        };
-      }
 
       setSelectedUniversitas(data);
     } catch (e: any) {
