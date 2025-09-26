@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { icons, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,6 +6,14 @@ import TokenManager from "../../../utils/tokenManager";
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 import HeroSectionBG from "../../../assets/hero-section.png";
+
+//icon info
+import infoHome1 from "../../../assets/icons/info-home-1.png";
+import infoHome2 from "../../../assets/icons/info-home-2.png";
+import infoHome3 from "../../../assets/icons/info-home-3.png";
+import infoHome4 from "../../../assets/icons/info-home-4.png";
+// import infoHome5 from "../../../assets/icons/info-home-5.png";
+// import infoHome6 from "../../../assets/icons/info-home-6.png";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -25,6 +33,16 @@ const Home = () => {
   // Universitas data state
   const [allUniversities, setAllUniversities] = useState<string[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(true);
+
+  // Ambil 1 huruf pertama firstname + lastname (fallback: 2 huruf pertama firstname)
+  const getInitials = (u: { firstname: string; lastname: string } | null) => {
+    const f = (u?.firstname || "").trim();
+    const l = (u?.lastname || "").trim();
+    const a = f ? f[0] : "";
+    const b = l ? l[0] : "";
+    const initials = a + b || f.slice(0, 2) || "U";
+    return initials.toUpperCase();
+  };
 
   // Fetch user data
   useEffect(() => {
@@ -129,10 +147,26 @@ const Home = () => {
   }, [API_URL]);
 
   const infoItems = [
-    { label: "Tentang Kami" },
-    { label: "Telusuri Jurusan" },
-    { label: "Rekomendasi Universitas" },
-    { label: "Apa itu Tes Minat Bakat?" },
+    {
+      label: "Tentang Kami",
+      icons: infoHome1,
+      onclick: () => navigate("/about"),
+    },
+    {
+      label: "Telusuri Jurusan",
+      icons: infoHome2,
+      onclick: () => navigate("/jurusan"),
+    },
+    {
+      label: "Rekomendasi Universitas",
+      icons: infoHome3,
+      onclick: () => navigate("/universitas"),
+    },
+    {
+      label: "Apa itu Tes Minat Bakat?",
+      icons: infoHome4,
+      onclick: () => navigate("/test-info"),
+    },
     { label: "Informasi Beasiswa" },
     { label: "Hubungi Kami" },
   ];
@@ -174,25 +208,36 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 relative">
       {/* HERO SECTION */}
-      <section className="hidden sm:block absolute -top-10 lg:-top-20 left-0 w-full h-64 sm:h-80 lg:h-[520px] z-[1]">
-        {/* Gambar background */}
+      <section className="hidden sm:block absolute -top-10 lg:-top-20 left-0 w-full h-64 sm:h-80 md:h-[540px] lg:h-[780px] z-[1]">
+        {/* Background */}
         <img
           src={HeroSectionBG}
           alt="Hero Home"
           className="w-full h-full object-cover rounded-b-4xl"
         />
 
-        {/* Overlay konten */}
+        {/* Overlay content */}
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
-            {/* Grid kiri-kanan: kiri (greeting), kanan (kartu info) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-              {/* Kiri: avatar + sapaan + deskripsi + tombol */}
-              <div className="max-w-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-                <div className="flex items-center gap-4">
-                  <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-white/95 shadow-inner ring-2 ring-white/50" />
+            {/* >>> FLEX layout, bukan grid <<< */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-10">
+              {/* KIRI: avatar + sapaan + deskripsi + tombol */}
+              <div className="flex-1 max-w-xl lg:max-w-2xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+                <div className="flex items-center gap-4 lg:gap-5">
+                  <div
+                    className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full bg-white/90 shadow-inner ring-2 ring-white/60 flex items-center justify-center select-none"
+                    aria-label={`Avatar ${
+                      user
+                        ? `${user.firstname} ${user.lastname}`.trim()
+                        : "User"
+                    }`}
+                  >
+                    <span className="text-[#003B73] font-extrabold text-lg sm:text-2xl md:text-3xl tracking-wide">
+                      {getInitials(user)}
+                    </span>
+                  </div>
                   <div>
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
                       Hello, {user?.firstname ? `${user.firstname}!` : "Name!"}
                     </h1>
                     <p className="text-white/95 font-semibold -mt-0.5">
@@ -201,7 +246,7 @@ const Home = () => {
                   </div>
                 </div>
 
-                <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg opacity-95">
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg opacity-95 leading-relaxed">
                   Yuk, jelajahi minat dan bakatmu, temukan jurusan dan
                   universitas terbaik untuk masa depanmu bersama{" "}
                   <strong>EduPath</strong>!
@@ -216,45 +261,70 @@ const Home = () => {
                 </button>
               </div>
 
-              {/* Kanan: grid 2×3 kartu info */}
-              <div className="hidden lg:grid grid-cols-3 gap-x-6 gap-y-8 content-start">
-                {infoItems.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col items-center text-center"
-                  >
-                    <div className="h-20 w-20 lg:h-24 lg:w-24 rounded-2xl bg-white/95 shadow-md" />
-                    <span className="mt-2 text-[11px] lg:text-xs font-semibold text-white drop-shadow">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
+              {/* KANAN: ikon info (pakai flex + wrap), hidden di <lg> */}
+              <div className="hidden lg:flex flex-1 justify-end">
+                <div className="grid grid-cols-3 lg:gap-1 xl:gap-2 auto-rows-auto">
+                  {infoItems.map((item, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={item.onclick}
+                      className="group flex flex-col items-center text-center focus:outline-none cursor-pointer"
+                    >
+                      <div className="overflow-hidden grid place-items-center transition-transform group-hover:-translate-y-0.5">
+                        <img
+                          src={item.icons}
+                          alt={item.label}
+                          className="w-24 h-24 xl:w-40 xl:h-40 object-contain"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <span className="mt-2 text-[11px] xl:text-base font-semibold text-white drop-shadow">
+                          {item.label}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
+            {/* <<< end FLEX layout >>> */}
           </div>
         </div>
 
-        {/* Gradient gelap tipis dari kiri biar teks lebih kontras */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-b-4xl
-               bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
-        />
+        {/* Gradient untuk kontras */}
+        <div className="absolute inset-0 pointer-events-none rounded-b-4xl bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent" />
       </section>
 
-      <div className="relative px-4 sm:px-8 lg:px-10 xl:px-24  sm:pt-80 lg:pt-[520px] pb-6">
+      <div className="relative px-4 sm:px-8 lg:px-10 xl:px-24 sm:pt-80 md:pt-[540px] lg:pt-[720px] pb-6">
         {/* INFO (mobile only) */}
         <SectionCard title="Info" className="block lg:hidden w-full mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {infoItems.map((item, i) => (
-              <div key={i} className="flex flex-col items-center text-center">
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white shadow-md" />
-                <span className="mt-1 sm:mt-2 text-[10px] sm:text-[11px] font-semibold text-gray-700">
+              <button
+                key={i}
+                type="button"
+                onClick={() => item.onclick && item.onclick()}
+                className="group flex flex-col items-center text-center focus:outline-none cursor-pointer disabled:opacity-60"
+                disabled={!item.onclick}
+              >
+                <div className="w-full grid place-items-center">
+                  <img
+                    src={item.icons}
+                    alt={item.label}
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain transition-transform group-active:scale-95"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <span className="mt-1 sm:mt-2 text-[11px] sm:text-[12px] font-semibold text-gray-700">
                   {item.label}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </SectionCard>
+
         {/* ANALYTICS */}
         <SectionCard title="Analytics" className="mt-8 lg:mt-12 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 lg:gap-6">
