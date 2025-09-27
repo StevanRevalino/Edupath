@@ -12,8 +12,8 @@ import infoHome1 from "../../../assets/icons/info-home-1.png";
 import infoHome2 from "../../../assets/icons/info-home-2.png";
 import infoHome3 from "../../../assets/icons/info-home-3.png";
 import infoHome4 from "../../../assets/icons/info-home-4.png";
-// import infoHome5 from "../../../assets/icons/info-home-5.png";
-// import infoHome6 from "../../../assets/icons/info-home-6.png";
+import infoHome5 from "../../../assets/icons/info-home-5.png";
+import infoHome6 from "../../../assets/icons/info-home-6.png";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -167,8 +167,16 @@ const Home = () => {
       icons: infoHome4,
       onclick: () => navigate("/test-info"),
     },
-    { label: "Informasi Beasiswa" },
-    { label: "Hubungi Kami" },
+    {
+      label: "Informasi Beasiswa",
+      icons: infoHome5,
+      onclick: () => navigate("/beasiswa"),
+    },
+    {
+      label: "Hubungi Kami",
+      icons: infoHome6,
+      onclick: () => navigate("/contact"),
+    },
   ];
 
   const [showAll, setShowAll] = useState(false);
