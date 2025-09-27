@@ -163,12 +163,6 @@ export class UniversitasService {
         }
       }
 
-      console.log(
-        `Found ${nameResults?.length || 0} name matches and ${
-          combinedResults.length
-        } total results for query: ${query}`
-      );
-
       if (!combinedResults || combinedResults.length === 0) {
         return [];
       }

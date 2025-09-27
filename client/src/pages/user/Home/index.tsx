@@ -40,7 +40,7 @@ const Home = () => {
     const l = (u?.lastname || "").trim();
     const a = f ? f[0] : "";
     const b = l ? l[0] : "";
-    const initials = a + b || f.slice(0, 2) || "U";
+    const initials = a + b || f.slice(0, 2) || "...";
     return initials.toUpperCase();
   };
 
@@ -150,7 +150,7 @@ const Home = () => {
     {
       label: "Tentang Kami",
       icons: infoHome1,
-      onclick: () => navigate("/about"),
+      onclick: () => navigate("/about-us"),
     },
     {
       label: "Telusuri Jurusan",
@@ -165,7 +165,7 @@ const Home = () => {
     {
       label: "Apa itu Tes Minat Bakat?",
       icons: infoHome4,
-      onclick: () => navigate("/test-info"),
+      onclick: () => navigate("/tes"),
     },
     {
       label: "Informasi Beasiswa",
@@ -175,7 +175,7 @@ const Home = () => {
     {
       label: "Hubungi Kami",
       icons: infoHome6,
-      onclick: () => navigate("/contact"),
+      onclick: () => navigate("/contact-us"),
     },
   ];
 
@@ -246,10 +246,10 @@ const Home = () => {
                   </div>
                   <div>
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
-                      Hello, {user?.firstname ? `${user.firstname}!` : "Name!"}
+                      Hello, {user?.firstname ? `${user.firstname}!` : "..."}
                     </h1>
                     <p className="text-white/95 font-semibold -mt-0.5">
-                      Kelas {user ? getKelasText(user.kelas) : "XX"}
+                      Kelas {user ? getKelasText(user.kelas) : "..."}
                     </p>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ const Home = () => {
                       onClick={item.onclick}
                       className="group flex flex-col items-center text-center focus:outline-none cursor-pointer"
                     >
-                      <div className="overflow-hidden grid place-items-center transition-transform group-hover:-translate-y-0.5">
+                      <div className="overflow-hidden grid place-items-center transition-transform group-hover:-translate-y-1">
                         <img
                           src={item.icons}
                           alt={item.label}
@@ -287,7 +287,7 @@ const Home = () => {
                           loading="lazy"
                           decoding="async"
                         />
-                        <span className="mt-2 text-[11px] xl:text-base font-semibold text-white drop-shadow">
+                        <span className="text-[11px] xl:text-base font-semibold text-white drop-shadow">
                           {item.label}
                         </span>
                       </div>
