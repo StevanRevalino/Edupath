@@ -136,12 +136,6 @@ const Konseling = () => {
             </div>
           </div>
         </div>
-
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-b-4xl
-              bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
-        />
       </section>
 
       {/* Mengapa Konseling (setelah hero) */}

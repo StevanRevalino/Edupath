@@ -59,7 +59,7 @@ const Universitas: React.FC = () => {
   const [dataSource, setDataSource] = useState<"api" | "local" | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
-    // ===== Riwayat pencarian (localStorage) =====
+  // ===== Riwayat pencarian (localStorage) =====
   const HISTORY_KEY = "edupath:univSearchHistory";
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -377,12 +377,6 @@ const Universitas: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-b-4xl
-              bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
-        />
       </section>
 
       {/* === Main Section === */}

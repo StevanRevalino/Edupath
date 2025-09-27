@@ -299,9 +299,6 @@ const Home = () => {
             {/* <<< end FLEX layout >>> */}
           </div>
         </div>
-
-        {/* Gradient untuk kontras */}
-        <div className="absolute inset-0 pointer-events-none rounded-b-4xl bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent" />
       </section>
 
       <div className="relative px-4 sm:px-8 lg:px-10 xl:px-24 sm:pt-80 md:pt-[540px] lg:pt-[720px] pb-6">
