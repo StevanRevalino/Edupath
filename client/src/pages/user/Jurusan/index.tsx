@@ -64,6 +64,11 @@ const Jurusan: React.FC = () => {
   const HISTORY_KEY = "edupath:prodiSearchHistory";
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
+  const heroCanSearch = useMemo(
+    () => heroQuery.trim().length >= 2,
+    [heroQuery]
+  );
+
   const showResults = hasSearched && query.trim().length > 0;
 
   const badgeClass = (value?: string | null) => {
@@ -270,9 +275,8 @@ const Jurusan: React.FC = () => {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (canSearch) {
+                    if (heroCanSearch) {
                       setQuery(heroQuery);
-                      pushHistory(heroQuery);
                       setHasSearched(true);
                       search(heroQuery);
                       focusSearch();
@@ -308,7 +312,7 @@ const Jurusan: React.FC = () => {
                       type="text"
                       value={heroQuery}
                       onChange={(e) => setHeroQuery(e.target.value)}
-                      placeholder="Contoh: Informatika ITB, Film Binus, Akuntansi..."
+                      placeholder="Cari Program Studi"
                       className="w-full rounded-full bg-white/95 text-gray-800 placeholder-gray-400 pr-4 pl-11 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.15)] focus:outline-none focus:ring-2 focus:ring-sky-300"
                     />
                   </div>
@@ -316,14 +320,14 @@ const Jurusan: React.FC = () => {
 
                 <button
                   type="button"
-                  disabled={!canSearch || loading}
+                  disabled={!heroCanSearch || loading}
                   className="rounded-full px-5 py-3 bg-sky-300 text-white font-semibold shadow-[0_6px_16px_rgba(0,0,0,0.15)] 
                   disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95 active:brightness-90 transition mt-5"
                   onClick={() => {
-                    if (canSearch) {
+                    if (heroCanSearch) {
                       setQuery(heroQuery);
                       setHasSearched(true);
-                      search(heroQuery);
+                      search(heroQuery); 
                       focusSearch();
                     }
                   }}
@@ -375,8 +379,8 @@ const Jurusan: React.FC = () => {
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Cari program studi atau universitas (mis: Film Binus, Informatika ITB, Akuntansi)…"
-                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+                      placeholder="Cari Program Studi"
+                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
                     />
                   </div>
 

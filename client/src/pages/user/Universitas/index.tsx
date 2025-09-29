@@ -68,6 +68,10 @@ const Universitas: React.FC = () => {
   const [hasSearched, setHasSearched] = useState(false);
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
+  const heroCanSearch = useMemo(
+    () => heroQuery.trim().length >= 2,
+    [heroQuery]
+  );
   const showResults = hasSearched && query.trim().length > 0;
 
   // === Fix lag pakai requestId untuk search ===
@@ -280,9 +284,8 @@ const Universitas: React.FC = () => {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (canSearch) {
+                    if (heroCanSearch) {
                       setQuery(heroQuery);
-                      pushHistory(heroQuery);
                       setHasSearched(true);
                       search(heroQuery);
                       focusSearch();
@@ -326,7 +329,7 @@ const Universitas: React.FC = () => {
                 </form>
                 <button
                   type="submit"
-                  disabled={!canSearch || loading}
+                  disabled={!heroCanSearch || loading}
                   className="rounded-full px-5 py-3 bg-sky-300 text-[#FFFFFF] font-semibold
                          shadow-[0_6px_16px_rgba(0,0,0,0.15)] disabled:opacity-60 disabled:cursor-not-allowed
                          hover:brightness-95 active:brightness-90 transition mt-5"
