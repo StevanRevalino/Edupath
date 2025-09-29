@@ -10,7 +10,11 @@ import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
-import { set } from "date-fns";
+
+import jurusanInfo1 from "../../../assets/jurusan-info-1.png";
+import jurusanInfo2 from "../../../assets/jurusan-info-2.png";
+import jurusanInfo3 from "../../../assets/jurusan-info-3.png";
+import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 type ProdiItem = {
   prodi_id: string;
@@ -70,6 +74,24 @@ const Jurusan: React.FC = () => {
   );
 
   const showResults = hasSearched && query.trim().length > 0;
+
+  const items = [
+    {
+      img: jurusanInfo1,
+      title: "Meningkatkan Peluang Sukses Akademik dan Karier",
+      desc: "Jurusan yang sesuai dengan minat dan kemampuanmu akan membuat proses belajar lebih menyenangkan dan hasilnya lebih optimal. Hal ini juga mempermudahmu membangun keahlian yang relevan dengan karier impianmu.",
+    },
+    {
+      img: jurusanInfo2,
+      title: "Mengurangi Risiko Stres dan Kebingungan di Masa Depan",
+      desc: "Jurusan yang tidak cocok sering membuat mahasiswa merasa terbebani, kehilangan motivasi, bahkan ingin pindah jurusan. Dengan memilih yang tepat sejak awal, kamu bisa meminimalkan tekanan psikologis dan kebingungan soal masa depan.",
+    },
+    {
+      img: jurusanInfo3,
+      title: "Mendukung pengembangan diri jangka panjang",
+      desc: "Jurusan yang sesuai akan memberi ruang untuk mengembangkan potensi diri, membangun koneksi, dan menemukan passion yang bisa bertahan hingga ke dunia kerja dan kehidupan profesional.",
+    },
+  ];
 
   const badgeClass = (value?: string | null) => {
     const v = (value || "").toLowerCase();
@@ -327,21 +349,85 @@ const Jurusan: React.FC = () => {
                     if (heroCanSearch) {
                       setQuery(heroQuery);
                       setHasSearched(true);
-                      search(heroQuery); 
+                      search(heroQuery);
                       focusSearch();
                     }
                   }}
                 >
                   {loading ? "Mencari…" : "Telusuri"}
                 </button>
+                <div className="mt-5 flex flex-wrap max-w-2xl justify-center gap-2">
+                  {[
+                    "Teknik Informatika",
+                    "Sistem Informasi",
+                    "Teknologi Informasi",
+                    "Manajemen",
+                    "Akuntansi",
+                    "Psikologi",
+                    "Hukum",
+                  ].map((label, i) => (
+                    <UnivAndProdiTag
+                      key={i}
+                      text={label}
+                      className="cursor-pointer hover:opacity-90"
+                      onClick={() => {
+                        setQuery(label);
+                        setHasSearched(true);
+                        pushHistory(label);
+                        search(label);
+                        focusSearch();
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-8 sm:pt-80 lg:pt-[520px] pb-6">
+        <div
+          className="relative rounded-[24px] bg-[#EDF5FF] backdrop-blur-[1px]
+                  px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+        >
+          <div
+            className="pointer-events-none absolute -top-6 -left-6 h-12 w-12
+                    border-t-2 border-l-2 border-[#0B4F85] rounded-tl-[20px]"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-6 -right-6 h-12 w-12
+                    border-b-2 border-r-2 border-[#0B4F85] rounded-br-[20px]"
+          />
+
+          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-black mb-8">
+            Mengapa harus Mencari Universitas yang Cocok?
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {items.map((it, i) => (
+              <div key={i} className="text-center px-2">
+                <img
+                  src={it.img}
+                  alt={it.title}
+                  className="mx-auto w-24 h-24 md:w-32 md:h-32 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <h4 className="mt-4 font-extrabold text-[#0B4F85]">
+                  {it.title}
+                </h4>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                  {it.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* === Main Section === */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pt-8 sm:pt-80 lg:pt-[520px] pb-12">
+      <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-extrabold text-[#0B0B0B]">Telusuri</h2>
 

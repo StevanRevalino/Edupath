@@ -154,11 +154,11 @@ const Konseling = () => {
                     border-b-2 border-r-2 border-[#0B4F85] rounded-br-[20px]"
           />
 
-          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-[#0B4F85] mb-8">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-black mb-8">
             Mengapa Konseling?
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {items.map((it, i) => (
               <div key={i} className="text-center px-2">
                 <img

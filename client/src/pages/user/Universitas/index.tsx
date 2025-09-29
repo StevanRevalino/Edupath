@@ -12,6 +12,10 @@ import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
 
+import universitasIcon1 from "../../../assets/universitas-info-1.png";
+import universitasIcon2 from "../../../assets/universitas-info-2.png";
+import universitasIcon3 from "../../../assets/universitas-info-3.png";
+
 type UniversitasItem = {
   university_id: string;
   nama: string;
@@ -73,6 +77,24 @@ const Universitas: React.FC = () => {
     [heroQuery]
   );
   const showResults = hasSearched && query.trim().length > 0;
+
+  const items = [
+    {
+      img: universitasIcon1,
+      title: "Kualitas Pendidikan dan Fasilitas",
+      desc: "Universitas yang tepat akan menyediakan dosen berpengalaman, kurikulum relevan, serta fasilitas pendukung seperti laboratorium, perpustakaan, dan program magang yang membantu perkembangan akademik dan profesionalmu.",
+    },
+    {
+      img: universitasIcon2,
+      title: "Lingkungan dan Budaya Belajar yang Sesuai",
+      desc: "Setiap kampus punya budaya, kegiatan mahasiswa, dan sistem pembelajaran berbeda. Memilih universitas yang sesuai kepribadian dan gaya belajarmu akan membuat pengalaman kuliah lebih nyaman dan menyenangkan.",
+    },
+    {
+      img: universitasIcon3,
+      title: "Peluang Karier dan Jaringan Alumni",
+      desc: "Universitas dengan reputasi baik dan jaringan alumni yang luas bisa membuka kesempatan kerja lebih besar melalui job fair, kerjasama industri, atau rekomendasi dari senior.",
+    },
+  ];
 
   // === Fix lag pakai requestId untuk search ===
   const searchRequestIdRef = useRef(0);
@@ -346,7 +368,7 @@ const Universitas: React.FC = () => {
                 </button>
 
                 {/* TAG REKOMENDASI di Hero */}
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap max-w-2xl justify-center gap-2">
                   {[
                     "UGM",
                     "UI",
@@ -356,6 +378,9 @@ const Universitas: React.FC = () => {
                     "UNPAD",
                     "UNAIR",
                     "UPH",
+                    "UMN",
+                    "Telkom University",
+                    "Universitas Brawijaya",
                   ].map((label, i) => (
                     <UnivAndProdiTag
                       key={i}
@@ -363,6 +388,7 @@ const Universitas: React.FC = () => {
                       className="cursor-pointer hover:opacity-90"
                       onClick={() => {
                         setQuery(label);
+                        setHasSearched(true);
                         pushHistory(label);
                         search(label);
                         focusSearch();
@@ -376,8 +402,48 @@ const Universitas: React.FC = () => {
         </div>
       </section>
 
+      <section className="relative px-[52px] md:px-[120px] lg:px-[180px] xl:px-[240px] pt-8 sm:pt-80 lg:pt-[520px] pb-6">
+        <div
+          className="relative rounded-[24px] bg-[#EDF5FF] backdrop-blur-[1px]
+                  px-5 py-6 md:px-8 md:py-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+        >
+          <div
+            className="pointer-events-none absolute -top-6 -left-6 h-12 w-12
+                    border-t-2 border-l-2 border-[#0B4F85] rounded-tl-[20px]"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-6 -right-6 h-12 w-12
+                    border-b-2 border-r-2 border-[#0B4F85] rounded-br-[20px]"
+          />
+
+          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-black mb-8">
+            Mengapa harus Mencari Universitas yang Cocok?
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {items.map((it, i) => (
+              <div key={i} className="text-center px-2">
+                <img
+                  src={it.img}
+                  alt={it.title}
+                  className="mx-auto w-24 h-24 md:w-32 md:h-32 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <h4 className="mt-4 font-extrabold text-[#0B4F85]">
+                  {it.title}
+                </h4>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                  {it.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* === Main Section === */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pt-8 sm:pt-80 lg:pt-[520px] pb-12">
+      <section className="relative px-4 sm:px-6 lg:px-8 mt-8 lg:mt-12 pb-12">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-extrabold text-[#0B0B0B]">Telusuri</h2>
           {/* Search Panel + Detail */}

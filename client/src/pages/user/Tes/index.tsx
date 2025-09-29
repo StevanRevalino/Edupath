@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import HeroSectionBG from "../../../assets/hero-section.png";
 import TesIcon from "../../../assets/icons/tes-header-icon.png";
-import TestInfoIcon1 from "../../../assets/test-info-icon-1.png";
-import TestInfoIcon2 from "../../../assets/test-info-icon-2.png";
-import TestInfoIcon3 from "../../../assets/test-info-icon-3.png";
+import TestInfoIcon1 from "../../../assets/tes-info-1.png";
+import TestInfoIcon2 from "../../../assets/tes-info-2.png";
+import TestInfoIcon3 from "../../../assets/tes-info-3.png";
 import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
@@ -151,11 +151,11 @@ const Tes = () => {
                     border-b-2 border-r-2 border-[#0B4F85] rounded-br-[20px]"
           />
 
-          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-[#0B4F85] mb-8">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-center text-black mb-8">
             Mengapa Tes Minat & Bakat?
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {items.map((it, i) => (
               <div key={i} className="text-center px-2">
                 <img
