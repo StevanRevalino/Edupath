@@ -65,9 +65,10 @@ const Universitas: React.FC = () => {
 
   const heroSearchRef = useRef<HTMLInputElement | null>(null);
   const mainSearchRef = useRef<HTMLInputElement | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
-  const showResults = query.trim().length > 0;
+  const showResults = hasSearched && query.trim().length > 0;
 
   // === Fix lag pakai requestId untuk search ===
   const searchRequestIdRef = useRef(0);
@@ -175,25 +176,20 @@ const Universitas: React.FC = () => {
     [fetchUniversitasDetail]
   );
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      if (raw) setRecentSearches(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  const pushHistory = (term: string) => {
+  const pushHistory = useCallback((term: string) => {
     const t = term.trim();
     if (!t) return;
-    const next = [
-      t,
-      ...recentSearches.filter((x) => x.toLowerCase() !== t.toLowerCase()),
-    ].slice(0, 10);
-    setRecentSearches(next);
-    try {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-    } catch {}
-  };
+    setRecentSearches((prev) => {
+      const next = [
+        t,
+        ...prev.filter((x) => x.toLowerCase() !== t.toLowerCase()),
+      ].slice(0, 10);
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const clearHistory = () => {
     setRecentSearches([]);
@@ -210,45 +206,17 @@ const Universitas: React.FC = () => {
     } catch {}
   };
 
-  // untuk input search (pakai debounce 400ms)
-  useEffect(() => {
-    if (query.trim().length >= 2) {
-      const id = setTimeout(() => {
-        search(query);
-        pushHistory(query);
-      }, 400);
-      return () => clearTimeout(id);
-    }
-  }, [query, search]);
-
   const onSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       if (canSearch) {
         search(query);
+        setHasSearched(true);
         pushHistory(query);
       }
     },
     [canSearch, query, search, pushHistory]
   );
-
-  const onClear = useCallback(() => {
-    setQuery("");
-    setResults([]);
-    setError("");
-    setSelectedUniversitas(null);
-    setDetailError("");
-    setDataSource(null);
-  }, []);
-
-  // auto-select dari navigation state
-  useEffect(() => {
-    const selectedUniversityName = (location.state as any)?.selectedUniversity;
-    if (selectedUniversityName) {
-      setQuery(selectedUniversityName);
-      search(selectedUniversityName, true);
-    }
-  }, [location.state, search]);
 
   const cleanProvinceName = (provinsi: string | null | undefined) => {
     if (!provinsi) return "-";
@@ -267,6 +235,28 @@ const Universitas: React.FC = () => {
       mainSearchRef.current.setSelectionRange(val.length, val.length);
     }
   };
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (raw) setRecentSearches(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  // auto-select dari navigation state
+  useEffect(() => {
+    const selectedUniversityName = (location.state as any)?.selectedUniversity;
+    if (selectedUniversityName) {
+      setQuery(selectedUniversityName);
+      search(selectedUniversityName, true);
+    }
+  }, [location.state, search]);
+
+  useEffect(() => {
+    if (query.trim() === "") {
+      setHasSearched(false);
+    }
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
@@ -290,9 +280,10 @@ const Universitas: React.FC = () => {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (heroQuery.trim().length >= 2) {
+                    if (canSearch) {
                       setQuery(heroQuery);
                       pushHistory(heroQuery);
+                      setHasSearched(true);
                       search(heroQuery);
                       focusSearch();
                     }
@@ -341,6 +332,9 @@ const Universitas: React.FC = () => {
                          hover:brightness-95 active:brightness-90 transition mt-5"
                   onClick={() => {
                     if (canSearch) {
+                      setQuery(heroQuery);
+                      setHasSearched(true);
+                      search(heroQuery);
                       focusSearch();
                     }
                   }}
@@ -387,36 +381,57 @@ const Universitas: React.FC = () => {
           <div className="flex gap-6">
             <div className="flex-1">
               {/* Search bar besar ala mockup */}
-              <form onSubmit={onSubmit} className="my-4">
-                <div className="relative w-full">
-                  <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M21 21l-4.35-4.35"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <circle
-                        cx="11"
-                        cy="11"
-                        r="7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </span>
-                  <input
-                    ref={mainSearchRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Telusuri..."
-                    className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pr-5 pl-14 py-2
-                   shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-                  />
-                  <button type="submit" className="hidden">
-                    Telusuri
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (canSearch) {
+                    setHasSearched(true);
+                    search(query);
+                    pushHistory(query);
+                  }
+                }}
+                className="my-4"
+              >
+                <div className="flex w-full items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M21 21l-4.35-4.35"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <circle
+                          cx="11"
+                          cy="11"
+                          r="7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    </span>
+                    <input
+                      ref={mainSearchRef}
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Telusuri..."
+                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!canSearch || loading}
+                    className="rounded-full px-6 py-3 bg-sky-600 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95"
+                  >
+                    {loading ? "Mencari…" : "Telusuri"}
                   </button>
                 </div>
               </form>

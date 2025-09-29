@@ -10,6 +10,7 @@ import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
+import { set } from "date-fns";
 
 type ProdiItem = {
   prodi_id: string;
@@ -51,6 +52,7 @@ const Jurusan: React.FC = () => {
   const [detailError, setDetailError] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [dataSource, setDataSource] = useState<"api" | "local" | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const controllerRef = useRef<AbortController | null>(null);
   const searchRequestIdRef = useRef(0);
@@ -60,8 +62,9 @@ const Jurusan: React.FC = () => {
   const mainSearchRef = useRef<HTMLInputElement | null>(null);
 
   const HISTORY_KEY = "edupath:prodiSearchHistory";
+
   const canSearch = useMemo(() => query.trim().length >= 2, [query]);
-  const showResults = query.trim().length > 0;
+  const showResults = hasSearched && query.trim().length > 0;
 
   const badgeClass = (value?: string | null) => {
     const v = (value || "").toLowerCase();
@@ -179,18 +182,20 @@ const Jurusan: React.FC = () => {
     } catch {}
   }, []);
 
-  const pushHistory = (term: string) => {
+  const pushHistory = useCallback((term: string) => {
     const t = term.trim();
     if (!t) return;
-    const next = [
-      t,
-      ...recentSearches.filter((x) => x.toLowerCase() !== t.toLowerCase()),
-    ].slice(0, 10);
-    setRecentSearches(next);
-    try {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-    } catch {}
-  };
+    setRecentSearches((prev) => {
+      const next = [
+        t,
+        ...prev.filter((x) => x.toLowerCase() !== t.toLowerCase()),
+      ].slice(0, 10);
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const clearHistory = () => {
     setRecentSearches([]);
@@ -199,41 +204,16 @@ const Jurusan: React.FC = () => {
     } catch {}
   };
 
-  // auto-select dari navigation state
-  useEffect(() => {
-    const selectedMajorName = (location.state as any)?.selectedMajor;
-    if (selectedMajorName) {
-      setQuery(selectedMajorName);
-      search(selectedMajorName, true);
-    }
-  }, [location.state, search]);
-
-  // untuk input search (debounce 400ms)
-  useEffect(() => {
-    if (query.trim().length >= 2) {
-      const id = setTimeout(() => {
-        search(query);
-      }, 400);
-      return () => clearTimeout(id);
-    }
-  }, [query, search]);
-
   const onSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (canSearch) search(query);
+      if (canSearch) {
+        setHasSearched(true);
+        search(query);
+      }
     },
     [canSearch, query, search]
   );
-
-  const onClear = useCallback(() => {
-    setQuery("");
-    setResults([]);
-    setError("");
-    setSelectedProdi(null);
-    setDetailError("");
-    setDataSource(null);
-  }, []);
 
   const focusSearch = () => {
     if (mainSearchRef.current) {
@@ -244,6 +224,30 @@ const Jurusan: React.FC = () => {
       mainSearchRef.current.focus();
     }
   };
+
+  // ===== Search History =====
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (raw) setRecentSearches(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  // auto-select dari navigation state
+  useEffect(() => {
+    const selectedMajorName = (location.state as any)?.selectedMajor;
+    if (selectedMajorName) {
+      setQuery(selectedMajorName);
+      setHasSearched(true);
+      search(selectedMajorName, true);
+    }
+  }, [location.state, search]);
+
+  useEffect(() => {
+    if (query.trim() === "") {
+      setHasSearched(false);
+    }
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
@@ -266,9 +270,10 @@ const Jurusan: React.FC = () => {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (heroQuery.trim().length >= 2) {
+                    if (canSearch) {
                       setQuery(heroQuery);
                       pushHistory(heroQuery);
+                      setHasSearched(true);
                       search(heroQuery);
                       focusSearch();
                     }
@@ -312,9 +317,15 @@ const Jurusan: React.FC = () => {
                 <button
                   type="button"
                   disabled={!canSearch || loading}
-                  className="rounded-full px-5 py-3 bg-sky-300 text-white font-semibold shadow-[0_6px_16px_rgba(0,0,0,0.15)] disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95 active:brightness-90 transition mt-5"
+                  className="rounded-full px-5 py-3 bg-sky-300 text-white font-semibold shadow-[0_6px_16px_rgba(0,0,0,0.15)] 
+                  disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95 active:brightness-90 transition mt-5"
                   onClick={() => {
-                    if (canSearch) focusSearch();
+                    if (canSearch) {
+                      setQuery(heroQuery);
+                      setHasSearched(true);
+                      search(heroQuery);
+                      focusSearch();
+                    }
                   }}
                 >
                   {loading ? "Mencari…" : "Telusuri"}
@@ -334,34 +345,48 @@ const Jurusan: React.FC = () => {
             {/* Left: Search + Results */}
             <div className="flex-1">
               <form onSubmit={onSubmit} className="my-4">
-                <div className="relative w-full">
-                  <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M21 21l-4.35-4.35"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <circle
-                        cx="11"
-                        cy="11"
-                        r="7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </span>
-                  <input
-                    ref={mainSearchRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Cari program studi atau universitas (mis: Film Binus, Informatika ITB, Akuntansi)…"
-                    className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pr-5 pl-14 py-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-                  />
-                  <button type="submit" className="hidden">
-                    Telusuri
+                <div className="flex w-full items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M21 21l-4.35-4.35"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <circle
+                          cx="11"
+                          cy="11"
+                          r="7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    </span>
+
+                    <input
+                      ref={mainSearchRef}
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Cari program studi atau universitas (mis: Film Binus, Informatika ITB, Akuntansi)…"
+                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!canSearch || loading}
+                    className="rounded-full px-6 py-3 bg-sky-600 text-white font-semibold
+                 disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95"
+                  >
+                    {loading ? "Mencari…" : "Telusuri"}
                   </button>
                 </div>
               </form>
@@ -403,7 +428,7 @@ const Jurusan: React.FC = () => {
                             className="text-left text-[15px] text-gray-800 hover:underline"
                             onClick={() => {
                               setQuery(term);
-                              pushHistory(term);
+                              setHasSearched(true);
                               search(term);
                             }}
                           >
