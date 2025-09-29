@@ -6,6 +6,7 @@ export class ProdiService {
   constructor() {
     this.prodiRepository = new ProdiRepository();
   }
+
   // Get all prodi with optional search and pagination
   async getAllProdiLocal({
     search = "",
@@ -18,7 +19,6 @@ export class ProdiService {
   }) {
     try {
       if (search && search.trim().length > 0) {
-        // Use existing search functionality if search term provided
         const searchResults = await this.searchProdiLocal(search.trim(), take);
         return {
           data: searchResults,
@@ -26,18 +26,15 @@ export class ProdiService {
         };
       }
 
-      // Get all prodi without search
       const allProdi = await this.prodiRepository.findMany({
-        limit: 1000, // Get reasonable amount
+        limit: 1000,
       });
 
-      // Get detailed results with relations
       const detailedProdi = await Promise.all(
         allProdi.slice(skip, skip + take).map(async (prodi) => {
           const detailed = await this.prodiRepository.findById(prodi.prodi_id);
           if (!detailed) return null;
 
-          // Transform to consistent format
           return {
             prodi_id: detailed.prodi_id.toString(),
             nama_prodi: detailed.nama_prodi,
@@ -76,7 +73,6 @@ export class ProdiService {
         return null;
       }
 
-      // Transform to match API format
       const transformedResult = {
         prodi_id: result.prodi_id.toString(),
         nama_prodi: result.nama_prodi,
@@ -99,183 +95,286 @@ export class ProdiService {
       throw error;
     }
   }
-  // Search prodi from local database
+
+  // Main search function
   async searchProdiLocal(query: string, limit: number = 20) {
     try {
-      // Normalize query: trim, lowercase, split into words
       const normalizedQuery = query.trim().toLowerCase();
+      
+      if (normalizedQuery.length === 0) {
+        return [];
+      }
+
       const queryWords = normalizedQuery
         .split(/\s+/)
         .filter((word) => word.length >= 2);
 
-      // If single word or very short, use simple search
-      if (queryWords.length <= 1) {
-        return this.simpleSearch(normalizedQuery, limit);
+      if (queryWords.length === 0) {
+        return [];
       }
 
-      // Multi-word search with intelligent matching
-      return this.multiWordSearch(queryWords, limit);
+      return this.intelligentSearch(normalizedQuery, queryWords, limit);
     } catch (error) {
       console.error("Error searching prodi locally:", error);
       throw error;
     }
   }
 
-  // Simple search for single words
-  private async simpleSearch(query: string, limit: number) {
-    // First, search by prodi name (higher priority)
-    const prodiNameResults = await this.prodiRepository.findMany({
-      nama_prodi: query,
-      limit: 1000, // Get more results for processing
-    });
+  // Helper: Create acronym from string
+  private makeAcronym(s: string): string {
+    return s
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join("")
+      .toLowerCase();
+  }
 
-    // Get the detailed results with relations
-    const prodiNameResultsWithRelations = await Promise.all(
-      prodiNameResults.map(async (prodi) => {
-        return await this.prodiRepository.findById(prodi.prodi_id);
-      })
+  // Helper: Normalize university name variations
+  private normalizeUnivName(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/^universitas\s+/i, "")
+      .replace(/^institut\s+/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // Helper: Check if words are in sequence
+  private hasSequentialMatch(text: string, words: string[]): boolean {
+    if (words.length === 0) return false;
+    
+    const pattern = words.join("\\s+");
+    const regex = new RegExp(pattern, "i");
+    return regex.test(text);
+  }
+
+  // Main scoring algorithm
+  private computeScore({
+    prodiName,
+    univName,
+    univShort,
+    words,
+    originalQuery,
+  }: {
+    prodiName: string;
+    univName: string;
+    univShort: string;
+    words: string[];
+    originalQuery: string;
+  }): number {
+    let score = 0;
+
+    const q = originalQuery.toLowerCase().trim();
+    const prodiAcr = this.makeAcronym(prodiName);
+    const univAcr = this.makeAcronym(univName);
+    const univShortAcr = this.makeAcronym(univShort);
+    
+    const normalizedUnivName = this.normalizeUnivName(univName);
+    const normalizedUnivShort = this.normalizeUnivName(univShort);
+
+    // === KOMBINASI PRODI + UNIVERSITAS (Prioritas Tertinggi) ===
+    // Contoh: "ti binus", "informatika ui", "teknik unpad"
+    
+    // Split query into potential prodi and univ parts
+    const hasProdiWord = words.some(w => 
+      prodiName.includes(w) || prodiAcr.includes(w)
+    );
+    const hasUnivWord = words.some(w => 
+      univName.includes(w) || univShort.includes(w) || 
+      normalizedUnivName.includes(w) || normalizedUnivShort.includes(w)
     );
 
-    // Then, search by university name (lower priority)
-    // Since ProdiRepository doesn't have direct university search,
-    // we'll get all prodi and filter by university
-    const allProdiWithUniversities = await Promise.all(
-      (
-        await this.prodiRepository.findMany({ limit: 1000 })
-      ).map(async (prodi) => {
-        return await this.prodiRepository.findById(prodi.prodi_id);
-      })
-    );
+    // Boost combination matches significantly
+    if (hasProdiWord && hasUnivWord) {
+      score += 100; // Major boost for queries mentioning both
+      
+      // Extra boost if both match well
+      const prodiMatches = words.filter(w => prodiName.includes(w)).length;
+      const univMatches = words.filter(w => 
+        univName.includes(w) || univShort.includes(w)
+      ).length;
+      
+      score += (prodiMatches + univMatches) * 15;
+    }
 
-    const universityNameResults = allProdiWithUniversities.filter((prodi) => {
-      if (!prodi?.prodi_pt) return false;
-      return prodi.prodi_pt.some((pt) => {
-        const univName = pt.universitas?.nama?.toLowerCase() || "";
-        const univShortName = pt.universitas?.nama_singkat?.toLowerCase() || "";
-        return (
-          univName.includes(query.toLowerCase()) ||
-          univShortName.includes(query.toLowerCase())
-        );
-      });
-    });
+    // === EXACT MATCHES (Very High Priority) ===
+    if (prodiName === q) score += 200;
+    if (univName === q || univShort === q) score += 150;
+    if (normalizedUnivName === q || normalizedUnivShort === q) score += 140;
 
-    // Combine results, prioritizing prodi name matches
-    const combinedResults = [...prodiNameResultsWithRelations.filter(Boolean)];
-
-    // Add university name results that aren't already included
-    for (const univResult of universityNameResults) {
-      if (!univResult) continue;
-
-      const alreadyExists = combinedResults.some(
-        (existing) => existing && existing.prodi_id === univResult.prodi_id
-      );
-      if (!alreadyExists) {
-        combinedResults.push(univResult);
+    // === ACRONYM MATCHES ===
+    // "ti" for "Teknik Informatika", "ui" for "Universitas Indonesia"
+    if (q === prodiAcr) score += 120;
+    if (q === univAcr || q === univShortAcr) score += 90;
+    
+    // Partial acronym match (for multi-word queries)
+    if (words.length > 1) {
+      const combinedAcronym = words.join("");
+      const fullAcronym = prodiAcr + univAcr;
+      const fullAcronymShort = prodiAcr + univShortAcr;
+      
+      if (combinedAcronym === fullAcronym || combinedAcronym === fullAcronymShort) {
+        score += 150;
       }
     }
 
-    return this.transformResults(combinedResults, limit);
+    // === PRODI NAME MATCHES ===
+    if (prodiName.includes(q)) score += 80;
+    if (prodiName.startsWith(q)) score += 60;
+    
+    // Sequential word matching in prodi
+    if (this.hasSequentialMatch(prodiName, words)) score += 50;
+    
+    // Individual word matches in prodi
+    let prodiWordMatches = 0;
+    for (const w of words) {
+      if (prodiName.includes(w)) {
+        prodiWordMatches++;
+        score += 25;
+        if (prodiName.startsWith(w)) score += 15;
+      }
+    }
+
+    // === UNIVERSITY NAME MATCHES ===
+    if (univName.includes(q) || univShort.includes(q)) score += 50;
+    if (normalizedUnivName.includes(q) || normalizedUnivShort.includes(q)) score += 55;
+    if (univName.startsWith(q) || univShort.startsWith(q)) score += 40;
+    
+    // Sequential word matching in university
+    if (this.hasSequentialMatch(univName + " " + univShort, words)) score += 35;
+    
+    // Individual word matches in university
+    let univWordMatches = 0;
+    for (const w of words) {
+      if (univName.includes(w) || univShort.includes(w)) {
+        univWordMatches++;
+        score += 15;
+        if (univName.startsWith(w) || univShort.startsWith(w)) score += 10;
+      }
+      if (normalizedUnivName.includes(w) || normalizedUnivShort.includes(w)) {
+        score += 12;
+      }
+    }
+
+    // === COVERAGE BONUS ===
+    // Reward results that match more query words
+    const totalWordMatches = prodiWordMatches + univWordMatches;
+    const coverageRatio = totalWordMatches / words.length;
+    
+    if (coverageRatio >= 0.5) score += 20;
+    if (coverageRatio >= 0.75) score += 30;
+    if (coverageRatio === 1.0) score += 50; // All words matched
+
+    // === COMMON ABBREVIATIONS ===
+    const commonAbbreviations: Record<string, string[]> = {
+      "ti": ["teknik informatika", "teknologi informasi"],
+      "si": ["sistem informasi"],
+      "te": ["teknik elektro"],
+      "tm": ["teknik mesin"],
+      "ak": ["akuntansi"],
+      "mn": ["manajemen"],
+      "hk": ["hukum"],
+      "psi": ["psikologi"],
+      "kedokteran": ["fk", "kedokteran"],
+    };
+
+    for (const [abbr, fullNames] of Object.entries(commonAbbreviations)) {
+      if (words.includes(abbr)) {
+        if (fullNames.some(fn => prodiName.includes(fn))) {
+          score += 80;
+        }
+      }
+    }
+
+    // === PENALTIES ===
+    // Penalize if only university matches (without prodi relevance)
+    if (univWordMatches > 0 && prodiWordMatches === 0 && !hasProdiWord) {
+      score -= 40;
+    }
+
+    // Penalize partial matches if there's no strong connection
+    if (totalWordMatches < words.length && score < 50) {
+      score -= 20;
+    }
+
+    return Math.max(0, score);
   }
 
-  // Multi-word search with intelligent matching
-  private async multiWordSearch(queryWords: string[], limit: number) {
-    // Get all potential matches from repository
+  // Intelligent search combining all strategies
+  private async intelligentSearch(
+    originalQuery: string,
+    queryWords: string[],
+    limit: number
+  ) {
     const allProdi = await this.prodiRepository.findMany({ limit: 2000 });
-
-    // Get detailed results with relations
     const allResults = await Promise.all(
-      allProdi.map(async (prodi) => {
-        return await this.prodiRepository.findById(prodi.prodi_id);
-      })
+      allProdi.map(async (prodi) =>
+        this.prodiRepository.findById(prodi.prodi_id)
+      )
     );
 
-    // Score and filter results
-    const scoredResults = [];
+    const scoredResults: Array<{
+      prodi: any;
+      pt: any;
+      score: number;
+    }> = [];
 
     for (const prodi of allResults) {
       if (!prodi || !prodi.prodi_pt) continue;
 
+      const prodiName = (prodi.nama_prodi || "").toLowerCase();
+
       for (const pt of prodi.prodi_pt) {
-        let score = 0;
-        const prodiName = prodi.nama_prodi.toLowerCase();
-        const univName = pt.universitas?.nama?.toLowerCase() || "";
-        const univShortName = pt.universitas?.nama_singkat?.toLowerCase() || "";
+        const univName = (pt.universitas?.nama || "").toLowerCase();
+        const univShort = (pt.universitas?.nama_singkat || "").toLowerCase();
 
-        // Calculate score based on word matches
-        for (const word of queryWords) {
-          // Higher score for exact matches in prodi name
-          if (prodiName.includes(word)) {
-            score += 10;
-          }
-          // Medium score for university name matches
-          if (univName.includes(word) || univShortName.includes(word)) {
-            score += 5;
-          }
-          // Bonus for multiple word matches
-          if (score > 10) {
-            score += 2;
-          }
-        }
+        const score = this.computeScore({
+          prodiName,
+          univName,
+          univShort,
+          words: queryWords,
+          originalQuery,
+        });
 
-        // Only include results that match at least one word
         if (score > 0) {
-          scoredResults.push({
-            prodi,
-            pt,
-            score,
-          });
+          scoredResults.push({ prodi, pt, score });
         }
       }
     }
 
-    // Sort by score (highest first) and transform
-    const sortedResults = scoredResults
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((item) => ({
-        prodi_id: item.prodi.prodi_id.toString(),
-        nama_prodi: item.prodi.nama_prodi,
-        jenjang: item.prodi.jenjang,
-        kode_prodi: null,
-        bidang: null,
-        akreditasi: item.pt.akreditasi_prodi,
-        status: "Aktif",
-        gelar: null,
-        universitas: item.pt.universitas
-          ? {
-              university_id: item.pt.universitas.university_id.toString(),
-              nama: item.pt.universitas.nama,
-              provinsi: item.pt.universitas.provinsi,
-            }
-          : null,
-      }));
+    // Remove duplicates, keeping highest score
+    const dedupMap = new Map<string, { prodi: any; pt: any; score: number }>();
+    for (const item of scoredResults) {
+      const key = `${item.prodi.prodi_id}-${
+        item.pt.universitas?.university_id ?? "x"
+      }`;
+      const existing = dedupMap.get(key);
+      if (!existing || item.score > existing.score) {
+        dedupMap.set(key, item);
+      }
+    }
 
-    return sortedResults;
-  }
+    // Sort by score descending
+    const sorted = [...dedupMap.values()].sort((a, b) => b.score - a.score);
 
-  // Transform results to API format
-  private transformResults(combinedResults: any[], limit: number) {
-    const transformedResults = combinedResults.flatMap((prodi) =>
-      prodi.prodi_pt.map((pt: any) => ({
-        prodi_id: prodi.prodi_id.toString(),
-        nama_prodi: prodi.nama_prodi,
-        jenjang: prodi.jenjang,
-        kode_prodi: null,
-        bidang: null,
-        akreditasi: pt.akreditasi_prodi,
-        status: "Aktif",
-        gelar: null,
-        universitas: pt.universitas
-          ? {
-              university_id: pt.universitas.university_id.toString(),
-              nama: pt.universitas.nama,
-              provinsi: pt.universitas.provinsi,
-            }
-          : null,
-      }))
-    );
-
-    // Apply limit after transformation
-    return transformedResults.slice(0, limit);
+    // Transform and return top results
+    return sorted.slice(0, limit).map((item) => ({
+      prodi_id: item.prodi.prodi_id.toString(),
+      nama_prodi: item.prodi.nama_prodi,
+      jenjang: item.prodi.jenjang ?? null,
+      kode_prodi: null,
+      bidang: null,
+      akreditasi: item.pt.akreditasi_prodi,
+      status: "Aktif",
+      gelar: null,
+      universitas: item.pt.universitas
+        ? {
+            university_id: item.pt.universitas.university_id.toString(),
+            nama: item.pt.universitas.nama,
+            provinsi: item.pt.universitas.provinsi,
+          }
+        : null,
+    }));
   }
 }

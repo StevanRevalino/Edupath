@@ -465,7 +465,7 @@ const Jurusan: React.FC = () => {
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Cari Program Studi"
+                      placeholder="Cari Program Studi (Contoh: Teknik Informatika)"
                       className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
                     />
                   </div>

@@ -95,18 +95,6 @@ export class ProdiController {
         return res.status(400).json({ message: "ID prodi harus disediakan" });
       }
 
-      // TODO: Uncomment when API is ready
-      // try {
-      //   // Try API first
-      //   const prodi = await service.getProdiById(id);
-      //   res.json({
-      //     message: "Berhasil mengambil detail prodi",
-      //     data: prodi,
-      //     source: "api"
-      //   });
-      // } catch (apiError) {
-      //   console.warn("API failed, trying local database:", apiError);
-
       // Use local database (from CSV dataset)
       const localProdi = await this.localService.getProdiDetailLocal(id);
       if (localProdi) {
@@ -131,19 +119,6 @@ export class ProdiController {
       if (!nama || nama.trim().length === 0) {
         return res.status(400).json({ message: "Nama prodi harus disediakan" });
       }
-
-      // TODO: Uncomment when API is ready
-      // try {
-      //   // Try API first
-      //   const data = await service.searchProdiByName(nama);
-      //   res.json({
-      //     message: `Berhasil mencari prodi dengan nama: ${nama}`,
-      //     data,
-      //     total: data.length,
-      //     source: "api"
-      //   });
-      // } catch (apiError) {
-      //   console.warn("API failed, trying local database:", apiError);
 
       // Use local database (from CSV dataset) with limit 15
       const localData = await this.localService.searchProdiLocal(nama, 15);
