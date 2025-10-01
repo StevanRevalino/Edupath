@@ -103,7 +103,7 @@ export class AuthService {
 
   async updateProfile(
     userId: string,
-    data: { firstname?: string; lastname?: string; kelas?: number }
+    data: { firstname?: string; lastname?: string; kelas?: number | null }
   ) {
     // Update profil user
     const updatedUser = await this.userRepository.updateProfile(userId, data);

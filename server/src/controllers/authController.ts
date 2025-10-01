@@ -105,15 +105,29 @@ export class AuthController {
       }
 
       const { firstname, lastname, kelas } = req.body;
+      console.log("Received update request:", { firstname, lastname, kelas });
+
       const updateData: {
         firstname?: string;
         lastname?: string;
-        kelas?: number;
+        kelas?: number | null;
       } = {};
 
       if (firstname) updateData.firstname = firstname;
       if (lastname) updateData.lastname = lastname;
-      if (kelas !== undefined) updateData.kelas = Number(kelas);
+      if (kelas !== undefined && kelas !== null) {
+        const kelasNumber = Number(kelas);
+        // Pastikan kelas adalah number valid, jika tidak gunakan nilai asli atau skip
+        if (!isNaN(kelasNumber) && kelasNumber >= 10 && kelasNumber <= 12) {
+          updateData.kelas = kelasNumber;
+        } else {
+          console.warn(`Invalid kelas value: ${kelas}, skipping update`);
+        }
+      } else if (kelas === null) {
+        updateData.kelas = null;
+      }
+
+      console.log("Update data to be sent to DB:", updateData);
 
       // Cek apakah ada data yang akan diupdate
       if (Object.keys(updateData).length === 0) {

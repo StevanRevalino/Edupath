@@ -34,7 +34,7 @@ export class UserRepository {
 
   async updateProfile(
     userId: string,
-    data: { firstname?: string; lastname?: string; kelas?: number }
+    data: { firstname?: string; lastname?: string; kelas?: number | null }
   ) {
     return this.prisma.user.update({
       where: { user_id: userId },

@@ -2,6 +2,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
+import TokenManager from "@/utils/tokenManager";
+import axios from "axios";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -9,6 +11,13 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // User data state
+  const [user, setUser] = useState<{
+    firstname: string;
+    lastname: string;
+  } | null>(null);
 
   const menuItems = [
     { label: "Home", path: "/home" },
@@ -18,6 +27,61 @@ const Header = () => {
     { label: "Konseling", path: "/konseling" },
     { label: "Profil", path: "/profil" },
   ];
+
+  // Ambil 1 huruf pertama firstname + lastname (fallback: 2 huruf pertama firstname)
+  const getInitials = (u: { firstname: string; lastname: string } | null) => {
+    const f = (u?.firstname || "").trim();
+    const l = (u?.lastname || "").trim();
+    const a = f ? f[0] : "";
+    const b = l ? l[0] : "";
+    const initials = a + b || f.slice(0, 2) || "...";
+    return initials.toUpperCase();
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (!TokenManager.isAuthenticated()) {
+          navigate("/login");
+          return;
+        }
+
+        const token = TokenManager.getToken();
+        const { userId } = TokenManager.getUserData();
+
+        const response = await axios.get(`${API_URL}/api/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setUser(response.data.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (
+          axios.isAxiosError(error) &&
+          (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+          TokenManager.logout();
+          navigate("/login");
+        }
+      }
+    };
+
+    fetchUserData();
+
+    // Listen for profile update event
+    const handleProfileUpdate = () => {
+      fetchUserData();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, [navigate, API_URL]);
 
   // Handle click outside
   useEffect(() => {
@@ -47,7 +111,7 @@ const Header = () => {
   return (
     <>
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full bg-[#6CCBFF] flex items-center justify-between px-8 md:px-12 z-10 h-16 md:h-20 lg:h-22 md:rounded-b-3xl shadow-lg">
+      <header className="fixed top-0 left-0 w-full bg-[#6CCBFF] flex items-center justify-between px-4 lg:px-12 z-10 h-16 md:h-20 lg:h-22 md:rounded-b-3xl shadow-lg">
         {/* Logo */}
         <div
           className="flex items-center space-x-4 cursor-pointer"
@@ -85,8 +149,19 @@ const Header = () => {
           className="hidden md:flex flex-row gap-2 items-center text-white cursor-pointer"
           onClick={() => navigate("/profil")}
         >
-          <div className="w-12 h-12 bg-white rounded-full mb-1"></div>
-          <span className="text-sm">Nama</span>
+          <div
+            className="w-10 h-10 rounded-full bg-white/90 shadow-inner ring-2 flex items-center justify-center select-none"
+            aria-label={`Avatar ${
+              user ? `${user.firstname} ${user.lastname}`.trim() : "User"
+            }`}
+          >
+            <span className="text-[#003B73] font-extrabold text-xl tracking-wide">
+              {getInitials(user)}
+            </span>
+          </div>
+          <span className="text-base font-semibold">
+            {user ? `${user.firstname} ${user.lastname}`.trim() : "User"}
+          </span>
         </div>
 
         {/* Hamburger Menu untuk Mobile */}
