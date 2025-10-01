@@ -15,6 +15,8 @@ import jurusanInfo1 from "../../../assets/jurusan-info-1.png";
 import jurusanInfo2 from "../../../assets/jurusan-info-2.png";
 import jurusanInfo3 from "../../../assets/jurusan-info-3.png";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
+import SearchBar from "./components/SearchBar";
+import SearchHistory from "./components/SearchHistory";
 
 type ProdiItem = {
   prodi_id: string;
@@ -52,10 +54,10 @@ const Jurusan: React.FC = () => {
   const [selectedProdi, setSelectedProdi] = useState<ProdiDetailType | null>(
     null
   );
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [dataSource, setDataSource] = useState<"api" | "local" | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
   const controllerRef = useRef<AbortController | null>(null);
@@ -112,38 +114,43 @@ const Jurusan: React.FC = () => {
     } catch {}
   };
 
-  // ===== Search & Detail with requestId (anti spam) =====
-  const fetchProdiDetail = useCallback(async (prodiId: string) => {
-    const currentId = ++detailRequestIdRef.current;
-    setDetailLoading(true);
-    setDetailError("");
-    try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const url = `${API_URL}/api/prodi/detail/${prodiId}`;
-      const token = TokenManager.getToken();
-      const res = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (currentId !== detailRequestIdRef.current) return;
-      setSelectedProdi(res.data?.data as ProdiDetailType);
-    } catch (e: any) {
-      if (currentId !== detailRequestIdRef.current) return;
-      if (e?.response?.status === 401 || e?.response?.status === 403) {
-        TokenManager.logout();
-        window.location.href = "/login";
-        return;
+  const fetchProdiDetail = useCallback(
+    async (prodiId: string, rowIndex?: number) => {
+      const currentId = ++detailRequestIdRef.current;
+      setDetailLoading(true);
+      setDetailError("");
+      if (rowIndex !== undefined) {
+        setSelectedRowIndex(rowIndex);
       }
-      setDetailError(
-        e?.response?.data?.message ||
-          e?.message ||
-          "Terjadi kesalahan saat memuat detail"
-      );
-    } finally {
-      if (currentId === detailRequestIdRef.current) setDetailLoading(false);
-    }
-  }, []);
+      try {
+        const API_URL =
+          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+        const url = `${API_URL}/api/prodi/detail/${prodiId}`;
+        const token = TokenManager.getToken();
+        const res = await axios.get(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (currentId !== detailRequestIdRef.current) return;
+        setSelectedProdi(res.data?.data as ProdiDetailType);
+      } catch (e: any) {
+        if (currentId !== detailRequestIdRef.current) return;
+        if (e?.response?.status === 401 || e?.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+          return;
+        }
+        setDetailError(
+          e?.response?.data?.message ||
+            e?.message ||
+            "Terjadi kesalahan saat memuat detail"
+        );
+      } finally {
+        if (currentId === detailRequestIdRef.current) setDetailLoading(false);
+      }
+    },
+    []
+  );
 
   const search = useCallback(
     async (q: string, autoSelectExactMatch = false) => {
@@ -171,7 +178,6 @@ const Jurusan: React.FC = () => {
         if (currentId !== searchRequestIdRef.current) return;
         const data = (res.data?.data || []) as ProdiItem[];
         setResults(data);
-        setDataSource(res.data?.source || "api");
 
         pushHistory(q.trim());
 
@@ -179,7 +185,10 @@ const Jurusan: React.FC = () => {
           const exact = data.find(
             (p) => p.nama_prodi.toLowerCase() === q.trim().toLowerCase()
           );
-          if (exact) fetchProdiDetail(exact.prodi_id);
+          if (exact) {
+            const exactIndex = data.indexOf(exact);
+            fetchProdiDetail(exact.prodi_id, exactIndex);
+          }
         }
       } catch (e: any) {
         if (axios.isCancel(e)) return;
@@ -429,115 +438,38 @@ const Jurusan: React.FC = () => {
       {/* === Main Section === */}
       <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-[#0B0B0B]">Telusuri</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">Telusuri</h2>
 
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* Left: Search + Results */}
-            <div className="flex-1">
-              <form onSubmit={onSubmit} className="my-4">
-                <div className="flex w-full items-center gap-2">
-                  <div className="relative flex-1">
-                    <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M21 21l-4.35-4.35"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="11"
-                          cy="11"
-                          r="7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </span>
-
-                    <input
-                      ref={mainSearchRef}
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Cari Program Studi (Contoh: Teknik Informatika)"
-                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={!canSearch || loading}
-                    className="rounded-full px-6 py-3 bg-sky-600 text-white font-semibold
-                 disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95"
-                  >
-                    {loading ? "Mencari…" : "Telusuri"}
-                  </button>
-                </div>
-              </form>
+            <div className="flex-1 w-full lg:w-auto">
+              <SearchBar
+                value={query}
+                onChange={setQuery}
+                onSubmit={onSubmit}
+                placeholder="Cari Program Studi (Contoh: Teknik Informatika)"
+                canSearch={canSearch}
+                loading={loading}
+                inputRef={mainSearchRef}
+              />
 
               {error && (
-                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 mb-4">
+                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 mb-4 text-sm">
                   {error}
                 </div>
               )}
 
               {!showResults ? (
-                // ===== RIWAYAT =====
-                <div className="mt-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-extrabold text-[#0B0B0B]">
-                      Pencarian terakhir
-                    </h3>
-                    {recentSearches.length > 0 && (
-                      <button
-                        onClick={clearHistory}
-                        className="text-sm underline text-gray-500 hover:text-gray-700"
-                      >
-                        Hapus riwayat
-                      </button>
-                    )}
-                  </div>
-
-                  <ul className="mt-4 divide-y divide-gray-100">
-                    {recentSearches.length === 0 ? (
-                      <li className="py-3 text-gray-400">Belum ada riwayat</li>
-                    ) : (
-                      recentSearches.map((term) => (
-                        <li
-                          key={term}
-                          className="py-3 flex items-center justify-between"
-                        >
-                          <button
-                            type="button"
-                            className="text-left text-[15px] text-gray-800 hover:underline"
-                            onClick={() => {
-                              setQuery(term);
-                              setHasSearched(true);
-                              search(term);
-                            }}
-                          >
-                            {term}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeHistoryItem(term)}
-                            className="text-gray-400 hover:text-gray-600 text-lg leading-none"
-                            aria-label={`Hapus ${term}`}
-                            title="Hapus"
-                          >
-                            ×
-                          </button>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </div>
+                <SearchHistory
+                  searches={recentSearches}
+                  onSearchClick={(term) => {
+                    setQuery(term);
+                    setHasSearched(true);
+                    search(term);
+                  }}
+                  onRemove={removeHistoryItem}
+                  onClearAll={clearHistory}
+                />
               ) : (
                 <>
                   {loading && (
@@ -566,11 +498,11 @@ const Jurusan: React.FC = () => {
                               key={`${p.prodi_id}-${
                                 p.universitas?.university_id || "no-univ"
                               }-${index}`}
-                              onClick={() => fetchProdiDetail(p.prodi_id)}
+                              onClick={() =>
+                                fetchProdiDetail(p.prodi_id, index)
+                              }
                               className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
-                                selectedProdi?.prodi_id === p.prodi_id
-                                  ? "bg-blue-100"
-                                  : ""
+                                selectedRowIndex === index ? "bg-sky-50" : ""
                               }`}
                             >
                               <td className="px-4 py-2">

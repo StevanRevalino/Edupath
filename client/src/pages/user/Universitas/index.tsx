@@ -16,6 +16,9 @@ import universitasIcon1 from "../../../assets/universitas-info-1.png";
 import universitasIcon2 from "../../../assets/universitas-info-2.png";
 import universitasIcon3 from "../../../assets/universitas-info-3.png";
 
+import SearchBar from "./components/SearchBar";
+import SearchHistory from "./components/SearchHistory";
+
 type UniversitasItem = {
   university_id: string;
   nama: string;
@@ -60,7 +63,6 @@ const Universitas: React.FC = () => {
     useState<UniversitasDetailType | null>(null);
   const [detailLoading, setDetailLoading] = useState<boolean>(false);
   const [detailError, setDetailError] = useState<string>("");
-  const [dataSource, setDataSource] = useState<"api" | "local" | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
   // ===== Riwayat pencarian (localStorage) =====
@@ -170,7 +172,6 @@ const Universitas: React.FC = () => {
 
         const data = (res.data?.data || []) as UniversitasItem[];
         setResults(data);
-        setDataSource(res.data?.source || "api");
 
         if (autoSelectExactMatch && data.length > 0) {
           const exactMatch = data.find(
@@ -231,18 +232,6 @@ const Universitas: React.FC = () => {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
     } catch {}
   };
-
-  const onSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (canSearch) {
-        search(query);
-        setHasSearched(true);
-        pushHistory(query);
-      }
-    },
-    [canSearch, query, search, pushHistory]
-  );
 
   const cleanProvinceName = (provinsi: string | null | undefined) => {
     if (!provinsi) return "-";
@@ -443,14 +432,18 @@ const Universitas: React.FC = () => {
       </section>
 
       {/* === Main Section === */}
-      <section className="relative px-4 sm:px-6 lg:px-8 mt-8 lg:mt-12 pb-12">
+      <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-[#0B0B0B]">Telusuri</h2>
-          {/* Search Panel + Detail */}
-          <div className="flex gap-6">
-            <div className="flex-1">
-              {/* Search bar besar ala mockup */}
-              <form
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">
+            Telusuri
+          </h2>
+
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+            {/* Left: Search + Results */}
+            <div className="flex-1 w-full lg:w-auto">
+              <SearchBar
+                value={query}
+                onChange={setQuery}
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (canSearch) {
@@ -459,111 +452,30 @@ const Universitas: React.FC = () => {
                     pushHistory(query);
                   }
                 }}
-                className="my-4"
-              >
-                <div className="flex w-full items-center gap-2">
-                  <div className="relative flex-1">
-                    <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 opacity-40">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M21 21l-4.35-4.35"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="11"
-                          cy="11"
-                          r="7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </span>
-                    <input
-                      ref={mainSearchRef}
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Telusuri..."
-                      className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-14 pr-5 py-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={!canSearch || loading}
-                    className="rounded-full px-6 py-3 bg-sky-600 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-95"
-                  >
-                    {loading ? "Mencari…" : "Telusuri"}
-                  </button>
-                </div>
-              </form>
+                placeholder="Cari Universitas (Contoh: Institut Teknologi Bandung)"
+                canSearch={canSearch}
+                loading={loading}
+                inputRef={mainSearchRef}
+              />
 
               {error && (
-                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 mb-4">
+                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 mb-4 text-sm">
                   {error}
                 </div>
               )}
 
               {!showResults ? (
-                // ===== RIWAYAT =====
-                <div className="mt-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-extrabold text-[#0B0B0B]">
-                      Pencarian terakhir
-                    </h3>
-                    {recentSearches.length > 0 && (
-                      <button
-                        onClick={clearHistory}
-                        className="text-sm underline text-gray-500 hover:text-gray-700"
-                      >
-                        Hapus riwayat
-                      </button>
-                    )}
-                  </div>
-
-                  <ul className="mt-4 divide-y divide-gray-100">
-                    {recentSearches.length === 0 ? (
-                      <li className="py-3 text-gray-400">Belum ada riwayat</li>
-                    ) : (
-                      recentSearches.map((term) => (
-                        <li
-                          key={term}
-                          className="py-3 flex items-center justify-between"
-                        >
-                          <button
-                            type="button"
-                            className="text-left text-[15px] text-gray-800 hover:underline"
-                            onClick={() => {
-                              setQuery(term);
-                              pushHistory(term);
-                              search(term);
-                            }}
-                          >
-                            {term}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeHistoryItem(term)}
-                            className="text-gray-400 hover:text-gray-600 text-lg leading-none"
-                            aria-label={`Hapus ${term}`}
-                            title="Hapus"
-                          >
-                            ×
-                          </button>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </div>
+                <SearchHistory
+                  searches={recentSearches}
+                  onSearchClick={(term) => {
+                    setQuery(term);
+                    setHasSearched(true);
+                    search(term);
+                  }}
+                  onRemove={removeHistoryItem}
+                  onClearAll={clearHistory}
+                />
               ) : (
-                // ===== HASIL SEARCH =====
                 <>
                   {loading && (
                     <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
