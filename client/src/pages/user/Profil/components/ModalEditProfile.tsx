@@ -127,7 +127,7 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
             kelas: formData.kelas,
           };
 
-          const response = await axios.put(
+          await axios.put(
             `${API_URL}/api/auth/update-profile`,
             updateData,
             {

@@ -19,7 +19,7 @@ export class UserService {
         lastname: user.lastname,
         email: user.email,
         role: user.role,
-        kelas: user.kelas ? this.convertKelasToString(user.kelas) : null,
+        kelas: user.kelas,
         created_at: user.created_at,
       }));
 
@@ -70,7 +70,7 @@ export class UserService {
         lastname: user.lastname,
         email: user.email,
         role: user.role,
-        kelas: user.kelas ? this.convertKelasToString(user.kelas) : null,
+        kelas: user.kelas,
       };
     } catch (error) {
       console.error("Error in getUserById:", error);
@@ -96,9 +96,7 @@ export class UserService {
         lastname: updatedUser.lastname,
         email: updatedUser.email,
         role: updatedUser.role,
-        kelas: updatedUser.kelas
-          ? this.convertKelasToString(updatedUser.kelas)
-          : null,
+        kelas: updatedUser.kelas,
       };
     } catch (error) {
       console.error("Error in updateUser:", error);
@@ -115,15 +113,16 @@ export class UserService {
     }
   }
 
-  private convertKelasToString(kelas: number): string {
-    // Convert numeric kelas to readable format
-    // Simple mapping: 10 = X, 11 = XI, 12 = XII
-    const kelasMap: { [key: number]: string } = {
-      10: "X",
-      11: "XI",
-      12: "XII",
-    };
+  // Disabled: Kelas now returns as number (10, 11, 12) instead of roman numerals (X, XI, XII)
+  // private convertKelasToString(kelas: number): string {
+  //   // Convert numeric kelas to readable format
+  //   // Simple mapping: 10 = X, 11 = XI, 12 = XII
+  //   const kelasMap: { [key: number]: string } = {
+  //     10: "X",
+  //     11: "XI",
+  //     12: "XII",
+  //   };
 
-    return kelasMap[kelas] || `Kelas ${kelas}`;
-  }
+  //   return kelasMap[kelas] || `Kelas ${kelas}`;
+  // }
 }

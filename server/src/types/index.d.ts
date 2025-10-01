@@ -15,7 +15,7 @@ export interface UserResponse {
   lastname: string;
   email: string;
   role: "ADMIN" | "STUDENT";
-  kelas?: string | null;
+  kelas?: number | null;
   created_at?: string;
 }
 
