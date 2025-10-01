@@ -438,7 +438,9 @@ const Jurusan: React.FC = () => {
       {/* === Main Section === */}
       <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">Telusuri</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">
+            Telusuri
+          </h2>
 
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* Left: Search + Results */}
@@ -502,7 +504,7 @@ const Jurusan: React.FC = () => {
                                 fetchProdiDetail(p.prodi_id, index)
                               }
                               className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
-                                selectedRowIndex === index ? "bg-sky-50" : ""
+                                selectedRowIndex === index ? "bg-blue-100" : ""
                               }`}
                             >
                               <td className="px-4 py-2">
