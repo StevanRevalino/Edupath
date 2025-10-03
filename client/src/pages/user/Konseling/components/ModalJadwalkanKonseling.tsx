@@ -34,6 +34,35 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
+// Helper function to check if a time slot is in the past for today
+const isTimeSlotDisabled = (timeSlot: string, selectedDate?: Date): boolean => {
+  if (!selectedDate) return false;
+
+  const today = new Date();
+  const isToday = selectedDate.toDateString() === today.toDateString();
+
+  if (!isToday) return false;
+
+  const [hours, minutes] = timeSlot.split(":").map(Number);
+  const slotTime = new Date();
+  slotTime.setHours(hours, minutes, 0, 0);
+
+  return slotTime <= today;
+};
+
+// Helper function to get available time slots
+const getAvailableTimeSlots = (selectedDate?: Date): string[] => {
+  if (!selectedDate) return timeSlots;
+
+  const today = new Date();
+  const isToday = selectedDate.toDateString() === today.toDateString();
+
+  if (!isToday) return timeSlots;
+
+  // Filter out past time slots for today
+  return timeSlots.filter((slot) => !isTimeSlotDisabled(slot, selectedDate));
+};
+
 interface Admin {
   user_id: string;
   firstname: string;
@@ -58,7 +87,6 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const [selectedTimeEnd, setSelectedTimeEnd] = useState<string>("");
   const [dateOpen, setDateOpen] = useState(false);
   const [startTimeOpen, setStartTimeOpen] = useState(false);
-  const [endTimeOpen, setEndTimeOpen] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -263,11 +291,32 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   onSelect={(date) => {
                     setSelectedDate(date);
                     setDateOpen(false);
+                    // Reset time selections when date changes to today
+                    if (
+                      date &&
+                      date.toDateString() === new Date().toDateString()
+                    ) {
+                      // Clear time if it's now in the past
+                      if (
+                        selectedTimeStart &&
+                        isTimeSlotDisabled(selectedTimeStart, date)
+                      ) {
+                        setSelectedTimeStart("");
+                      }
+                      if (
+                        selectedTimeEnd &&
+                        isTimeSlotDisabled(selectedTimeEnd, date)
+                      ) {
+                        setSelectedTimeEnd("");
+                      }
+                    }
                     if (errors.selectedDate) {
                       setErrors((prev) => ({ ...prev, selectedDate: "" }));
                     }
                   }}
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) =>
+                    date < new Date(new Date().setHours(0, 0, 0, 0))
+                  }
                   captionLayout="dropdown"
                   className="rounded-md border"
                 />
@@ -302,29 +351,45 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                      {timeSlots.map((time) => (
-                        <Button
-                          key={time}
-                          variant={
-                            selectedTimeStart === time ? "default" : "outline"
-                          }
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTimeStart(time);
-                            setStartTimeOpen(false);
-                            // Clear error when user selects time
-                            if (errors.selectedTimeStart) {
-                              setErrors((prev) => ({
-                                ...prev,
-                                selectedTimeStart: "",
-                              }));
+                      {getAvailableTimeSlots(selectedDate).map((time) => {
+                        const isDisabled = isTimeSlotDisabled(
+                          time,
+                          selectedDate
+                        );
+                        return (
+                          <Button
+                            key={time}
+                            variant={
+                              selectedTimeStart === time ? "default" : "outline"
                             }
-                          }}
-                          className="h-10"
-                        >
-                          {time}
-                        </Button>
-                      ))}
+                            size="sm"
+                            onClick={() => {
+                              if (!isDisabled) {
+                                setSelectedTimeStart(time);
+                                setStartTimeOpen(false);
+                                // Clear end time if it's before or equal to start time
+                                if (
+                                  selectedTimeEnd &&
+                                  selectedTimeEnd <= time
+                                ) {
+                                  setSelectedTimeEnd("");
+                                }
+                                // Clear error when user selects time
+                                if (errors.selectedTimeStart) {
+                                  setErrors((prev) => ({
+                                    ...prev,
+                                    selectedTimeStart: "",
+                                  }));
+                                }
+                              }
+                            }}
+                            disabled={isDisabled}
+                            className="h-10"
+                          >
+                            {time}
+                          </Button>
+                        );
+                      })}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -348,31 +413,47 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                      {timeSlots.map((time) => (
-                        <Button
-                          key={time}
-                          variant={
-                            selectedTimeEnd === time ? "default" : "outline"
-                          }
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTimeEnd(time);
-                            // Clear error when user selects time
-                            if (errors.selectedTimeEnd) {
-                              setErrors((prev) => ({
-                                ...prev,
-                                selectedTimeEnd: "",
-                              }));
-                            }
-                          }}
-                          className="h-10"
-                          disabled={
-                            !!(selectedTimeStart && time <= selectedTimeStart)
-                          }
-                        >
-                          {time}
-                        </Button>
-                      ))}
+                      {getAvailableTimeSlots(selectedDate)
+                        .filter(
+                          (time) =>
+                            !selectedTimeStart || time > selectedTimeStart
+                        )
+                        .map((time) => {
+                          const isDisabled = isTimeSlotDisabled(
+                            time,
+                            selectedDate
+                          );
+                          return (
+                            <Button
+                              key={time}
+                              variant={
+                                selectedTimeEnd === time ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => {
+                                if (!isDisabled) {
+                                  setSelectedTimeEnd(time);
+                                  // Clear error when user selects time
+                                  if (errors.selectedTimeEnd) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      selectedTimeEnd: "",
+                                    }));
+                                  }
+                                }
+                              }}
+                              className="h-10"
+                              disabled={
+                                isDisabled ||
+                                !!(
+                                  selectedTimeStart && time <= selectedTimeStart
+                                )
+                              }
+                            >
+                              {time}
+                            </Button>
+                          );
+                        })}
                     </div>
                   </PopoverContent>
                 </Popover>

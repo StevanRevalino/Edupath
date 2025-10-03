@@ -13,7 +13,7 @@ interface Consultation {
   consultation_id: string;
   murid_id: string;
   topic: string;
-  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
   consultation_date: string;
   consultation_time: string;
   notes?: string;
@@ -80,6 +80,10 @@ const KelolaDataKonseling = () => {
         return "text-green-500 font-semibold";
       case "DECLINED":
         return "text-red-500 font-semibold";
+      case "COMPLETED":
+        return "text-blue-500 font-semibold";
+      default:
+        return "text-gray-500 font-semibold";
     }
   };
 
@@ -91,6 +95,8 @@ const KelolaDataKonseling = () => {
         return "Accepted";
       case "DECLINED":
         return "Declined";
+      case "COMPLETED":
+        return "Completed";
       default:
         return status;
     }
@@ -180,6 +186,67 @@ const KelolaDataKonseling = () => {
     }
   };
 
+  const handleEndConsultation = async (consultationId: string) => {
+    try {
+      const result = await Swal.fire({
+        title: "Akhiri Konseling?",
+        text: "Konseling akan ditandai sebagai selesai dan tidak aktif. Murid dapat membuat konseling baru setelah ini.",
+        imageUrl: questionIcon,
+        imageWidth: 80,
+        imageHeight: 90,
+        showCancelButton: true,
+        confirmButtonColor: "#6CCBFF",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, akhiri konseling",
+        cancelButtonText: "Batal",
+      });
+
+      if (result.isConfirmed) {
+        const token = TokenManager.getToken();
+
+        await axios.patch(
+          `${API_URL}/api/consultations/${consultationId}/end`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        // Update local state
+        setConsultations(
+          consultations.map((consultation) =>
+            consultation.consultation_id === consultationId
+              ? {
+                  ...consultation,
+                  status: "COMPLETED" as Consultation["status"],
+                }
+              : consultation
+          )
+        );
+
+        toast.success("Konseling berhasil diakhiri");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          toast.error("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          toast.error(
+            error.response?.data?.message || "Gagal mengakhiri konseling"
+          );
+        }
+      } else {
+        console.error("Error ending consultation:", error);
+        toast.error("Gagal mengakhiri konseling");
+      }
+    }
+  };
+
   return (
     <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
       <PageHeader
@@ -196,14 +263,16 @@ const KelolaDataKonseling = () => {
             color: "yellow",
           },
           {
-            label: "Accepted",
+            label: "Active",
             value: consultations.filter((c) => c.status === "ACCEPTED").length,
             color: "green",
           },
           {
-            label: "Declined",
-            value: consultations.filter((c) => c.status === "DECLINED").length,
-            color: "red",
+            label: "History",
+            value: consultations.filter(
+              (c) => c.status === "COMPLETED" || c.status === "DECLINED"
+            ).length,
+            color: "blue",
           },
         ]}
       />
@@ -217,7 +286,8 @@ const KelolaDataKonseling = () => {
         filterOptions={[
           { value: "all", label: "Semua Status" },
           { value: "PENDING", label: "Pending" },
-          { value: "ACCEPTED", label: "Accepted" },
+          { value: "ACCEPTED", label: "Active" },
+          { value: "COMPLETED", label: "Completed" },
           { value: "DECLINED", label: "Declined" },
         ]}
       />
@@ -336,12 +406,24 @@ const KelolaDataKonseling = () => {
                             </button>
                           </>
                         )}
-                        {consultation.status !== "PENDING" && (
+                        {consultation.status === "ACCEPTED" && (
+                          <button
+                            onClick={() =>
+                              handleEndConsultation(
+                                consultation.consultation_id
+                              )
+                            }
+                            className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                          >
+                            <span className="w-2 h-2 bg-white rounded-full"></span>
+                            <span>End Consultation</span>
+                          </button>
+                        )}
+                        {(consultation.status === "DECLINED" ||
+                          consultation.status === "COMPLETED") && (
                           <span className="text-sm text-gray-500">
-                            {consultation.status === "ACCEPTED" &&
-                              "Sudah diterima"}
-                            {consultation.status === "DECLINED" &&
-                              "Sudah ditolak"}
+                            {consultation.status === "DECLINED" && "Ditolak"}
+                            {consultation.status === "COMPLETED" && "Selesai"}
                           </span>
                         )}
                       </div>
@@ -400,7 +482,7 @@ const KelolaDataKonseling = () => {
                                   "ACCEPTED"
                                 )
                               }
-                              className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors"
+                              className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors whitespace-nowrap"
                             >
                               <span className="w-2 h-2 bg-white rounded-full"></span>
                               <span>Accept</span>
@@ -412,19 +494,31 @@ const KelolaDataKonseling = () => {
                                   "DECLINED"
                                 )
                               }
-                              className="flex items-center space-x-1 px-3 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-colors"
+                              className="flex items-center space-x-1 px-3 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-colors whitespace-nowrap"
                             >
                               <span className="w-2 h-2 bg-white rounded-full"></span>
                               <span>Decline</span>
                             </button>
                           </>
                         )}
-                        {consultation.status !== "PENDING" && (
+                        {consultation.status === "ACCEPTED" && (
+                          <button
+                            onClick={() =>
+                              handleEndConsultation(
+                                consultation.consultation_id
+                              )
+                            }
+                            className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors whitespace-nowrap"
+                          >
+                            <span className="w-2 h-2 bg-white rounded-full"></span>
+                            <span>End</span>
+                          </button>
+                        )}
+                        {(consultation.status === "DECLINED" ||
+                          consultation.status === "COMPLETED") && (
                           <span className="text-xs text-gray-500 text-center">
-                            {consultation.status === "ACCEPTED" &&
-                              "Sudah diterima"}
-                            {consultation.status === "DECLINED" &&
-                              "Sudah ditolak"}
+                            {consultation.status === "DECLINED" && "Ditolak"}
+                            {consultation.status === "COMPLETED" && "Selesai"}
                           </span>
                         )}
                       </div>

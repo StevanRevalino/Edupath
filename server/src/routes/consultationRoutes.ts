@@ -65,6 +65,13 @@ router.patch(
   consultationController.updateConsultationStatus.bind(consultationController)
 );
 
+// End consultation (set is_active to false)
+router.patch(
+  "/:id/end",
+  authenticateToken,
+  consultationController.endConsultation.bind(consultationController)
+);
+
 // Delete consultation
 router.delete(
   "/:id",

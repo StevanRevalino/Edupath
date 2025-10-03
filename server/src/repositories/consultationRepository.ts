@@ -213,4 +213,62 @@ export class ConsultationRepository {
       select: { consultation_id: true },
     });
   }
+
+  // Find active consultation by student ID
+  async findActiveByMuridId(murid_id: string) {
+    return this.prisma.consultation.findFirst({
+      where: {
+        murid_id,
+        is_active: true,
+      },
+      include: {
+        murid: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            kelas: true,
+          },
+        },
+        admin: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  // Set consultation as inactive
+  async setInactive(consultation_id: string) {
+    return this.prisma.consultation.update({
+      where: { consultation_id },
+      data: {
+        is_active: false,
+      },
+      include: {
+        murid: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            kelas: true,
+          },
+        },
+        admin: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }

@@ -40,6 +40,7 @@ export interface Consultation {
   topic: string;
   consultation_date: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED";
+  is_active: boolean;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -88,6 +89,33 @@ class ConsultationService {
     } catch (error) {
       console.error("Error fetching consultations by status:", error);
       throw error;
+    }
+  }
+
+  async endConsultation(
+    consultation_id: string
+  ): Promise<ApiResponse<Consultation>> {
+    try {
+      const response = await axiosInstance.patch(
+        `/consultations/${consultation_id}/end`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error ending consultation:", error);
+      throw error;
+    }
+  }
+
+  async hasActiveConsultation(): Promise<boolean> {
+    try {
+      const response = await this.getConsultations();
+      if (response.success && response.data) {
+        return response.data.some((c) => c.is_active);
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking active consultation:", error);
+      return false;
     }
   }
 }

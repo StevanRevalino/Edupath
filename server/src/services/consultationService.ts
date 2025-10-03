@@ -281,4 +281,40 @@ export class ConsultationService {
       throw error;
     }
   }
+
+  // Check if student has an active consultation
+  async hasActiveConsultation(murid_id: string): Promise<boolean> {
+    try {
+      const activeConsultation =
+        await this.consultationRepository.findActiveByMuridId(murid_id);
+      return !!activeConsultation;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // End consultation (set is_active to false)
+  async endConsultation(consultation_id: string) {
+    try {
+      const existingConsultation = await this.consultationRepository.findById(
+        consultation_id
+      );
+
+      if (!existingConsultation) {
+        throw new Error("Konseling tidak ditemukan");
+      }
+
+      if (!existingConsultation.is_active) {
+        throw new Error("Konseling sudah tidak aktif");
+      }
+
+      const updatedConsultation = await this.consultationRepository.setInactive(
+        consultation_id
+      );
+
+      return updatedConsultation;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

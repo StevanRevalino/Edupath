@@ -110,6 +110,7 @@ model Consultation {
   consultation_date DateTime
   notes             String?
   status            ConsultationStatus @default(PENDING)
+  is_active         Boolean            @default(true)
   created_at        DateTime           @default(now())
 
   murid User @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
@@ -122,6 +123,7 @@ model Consultation {
   @@index([admin_id])
   @@index([status])
   @@index([consultation_date])
+  @@index([is_active])
 }
 
 // Chat Room model - represents a conversation between a student and admin

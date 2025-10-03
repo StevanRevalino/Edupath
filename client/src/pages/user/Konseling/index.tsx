@@ -27,6 +27,9 @@ const Konseling = () => {
   const [showChat, setShowChat] = useState(false);
   const currentUserId = TokenManager.getUserData().userId || "";
 
+  // Check if there's any active consultation
+  const hasActiveConsultation = consultations.some((c) => c.is_active);
+
   const items = [
     {
       img: conseling1,
@@ -68,6 +71,16 @@ const Konseling = () => {
 
   const handleModalSuccess = () => {
     fetchConsultations(); // Refresh consultations when modal succeeds
+  };
+
+  const handleOpenModal = () => {
+    if (hasActiveConsultation) {
+      toast.error(
+        "Anda masih memiliki konsultasi yang sedang aktif. Harap selesaikan konsultasi tersebut terlebih dahulu."
+      );
+      return;
+    }
+    setShowModal(true);
   };
 
   // Reset chat state when selected consultation changes
@@ -114,10 +127,17 @@ const Konseling = () => {
                 </p>
 
                 <button
-                  onClick={() => setShowModal(true)}
+                  onClick={handleOpenModal}
+                  disabled={hasActiveConsultation}
                   className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
                      text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
-                     hover:brightness-95 active:brightness-90 transition"
+                     hover:brightness-95 active:brightness-90 transition
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                  title={
+                    hasActiveConsultation
+                      ? "Anda masih memiliki konsultasi yang sedang aktif"
+                      : ""
+                  }
                 >
                   Jadwalkan sesi
                 </button>
@@ -191,8 +211,10 @@ const Konseling = () => {
             {/* Left Column */}
             <div className="space-y-8">
               {/* Jadwalkan Konseling */}
-              <ScheduleConsultation onSchedule={() => setShowModal(true)} />
-
+              <ScheduleConsultation
+                onSchedule={handleOpenModal}
+                hasPending={hasActiveConsultation}
+              />{" "}
               {/* Riwayat Konseling */}
               <div className="bg-white rounded-xl shadow-md p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">

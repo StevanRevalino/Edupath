@@ -22,6 +22,17 @@ export class ConsultationController {
         });
       }
 
+      // Check if student has an active consultation
+      const hasActiveConsultation =
+        await this.consultationService.hasActiveConsultation(murid_id);
+      if (hasActiveConsultation) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Anda masih memiliki konsultasi yang sedang aktif. Harap selesaikan konsultasi tersebut terlebih dahulu.",
+        });
+      }
+
       // Validate date format
       const consultationDate = new Date(consultation_date);
       if (isNaN(consultationDate.getTime())) {
@@ -31,11 +42,14 @@ export class ConsultationController {
         });
       }
 
-      // Check if consultation date is in the future
-      if (consultationDate < new Date()) {
+      // Check if consultation date is in the future (with 5 minute margin to account for processing time)
+      const now = new Date();
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+      if (consultationDate < fiveMinutesFromNow) {
         return res.status(400).json({
           success: false,
-          message: "Tanggal konseling harus di masa depan",
+          message: "Tanggal konseling harus minimal 5 menit dari sekarang",
         });
       }
 
@@ -180,7 +194,8 @@ export class ConsultationController {
       if (!validStatuses.includes(status as ConsultationStatus)) {
         return res.status(400).json({
           success: false,
-          message: "Status harus salah satu dari: PENDING, ACCEPTED, DECLINED",
+          message:
+            "Status harus salah satu dari: PENDING, ACCEPTED, DECLINED, COMPLETED",
         });
       }
 
@@ -381,6 +396,34 @@ export class ConsultationController {
         message:
           error.message ||
           "Terjadi kesalahan saat mengambil statistik konseling",
+      });
+    }
+  }
+
+  // End consultation (set is_active to false)
+  async endConsultation(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "ID konseling wajib diisi",
+        });
+      }
+
+      const updatedConsultation =
+        await this.consultationService.endConsultation(id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Konseling berhasil diakhiri",
+        data: updatedConsultation,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat mengakhiri konseling",
       });
     }
   }
