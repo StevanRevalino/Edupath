@@ -7,6 +7,7 @@ import TestInfoIcon3 from "../../../assets/test-info-icon-3.png";
 import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
+import { useNavigate } from "react-router-dom";
 
 // Dummy data for test sessions
 const dummyTesSessions: TesSession[] = [
@@ -62,6 +63,7 @@ const items = [
 ];
 
 const Tes = () => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [tesSessions] = useState<TesSession[]>(dummyTesSessions);
   const [selectedTesSession, setSelectedTesSession] =
@@ -129,11 +131,6 @@ const Tes = () => {
             </div>
           </div>
         </div>
-
-        <div
-          className="absolute inset-0 pointer-events-none rounded-b-4xl
-              bg-gradient-to-r from-[rgba(0,0,0,0.25)] via-transparent to-transparent"
-        />
       </section>
 
       {/* Info Card Section */}
@@ -190,7 +187,7 @@ const Tes = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-8">
               {/* Jadwalkan Tes */}
-              <ScheduleTes onSchedule={() => setShowModal(true)} />
+              <ScheduleTes onSchedule={() => navigate("tutorial")} />
 
               {/* Riwayat Tes */}
               <div className="bg-white rounded-xl shadow-md p-6">
