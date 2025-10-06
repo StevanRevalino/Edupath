@@ -3,6 +3,7 @@ import AdminSidebar from "../../layouts/AdminSidebar";
 import KelolaDataMurid from "./components/KelolaDataMurid";
 import KelolaDataKonseling from "./components/KelolaDataKonseling";
 import KelolaLiveChat from "./components/KelolaLiveChat";
+import KelolaDataBeasiswa from "./components/KelolaDataBeasiswa";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("kelola-data-murid");
@@ -15,6 +16,8 @@ const AdminDashboard = () => {
         return <KelolaDataKonseling />;
       case "kelola-live-chat":
         return <KelolaLiveChat />;
+      case "kelola-data-beasiswa":
+        return <KelolaDataBeasiswa />;
       default:
         return <KelolaDataMurid />;
     }

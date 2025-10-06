@@ -164,3 +164,15 @@ model ChatMessage {
   @@index([sender_id])
   @@index([created_at])
 }
+
+// Scholarship/Beasiswa model
+model Beasiswa {
+  beasiswa_id String   @id @default(cuid())
+  title       String
+  image_url   String // Cloudinary URL
+  link        String // Link to medsos/website universitas
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([created_at])
+}

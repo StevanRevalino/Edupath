@@ -59,6 +59,11 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         label: "Chat Murid",
         icon: "/src/assets/icons/kelola-chat-murid.png",
       },
+      {
+        id: "kelola-data-beasiswa",
+        label: "Kelola Data Beasiswa",
+        icon: "/src/assets/icons/info-home-1.png", // Temporary icon, ganti dengan icon beasiswa nanti
+      },
     ],
     []
   );

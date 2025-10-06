@@ -206,7 +206,7 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
         {/* Close button */}
         <button
