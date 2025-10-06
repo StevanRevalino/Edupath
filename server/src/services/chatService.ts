@@ -255,12 +255,13 @@ export class ChatService {
     }
   }
 
-  // Get students with accepted consultations (for chat user list)
+  // Get students with accepted AND ACTIVE consultations (for live chat user list)
   async getStudentsWithAcceptedConsultations() {
     try {
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
           status: "ACCEPTED",
+          is_active: true, // ✨ Hanya konsultasi yang masih aktif
         },
         include: {
           murid: {
@@ -299,7 +300,7 @@ export class ChatService {
         firstname: consultation.murid.firstname,
         lastname: consultation.murid.lastname,
         kelas: consultation.murid.kelas,
-        consultation_id: consultation.consultation_id, // Add this field
+        consultation_id: consultation.consultation_id,
         latestConsultationTopic: consultation.topic,
         room_id: consultation.chatRoom?.room_id,
         lastMessage:
@@ -311,6 +312,72 @@ export class ChatService {
       }));
     } catch (error) {
       console.error("Error in getStudentsWithAcceptedConsultations:", error);
+      throw error;
+    }
+  }
+
+  // ✨ NEW: Get chat history (inactive consultations)
+  async getChatHistory() {
+    try {
+      const inactiveConsultations = await prisma.consultation.findMany({
+        where: {
+          is_active: false, // Konsultasi yang sudah selesai
+          chatRoom: {
+            isNot: null, // Hanya yang punya chat room
+          },
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+            },
+          },
+          chatRoom: {
+            include: {
+              messages: {
+                orderBy: { created_at: "desc" },
+                take: 1,
+              },
+              _count: {
+                select: {
+                  messages: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      });
+
+      return inactiveConsultations.map((consultation) => ({
+        consultation_id: consultation.consultation_id,
+        user_id: consultation.murid.user_id,
+        firstname: consultation.murid.firstname,
+        lastname: consultation.murid.lastname,
+        kelas: consultation.murid.kelas,
+        admin_name: `${consultation.admin.firstname} ${consultation.admin.lastname}`,
+        topic: consultation.topic,
+        consultation_date: consultation.consultation_date.toISOString(),
+        status: consultation.status,
+        room_id: consultation.chatRoom?.room_id,
+        lastMessage: consultation.chatRoom?.messages[0]?.message || "",
+        lastMessageTime:
+          consultation.chatRoom?.messages[0]?.created_at.toISOString() ||
+          consultation.created_at.toISOString(),
+        messageCount: consultation.chatRoom?._count.messages || 0,
+      }));
+    } catch (error) {
+      console.error("Error in getChatHistory:", error);
       throw error;
     }
   }

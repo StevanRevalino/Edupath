@@ -11,7 +11,12 @@ const ConsultationCard = ({
   isSelected,
   onClick,
 }: ConsultationCardProps) => {
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string, isActive: boolean) => {
+    // Jika konsultasi sudah tidak aktif, tampilkan "Selesai"
+    if (!isActive) {
+      return "Selesai";
+    }
+
     switch (status) {
       case "COMPLETED":
         return "Sesi telah dilakukan";
@@ -24,7 +29,12 @@ const ConsultationCard = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, isActive: boolean) => {
+    // Jika konsultasi sudah tidak aktif, tampilkan warna abu-abu
+    if (!isActive) {
+      return "bg-gray-600";
+    }
+
     switch (status) {
       case "COMPLETED":
         return "bg-green-600";
@@ -40,19 +50,30 @@ const ConsultationCard = ({
   return (
     <div
       onClick={() => onClick(consultation)}
-      className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer ${
+      className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer relative ${
         isSelected
           ? "bg-blue-100 border-blue-500"
+          : !consultation.is_active
+          ? "bg-gray-50 border-gray-300 opacity-75"
           : "bg-blue-50 border-[#00437A] hover:bg-blue-100"
       }`}
     >
+      {/* Badge "Selesai" untuk konsultasi yang tidak aktif */}
+      {!consultation.is_active && (
+        <div className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+          <span>✓</span>
+          <span>Selesai</span>
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-2">
         <span
           className={`text-white text-xs font-semibold px-2 py-1 rounded ${getStatusColor(
-            consultation.status
+            consultation.status,
+            consultation.is_active
           )}`}
         >
-          {getStatusText(consultation.status)}
+          {getStatusText(consultation.status, consultation.is_active)}
         </span>
         <span className="text-xs text-gray-500">
           #{consultation.consultation_id}

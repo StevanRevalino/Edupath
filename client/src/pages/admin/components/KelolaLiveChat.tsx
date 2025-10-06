@@ -23,6 +23,22 @@ interface ChatUser {
   unreadCount?: number;
 }
 
+interface ChatHistory {
+  consultation_id: string;
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  kelas: number | null;
+  admin_name: string;
+  topic: string;
+  consultation_date: string;
+  status: string;
+  room_id?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  messageCount: number;
+}
+
 interface ChatMessage {
   id: string;
   message: string;
@@ -33,8 +49,13 @@ interface ChatMessage {
 }
 
 const KelolaLiveChat = () => {
+  const [activeTab, setActiveTab] = useState<"live" | "history">("live"); // ✨ NEW: Tab state
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]); // ✨ NEW: Chat history state
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+  const [selectedHistory, setSelectedHistory] = useState<ChatHistory | null>(
+    null
+  ); // ✨ NEW
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -103,14 +124,14 @@ const KelolaLiveChat = () => {
     };
   }, [selectedUser, API_URL]);
 
-  // Fetch chat users (students who have accepted consultations)
+  // Fetch chat users (students who have accepted AND ACTIVE consultations)
   useEffect(() => {
     const fetchChatUsers = async () => {
       try {
         setLoading(true);
         const token = TokenManager.getToken();
 
-        // Use the new chat endpoint
+        // Fetch live chat users (active consultations)
         const response = await axios.get(`${API_URL}/api/chat/users`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -119,6 +140,16 @@ const KelolaLiveChat = () => {
         });
 
         setChatUsers(response.data.data);
+
+        // ✨ NEW: Fetch chat history (inactive consultations)
+        const historyResponse = await axios.get(`${API_URL}/api/chat/history`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setChatHistory(historyResponse.data.data);
       } catch (error) {
         console.error("Error fetching chat users:", error);
         if (axios.isAxiosError(error)) {

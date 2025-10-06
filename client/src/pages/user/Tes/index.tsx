@@ -197,7 +197,7 @@ const Tes = () => {
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
                   Riwayat Tes
                 </h3>
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain pt-3">
                   {tesSessions.length > 0 ? (
                     tesSessions.map((tesSession, index) => (
                       <TesCard

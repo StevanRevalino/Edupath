@@ -190,7 +190,7 @@ const KelolaDataKonseling = () => {
     try {
       const result = await Swal.fire({
         title: "Akhiri Konseling?",
-        text: "Konseling akan ditandai sebagai selesai dan tidak aktif. Murid dapat membuat konseling baru setelah ini.",
+        text: "Apakah Anda yakin ingin mengakhiri konseling ini?",
         imageUrl: questionIcon,
         imageWidth: 80,
         imageHeight: 90,

@@ -40,4 +40,11 @@ router.get(
   chatController.getAdminChatRooms.bind(chatController)
 );
 
+// ✨ NEW: Get chat history (inactive consultations)
+router.get(
+  "/history",
+  authenticateToken,
+  chatController.getChatHistory.bind(chatController)
+);
+
 export default router;

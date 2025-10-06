@@ -207,4 +207,25 @@ export class ChatController {
       });
     }
   }
+
+  // ✨ NEW: Get chat history (inactive consultations)
+  async getChatHistory(req: Request, res: Response) {
+    try {
+      const chatHistory = await this.chatService.getChatHistory();
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil chat history",
+        data: chatHistory,
+        count: chatHistory.length,
+      });
+    } catch (error: any) {
+      console.error("Error in getChatHistory:", error);
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || "Terjadi kesalahan saat mengambil chat history",
+      });
+    }
+  }
 }

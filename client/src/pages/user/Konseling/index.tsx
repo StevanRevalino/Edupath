@@ -220,7 +220,7 @@ const Konseling = () => {
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
                   Riwayat Konseling
                 </h3>
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain pt-3">
                   {loading ? (
                     <div className="text-center py-4">
                       <p className="text-gray-500">Loading consultations...</p>

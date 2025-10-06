@@ -34,7 +34,12 @@ const ConsultationInfo = ({
     );
   }
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string, isActive: boolean) => {
+    // Jika konsultasi sudah tidak aktif, tampilkan "Selesai"
+    if (!isActive) {
+      return "Selesai";
+    }
+
     switch (status) {
       case "COMPLETED":
         return "Selesai";
@@ -47,7 +52,12 @@ const ConsultationInfo = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, isActive: boolean) => {
+    // Jika konsultasi sudah tidak aktif, tampilkan warna abu-abu
+    if (!isActive) {
+      return "text-gray-600";
+    }
+
     switch (status) {
       case "COMPLETED":
         return "text-green-600";
@@ -73,11 +83,17 @@ const ConsultationInfo = ({
           </label>
           <p
             className={`text-sm font-semibold ${getStatusColor(
-              consultation.status
+              consultation.status,
+              consultation.is_active
             )}`}
           >
-            {getStatusText(consultation.status)}
+            {getStatusText(consultation.status, consultation.is_active)}
           </p>
+          {!consultation.is_active && (
+            <p className="text-xs text-gray-500 mt-1 italic">
+              Konsultasi ini telah selesai. Anda dapat membuat konsultasi baru.
+            </p>
+          )}
         </div>
 
         <div className="border-b pb-3">
@@ -130,8 +146,8 @@ const ConsultationInfo = ({
           </div>
         )}
 
-        {/* Chat Button - Only show for ACCEPTED consultations */}
-        {consultation.status === "ACCEPTED" && (
+        {/* Chat Button - Only show for ACCEPTED and ACTIVE consultations */}
+        {consultation.status === "ACCEPTED" && consultation.is_active && (
           <div className="pt-4 border-t">
             <button
               onClick={() => onOpenChat(consultation)}
