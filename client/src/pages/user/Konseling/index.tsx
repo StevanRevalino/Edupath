@@ -128,16 +128,9 @@ const Konseling = () => {
 
                 <button
                   onClick={handleOpenModal}
-                  disabled={hasActiveConsultation}
                   className="mt-5 inline-flex items-center rounded-full bg-[#6CCBFF] px-4 py-2
                      text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
-                     hover:brightness-95 active:brightness-90 transition
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
-                  title={
-                    hasActiveConsultation
-                      ? "Anda masih memiliki konsultasi yang sedang aktif"
-                      : ""
-                  }
+                     hover:brightness-95 active:brightness-90 transition"
                 >
                   Jadwalkan sesi
                 </button>

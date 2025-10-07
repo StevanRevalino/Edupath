@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface ScheduleConsultationProps {
   onSchedule: () => void;
@@ -9,26 +10,25 @@ const ScheduleConsultation = ({
   onSchedule,
   hasPending = false,
 }: ScheduleConsultationProps) => {
+  const handleClick = () => {
+    if (hasPending) {
+      toast.error(
+        "Anda masih memiliki konsultasi yang sedang aktif. Harap selesaikan konsultasi tersebut terlebih dahulu."
+      );
+    } else {
+      onSchedule();
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
       <h3 className="text-xl font-bold text-gray-800 mb-4">
         Jadwalkan Konseling
       </h3>
 
-      {hasPending && (
-        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            ⏳ Anda masih memiliki konsultasi yang sedang aktif. Harap
-            selesaikan konsultasi tersebut terlebih dahulu.
-          </p>
-        </div>
-      )}
-
       <button
-        onClick={onSchedule}
-        disabled={hasPending}
-        className="w-full bg-gray-100 border-2 border-dashed border-[#00437A] rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
-        title={hasPending ? "Tunggu hingga konsultasi sebelumnya diproses" : ""}
+        onClick={handleClick}
+        className="w-full bg-gray-100 border-2 border-dashed border-[#00437A] rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer"
       >
         <div className="p-2 lg:p-4 bg-[#E9E9E9] rounded-md flex">
           <Plus
