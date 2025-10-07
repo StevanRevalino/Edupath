@@ -41,8 +41,14 @@ export class ProdiService {
             jenjang: detailed.jenjang,
             kode_prodi: null,
             bidang: null,
-            akreditasi: detailed.prodi_pt[0]?.akreditasi_prodi || detailed.prodi_pt[0]?.universitas?.akreditasi || null,
-            status_akreditasi: detailed.prodi_pt[0]?.akreditasi_prodi || detailed.prodi_pt[0]?.universitas?.akreditasi || null,
+            akreditasi:
+              detailed.prodi_pt[0]?.akreditasi_prodi ||
+              detailed.prodi_pt[0]?.universitas?.akreditasi ||
+              null,
+            status_akreditasi:
+              detailed.prodi_pt[0]?.akreditasi_prodi ||
+              detailed.prodi_pt[0]?.universitas?.akreditasi ||
+              null,
             tanggal_berdiri: null,
             tanggal_tutup: null,
             status: "Aktif",
@@ -79,8 +85,14 @@ export class ProdiService {
         jenjang: result.jenjang,
         kode_prodi: null,
         bidang: null,
-        akreditasi: result.prodi_pt[0]?.akreditasi_prodi || result.prodi_pt[0]?.universitas?.akreditasi || null,
-        status_akreditasi: result.prodi_pt[0]?.akreditasi_prodi || result.prodi_pt[0]?.universitas?.akreditasi || null,
+        akreditasi:
+          result.prodi_pt[0]?.akreditasi_prodi ||
+          result.prodi_pt[0]?.universitas?.akreditasi ||
+          null,
+        status_akreditasi:
+          result.prodi_pt[0]?.akreditasi_prodi ||
+          result.prodi_pt[0]?.universitas?.akreditasi ||
+          null,
         tanggal_berdiri: null,
         tanggal_tutup: null,
         status: "Aktif",
@@ -100,7 +112,7 @@ export class ProdiService {
   async searchProdiLocal(query: string, limit: number = 20) {
     try {
       const normalizedQuery = query.trim().toLowerCase();
-      
+
       if (normalizedQuery.length === 0) {
         return [];
       }
@@ -143,7 +155,7 @@ export class ProdiService {
   // Helper: Check if words are in sequence
   private hasSequentialMatch(text: string, words: string[]): boolean {
     if (words.length === 0) return false;
-    
+
     const pattern = words.join("\\s+");
     const regex = new RegExp(pattern, "i");
     return regex.test(text);
@@ -169,32 +181,35 @@ export class ProdiService {
     const prodiAcr = this.makeAcronym(prodiName);
     const univAcr = this.makeAcronym(univName);
     const univShortAcr = this.makeAcronym(univShort);
-    
+
     const normalizedUnivName = this.normalizeUnivName(univName);
     const normalizedUnivShort = this.normalizeUnivName(univShort);
 
     // === KOMBINASI PRODI + UNIVERSITAS (Prioritas Tertinggi) ===
     // Contoh: "ti binus", "informatika ui", "teknik unpad"
-    
+
     // Split query into potential prodi and univ parts
-    const hasProdiWord = words.some(w => 
-      prodiName.includes(w) || prodiAcr.includes(w)
+    const hasProdiWord = words.some(
+      (w) => prodiName.includes(w) || prodiAcr.includes(w)
     );
-    const hasUnivWord = words.some(w => 
-      univName.includes(w) || univShort.includes(w) || 
-      normalizedUnivName.includes(w) || normalizedUnivShort.includes(w)
+    const hasUnivWord = words.some(
+      (w) =>
+        univName.includes(w) ||
+        univShort.includes(w) ||
+        normalizedUnivName.includes(w) ||
+        normalizedUnivShort.includes(w)
     );
 
     // Boost combination matches significantly
     if (hasProdiWord && hasUnivWord) {
       score += 100; // Major boost for queries mentioning both
-      
+
       // Extra boost if both match well
-      const prodiMatches = words.filter(w => prodiName.includes(w)).length;
-      const univMatches = words.filter(w => 
-        univName.includes(w) || univShort.includes(w)
+      const prodiMatches = words.filter((w) => prodiName.includes(w)).length;
+      const univMatches = words.filter(
+        (w) => univName.includes(w) || univShort.includes(w)
       ).length;
-      
+
       score += (prodiMatches + univMatches) * 15;
     }
 
@@ -207,14 +222,17 @@ export class ProdiService {
     // "ti" for "Teknik Informatika", "ui" for "Universitas Indonesia"
     if (q === prodiAcr) score += 120;
     if (q === univAcr || q === univShortAcr) score += 90;
-    
+
     // Partial acronym match (for multi-word queries)
     if (words.length > 1) {
       const combinedAcronym = words.join("");
       const fullAcronym = prodiAcr + univAcr;
       const fullAcronymShort = prodiAcr + univShortAcr;
-      
-      if (combinedAcronym === fullAcronym || combinedAcronym === fullAcronymShort) {
+
+      if (
+        combinedAcronym === fullAcronym ||
+        combinedAcronym === fullAcronymShort
+      ) {
         score += 150;
       }
     }
@@ -222,10 +240,10 @@ export class ProdiService {
     // === PRODI NAME MATCHES ===
     if (prodiName.includes(q)) score += 80;
     if (prodiName.startsWith(q)) score += 60;
-    
+
     // Sequential word matching in prodi
     if (this.hasSequentialMatch(prodiName, words)) score += 50;
-    
+
     // Individual word matches in prodi
     let prodiWordMatches = 0;
     for (const w of words) {
@@ -238,12 +256,13 @@ export class ProdiService {
 
     // === UNIVERSITY NAME MATCHES ===
     if (univName.includes(q) || univShort.includes(q)) score += 50;
-    if (normalizedUnivName.includes(q) || normalizedUnivShort.includes(q)) score += 55;
+    if (normalizedUnivName.includes(q) || normalizedUnivShort.includes(q))
+      score += 55;
     if (univName.startsWith(q) || univShort.startsWith(q)) score += 40;
-    
+
     // Sequential word matching in university
     if (this.hasSequentialMatch(univName + " " + univShort, words)) score += 35;
-    
+
     // Individual word matches in university
     let univWordMatches = 0;
     for (const w of words) {
@@ -261,27 +280,27 @@ export class ProdiService {
     // Reward results that match more query words
     const totalWordMatches = prodiWordMatches + univWordMatches;
     const coverageRatio = totalWordMatches / words.length;
-    
+
     if (coverageRatio >= 0.5) score += 20;
     if (coverageRatio >= 0.75) score += 30;
     if (coverageRatio === 1.0) score += 50; // All words matched
 
     // === COMMON ABBREVIATIONS ===
     const commonAbbreviations: Record<string, string[]> = {
-      "ti": ["teknik informatika", "teknologi informasi"],
-      "si": ["sistem informasi"],
-      "te": ["teknik elektro"],
-      "tm": ["teknik mesin"],
-      "ak": ["akuntansi"],
-      "mn": ["manajemen"],
-      "hk": ["hukum"],
-      "psi": ["psikologi"],
-      "kedokteran": ["fk", "kedokteran"],
+      ti: ["teknik informatika", "teknologi informasi"],
+      si: ["sistem informasi"],
+      te: ["teknik elektro"],
+      tm: ["teknik mesin"],
+      ak: ["akuntansi"],
+      mn: ["manajemen"],
+      hk: ["hukum"],
+      psi: ["psikologi"],
+      kedokteran: ["fk", "kedokteran"],
     };
 
     for (const [abbr, fullNames] of Object.entries(commonAbbreviations)) {
       if (words.includes(abbr)) {
-        if (fullNames.some(fn => prodiName.includes(fn))) {
+        if (fullNames.some((fn) => prodiName.includes(fn))) {
           score += 80;
         }
       }
@@ -365,7 +384,8 @@ export class ProdiService {
       jenjang: item.prodi.jenjang ?? null,
       kode_prodi: null,
       bidang: null,
-      akreditasi: item.pt.akreditasi_prodi || item.pt.universitas?.akreditasi || null,
+      akreditasi:
+        item.pt.akreditasi_prodi || item.pt.universitas?.akreditasi || null,
       status: "Aktif",
       gelar: null,
       universitas: item.pt.universitas
