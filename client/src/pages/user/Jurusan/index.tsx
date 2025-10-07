@@ -491,7 +491,7 @@ const Jurusan: React.FC = () => {
                             <th className="px-4 py-2">Nama Program Studi</th>
                             <th className="px-4 py-2">Jenjang</th>
                             <th className="px-4 py-2">Universitas</th>
-                            <th className="px-4 py-2">Akreditasi</th>
+                            <th className="px-4 py-2">Akreditasi Universitas</th>
                           </tr>
                         </thead>
                         <tbody>
