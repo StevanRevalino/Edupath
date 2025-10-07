@@ -10,6 +10,7 @@ import Jurusan from "./pages/user/Jurusan";
 import Universitas from "./pages/user/Universitas";
 import Konseling from "./pages/user/Konseling";
 import Profil from "./pages/user/Profil";
+import Beasiswa from "./pages/user/Beasiswa";
 import TokenManager from "./utils/tokenManager";
 import useAuthMonitor from "./hooks/useAuthMonitor";
 import AboutUs from "./pages/user/AboutUs";
@@ -118,6 +119,16 @@ function App() {
           }
         >
           <Route index element={<Konseling />} />
+        </Route>
+        <Route
+          path="/beasiswa"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Beasiswa />} />
         </Route>
         <Route
           path="/profil"

@@ -25,6 +25,7 @@ const Header = () => {
     { label: "Jurusan", path: "/jurusan" },
     { label: "Universitas", path: "/universitas" },
     { label: "Konseling", path: "/konseling" },
+    { label: "Beasiswa", path: "/beasiswa" },
     { label: "Profil", path: "/profil" },
   ];
 

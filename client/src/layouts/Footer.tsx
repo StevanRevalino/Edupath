@@ -100,6 +100,19 @@ const Footer = () => {
                 </span>
                 <span>Konseling</span>
               </a>
+              <a
+                href="/beasiswa"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+              >
+                <span>
+                  <img
+                    src={homeIcon}
+                    alt="Beasiswa Icon"
+                    className="w-5 h-5 md:w-6 md:h-6"
+                  />
+                </span>
+                <span>Beasiswa</span>
+              </a>
             </nav>
           </div>
 
