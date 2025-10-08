@@ -7,7 +7,6 @@ import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
-import SearchFilterBar from "../../../components/SearchFilterBar";
 import DataTableContainer from "../../../components/DataTableContainer";
 
 interface Student {
@@ -16,7 +15,7 @@ interface Student {
   lastname: string;
   email: string;
   role: string;
-  kelas: string | null;
+  kelas: number | null;
   created_at: string;
 }
 
@@ -24,13 +23,15 @@ const KelolaDataMurid = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedKelas, setSelectedKelas] = useState("all");
+  const [selectedKelas, setSelectedKelas] = useState<
+    "all" | 10 | 11 | 12
+  >("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [editForm, setEditForm] = useState({
     firstname: "",
     lastname: "",
-    kelas: "",
+    kelas: null as number | null,
   });
   const API_URL = import.meta.env.VITE_API_URL;
   // Fetch users from API
@@ -81,6 +82,17 @@ const KelolaDataMurid = () => {
     return matchesSearch && matchesKelas;
   });
 
+  // Helper function to convert kelas number to display format
+  const getKelasDisplay = (kelas: number | null): string => {
+    if (!kelas) return "Belum diatur";
+    const kelasMap: { [key: number]: string } = {
+      10: "X",
+      11: "XI",
+      12: "XII",
+    };
+    return kelasMap[kelas] || `Kelas ${kelas}`;
+  };
+
   const handleEdit = (studentId: string) => {
     const student = students.find((s) => s.user_id === studentId);
     if (student) {
@@ -88,7 +100,7 @@ const KelolaDataMurid = () => {
       setEditForm({
         firstname: student.firstname || "",
         lastname: student.lastname || "",
-        kelas: student.kelas || "",
+        kelas: student.kelas,
       });
       setIsModalOpen(true);
     }
@@ -100,7 +112,7 @@ const KelolaDataMurid = () => {
     setEditForm({
       firstname: "",
       lastname: "",
-      kelas: "",
+      kelas: null,
     });
   };
 
@@ -126,13 +138,6 @@ const KelolaDataMurid = () => {
     try {
       const token = TokenManager.getToken();
 
-      // Convert kelas string to number for backend
-      const kelasMap: { [key: string]: number } = {
-        X: 10,
-        XI: 11,
-        XII: 12,
-      };
-
       Swal.fire({
         title: "Apakah anda ingin menyimpan perubahan?",
         showDenyButton: true,
@@ -148,10 +153,7 @@ const KelolaDataMurid = () => {
           const updatePayload = {
             firstname: editForm.firstname,
             lastname: editForm.lastname,
-            kelas:
-              editForm.kelas && kelasMap[editForm.kelas] !== undefined
-                ? kelasMap[editForm.kelas]
-                : null,
+            kelas: editForm.kelas,
           };
 
           await axios.put(
@@ -258,13 +260,13 @@ const KelolaDataMurid = () => {
 
   const kelasOptions = ["X", "XI", "XII"];
 
-  const getKelasColor = (kelas: string | null) => {
+  const getKelasColor = (kelas: number | null) => {
     switch (kelas) {
-      case "X":
+      case 10:
         return "bg-green-100 text-green-800";
-      case "XI":
+      case 11:
         return "bg-blue-100 text-blue-800";
-      case "XII":
+      case 12:
         return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -273,36 +275,185 @@ const KelolaDataMurid = () => {
 
   return (
     <>
-      <div className="max-h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
+      <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
         <PageHeader
           title="Kelola Data Murid"
           description="Kelola data murid yang sudah terdaftar di EduPath."
-          className="mb-6"
         />
 
-        <SearchFilterBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Cari berdasarkan nama atau email..."
-          filterValue={selectedKelas}
-          onFilterChange={setSelectedKelas}
-          filterLabel="Filter Kelas"
-          filterWidth="lg:w-48"
-          filterOptions={[
-            { value: "all", label: "Semua Kelas" },
-            ...kelasOptions.map((kelas) => ({
-              value: kelas,
-              label: `Kelas ${kelas}`,
-            })),
-          ]}
-          className="mb-4 sm:mb-6"
-        />
+        {/* Integrated Control Panel: Kelas Tabs + Search */}
+        <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+          {/* Kelas Tabs with Stats */}
+          <div className="grid grid-cols-4">
+            <button
+              onClick={() => setSelectedKelas("all")}
+              className={`px-4 py-5 transition-all duration-200 relative ${
+                selectedKelas === "all"
+                  ? "bg-gradient-to-b from-blue-50 to-white"
+                  : "bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col items-center space-y-1.5">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wider ${
+                    selectedKelas === "all" ? "text-blue-700" : "text-gray-500"
+                  }`}
+                >
+                  Semua Kelas
+                </span>
+                <span
+                  className={`text-3xl font-bold transition-colors ${
+                    selectedKelas === "all" ? "text-blue-600" : "text-gray-400"
+                  }`}
+                >
+                  {students.length}
+                </span>
+              </div>
+              {selectedKelas === "all" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+              )}
+            </button>
 
-        <DataTableContainer
-          title="Data Murid"
-          count={filteredStudents.length}
-          loading={loading}
-        >
+            <button
+              onClick={() => setSelectedKelas(10)}
+              className={`px-4 py-5 transition-all duration-200 relative ${
+                selectedKelas === 10
+                  ? "bg-gradient-to-b from-green-50 to-white"
+                  : "bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col items-center space-y-1.5">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wider ${
+                    selectedKelas === 10 ? "text-green-700" : "text-gray-500"
+                  }`}
+                >
+                  Kelas 10
+                </span>
+                <span
+                  className={`text-3xl font-bold transition-colors ${
+                    selectedKelas === 10 ? "text-green-600" : "text-gray-400"
+                  }`}
+                >
+                  {students.filter((s) => s.kelas === 10).length}
+                </span>
+              </div>
+              {selectedKelas === 10 && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
+              )}
+            </button>
+
+            <button
+              onClick={() => setSelectedKelas(11)}
+              className={`px-4 py-5 transition-all duration-200 relative ${
+                selectedKelas === 11
+                  ? "bg-gradient-to-b from-blue-50 to-white"
+                  : "bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col items-center space-y-1.5">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wider ${
+                    selectedKelas === 11 ? "text-blue-700" : "text-gray-500"
+                  }`}
+                >
+                  Kelas 11
+                </span>
+                <span
+                  className={`text-3xl font-bold transition-colors ${
+                    selectedKelas === 11 ? "text-blue-600" : "text-gray-400"
+                  }`}
+                >
+                  {students.filter((s) => s.kelas === 11).length}
+                </span>
+              </div>
+              {selectedKelas === 11 && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+              )}
+            </button>
+
+            <button
+              onClick={() => setSelectedKelas(12)}
+              className={`px-4 py-5 transition-all duration-200 relative ${
+                selectedKelas === 12
+                  ? "bg-gradient-to-b from-purple-50 to-white"
+                  : "bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col items-center space-y-1.5">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wider ${
+                    selectedKelas === 12
+                      ? "text-purple-700"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Kelas 12
+                </span>
+                <span
+                  className={`text-3xl font-bold transition-colors ${
+                    selectedKelas === 12
+                      ? "text-purple-600"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {students.filter((s) => s.kelas === 12).length}
+                </span>
+              </div>
+              {selectedKelas === 12 && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
+              )}
+            </button>
+          </div>
+
+          {/* Integrated Search Bar */}
+          <div className="p-4 bg-gray-50 border-t border-gray-200">
+            <div className="relative">
+              <svg
+                className="absolute left-3.5 top-3 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Cari berdasarkan nama atau email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <DataTableContainer loading={loading}>
           {/* Desktop Table View - Hidden on Mobile */}
           <div className="hidden lg:flex flex-col overflow-hidden">
             {/* Header - Fixed */}
@@ -352,9 +503,7 @@ const KelolaDataMurid = () => {
                             student.kelas
                           )}`}
                         >
-                          {student.kelas
-                            ? `Kelas ${student.kelas}`
-                            : "Belum diatur"}
+                          {getKelasDisplay(student.kelas)}
                         </span>
                       </div>
 
@@ -437,9 +586,7 @@ const KelolaDataMurid = () => {
                           student.kelas
                         )}`}
                       >
-                        {student.kelas
-                          ? `Kelas ${student.kelas}`
-                          : "Belum diatur"}
+                        {getKelasDisplay(student.kelas)}
                       </span>
 
                       <div className="text-sm text-gray-500 break-all">
@@ -504,9 +651,12 @@ const KelolaDataMurid = () => {
                   Kelas <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={editForm.kelas}
+                  value={editForm.kelas || ""}
                   onChange={(e) =>
-                    setEditForm({ ...editForm, kelas: e.target.value })
+                    setEditForm({
+                      ...editForm,
+                      kelas: e.target.value ? Number(e.target.value) : null,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
                 >

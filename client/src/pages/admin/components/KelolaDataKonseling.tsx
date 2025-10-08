@@ -4,8 +4,6 @@ import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
-import StatisticsCards from "../../../components/StatisticsCards";
-import SearchFilterBar from "../../../components/SearchFilterBar";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 
@@ -31,7 +29,9 @@ const KelolaDataKonseling = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState<
+    "pending" | "active" | "completed" | "declined"
+  >("active");
   const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch consultations from API
@@ -119,9 +119,18 @@ const KelolaDataKonseling = () => {
     const matchesSearch =
       fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       consultation.topic.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || consultation.status === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    // Filter by active tab
+    const matchesTab =
+      activeTab === "pending"
+        ? consultation.status === "PENDING"
+        : activeTab === "active"
+        ? consultation.status === "ACCEPTED"
+        : activeTab === "completed"
+        ? consultation.status === "COMPLETED"
+        : consultation.status === "DECLINED";
+
+    return matchesSearch && matchesTab;
   });
 
   const handleUpdateStatus = async (
@@ -256,49 +265,175 @@ const KelolaDataKonseling = () => {
         description="Kelola dan pantau sesi konseling dengan murid."
       />
 
-      <StatisticsCards
-        statistics={[
-          { label: "Total", value: consultations.length },
-          {
-            label: "Pending",
-            value: consultations.filter((c) => c.status === "PENDING").length,
-            color: "yellow",
-          },
-          {
-            label: "Active",
-            value: consultations.filter((c) => c.status === "ACCEPTED").length,
-            color: "green",
-          },
-          {
-            label: "Completed",
-            value: consultations.filter(
-              (c) => c.status === "COMPLETED" || c.status === "DECLINED"
-            ).length,
-            color: "blue",
-          },
-        ]}
-      />
+      {/* Integrated Control Panel: Tabs + Search */}
+      <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+        {/* Tab Navigation with Inline Stats */}
+        <div className="grid grid-cols-4">
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-4 py-5 transition-all duration-200 relative ${
+              activeTab === "pending"
+                ? "bg-gradient-to-b from-yellow-50 to-white border-b-3 border-b-yellow-500"
+                : "bg-gray-50 hover:bg-gray-100"
+            }`}
+          >
+            <div className="flex flex-col items-center space-y-1.5">
+              <span
+                className={`text-xs font-semibold uppercase tracking-wider ${
+                  activeTab === "pending" ? "text-yellow-700" : "text-gray-500"
+                }`}
+              >
+                Pending
+              </span>
+              <span
+                className={`text-3xl font-bold transition-colors ${
+                  activeTab === "pending" ? "text-yellow-600" : "text-gray-400"
+                }`}
+              >
+                {consultations.filter((c) => c.status === "PENDING").length}
+              </span>
+            </div>
+            {activeTab === "pending" && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-500"></div>
+            )}
+          </button>
 
-      <SearchFilterBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Cari nama murid atau topik..."
-        filterValue={statusFilter}
-        onFilterChange={setStatusFilter}
-        filterOptions={[
-          { value: "all", label: "Semua Status" },
-          { value: "PENDING", label: "Pending" },
-          { value: "ACCEPTED", label: "Active" },
-          { value: "COMPLETED", label: "Completed" },
-          { value: "DECLINED", label: "Declined" },
-        ]}
-      />
+          <button
+            onClick={() => setActiveTab("active")}
+            className={`px-4 py-5 transition-all duration-200 relative ${
+              activeTab === "active"
+                ? "bg-gradient-to-b from-blue-50 to-white"
+                : "bg-gray-50 hover:bg-gray-100"
+            }`}
+          >
+            <div className="flex flex-col items-center space-y-1.5">
+              <span
+                className={`text-xs font-semibold uppercase tracking-wider ${
+                  activeTab === "active" ? "text-blue-700" : "text-gray-500"
+                }`}
+              >
+                Active
+              </span>
+              <span
+                className={`text-3xl font-bold transition-colors ${
+                  activeTab === "active" ? "text-blue-600" : "text-gray-400"
+                }`}
+              >
+                {consultations.filter((c) => c.status === "ACCEPTED").length}
+              </span>
+            </div>
+            {activeTab === "active" && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+            )}
+          </button>
 
-      <DataTableContainer
-        title="Data Konseling"
-        count={filteredConsultations.length}
-        loading={loading}
-      >
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`px-4 py-5 transition-all duration-200 relative ${
+              activeTab === "completed"
+                ? "bg-gradient-to-b from-green-50 to-white"
+                : "bg-gray-50 hover:bg-gray-100"
+            }`}
+          >
+            <div className="flex flex-col items-center space-y-1.5">
+              <span
+                className={`text-xs font-semibold uppercase tracking-wider ${
+                  activeTab === "completed" ? "text-green-700" : "text-gray-500"
+                }`}
+              >
+                Completed
+              </span>
+              <span
+                className={`text-3xl font-bold transition-colors ${
+                  activeTab === "completed" ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {consultations.filter((c) => c.status === "COMPLETED").length}
+              </span>
+            </div>
+            {activeTab === "completed" && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("declined")}
+            className={`px-4 py-5 transition-all duration-200 relative ${
+              activeTab === "declined"
+                ? "bg-gradient-to-b from-red-50 to-white"
+                : "bg-gray-50 hover:bg-gray-100"
+            }`}
+          >
+            <div className="flex flex-col items-center space-y-1.5">
+              <span
+                className={`text-xs font-semibold uppercase tracking-wider ${
+                  activeTab === "declined" ? "text-red-700" : "text-gray-500"
+                }`}
+              >
+                Declined
+              </span>
+              <span
+                className={`text-3xl font-bold transition-colors ${
+                  activeTab === "declined" ? "text-red-600" : "text-gray-400"
+                }`}
+              >
+                {consultations.filter((c) => c.status === "DECLINED").length}
+              </span>
+            </div>
+            {activeTab === "declined" && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-500"></div>
+            )}
+          </button>
+        </div>
+
+        {/* Integrated Search Bar */}
+        <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <div className="relative">
+            <svg
+              className="absolute left-3.5 top-3 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Cari nama murid atau topik konseling..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <DataTableContainer loading={loading}>
         <div className="flex flex-col overflow-hidden">
           {/* Desktop Table View - Hidden on Mobile */}
           <div className="hidden lg:flex flex-col overflow-hidden">
@@ -316,8 +451,8 @@ const KelolaDataKonseling = () => {
               {filteredConsultations.length === 0 ? (
                 <div className="flex items-center justify-center h-32">
                   <div className="text-center text-gray-500">
-                    {searchTerm || statusFilter !== "all"
-                      ? "Tidak ada data yang sesuai dengan filter"
+                    {searchTerm
+                      ? "Tidak ada data yang sesuai dengan pencarian"
                       : "Belum ada data konseling"}
                   </div>
                 </div>
@@ -448,8 +583,8 @@ const KelolaDataKonseling = () => {
             {filteredConsultations.length === 0 ? (
               <div className="flex items-center justify-center h-32">
                 <div className="text-center text-gray-500">
-                  {searchTerm || statusFilter !== "all"
-                    ? "Tidak ada data yang sesuai dengan filter"
+                  {searchTerm
+                    ? "Tidak ada data yang sesuai dengan pencarian"
                     : "Belum ada data konseling"}
                 </div>
               </div>

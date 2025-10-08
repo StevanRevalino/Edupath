@@ -30,7 +30,7 @@ const StatisticsCards = ({
 
   return (
     <div
-      className={`grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4 flex-shrink-0 ${className}`}
+      className={`grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 mb-3 sm:mb-4 flex-shrink-0 ${className}`}
     >
       {statistics.map((stat, index) => (
         <div key={index} className="bg-white rounded-lg shadow p-2 sm:p-3">

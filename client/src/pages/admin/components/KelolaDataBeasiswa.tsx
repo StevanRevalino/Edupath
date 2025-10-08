@@ -278,7 +278,7 @@ const KelolaDataBeasiswa = () => {
       </div>
 
       {/* Table */}
-      <DataTableContainer title="Daftar Beasiswa">
+      <DataTableContainer>
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading...</div>
         ) : beasiswaList.length === 0 ? (
