@@ -126,7 +126,7 @@ const Header = () => {
         </div>
 
         {/* Menu Desktop */}
-        <nav className="hidden md:flex flex-1 justify-center space-x-8 md:space-x-8 lg:space-x-16 xl:space-x-24 text-white text-lg md:text-xl xl:text-2xl">
+        <nav className="hidden md:flex flex-1 justify-center sm:space-x-2 md:space-x-4 lg:space-x-8 xl:space-x-16 text-white text-lg md:text-lg xl:text-2xl">
           {menuItems
             .filter((item) => item.label !== "Profil")
             .map((item) => {
