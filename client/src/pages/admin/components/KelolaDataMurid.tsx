@@ -23,9 +23,9 @@ const KelolaDataMurid = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedKelas, setSelectedKelas] = useState<
-    "all" | 10 | 11 | 12
-  >("all");
+  const [selectedKelas, setSelectedKelas] = useState<"all" | 10 | 11 | 12>(
+    "all"
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [editForm, setEditForm] = useState({
@@ -383,18 +383,14 @@ const KelolaDataMurid = () => {
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === 12
-                      ? "text-purple-700"
-                      : "text-gray-500"
+                    selectedKelas === 12 ? "text-purple-700" : "text-gray-500"
                   }`}
                 >
                   Kelas 12
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === 12
-                      ? "text-purple-600"
-                      : "text-gray-400"
+                    selectedKelas === 12 ? "text-purple-600" : "text-gray-400"
                   }`}
                 >
                   {students.filter((s) => s.kelas === 12).length}
