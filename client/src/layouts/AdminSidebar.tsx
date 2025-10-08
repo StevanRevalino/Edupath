@@ -62,7 +62,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       {
         id: "kelola-data-beasiswa",
         label: "Kelola Data Beasiswa",
-        icon: "/src/assets/icons/info-home-1.png", // Temporary icon, ganti dengan icon beasiswa nanti
+        icon: "/src/assets/icons/kelola-data-beasiswa.png",
       },
     ],
     []

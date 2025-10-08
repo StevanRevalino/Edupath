@@ -249,6 +249,7 @@ export class ConsultationRepository {
       where: { consultation_id },
       data: {
         is_active: false,
+        status: "COMPLETED",
       },
       include: {
         murid: {

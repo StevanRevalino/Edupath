@@ -16,6 +16,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
   // Use real-time chat hook
   const {
     messages,
+    loading,
     sending: sendingMessage,
     sendMessage,
     error,
@@ -105,10 +106,18 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           </div>
         )}
 
-        {messages.length === 0 ? (
+        {loading ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <Loader className="animate-spin mb-2" />
             Memuat pesan...
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="text-4xl mb-2">💬</div>
+            <p className="text-lg font-medium">Belum ada pesan</p>
+            <p className="text-sm mt-1">
+              Mulai percakapan dengan mengirim pesan
+            </p>
           </div>
         ) : (
           messages.map((message) => {

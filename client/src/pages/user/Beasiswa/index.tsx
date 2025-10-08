@@ -4,7 +4,6 @@ import { Search, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 import HeroSection from "../../../components/HeroSection";
-import InfoSection from "../../../components/InfoSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import EmptyState from "../../../components/EmptyState";
 import ImageZoomModal from "../../../components/ImageZoomModal";
@@ -13,9 +12,6 @@ import BeasiswaDetailModal from "./components/BeasiswaDetailModal";
 
 import HeroSectionBG from "../../../assets/hero-section.png";
 import BeasiswaIcon from "../../../assets/icons/conseling-icon.png";
-import beasiswaIcon1 from "../../../assets/conseling-1.png";
-import beasiswaIcon2 from "../../../assets/conseling-2.png";
-import beasiswaIcon3 from "../../../assets/conseling-3.png";
 
 interface Beasiswa {
   beasiswa_id: string;
@@ -81,25 +77,6 @@ const Beasiswa = () => {
     setSelectedBeasiswa(null);
     setIsImageZoomed(false);
   };
-
-  // Info section data
-  const infoItems = [
-    {
-      img: beasiswaIcon1,
-      title: "Akses Pendidikan Berkualitas",
-      desc: "Beasiswa membuka peluang bagi siswa untuk mengakses pendidikan berkualitas tanpa terbebani biaya.",
-    },
-    {
-      img: beasiswaIcon2,
-      title: "Meringankan Beban Finansial",
-      desc: "Dengan beasiswa, siswa dapat fokus pada studi tanpa khawatir tentang biaya kuliah dan kebutuhan lainnya.",
-    },
-    {
-      img: beasiswaIcon3,
-      title: "Meningkatkan Prestasi",
-      desc: "Beasiswa mendorong siswa untuk terus berprestasi dan mengembangkan potensi diri secara maksimal.",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-100 relative">

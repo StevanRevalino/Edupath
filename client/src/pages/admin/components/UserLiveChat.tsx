@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Send,
-  MessageCircle,
-  X,
-  Minimize2,
-  Maximize2,
-} from "lucide-react";
+import { Send, MessageCircle, X, Minimize2, Maximize2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface ChatMessage {
@@ -55,10 +49,10 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
 
     setSendingMessage(true);
     try {
-      // US005 sending message to BK001
+      // TODO: Implement real-time chat with backend
+      // For now, just add message locally
       const userId = "US005";
 
-      // Create user message
       const userMessage: ChatMessage = {
         id: Date.now().toString(),
         message: newMessage,
@@ -70,36 +64,6 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
 
       setChatMessages((prev) => [...prev, userMessage]);
       setNewMessage("");
-
-      // Simulate BK001 response after 2-3 seconds
-      setTimeout(() => {
-        const bkResponses = [
-          "Baik, saya mengerti. Dari hasil tes minat bakat yang sudah kamu kerjakan, ada beberapa rekomendasi yang cocok untuk kamu.",
-          "Hmm, menarik. Bisa ceritakan lebih detail tentang mata pelajaran favorit kamu?",
-          "Saya akan bantu kamu analisis kemampuan dan minat. Sudah pernah ikut tes minat bakat di aplikasi ini?",
-          "Terima kasih sudah berbagi. Untuk jurusan yang kamu minati, ada beberapa universitas yang bisa jadi pilihan.",
-          "Bagus! Saya akan berikan beberapa saran berdasarkan profil kamu.",
-        ];
-
-        const randomResponse =
-          bkResponses[Math.floor(Math.random() * bkResponses.length)];
-
-        const bkResponse: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          message: randomResponse,
-          senderId: "BK001",
-          senderName: "Ibu Sarah (BK001)",
-          timestamp: new Date().toISOString(),
-          isFromAdmin: true,
-        };
-
-        setChatMessages((prev) => [...prev, bkResponse]);
-
-        // Add unread count if chat is minimized
-        if (isMinimized) {
-          setUnreadCount((prev) => prev + 1);
-        }
-      }, 2000 + Math.random() * 1000); // 2-3 seconds delay
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Gagal mengirim pesan");
@@ -178,34 +142,48 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
           <>
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 h-64">
-              {chatMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.isFromAdmin ? "justify-start" : "justify-end"
-                  }`}
-                >
-                  <div className={`max-w-[80%]`}>
+              {chatMessages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                  <MessageCircle size={48} className="mb-3 opacity-50" />
+                  <p className="text-sm font-medium mb-1">Belum ada pesan</p>
+                  <p className="text-xs text-center px-4">
+                    Mulai percakapan dengan mengirim pesan
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {chatMessages.map((message) => (
                     <div
-                      className={`p-2 rounded-lg text-sm ${
-                        message.isFromAdmin
-                          ? "bg-gray-200 text-gray-800"
-                          : "bg-blue-500 text-white"
-                      }`}
-                    >
-                      <p>{message.message}</p>
-                    </div>
-                    <div
-                      className={`flex items-center mt-1 text-xs text-gray-500 ${
+                      key={message.id}
+                      className={`flex ${
                         message.isFromAdmin ? "justify-start" : "justify-end"
                       }`}
                     >
-                      {formatTime(message.timestamp)}
+                      <div className={`max-w-[80%]`}>
+                        <div
+                          className={`p-2 rounded-lg text-sm ${
+                            message.isFromAdmin
+                              ? "bg-gray-200 text-gray-800"
+                              : "bg-blue-500 text-white"
+                          }`}
+                        >
+                          <p>{message.message}</p>
+                        </div>
+                        <div
+                          className={`flex items-center mt-1 text-xs text-gray-500 ${
+                            message.isFromAdmin
+                              ? "justify-start"
+                              : "justify-end"
+                          }`}
+                        >
+                          {formatTime(message.timestamp)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Message Input */}

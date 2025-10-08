@@ -18,6 +18,7 @@ interface Consultation {
   consultation_time: string;
   notes?: string;
   created_at: string;
+  is_active: boolean;
   murid: {
     firstname: string;
     lastname: string;
@@ -222,6 +223,7 @@ const KelolaDataKonseling = () => {
               ? {
                   ...consultation,
                   status: "COMPLETED" as Consultation["status"],
+                  is_active: false,
                 }
               : consultation
           )
@@ -268,7 +270,7 @@ const KelolaDataKonseling = () => {
             color: "green",
           },
           {
-            label: "History",
+            label: "Completed",
             value: consultations.filter(
               (c) => c.status === "COMPLETED" || c.status === "DECLINED"
             ).length,
@@ -406,19 +408,26 @@ const KelolaDataKonseling = () => {
                             </button>
                           </>
                         )}
-                        {consultation.status === "ACCEPTED" && (
-                          <button
-                            onClick={() =>
-                              handleEndConsultation(
-                                consultation.consultation_id
-                              )
-                            }
-                            className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
-                          >
-                            <span className="w-2 h-2 bg-white rounded-full"></span>
-                            <span>End Consultation</span>
-                          </button>
-                        )}
+                        {consultation.status === "ACCEPTED" &&
+                          consultation.is_active && (
+                            <button
+                              onClick={() =>
+                                handleEndConsultation(
+                                  consultation.consultation_id
+                                )
+                              }
+                              className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                            >
+                              <span className="w-2 h-2 bg-white rounded-full"></span>
+                              <span>End Consultation</span>
+                            </button>
+                          )}
+                        {consultation.status === "ACCEPTED" &&
+                          !consultation.is_active && (
+                            <span className="text-sm text-gray-500">
+                              Selesai
+                            </span>
+                          )}
                         {(consultation.status === "DECLINED" ||
                           consultation.status === "COMPLETED") && (
                           <span className="text-sm text-gray-500">
@@ -501,19 +510,26 @@ const KelolaDataKonseling = () => {
                             </button>
                           </>
                         )}
-                        {consultation.status === "ACCEPTED" && (
-                          <button
-                            onClick={() =>
-                              handleEndConsultation(
-                                consultation.consultation_id
-                              )
-                            }
-                            className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors whitespace-nowrap"
-                          >
-                            <span className="w-2 h-2 bg-white rounded-full"></span>
-                            <span>End</span>
-                          </button>
-                        )}
+                        {consultation.status === "ACCEPTED" &&
+                          consultation.is_active && (
+                            <button
+                              onClick={() =>
+                                handleEndConsultation(
+                                  consultation.consultation_id
+                                )
+                              }
+                              className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors whitespace-nowrap"
+                            >
+                              <span className="w-2 h-2 bg-white rounded-full"></span>
+                              <span>End</span>
+                            </button>
+                          )}
+                        {consultation.status === "ACCEPTED" &&
+                          !consultation.is_active && (
+                            <span className="text-xs text-gray-500 text-center">
+                              Selesai
+                            </span>
+                          )}
                         {(consultation.status === "DECLINED" ||
                           consultation.status === "COMPLETED") && (
                           <span className="text-xs text-gray-500 text-center">
