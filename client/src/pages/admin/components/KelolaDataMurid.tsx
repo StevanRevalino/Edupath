@@ -283,21 +283,21 @@ const KelolaDataMurid = () => {
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === "all" ? "text-blue-700" : "text-gray-500"
+                    selectedKelas === "all" ? "text-black" : "text-gray-500"
                   }`}
                 >
                   Semua Kelas
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === "all" ? "text-blue-600" : "text-gray-400"
+                    selectedKelas === "all" ? "text-black" : "text-gray-400"
                   }`}
                 >
                   {students.length}
                 </span>
               </div>
               {selectedKelas === "all" && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black"></div>
               )}
             </button>
 

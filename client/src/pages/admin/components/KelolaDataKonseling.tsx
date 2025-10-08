@@ -264,7 +264,7 @@ const KelolaDataKonseling = () => {
             onClick={() => setActiveTab("pending")}
             className={`px-4 py-5 transition-all duration-200 relative ${
               activeTab === "pending"
-                ? "bg-gradient-to-b from-yellow-50 to-white border-b-3 border-b-yellow-500"
+                ? "bg-gradient-to-b from-blue-50 to-white"
                 : "bg-gray-50 hover:bg-gray-100"
             }`}
           >
