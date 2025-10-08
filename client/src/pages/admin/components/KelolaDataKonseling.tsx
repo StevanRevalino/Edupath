@@ -103,15 +103,6 @@ const KelolaDataKonseling = () => {
     }
   };
 
-  const getKelasText = (kelas: number | null) => {
-    if (!kelas) return "Belum diatur";
-    const kelasMap: { [key: number]: string } = {
-      10: "X",
-      11: "XI",
-      12: "XII",
-    };
-    return kelasMap[kelas] || `Kelas ${kelas}`;
-  };
 
   const filteredConsultations = consultations.filter((consultation) => {
     const fullName =
@@ -476,7 +467,7 @@ const KelolaDataKonseling = () => {
                             {`${consultation.murid.firstname} ${consultation.murid.lastname}`.trim()}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {getKelasText(consultation.murid.kelas)}
+                            {consultation.murid.kelas}
                           </div>
                         </div>
                       </div>
@@ -610,7 +601,7 @@ const KelolaDataKonseling = () => {
                             {`${consultation.murid.firstname} ${consultation.murid.lastname}`.trim()}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {getKelasText(consultation.murid.kelas)}
+                            {consultation.murid.kelas}
                           </div>
                         </div>
                       </div>

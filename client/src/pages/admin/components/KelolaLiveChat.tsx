@@ -495,17 +495,6 @@ const KelolaLiveChat = () => {
     });
   };
 
-  const getKelasText = (kelas: number | null) => {
-    if (!kelas) return "Tidak diketahui";
-    return kelas === 10
-      ? "X"
-      : kelas === 11
-      ? "XI"
-      : kelas === 12
-      ? "XII"
-      : kelas.toString();
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -602,7 +591,7 @@ const KelolaLiveChat = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600">
-                        Kelas {getKelasText(user.kelas)}
+                        Kelas {user.kelas}
                       </p>
                       {user.lastMessageTime && (
                         <span className="text-xs text-gray-400">
@@ -647,7 +636,7 @@ const KelolaLiveChat = () => {
                       )}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Kelas {getKelasText(selectedUser.kelas)}
+                      Kelas {selectedUser.kelas}
                     </p>
                   </div>
                 </div>

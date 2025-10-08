@@ -82,17 +82,6 @@ const KelolaDataMurid = () => {
     return matchesSearch && matchesKelas;
   });
 
-  // Helper function to convert kelas number to display format
-  const getKelasDisplay = (kelas: number | null): string => {
-    if (!kelas) return "Belum diatur";
-    const kelasMap: { [key: number]: string } = {
-      10: "X",
-      11: "XI",
-      12: "XII",
-    };
-    return kelasMap[kelas] || `Kelas ${kelas}`;
-  };
-
   const handleEdit = (studentId: string) => {
     const student = students.find((s) => s.user_id === studentId);
     if (student) {
@@ -257,8 +246,6 @@ const KelolaDataMurid = () => {
       }
     });
   };
-
-  const kelasOptions = ["X", "XI", "XII"];
 
   const getKelasColor = (kelas: number | null) => {
     switch (kelas) {
@@ -499,7 +486,7 @@ const KelolaDataMurid = () => {
                             student.kelas
                           )}`}
                         >
-                          {getKelasDisplay(student.kelas)}
+                          {student.kelas}
                         </span>
                       </div>
 
@@ -582,7 +569,7 @@ const KelolaDataMurid = () => {
                           student.kelas
                         )}`}
                       >
-                        {getKelasDisplay(student.kelas)}
+                        {student.kelas}
                       </span>
 
                       <div className="text-sm text-gray-500 break-all">
@@ -656,12 +643,10 @@ const KelolaDataMurid = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
                 >
-                  <option value="">Pilih Kelas</option>
-                  {kelasOptions.map((kelas) => (
-                    <option key={kelas} value={kelas}>
-                      Kelas {kelas}
-                    </option>
-                  ))}
+                  <option value="" disabled>Pilih Kelas</option>
+                  <option value={10}>10</option>
+                  <option value={11}>11</option>
+                  <option value={12}>12</option>
                 </select>
               </div>
 

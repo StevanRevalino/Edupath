@@ -112,17 +112,4 @@ export class UserService {
       throw new Error("Failed to delete user");
     }
   }
-
-  // Disabled: Kelas now returns as number (10, 11, 12) instead of roman numerals (X, XI, XII)
-  // private convertKelasToString(kelas: number): string {
-  //   // Convert numeric kelas to readable format
-  //   // Simple mapping: 10 = X, 11 = XI, 12 = XII
-  //   const kelasMap: { [key: number]: string } = {
-  //     10: "X",
-  //     11: "XI",
-  //     12: "XII",
-  //   };
-
-  //   return kelasMap[kelas] || `Kelas ${kelas}`;
-  // }
 }
