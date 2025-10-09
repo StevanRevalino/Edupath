@@ -16,7 +16,8 @@ import jurusanInfo2 from "../../../assets/jurusan-info-2.png";
 import jurusanInfo3 from "../../../assets/jurusan-info-3.png";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 import SearchBar from "./components/SearchBar";
-import SearchHistory from "./components/SearchHistory";
+import FilterSortBar from "./components/FilterSortBar";
+import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
 type ProdiItem = {
   prodi_id: string;
@@ -54,6 +55,16 @@ const Jurusan: React.FC = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // ===== Filter & Sort States =====
+  const [selectedJenjang, setSelectedJenjang] = useState<string>("Semua");
+  const [selectedAkreditasi, setSelectedAkreditasi] = useState<string>("Semua");
+  const [sortBy, setSortBy] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isFullDataLoaded, setIsFullDataLoaded] = useState<boolean>(false); // Track if all data is loaded
+
+  // ===== Search Cache =====
+  const searchCacheRef = useRef<Map<string, ProdiItem[]>>(new Map());
+
   const controllerRef = useRef<AbortController | null>(null);
   const searchRequestIdRef = useRef(0);
   const detailRequestIdRef = useRef(0);
@@ -68,8 +79,6 @@ const Jurusan: React.FC = () => {
     () => heroQuery.trim().length >= 2,
     [heroQuery]
   );
-
-  const showResults = hasSearched && query.trim().length > 0;
 
   const items = [
     {
@@ -96,9 +105,6 @@ const Jurusan: React.FC = () => {
     if (v === "baik" || v === "c") return "bg-yellow-100 text-yellow-800";
     return "bg-gray-100 text-gray-800";
   };
-
-  const formatDate = (iso?: string | null) =>
-    iso ? new Date(iso).toLocaleDateString("id-ID") : "-";
 
   const removeHistoryItem = (term: string) => {
     const next = recentSearches.filter((x) => x !== term);
@@ -146,9 +152,106 @@ const Jurusan: React.FC = () => {
     []
   );
 
+  // Fetch default prodi (top N prodi)
+  const fetchDefaultProdi = useCallback(async () => {
+    const currentId = ++searchRequestIdRef.current;
+    setLoading(true);
+    setError("");
+
+    try {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const url = `${API_URL}/api/prodi`;
+      const token = TokenManager.getToken();
+      const res = await axios.get(url, {
+        params: { limit: 20 }, // Get top 20 prodi for initial display
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (currentId !== searchRequestIdRef.current) return;
+
+      const data = (res.data?.data || []) as ProdiItem[];
+      // Filter: Only show prodi with universitas.nama
+      const filtered = data.filter((p) => p.universitas?.nama);
+      setResults(filtered);
+      setHasSearched(true);
+      setIsFullDataLoaded(false); // Partial data loaded
+    } catch (e: any) {
+      if (currentId !== searchRequestIdRef.current) return;
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+        return;
+      }
+      const msg =
+        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+      setError(msg);
+      setResults([]);
+      setIsFullDataLoaded(false);
+    } finally {
+      if (currentId === searchRequestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  // Fetch ALL prodi for sorting/filtering
+  const fetchAllProdi = useCallback(async () => {
+    const currentId = ++searchRequestIdRef.current;
+    setLoading(true);
+    setError("");
+
+    try {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const url = `${API_URL}/api/prodi`;
+      const token = TokenManager.getToken();
+      const res = await axios.get(url, {
+        params: { limit: 10000 }, // Get ALL prodi for accurate sorting
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (currentId !== searchRequestIdRef.current) return;
+
+      const data = (res.data?.data || []) as ProdiItem[];
+      // Filter: Only show prodi with universitas.nama
+      const filtered = data.filter((p) => p.universitas?.nama);
+      setResults(filtered);
+      setHasSearched(true);
+      setIsFullDataLoaded(true); // Full data loaded
+    } catch (e: any) {
+      if (currentId !== searchRequestIdRef.current) return;
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+        return;
+      }
+      const msg =
+        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+      setError(msg);
+      setResults([]);
+      setIsFullDataLoaded(false);
+    } finally {
+      if (currentId === searchRequestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
   const search = useCallback(
     async (q: string, autoSelectExactMatch = false) => {
       if (!q.trim()) return;
+
+      // Check cache first
+      const cacheKey = q.trim().toLowerCase();
+      if (searchCacheRef.current.has(cacheKey)) {
+        const cachedData = searchCacheRef.current.get(cacheKey)!;
+        setResults(cachedData);
+        setHasSearched(true);
+        setIsFullDataLoaded(false);
+        return;
+      }
+
       if (controllerRef.current) controllerRef.current.abort();
       const ctrl = new AbortController();
       controllerRef.current = ctrl;
@@ -171,16 +274,23 @@ const Jurusan: React.FC = () => {
 
         if (currentId !== searchRequestIdRef.current) return;
         const data = (res.data?.data || []) as ProdiItem[];
-        setResults(data);
 
-        pushHistory(q.trim());
+        // Filter: Only show prodi with universitas.nama
+        const filtered = data.filter((p) => p.universitas?.nama);
 
-        if (autoSelectExactMatch && data.length > 0) {
-          const exact = data.find(
+        // Cache the filtered results
+        searchCacheRef.current.set(cacheKey, filtered);
+
+        setResults(filtered);
+        setHasSearched(true);
+        setIsFullDataLoaded(false);
+
+        if (autoSelectExactMatch && filtered.length > 0) {
+          const exact = filtered.find(
             (p) => p.nama_prodi.toLowerCase() === q.trim().toLowerCase()
           );
           if (exact) {
-            const exactIndex = data.indexOf(exact);
+            const exactIndex = filtered.indexOf(exact);
             fetchProdiDetail(exact.prodi_id, exactIndex);
           }
         }
@@ -196,6 +306,7 @@ const Jurusan: React.FC = () => {
             e?.response?.data?.message || e?.message || "Terjadi kesalahan"
           );
           setResults([]);
+          setIsFullDataLoaded(false);
         }
       } finally {
         if (currentId === searchRequestIdRef.current) setLoading(false);
@@ -240,6 +351,7 @@ const Jurusan: React.FC = () => {
       if (canSearch) {
         setHasSearched(true);
         search(query);
+        pushHistory(query);
       }
     },
     [canSearch, query, search]
@@ -254,6 +366,93 @@ const Jurusan: React.FC = () => {
       mainSearchRef.current.focus();
     }
   };
+
+  // ===== Extract unique filter options =====
+  const jenjangOptions = useMemo(() => {
+    const unique = new Set<string>();
+    results.forEach((p) => {
+      if (p.jenjang) unique.add(p.jenjang);
+    });
+    return Array.from(unique).sort();
+  }, [results]);
+
+  const akreditasiOptions = useMemo(() => {
+    const unique = new Set<string>();
+    results.forEach((p) => {
+      if (p.akreditasi) unique.add(p.akreditasi);
+    });
+    return Array.from(unique).sort();
+  }, [results]);
+
+  // ===== Filtered and Sorted Results =====
+  const filteredAndSortedResults = useMemo(() => {
+    let filtered = [...results];
+
+    // Apply filters
+    if (selectedJenjang !== "Semua") {
+      filtered = filtered.filter((p) => p.jenjang === selectedJenjang);
+    }
+
+    if (selectedAkreditasi !== "Semua") {
+      filtered = filtered.filter((p) => p.akreditasi === selectedAkreditasi);
+    }
+
+    // Apply sorting
+    if (sortBy) {
+      filtered.sort((a, b) => {
+        let aVal: any = a[sortBy as keyof ProdiItem];
+        let bVal: any = b[sortBy as keyof ProdiItem];
+
+        // Handle nested universitas properties
+        if (sortBy === "universitas") {
+          aVal = a.universitas?.nama || "";
+          bVal = b.universitas?.nama || "";
+        }
+
+        // Handle null/undefined values
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        // Compare strings
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          const comparison = aVal.localeCompare(bVal);
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [results, selectedJenjang, selectedAkreditasi, sortBy, sortOrder]);
+
+  // Reset filters function
+  const handleResetFilters = useCallback(() => {
+    setSelectedJenjang("Semua");
+    setSelectedAkreditasi("Semua");
+    setSortBy("");
+    setSortOrder("asc");
+  }, []);
+
+  // Handle table header click for sorting
+  const handleHeaderClick = useCallback(
+    async (column: string) => {
+      // If clicking the same column, toggle order
+      if (sortBy === column) {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+      } else {
+        // New column, set it and default to ascending
+        setSortBy(column);
+        setSortOrder("asc");
+
+        // Fetch all data when sorting (if not already loaded)
+        if (!isFullDataLoaded) {
+          await fetchAllProdi();
+        }
+      }
+    },
+    [sortBy, isFullDataLoaded, fetchAllProdi]
+  );
 
   // ===== Search History =====
   useEffect(() => {
@@ -270,14 +469,22 @@ const Jurusan: React.FC = () => {
       setQuery(selectedMajorName);
       setHasSearched(true);
       search(selectedMajorName, true);
+    } else {
+      // Load default prodi on mount
+      fetchDefaultProdi();
     }
-  }, [location.state, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
+  // Auto-reload default prodi when query is cleared
   useEffect(() => {
-    if (query.trim() === "") {
+    if (query.trim() === "" && hasSearched && results.length > 0) {
+      // User cleared the search, reload defaults
       setHasSearched(false);
+      fetchDefaultProdi();
     }
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]); // Only depend on query changes
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
@@ -431,9 +638,9 @@ const Jurusan: React.FC = () => {
 
       {/* === Main Section === */}
       <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1500px] mx-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">
-            Telusuri
+            Daftar Program Studi
           </h2>
 
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -443,10 +650,17 @@ const Jurusan: React.FC = () => {
                 value={query}
                 onChange={setQuery}
                 onSubmit={onSubmit}
-                placeholder="Cari Program Studi (Contoh: Teknik Informatika)"
+                placeholder="Cari Program Studi..."
                 canSearch={canSearch}
-                loading={loading}
                 inputRef={mainSearchRef}
+                recentSearches={recentSearches}
+                onSearchClick={(term) => {
+                  setQuery(term);
+                  setHasSearched(true);
+                  search(term);
+                }}
+                onRemoveHistory={removeHistoryItem}
+                onClearAllHistory={clearHistory}
               />
 
               {error && (
@@ -455,43 +669,142 @@ const Jurusan: React.FC = () => {
                 </div>
               )}
 
-              {!showResults ? (
-                <SearchHistory
-                  searches={recentSearches}
-                  onSearchClick={(term) => {
-                    setQuery(term);
-                    setHasSearched(true);
-                    search(term);
-                  }}
-                  onRemove={removeHistoryItem}
-                  onClearAll={clearHistory}
-                />
-              ) : (
-                <>
-                  {loading && (
-                    <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Mencari...</p>
-                      </div>
-                    </div>
-                  )}
+              {loading && (
+                <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Mencari...</p>
+                  </div>
+                </div>
+              )}
 
-                  {!loading && results.length > 0 && (
-                    <div className="rounded-lg border border-gray-200 overflow-hidden">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2">Nama Program Studi</th>
-                            <th className="px-2 py-2">Jenjang</th>
-                            <th className="px-2 py-2">Universitas</th>
-                            <th className="px-2 py-2">
-                              Akreditasi Universitas
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {results.map((p, index) => (
+              {!loading && results.length > 0 && (
+                <>
+                  {/* Filter Bar */}
+                  <FilterSortBar
+                    selectedJenjang={selectedJenjang}
+                    onJenjangChange={setSelectedJenjang}
+                    selectedAkreditasi={selectedAkreditasi}
+                    onAkreditasiChange={setSelectedAkreditasi}
+                    jenjangOptions={jenjangOptions}
+                    akreditasiOptions={akreditasiOptions}
+                    onReset={handleResetFilters}
+                  />
+
+                  {/* Results Table with Sortable Headers - Modern Design */}
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <tr className="border-b-2 border-gray-200">
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("nama_prodi")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Nama Program Studi
+                              {sortBy === "nama_prodi" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("jenjang")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Jenjang
+                              {sortBy === "jenjang" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("universitas")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Universitas
+                              {sortBy === "universitas" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("akreditasi")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Akreditasi
+                              {sortBy === "akreditasi" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {filteredAndSortedResults.length > 0 ? (
+                          filteredAndSortedResults.map((p, index) => (
                             <tr
                               key={`${p.prodi_id}-${
                                 p.universitas?.university_id || "no-univ"
@@ -499,71 +812,100 @@ const Jurusan: React.FC = () => {
                               onClick={() =>
                                 fetchProdiDetail(p.prodi_id, index)
                               }
-                              className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
-                                selectedRowIndex === index ? "bg-blue-100" : ""
+                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
+                                selectedRowIndex === index
+                                  ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
+                                  : "bg-white"
                               }`}
                             >
-                              <td className="px-4 py-2">
-                                <div className="font-medium text-blue-600 hover:text-blue-800">
+                              <td className="px-6 py-4">
+                                <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
                                   {p.nama_prodi}
                                 </div>
                                 {p.bidang && (
-                                  <div className="text-gray-500 text-xs">
+                                  <div className="text-gray-500 text-xs mt-0.5">
                                     {p.bidang}
                                   </div>
                                 )}
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="px-6 py-4">
                                 {p.jenjang ? (
-                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                  <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 ring-1 ring-blue-600/20">
                                     {p.jenjang}
                                   </span>
                                 ) : (
-                                  "-"
+                                  <span className="text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="px-6 py-4">
                                 {p.universitas?.nama ? (
                                   <div>
-                                    <div className="font-medium text-gray-900 text-xs">
+                                    <div className="font-medium text-gray-900 text-sm">
                                       {p.universitas.nama}
                                     </div>
                                     {p.universitas.provinsi && (
-                                      <div className="text-gray-500 text-xs">
+                                      <div className="text-gray-500 text-xs mt-0.5">
                                         {p.universitas.provinsi}
                                       </div>
                                     )}
                                   </div>
                                 ) : (
-                                  "-"
+                                  <span className="text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="px-6 py-4">
                                 {p.akreditasi ? (
                                   <span
-                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass(
+                                    className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${badgeClass(
                                       p.akreditasi
-                                    )}`}
+                                    )} ring-1`}
                                   >
                                     {p.akreditasi}
                                   </span>
                                 ) : (
-                                  "-"
+                                  <span className="text-gray-400">-</span>
                                 )}
                               </td>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {!loading && !error && results.length === 0 && (
-                    <p className="text-gray-500">
-                      Tidak ada program studi yang cocok.
-                    </p>
-                  )}
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-12 text-center">
+                              <div className="text-gray-400 text-sm">
+                                <svg
+                                  className="mx-auto h-12 w-12 text-gray-300 mb-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                  />
+                                </svg>
+                                <p className="font-medium text-gray-500">
+                                  Tidak ada program studi yang sesuai dengan
+                                  filter
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Coba ubah filter atau reset pencarian
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </>
+              )}
+
+              {!loading && !error && results.length === 0 && (
+                <p className="text-gray-500">
+                  Tidak ada program studi yang cocok.
+                </p>
               )}
             </div>
 

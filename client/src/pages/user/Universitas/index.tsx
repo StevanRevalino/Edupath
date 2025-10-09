@@ -8,7 +8,6 @@ import React, {
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
-import { useDebounce } from "../../../hooks/useDebounce";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
@@ -18,7 +17,6 @@ import universitasIcon2 from "../../../assets/universitas-info-2.png";
 import universitasIcon3 from "../../../assets/universitas-info-3.png";
 
 import SearchBar from "./components/SearchBar";
-import SearchHistory from "./components/SearchHistory";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -75,9 +73,6 @@ const Universitas: React.FC = () => {
   // ===== Search Cache =====
   const searchCacheRef = useRef<Map<string, UniversitasItem[]>>(new Map());
 
-  // ===== Debounced Query =====
-  const debouncedQuery = useDebounce(query, 300); // 300ms delay
-
   // ===== Riwayat pencarian (localStorage) =====
   const HISTORY_KEY = "edupath:univSearchHistory";
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -91,8 +86,6 @@ const Universitas: React.FC = () => {
     () => heroQuery.trim().length >= 2,
     [heroQuery]
   );
-  // Always show results after initial load or search
-  const showResults = results.length > 0 || hasSearched;
 
   const items = [
     {
@@ -522,16 +515,6 @@ const Universitas: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]); // Only depend on query changes
 
-  // Auto-search with debounce when user types
-  useEffect(() => {
-    if (debouncedQuery.trim().length >= 2 && debouncedQuery !== "") {
-      setHasSearched(true);
-      search(debouncedQuery);
-      pushHistory(debouncedQuery);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery]); // Only depend on debouncedQuery
-
   return (
     <div className="min-h-screen bg-gray-100 relative">
       {/* === Hero Section (mirip Konseling) === */}
@@ -711,10 +694,17 @@ const Universitas: React.FC = () => {
                     pushHistory(query);
                   }
                 }}
-                placeholder="Cari Universitas (Contoh: Institut Teknologi Bandung)"
+                placeholder="Cari universitas..."
                 canSearch={canSearch}
-                loading={loading}
                 inputRef={mainSearchRef}
+                recentSearches={recentSearches}
+                onSearchClick={(term) => {
+                  setQuery(term);
+                  setHasSearched(true);
+                  search(term);
+                }}
+                onRemoveHistory={removeHistoryItem}
+                onClearAllHistory={clearHistory}
               />
 
               {error && (
@@ -723,319 +713,301 @@ const Universitas: React.FC = () => {
                 </div>
               )}
 
-              {!showResults ? (
-                <SearchHistory
-                  searches={recentSearches}
-                  onSearchClick={(term) => {
-                    setQuery(term);
-                    setHasSearched(true);
-                    search(term);
-                  }}
-                  onRemove={removeHistoryItem}
-                  onClearAll={clearHistory}
-                />
-              ) : (
-                <>
-                  {loading && (
-                    <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Mencari...</p>
-                      </div>
-                    </div>
-                  )}
-                  {!loading && results.length > 0 && (
-                    <>
-                      {/* Filter Bar */}
-                      <FilterSortBar
-                        selectedProvinsi={selectedProvinsi}
-                        onProvinsiChange={setSelectedProvinsi}
-                        selectedKota={selectedKota}
-                        onKotaChange={setSelectedKota}
-                        selectedAkreditasi={selectedAkreditasi}
-                        onAkreditasiChange={setSelectedAkreditasi}
-                        provinsiOptions={provinsiOptions}
-                        kotaOptions={kotaOptions}
-                        onReset={handleResetFilters}
-                      />
+              {loading && (
+                <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Mencari...</p>
+                  </div>
+                </div>
+              )}
 
-                      {/* Results Table with Sortable Headers - Modern Design */}
-                      <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
-                        <table className="w-full text-left text-sm">
-                          <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr className="border-b-2 border-gray-200">
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() => handleHeaderClick("nama")}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Nama
-                                  {sortBy === "nama" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
+              {!loading && results.length > 0 && (
+                <>
+                  {/* Filter Bar */}
+                  <FilterSortBar
+                    selectedProvinsi={selectedProvinsi}
+                    onProvinsiChange={setSelectedProvinsi}
+                    selectedKota={selectedKota}
+                    onKotaChange={setSelectedKota}
+                    selectedAkreditasi={selectedAkreditasi}
+                    onAkreditasiChange={setSelectedAkreditasi}
+                    provinsiOptions={provinsiOptions}
+                    kotaOptions={kotaOptions}
+                    onReset={handleResetFilters}
+                  />
+
+                  {/* Results Table with Sortable Headers - Modern Design */}
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <tr className="border-b-2 border-gray-200">
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("nama")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Nama
+                              {sortBy === "nama" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("kota")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Kota
+                              {sortBy === "kota" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("provinsi")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Provinsi
+                              {sortBy === "provinsi" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("akreditasi")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Akreditasi
+                              {sortBy === "akreditasi" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("rank_country")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Rank Country
+                              {sortBy === "rank_country" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            onClick={() => handleHeaderClick("rank_qs")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Rank QS
+                              {sortBy === "rank_qs" ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUp
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    className="text-blue-600"
+                                  />
+                                )
+                              ) : (
+                                <ChevronsUpDown
+                                  size={14}
+                                  className="text-gray-400"
+                                />
+                              )}
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {filteredAndSortedResults.length > 0 ? (
+                          filteredAndSortedResults.map((u, index) => (
+                            <tr
+                              key={`${u.university_id}-${index}`}
+                              onClick={() =>
+                                handleUniversitasClick(u.university_id)
+                              }
+                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
+                                selectedUniversitas?.university_id ===
+                                u.university_id
+                                  ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
+                                  : "bg-white"
+                              }`}
+                            >
+                              <td className="px-6 py-4">
+                                <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
+                                  {u.nama}
                                 </div>
-                              </th>
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() => handleHeaderClick("kota")}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Kota
-                                  {sortBy === "kota" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
-                                </div>
-                              </th>
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() => handleHeaderClick("provinsi")}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Provinsi
-                                  {sortBy === "provinsi" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
-                                </div>
-                              </th>
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() => handleHeaderClick("akreditasi")}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Akreditasi
-                                  {sortBy === "akreditasi" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
-                                </div>
-                              </th>
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() =>
-                                  handleHeaderClick("rank_country")
-                                }
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Rank Country
-                                  {sortBy === "rank_country" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
-                                </div>
-                              </th>
-                              <th
-                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                                onClick={() => handleHeaderClick("rank_qs")}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  Rank QS
-                                  {sortBy === "rank_qs" ? (
-                                    sortOrder === "asc" ? (
-                                      <ChevronUp
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    ) : (
-                                      <ChevronDown
-                                        size={14}
-                                        className="text-blue-600"
-                                      />
-                                    )
-                                  ) : (
-                                    <ChevronsUpDown
-                                      size={14}
-                                      className="text-gray-400"
-                                    />
-                                  )}
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {filteredAndSortedResults.length > 0 ? (
-                              filteredAndSortedResults.map((u, index) => (
-                                <tr
-                                  key={`${u.university_id}-${index}`}
-                                  onClick={() =>
-                                    handleUniversitasClick(u.university_id)
-                                  }
-                                  className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
-                                    selectedUniversitas?.university_id ===
-                                    u.university_id
-                                      ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
-                                      : "bg-white"
-                                  }`}
-                                >
-                                  <td className="px-6 py-4">
-                                    <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
-                                      {u.nama}
-                                    </div>
-                                    {u.nama_singkat && (
-                                      <div className="text-gray-500 text-xs mt-0.5">
-                                        {u.nama_singkat}
-                                      </div>
-                                    )}
-                                  </td>
-                                  <td className="px-6 py-4 text-gray-700">
-                                    {u.kota || "-"}
-                                  </td>
-                                  <td className="px-6 py-4 text-gray-700">
-                                    {cleanProvinceName(u.provinsi)}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    {u.akreditasi ? (
-                                      <span
-                                        className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${
-                                          u.akreditasi === "Unggul"
-                                            ? "bg-green-100 text-green-800 ring-1 ring-green-600/20"
-                                            : u.akreditasi === "Baik Sekali"
-                                            ? "bg-blue-100 text-blue-800 ring-1 ring-blue-600/20"
-                                            : u.akreditasi === "Baik"
-                                            ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20"
-                                            : "bg-gray-100 text-gray-800 ring-1 ring-gray-600/20"
-                                        }`}
-                                      >
-                                        {u.akreditasi}
-                                      </span>
-                                    ) : (
-                                      <span className="text-gray-400">-</span>
-                                    )}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    {u.rank_country ? (
-                                      <span className="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold ring-1 ring-purple-600/20">
-                                        #{u.rank_country}
-                                      </span>
-                                    ) : (
-                                      <span className="text-gray-400">-</span>
-                                    )}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    {u.rank_qs ? (
-                                      <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold ring-1 ring-indigo-600/20">
-                                        #{u.rank_qs}
-                                      </span>
-                                    ) : (
-                                      <span className="text-gray-400">-</span>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan={6}
-                                  className="px-6 py-12 text-center"
-                                >
-                                  <div className="text-gray-400 text-sm">
-                                    <svg
-                                      className="mx-auto h-12 w-12 text-gray-300 mb-3"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.5}
-                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                                      />
-                                    </svg>
-                                    <p className="font-medium text-gray-500">
-                                      Tidak ada universitas yang sesuai dengan
-                                      filter
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                      Coba ubah filter atau reset pencarian
-                                    </p>
+                                {u.nama_singkat && (
+                                  <div className="text-gray-500 text-xs mt-0.5">
+                                    {u.nama_singkat}
                                   </div>
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
-                  )}
-                  {!loading && !error && results.length === 0 && (
-                    <p className="text-gray-500">
-                      Tidak ada universitas yang cocok.
-                    </p>
-                  )}
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-gray-700">
+                                {u.kota || "-"}
+                              </td>
+                              <td className="px-6 py-4 text-gray-700">
+                                {cleanProvinceName(u.provinsi)}
+                              </td>
+                              <td className="px-6 py-4">
+                                {u.akreditasi ? (
+                                  <span
+                                    className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${
+                                      u.akreditasi === "Unggul"
+                                        ? "bg-green-100 text-green-800 ring-1 ring-green-600/20"
+                                        : u.akreditasi === "Baik Sekali"
+                                        ? "bg-blue-100 text-blue-800 ring-1 ring-blue-600/20"
+                                        : u.akreditasi === "Baik"
+                                        ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20"
+                                        : "bg-gray-100 text-gray-800 ring-1 ring-gray-600/20"
+                                    }`}
+                                  >
+                                    {u.akreditasi}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {u.rank_country ? (
+                                  <span className="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold ring-1 ring-purple-600/20">
+                                    #{u.rank_country}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {u.rank_qs ? (
+                                  <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold ring-1 ring-indigo-600/20">
+                                    #{u.rank_qs}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-12 text-center">
+                              <div className="text-gray-400 text-sm">
+                                <svg
+                                  className="mx-auto h-12 w-12 text-gray-300 mb-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                  />
+                                </svg>
+                                <p className="font-medium text-gray-500">
+                                  Tidak ada universitas yang sesuai dengan
+                                  filter
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Coba ubah filter atau reset pencarian
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </>
+              )}
+
+              {!loading && !error && results.length === 0 && (
+                <p className="text-gray-500">
+                  Tidak ada universitas yang cocok.
+                </p>
               )}
             </div>
 
