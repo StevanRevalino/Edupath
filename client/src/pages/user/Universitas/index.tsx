@@ -8,6 +8,7 @@ import React, {
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
+import { useDebounce } from "../../../hooks/useDebounce";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
@@ -18,6 +19,8 @@ import universitasIcon3 from "../../../assets/universitas-info-3.png";
 
 import SearchBar from "./components/SearchBar";
 import SearchHistory from "./components/SearchHistory";
+import FilterSortBar from "./components/FilterSortBar";
+import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
 type UniversitasItem = {
   university_id: string;
@@ -28,26 +31,22 @@ type UniversitasItem = {
   akreditasi?: string | null;
   email?: string | null;
   telepon?: string | null;
+  rank_qs?: number | null;
+  rank_country?: number | null;
 };
 
 type UniversitasDetailType = {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
-  kelompok?: string | null;
-  pembina?: string | null;
-  alamat?: string | null;
-  kecamatan?: string | null;
-  kota?: string | null;
-  provinsi?: string | null;
   kode_pos?: string | null;
-  email?: string | null;
   telepon?: string | null;
   fax?: string | null;
-  website?: string | null;
-  tanggal_berdiri?: string | null;
+  email?: string | null;
+  alamat?: string | null;
+  kota?: string | null;
+  provinsi?: string | null;
   akreditasi?: string | null;
-  status_akreditasi?: string | null;
   rank_qs?: number | null;
   rank_country?: number | null;
 };
@@ -65,6 +64,20 @@ const Universitas: React.FC = () => {
   const [detailError, setDetailError] = useState<string>("");
   const controllerRef = useRef<AbortController | null>(null);
 
+  // ===== Filter & Sort States =====
+  const [selectedProvinsi, setSelectedProvinsi] = useState<string>("Semua");
+  const [selectedKota, setSelectedKota] = useState<string>("Semua");
+  const [selectedAkreditasi, setSelectedAkreditasi] = useState<string>("Semua");
+  const [sortBy, setSortBy] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isFullDataLoaded, setIsFullDataLoaded] = useState<boolean>(false); // Track if all data is loaded
+
+  // ===== Search Cache =====
+  const searchCacheRef = useRef<Map<string, UniversitasItem[]>>(new Map());
+
+  // ===== Debounced Query =====
+  const debouncedQuery = useDebounce(query, 300); // 300ms delay
+
   // ===== Riwayat pencarian (localStorage) =====
   const HISTORY_KEY = "edupath:univSearchHistory";
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -78,7 +91,8 @@ const Universitas: React.FC = () => {
     () => heroQuery.trim().length >= 2,
     [heroQuery]
   );
-  const showResults = hasSearched && query.trim().length > 0;
+  // Always show results after initial load or search
+  const showResults = results.length > 0 || hasSearched;
 
   const items = [
     {
@@ -146,9 +160,113 @@ const Universitas: React.FC = () => {
     [fetchUniversitasDetail]
   );
 
+  // Fetch default universities (top N universities)
+  const fetchDefaultUniversities = useCallback(async () => {
+    const currentId = ++searchRequestIdRef.current;
+    setLoading(true);
+    setError("");
+
+    try {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const url = `${API_URL}/api/universitas`;
+      const token = TokenManager.getToken();
+      const res = await axios.get(url, {
+        params: { limit: 20 }, // Get top 20 universities for initial display
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (currentId !== searchRequestIdRef.current) return;
+
+      const data = (res.data?.data || []) as UniversitasItem[];
+      setResults(data);
+      setHasSearched(true);
+      setIsFullDataLoaded(false); // Partial data loaded
+    } catch (e: any) {
+      if (currentId !== searchRequestIdRef.current) return;
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+        return;
+      }
+      const msg =
+        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+      setError(msg);
+      setResults([]);
+      setIsFullDataLoaded(false);
+    } finally {
+      if (currentId === searchRequestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  // Fetch ALL universities for sorting/filtering
+  const fetchAllUniversities = useCallback(async () => {
+    const currentId = ++searchRequestIdRef.current;
+    setLoading(true);
+    setError("");
+
+    try {
+      const API_URL =
+        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+      const url = `${API_URL}/api/universitas`;
+      const token = TokenManager.getToken();
+      const res = await axios.get(url, {
+        params: { limit: 10000 }, // Get ALL universities for accurate sorting
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (currentId !== searchRequestIdRef.current) return;
+
+      const data = (res.data?.data || []) as UniversitasItem[];
+      setResults(data);
+      setHasSearched(true);
+      setIsFullDataLoaded(true); // Full data loaded
+    } catch (e: any) {
+      if (currentId !== searchRequestIdRef.current) return;
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+        return;
+      }
+      const msg =
+        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+      setError(msg);
+      setResults([]);
+      setIsFullDataLoaded(false);
+    } finally {
+      if (currentId === searchRequestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
   const search = useCallback(
     async (q: string, autoSelectExactMatch = false) => {
       if (!q.trim()) return;
+
+      const searchKey = q.trim().toLowerCase();
+
+      // Check cache first
+      if (searchCacheRef.current.has(searchKey)) {
+        console.log("Using cached search results for:", searchKey);
+        const cachedData = searchCacheRef.current.get(searchKey)!;
+        setResults(cachedData);
+        setIsFullDataLoaded(false);
+
+        if (autoSelectExactMatch && cachedData.length > 0) {
+          const exactMatch = cachedData.find(
+            (univ) => univ.nama.toLowerCase() === searchKey
+          );
+          if (exactMatch) {
+            fetchUniversitasDetail(exactMatch.university_id);
+          }
+        }
+        return;
+      }
+
+      // Cancel previous request
       if (controllerRef.current) controllerRef.current.abort();
       const ctrl = new AbortController();
       controllerRef.current = ctrl;
@@ -171,7 +289,12 @@ const Universitas: React.FC = () => {
         if (currentId !== searchRequestIdRef.current) return; // abaikan response lama
 
         const data = (res.data?.data || []) as UniversitasItem[];
+
+        // Cache the results
+        searchCacheRef.current.set(searchKey, data);
+
         setResults(data);
+        setIsFullDataLoaded(false);
 
         if (autoSelectExactMatch && data.length > 0) {
           const exactMatch = data.find(
@@ -238,6 +361,123 @@ const Universitas: React.FC = () => {
     return provinsi.replace(/^Prov\.\s*/i, "");
   };
 
+  // ===== Extract unique options for filters =====
+  const provinsiOptions = useMemo(() => {
+    const uniqueProvinsi = new Set<string>();
+    results.forEach((u) => {
+      if (u.provinsi) {
+        uniqueProvinsi.add(cleanProvinceName(u.provinsi));
+      }
+    });
+    return Array.from(uniqueProvinsi).sort();
+  }, [results]);
+
+  const kotaOptions = useMemo(() => {
+    const uniqueKota = new Set<string>();
+    results.forEach((u) => {
+      if (u.kota) {
+        uniqueKota.add(u.kota);
+      }
+    });
+    return Array.from(uniqueKota).sort();
+  }, [results]);
+
+  // ===== Filter & Sort Logic =====
+  const filteredAndSortedResults = useMemo(() => {
+    let filtered = [...results];
+
+    // Apply filters
+    if (selectedProvinsi !== "Semua") {
+      filtered = filtered.filter(
+        (u) => cleanProvinceName(u.provinsi) === selectedProvinsi
+      );
+    }
+
+    if (selectedKota !== "Semua") {
+      filtered = filtered.filter((u) => u.kota === selectedKota);
+    }
+
+    if (selectedAkreditasi !== "Semua") {
+      filtered = filtered.filter((u) => u.akreditasi === selectedAkreditasi);
+    }
+
+    // Apply sorting
+    if (sortBy) {
+      filtered.sort((a, b) => {
+        let aVal: any = a[sortBy as keyof UniversitasItem];
+        let bVal: any = b[sortBy as keyof UniversitasItem];
+
+        // For number fields (rank_qs, rank_country), handle null as Infinity for sorting
+        if (sortBy === "rank_qs" || sortBy === "rank_country") {
+          const aNum = aVal === null || aVal === undefined ? Infinity : aVal;
+          const bNum = bVal === null || bVal === undefined ? Infinity : bVal;
+          return sortOrder === "asc" ? aNum - bNum : bNum - aNum;
+        }
+
+        // Handle null/undefined values for string fields
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        // Clean provinsi names for sorting
+        if (sortBy === "provinsi") {
+          aVal = cleanProvinceName(aVal);
+          bVal = cleanProvinceName(bVal);
+        }
+
+        // Compare strings
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          const comparison = aVal.localeCompare(bVal);
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+
+        // Compare numbers
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [
+    results,
+    selectedProvinsi,
+    selectedKota,
+    selectedAkreditasi,
+    sortBy,
+    sortOrder,
+  ]);
+
+  // Reset filters function
+  const handleResetFilters = useCallback(() => {
+    setSelectedProvinsi("Semua");
+    setSelectedKota("Semua");
+    setSelectedAkreditasi("Semua");
+    setSortBy("");
+    setSortOrder("asc");
+  }, []);
+
+  // Handle table header click for sorting
+  const handleHeaderClick = useCallback(
+    async (column: string) => {
+      // If clicking the same column, toggle order
+      if (sortBy === column) {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+      } else {
+        // New column, set it and default to ascending
+        setSortBy(column);
+        setSortOrder("asc");
+
+        // Fetch all data when sorting (if not already loaded)
+        if (!isFullDataLoaded) {
+          await fetchAllUniversities();
+        }
+      }
+    },
+    [sortBy, isFullDataLoaded, fetchAllUniversities]
+  );
+
   // scroll ke search input
   const focusSearch = () => {
     if (mainSearchRef.current) {
@@ -258,20 +498,39 @@ const Universitas: React.FC = () => {
     } catch {}
   }, []);
 
-  // auto-select dari navigation state
+  // Load default universities on mount
   useEffect(() => {
     const selectedUniversityName = (location.state as any)?.selectedUniversity;
     if (selectedUniversityName) {
+      // auto-select dari navigation state
       setQuery(selectedUniversityName);
       search(selectedUniversityName, true);
+    } else {
+      // Load default universities
+      fetchDefaultUniversities();
     }
-  }, [location.state, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
+  // Auto-reload default universities when query is cleared
   useEffect(() => {
-    if (query.trim() === "") {
+    if (query.trim() === "" && hasSearched && results.length > 0) {
+      // User cleared the search, reload defaults
       setHasSearched(false);
+      fetchDefaultUniversities();
     }
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]); // Only depend on query changes
+
+  // Auto-search with debounce when user types
+  useEffect(() => {
+    if (debouncedQuery.trim().length >= 2 && debouncedQuery !== "") {
+      setHasSearched(true);
+      search(debouncedQuery);
+      pushHistory(debouncedQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery]); // Only depend on debouncedQuery
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
@@ -433,9 +692,9 @@ const Universitas: React.FC = () => {
 
       {/* === Main Section === */}
       <section className="relative px-4 sm:px-6 lg:px-8 pt-8 mt-8 lg:mt-12 pb-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-[1500px]">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B0B0B] mb-4">
-            Telusuri
+            Daftar Universitas
           </h2>
 
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -486,100 +745,290 @@ const Universitas: React.FC = () => {
                     </div>
                   )}
                   {!loading && results.length > 0 && (
-                    <div className="rounded-lg border border-gray-200 overflow-hidden">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2">Nama</th>
-                            <th className="px-4 py-2">Provinsi</th>
-                            <th className="px-4 py-2">Akreditasi</th>
-                            <th className="px-4 py-2">Email</th>
-                            <th className="px-4 py-2">Telepon</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {results.map((u, index) => (
-                            <tr
-                              key={`${u.university_id}-${index}`}
-                              onClick={() =>
-                                handleUniversitasClick(u.university_id)
-                              }
-                              className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
-                                selectedUniversitas?.university_id ===
-                                u.university_id
-                                  ? "bg-blue-100"
-                                  : ""
-                              }`}
-                            >
-                              <td className="px-4 py-2">
-                                <div className="font-medium text-blue-600 hover:text-blue-800">
-                                  {u.nama}
+                    <>
+                      {/* Filter Bar */}
+                      <FilterSortBar
+                        selectedProvinsi={selectedProvinsi}
+                        onProvinsiChange={setSelectedProvinsi}
+                        selectedKota={selectedKota}
+                        onKotaChange={setSelectedKota}
+                        selectedAkreditasi={selectedAkreditasi}
+                        onAkreditasiChange={setSelectedAkreditasi}
+                        provinsiOptions={provinsiOptions}
+                        kotaOptions={kotaOptions}
+                        onReset={handleResetFilters}
+                      />
+
+                      {/* Results Table with Sortable Headers - Modern Design */}
+                      <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                            <tr className="border-b-2 border-gray-200">
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() => handleHeaderClick("nama")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Nama
+                                  {sortBy === "nama" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
                                 </div>
-                                {u.nama_singkat && (
-                                  <div className="text-gray-500 text-xs">
-                                    {u.nama_singkat}
-                                  </div>
-                                )}
-                              </td>
-                              <td className="px-4 py-2">
-                                {cleanProvinceName(u.provinsi)}
-                              </td>
-                              <td className="px-4 py-2">
-                                {u.akreditasi ? (
-                                  <span
-                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      u.akreditasi === "A" ||
-                                      u.akreditasi === "Unggul"
-                                        ? "bg-green-100 text-green-800"
-                                        : u.akreditasi === "Baik Sekali"
-                                        ? "bg-blue-100 text-blue-800"
-                                        : u.akreditasi === "B" ||
-                                          u.akreditasi === "Baik"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : u.akreditasi === "C"
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-gray-100 text-gray-800"
-                                    }`}
-                                  >
-                                    {u.akreditasi}
-                                  </span>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
-                              <td className="px-4 py-2">
-                                {u.email ? (
-                                  <a
-                                    href={`mailto:${u.email}`}
-                                    className="text-blue-600 hover:text-blue-800 text-xs"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {u.email.length > 20
-                                      ? `${u.email.substring(0, 20)}...`
-                                      : u.email}
-                                  </a>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
-                              <td className="px-4 py-2">
-                                {u.telepon ? (
-                                  <a
-                                    href={`tel:${u.telepon}`}
-                                    className="text-blue-600 hover:text-blue-800 text-xs"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {u.telepon}
-                                  </a>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
+                              </th>
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() => handleHeaderClick("kota")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Kota
+                                  {sortBy === "kota" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
+                                </div>
+                              </th>
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() => handleHeaderClick("provinsi")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Provinsi
+                                  {sortBy === "provinsi" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
+                                </div>
+                              </th>
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() => handleHeaderClick("akreditasi")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Akreditasi
+                                  {sortBy === "akreditasi" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
+                                </div>
+                              </th>
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() =>
+                                  handleHeaderClick("rank_country")
+                                }
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Rank Country
+                                  {sortBy === "rank_country" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
+                                </div>
+                              </th>
+                              <th
+                                className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                                onClick={() => handleHeaderClick("rank_qs")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Rank QS
+                                  {sortBy === "rank_qs" ? (
+                                    sortOrder === "asc" ? (
+                                      <ChevronUp
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    ) : (
+                                      <ChevronDown
+                                        size={14}
+                                        className="text-blue-600"
+                                      />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown
+                                      size={14}
+                                      className="text-gray-400"
+                                    />
+                                  )}
+                                </div>
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {filteredAndSortedResults.length > 0 ? (
+                              filteredAndSortedResults.map((u, index) => (
+                                <tr
+                                  key={`${u.university_id}-${index}`}
+                                  onClick={() =>
+                                    handleUniversitasClick(u.university_id)
+                                  }
+                                  className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
+                                    selectedUniversitas?.university_id ===
+                                    u.university_id
+                                      ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
+                                      : "bg-white"
+                                  }`}
+                                >
+                                  <td className="px-6 py-4">
+                                    <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
+                                      {u.nama}
+                                    </div>
+                                    {u.nama_singkat && (
+                                      <div className="text-gray-500 text-xs mt-0.5">
+                                        {u.nama_singkat}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4 text-gray-700">
+                                    {u.kota || "-"}
+                                  </td>
+                                  <td className="px-6 py-4 text-gray-700">
+                                    {cleanProvinceName(u.provinsi)}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {u.akreditasi ? (
+                                      <span
+                                        className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${
+                                          u.akreditasi === "Unggul"
+                                            ? "bg-green-100 text-green-800 ring-1 ring-green-600/20"
+                                            : u.akreditasi === "Baik Sekali"
+                                            ? "bg-blue-100 text-blue-800 ring-1 ring-blue-600/20"
+                                            : u.akreditasi === "Baik"
+                                            ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20"
+                                            : "bg-gray-100 text-gray-800 ring-1 ring-gray-600/20"
+                                        }`}
+                                      >
+                                        {u.akreditasi}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {u.rank_country ? (
+                                      <span className="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold ring-1 ring-purple-600/20">
+                                        #{u.rank_country}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {u.rank_qs ? (
+                                      <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold ring-1 ring-indigo-600/20">
+                                        #{u.rank_qs}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={6}
+                                  className="px-6 py-12 text-center"
+                                >
+                                  <div className="text-gray-400 text-sm">
+                                    <svg
+                                      className="mx-auto h-12 w-12 text-gray-300 mb-3"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.5}
+                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                      />
+                                    </svg>
+                                    <p className="font-medium text-gray-500">
+                                      Tidak ada universitas yang sesuai dengan
+                                      filter
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                      Coba ubah filter atau reset pencarian
+                                    </p>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
                   {!loading && !error && results.length === 0 && (
                     <p className="text-gray-500">
@@ -633,17 +1082,6 @@ const Universitas: React.FC = () => {
                           {selectedUniversitas.nama}
                         </dd>
                       </div>
-
-                      {selectedUniversitas.kelompok && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Kelompok
-                          </dt>
-                          <dd className="text-gray-900">
-                            {selectedUniversitas.kelompok}
-                          </dd>
-                        </div>
-                      )}
 
                       {selectedUniversitas.provinsi && (
                         <div>
@@ -700,25 +1138,11 @@ const Universitas: React.FC = () => {
                           </dd>
                         </div>
                       )}
-
-                      {selectedUniversitas.tanggal_berdiri && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Tanggal Berdiri
-                          </dt>
-                          <dd className="text-gray-900">
-                            {new Date(
-                              selectedUniversitas.tanggal_berdiri
-                            ).toLocaleDateString("id-ID")}
-                          </dd>
-                        </div>
-                      )}
                     </dl>
                   </div>
 
                   {(selectedUniversitas.email ||
-                    selectedUniversitas.telepon ||
-                    selectedUniversitas.website) && (
+                    selectedUniversitas.telepon) && (
                     <div className="px-6 py-4 border-t border-gray-200">
                       <h3 className="text-md font-medium text-gray-900 mb-3">
                         Kontak
@@ -749,28 +1173,6 @@ const Universitas: React.FC = () => {
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 {selectedUniversitas.telepon}
-                              </a>
-                            </dd>
-                          </div>
-                        )}
-
-                        {selectedUniversitas.website && (
-                          <div>
-                            <dt className="font-medium text-gray-500">
-                              Website
-                            </dt>
-                            <dd>
-                              <a
-                                href={
-                                  selectedUniversitas.website.startsWith("http")
-                                    ? selectedUniversitas.website
-                                    : `https://${selectedUniversitas.website}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                {selectedUniversitas.website}
                               </a>
                             </dd>
                           </div>

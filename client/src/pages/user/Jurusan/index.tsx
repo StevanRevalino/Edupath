@@ -35,13 +35,7 @@ type ProdiDetailType = {
   prodi_id: string;
   nama_prodi: string;
   jenjang?: string | null;
-  bidang?: string | null;
-  akreditasi?: string | null;
   status?: string;
-  gelar?: string | null;
-  singkatan_gelar?: string | null;
-  tanggal_berdiri?: string | null;
-  deskripsi?: string | null;
 };
 
 const Jurusan: React.FC = () => {
@@ -491,7 +485,9 @@ const Jurusan: React.FC = () => {
                             <th className="px-4 py-2">Nama Program Studi</th>
                             <th className="px-2 py-2">Jenjang</th>
                             <th className="px-2 py-2">Universitas</th>
-                            <th className="px-2 py-2">Akreditasi Universitas</th>
+                            <th className="px-2 py-2">
+                              Akreditasi Universitas
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -626,49 +622,6 @@ const Jurusan: React.FC = () => {
                         </div>
                       )}
 
-                      {selectedProdi.bidang && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Bidang Ilmu
-                          </dt>
-                          <dd className="text-gray-900">
-                            {selectedProdi.bidang}
-                          </dd>
-                        </div>
-                      )}
-
-                      {selectedProdi.akreditasi && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Akreditasi
-                          </dt>
-                          <dd>
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass(
-                                selectedProdi.akreditasi
-                              )}`}
-                            >
-                              {selectedProdi.akreditasi}
-                            </span>
-                          </dd>
-                        </div>
-                      )}
-
-                      {selectedProdi.gelar && (
-                        <div>
-                          <dt className="font-medium text-gray-500">Gelar</dt>
-                          <dd className="text-gray-900">
-                            {selectedProdi.gelar}
-                            {selectedProdi.singkatan_gelar && (
-                              <span className="text-gray-500">
-                                {" "}
-                                ({selectedProdi.singkatan_gelar})
-                              </span>
-                            )}
-                          </dd>
-                        </div>
-                      )}
-
                       {selectedProdi.status && (
                         <div>
                           <dt className="font-medium text-gray-500">Status</dt>
@@ -682,28 +635,6 @@ const Jurusan: React.FC = () => {
                             >
                               {selectedProdi.status}
                             </span>
-                          </dd>
-                        </div>
-                      )}
-
-                      {selectedProdi.tanggal_berdiri && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Tanggal Berdiri
-                          </dt>
-                          <dd className="text-gray-900">
-                            {formatDate(selectedProdi.tanggal_berdiri)}
-                          </dd>
-                        </div>
-                      )}
-
-                      {selectedProdi.deskripsi && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Deskripsi
-                          </dt>
-                          <dd className="text-gray-900">
-                            {selectedProdi.deskripsi}
                           </dd>
                         </div>
                       )}
