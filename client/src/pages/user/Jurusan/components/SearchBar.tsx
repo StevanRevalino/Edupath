@@ -29,6 +29,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isUserInteractionRef = useRef(false);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,6 +47,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, []);
 
   const handleInputFocus = () => {
+    // Only show dropdown if user manually clicked/focused (not programmatic)
+    if (
+      recentSearches.length > 0 &&
+      !value.trim() &&
+      isUserInteractionRef.current
+    ) {
+      setShowDropdown(true);
+    }
+    // Reset flag after check
+    isUserInteractionRef.current = false;
+  };
+
+  const handleInputClick = () => {
+    // Mark as user interaction when user clicks
+    isUserInteractionRef.current = true;
     if (recentSearches.length > 0 && !value.trim()) {
       setShowDropdown(true);
     }
@@ -102,6 +118,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               value={value}
               onChange={(e) => handleInputChange(e.target.value)}
               onFocus={handleInputFocus}
+              onClick={handleInputClick}
               placeholder={placeholder}
               className="w-full rounded-full bg-neutral-200 text-gray-800 placeholder-gray-400 pl-10 sm:pl-14 pr-4 sm:pr-5 py-2.5 sm:py-3 text-sm sm:text-base shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
             />

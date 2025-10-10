@@ -26,12 +26,17 @@ export class ProdiService {
         };
       }
 
+      // Get total count first
+      const totalCount = await this.prodiRepository.count();
+
+      // Fetch prodi with proper limit and offset
       const allProdi = await this.prodiRepository.findMany({
-        limit: 1000,
+        limit: take,
+        offset: skip,
       });
 
       const detailedProdi = await Promise.all(
-        allProdi.slice(skip, skip + take).map(async (prodi) => {
+        allProdi.map(async (prodi) => {
           const detailed = await this.prodiRepository.findById(prodi.prodi_id);
           if (!detailed) return null;
 
@@ -55,6 +60,15 @@ export class ProdiService {
             gelar: null,
             singkatan_gelar: null,
             deskripsi: null,
+            universitas: detailed.prodi_pt[0]?.universitas
+              ? {
+                  university_id: detailed.prodi_pt[0].universitas.university_id,
+                  nama: detailed.prodi_pt[0].universitas.nama,
+                  akreditasi: detailed.prodi_pt[0].universitas.akreditasi,
+                  provinsi: detailed.prodi_pt[0].universitas.provinsi,
+                  kota: detailed.prodi_pt[0].universitas.kota,
+                }
+              : null,
           };
         })
       );
@@ -63,7 +77,7 @@ export class ProdiService {
 
       return {
         data: filteredResults,
-        total: allProdi.length,
+        total: totalCount,
       };
     } catch (error) {
       console.error("Error getting all prodi locally:", error);

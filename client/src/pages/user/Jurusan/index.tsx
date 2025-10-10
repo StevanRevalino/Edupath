@@ -60,7 +60,6 @@ const Jurusan: React.FC = () => {
   const [selectedAkreditasi, setSelectedAkreditasi] = useState<string>("Semua");
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [isFullDataLoaded, setIsFullDataLoaded] = useState<boolean>(false); // Track if all data is loaded
 
   // ===== Search Cache =====
   const searchCacheRef = useRef<Map<string, ProdiItem[]>>(new Map());
@@ -164,7 +163,7 @@ const Jurusan: React.FC = () => {
       const url = `${API_URL}/api/prodi`;
       const token = TokenManager.getToken();
       const res = await axios.get(url, {
-        params: { limit: 20 }, // Get top 20 prodi for initial display
+        params: { limit: 15 }, // Get top 15 prodi for initial display
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
@@ -175,7 +174,6 @@ const Jurusan: React.FC = () => {
       const filtered = data.filter((p) => p.universitas?.nama);
       setResults(filtered);
       setHasSearched(true);
-      setIsFullDataLoaded(false); // Partial data loaded
     } catch (e: any) {
       if (currentId !== searchRequestIdRef.current) return;
       if (e?.response?.status === 401 || e?.response?.status === 403) {
@@ -187,50 +185,6 @@ const Jurusan: React.FC = () => {
         e?.response?.data?.message || e?.message || "Terjadi kesalahan";
       setError(msg);
       setResults([]);
-      setIsFullDataLoaded(false);
-    } finally {
-      if (currentId === searchRequestIdRef.current) {
-        setLoading(false);
-      }
-    }
-  }, []);
-
-  // Fetch ALL prodi for sorting/filtering
-  const fetchAllProdi = useCallback(async () => {
-    const currentId = ++searchRequestIdRef.current;
-    setLoading(true);
-    setError("");
-
-    try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const url = `${API_URL}/api/prodi`;
-      const token = TokenManager.getToken();
-      const res = await axios.get(url, {
-        params: { limit: 10000 }, // Get ALL prodi for accurate sorting
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (currentId !== searchRequestIdRef.current) return;
-
-      const data = (res.data?.data || []) as ProdiItem[];
-      // Filter: Only show prodi with universitas.nama
-      const filtered = data.filter((p) => p.universitas?.nama);
-      setResults(filtered);
-      setHasSearched(true);
-      setIsFullDataLoaded(true); // Full data loaded
-    } catch (e: any) {
-      if (currentId !== searchRequestIdRef.current) return;
-      if (e?.response?.status === 401 || e?.response?.status === 403) {
-        TokenManager.logout();
-        window.location.href = "/login";
-        return;
-      }
-      const msg =
-        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
-      setError(msg);
-      setResults([]);
-      setIsFullDataLoaded(false);
     } finally {
       if (currentId === searchRequestIdRef.current) {
         setLoading(false);
@@ -248,7 +202,6 @@ const Jurusan: React.FC = () => {
         const cachedData = searchCacheRef.current.get(cacheKey)!;
         setResults(cachedData);
         setHasSearched(true);
-        setIsFullDataLoaded(false);
         return;
       }
 
@@ -283,7 +236,6 @@ const Jurusan: React.FC = () => {
 
         setResults(filtered);
         setHasSearched(true);
-        setIsFullDataLoaded(false);
 
         if (autoSelectExactMatch && filtered.length > 0) {
           const exact = filtered.find(
@@ -306,7 +258,6 @@ const Jurusan: React.FC = () => {
             e?.response?.data?.message || e?.message || "Terjadi kesalahan"
           );
           setResults([]);
-          setIsFullDataLoaded(false);
         }
       } finally {
         if (currentId === searchRequestIdRef.current) setLoading(false);
@@ -436,7 +387,7 @@ const Jurusan: React.FC = () => {
 
   // Handle table header click for sorting
   const handleHeaderClick = useCallback(
-    async (column: string) => {
+    (column: string) => {
       // If clicking the same column, toggle order
       if (sortBy === column) {
         setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -444,14 +395,9 @@ const Jurusan: React.FC = () => {
         // New column, set it and default to ascending
         setSortBy(column);
         setSortOrder("asc");
-
-        // Fetch all data when sorting (if not already loaded)
-        if (!isFullDataLoaded) {
-          await fetchAllProdi();
-        }
       }
     },
-    [sortBy, isFullDataLoaded, fetchAllProdi]
+    [sortBy]
   );
 
   // ===== Search History =====
