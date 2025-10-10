@@ -2,7 +2,7 @@ import ProfilePageLayout from "../Profil/components/ProfilePageLayout";
 
 export default function ContactUs() {
   return (
-    <ProfilePageLayout>
+    <ProfilePageLayout pageTitle="Hubungi Edupath">
       <div className="space-y-5 p-10 pb-5">
         {/* Header */}
         <h1 className="text-4xl font-bold text-[#00437A] mb-8">Hubungi Kami</h1>

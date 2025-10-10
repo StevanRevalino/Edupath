@@ -2,7 +2,7 @@ import ProfilePageLayout from "../Profil/components/ProfilePageLayout";
 
 export default function AboutUs() {
   return (
-    <ProfilePageLayout>
+    <ProfilePageLayout pageTitle="Tentang Edupath">
       <div className="p-10">
         {/* Header */}
         <h1 className="text-4xl font-bold text-gray-800 mb-8">Tentang kami</h1>

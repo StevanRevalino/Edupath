@@ -74,11 +74,11 @@ const Profil = () => {
   };
 
   if (loading) {
-    return <ProfilePageLayout showLoading={true} />;
+    return <ProfilePageLayout showLoading={true} pageTitle="Profil" />;
   }
 
   return (
-    <ProfilePageLayout isProfilePage={true}>
+    <ProfilePageLayout isProfilePage={true} pageTitle="Profil">
       {userProfile && (
         <>
           {/* Profile Header - Fixed horizontal alignment */}

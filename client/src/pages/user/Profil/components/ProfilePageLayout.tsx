@@ -1,8 +1,8 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import TokenManager from "../../../../utils/tokenManager";
-import HeaderProfil from "../../../../assets/Header-Profil.png";
+import SimpleHeroSection from "./SimpleHeroSection";
 import SidebarProfil from "./Sidebar-Profil";
 import MainContainer from "./Main-Container";
 
@@ -10,14 +10,17 @@ interface ProfilePageLayoutProps {
   children?: ReactNode;
   isProfilePage?: boolean;
   showLoading?: boolean;
+  pageTitle?: string;
 }
 
 const ProfilePageLayout = ({
   children,
   isProfilePage = false,
   showLoading = false,
+  pageTitle = "Tentang EduPath",
 }: ProfilePageLayoutProps) => {
   const navigate = useNavigate();
+  const [mainSectionHeight, setMainSectionHeight] = useState(600);
 
   const handleLogout = () => {
     TokenManager.logout();
@@ -37,16 +40,22 @@ const ProfilePageLayout = ({
   }
 
   return (
-    <div className="bg-gray-100 relative -mb-24">
-      {/* Header Background */}
-      <div className="absolute -top-20">
-        <img src={HeaderProfil} alt="Header Profil" className="w-full h-auto" />
-      </div>
+    <div className="bg-gray-100 relative -mb-24 min-h-screen">
+      {/* Hero Section */}
+      <SimpleHeroSection title={pageTitle} />
 
       {/* Main Content */}
-      <div className="relative z-1 flex">
-        <SidebarProfil onLogout={handleLogout} />
-        <MainContainer isProfilePage={isProfilePage}>{children}</MainContainer>
+      <div className="relative z-[1] flex pt-20">
+        <SidebarProfil
+          onLogout={handleLogout}
+          mainSectionHeight={mainSectionHeight}
+        />
+        <MainContainer
+          isProfilePage={isProfilePage}
+          onHeightChange={setMainSectionHeight}
+        >
+          {children}
+        </MainContainer>
       </div>
     </div>
   );
