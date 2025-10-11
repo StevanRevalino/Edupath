@@ -15,7 +15,7 @@ import jurusanInfo1 from "../../../assets/jurusan-info-1.png";
 import jurusanInfo2 from "../../../assets/jurusan-info-2.png";
 import jurusanInfo3 from "../../../assets/jurusan-info-3.png";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
-import SearchBar from "./components/SearchBar";
+import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 

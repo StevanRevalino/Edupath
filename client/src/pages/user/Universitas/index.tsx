@@ -16,7 +16,7 @@ import universitasIcon1 from "../../../assets/universitas-info-1.png";
 import universitasIcon2 from "../../../assets/universitas-info-2.png";
 import universitasIcon3 from "../../../assets/universitas-info-3.png";
 
-import SearchBar from "./components/SearchBar";
+import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
