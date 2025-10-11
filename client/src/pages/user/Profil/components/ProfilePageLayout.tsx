@@ -17,7 +17,7 @@ const ProfilePageLayout = ({
   children,
   isProfilePage = false,
   showLoading = false,
-  pageTitle = "Tentang EduPath",
+  pageTitle = "",
 }: ProfilePageLayoutProps) => {
   const navigate = useNavigate();
   const [mainSectionHeight, setMainSectionHeight] = useState(600);
