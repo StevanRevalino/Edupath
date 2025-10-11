@@ -45,7 +45,7 @@ const ProfilePageLayout = ({
       <SimpleHeroSection title={pageTitle} />
 
       {/* Main Content */}
-      <div className="relative z-[1] flex pt-20">
+      <div className="relative z-[1] flex pt-8 sm:pt-12 md:pt-16 lg:pt-20">
         <SidebarProfil
           onLogout={handleLogout}
           mainSectionHeight={mainSectionHeight}

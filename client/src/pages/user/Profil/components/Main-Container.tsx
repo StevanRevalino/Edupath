@@ -32,17 +32,13 @@ export default function MainContainer({
   }, [onHeightChange]);
 
   return (
-    <div className="flex-1 pt-[240px] pb-10">
+    <div className="flex-1 pt-32 sm:pt-44 md:pt-56 lg:pt-[240px] pb-10">
       {/* Container dengan position relative untuk avatar yang menonjol */}
-      <div className="relative max-w-4xl mx-auto">
-
-        {/* Main Content Container */}
-        <div
-          ref={containerRef}
-          className="rounded-t-[75px] p-10 pt-15 border-b-0 min-h-[600px] relative z-[2]"
-        >
-          {children}
-        </div>
+      <div
+        className="relative max-w-screen mx-auto lg:pt-20 lg:pr-20"
+        ref={containerRef}
+      >
+        {children}
       </div>
     </div>
   );
