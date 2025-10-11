@@ -436,7 +436,7 @@ export default function PertanyaanTes() {
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
               disabled={!allQuestionsAnswered}
-              onClick={() => console.log("Submitted answers:", answers)}
+              onClick={() => navigate("/tes/selesai")}
             >
               {allQuestionsAnswered
                 ? `Selesai`
