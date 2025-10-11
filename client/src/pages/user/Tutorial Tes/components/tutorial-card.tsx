@@ -84,7 +84,7 @@ export default function TutorialCard({ onStartTest }: TutorialCardProps) {
       {isLastStep && (
         <button
           onClick={handleNext}
-          className="bg-blue-400 hover:bg-blue-500 text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
+          className="bg-[#3FBBFE] hover:bg-[#3FA9F5] text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
         >
           {currentTutorial.buttonText}
         </button>

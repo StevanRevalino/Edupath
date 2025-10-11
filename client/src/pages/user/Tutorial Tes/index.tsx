@@ -16,7 +16,7 @@ export default function TutorialTes() {
         </button>
       </div>
       <div className="flex items-center justify-center min-h-screen">
-        <TutorialCard onStartTest={() => console.log("Test started")} />
+        <TutorialCard onStartTest={() => navigate("/tes/pertanyaan")} />
       </div>
     </>
   );
