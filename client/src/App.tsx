@@ -16,6 +16,7 @@ import AboutUs from "./pages/user/AboutUs";
 import ContactUs from "./pages/user/ContactUs";
 import ScrollToTop from "./components/ScrollToTop";
 import TutorialTes from "./pages/user/Tutorial Tes";
+import PertanyaanTes from "./pages/user/Tes-Pertanyaan";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuthMonitor();
@@ -88,6 +89,7 @@ function App() {
         >
           <Route index element={<Tes />} />
           <Route path="tutorial" element={<TutorialTes />} />
+          <Route path="pertanyaan" element={<PertanyaanTes />} />
         </Route>
         <Route
           path="/jurusan"
