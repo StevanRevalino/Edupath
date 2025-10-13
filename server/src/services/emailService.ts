@@ -149,7 +149,7 @@ export class EmailService {
             </div>
             
             <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">
-              ⚠️ This OTP will expire in 10 minutes for security reasons.
+              ⚠️ This OTP will expire in 30 seconds for security reasons.
             </p>
           </div>
           
@@ -167,7 +167,7 @@ export class EmailService {
         
         OTP Code: ${otp}
         
-        ⚠️ This OTP will expire in 10 minutes for security reasons.
+        ⚠️ This OTP will expire in 30 seconds for security reasons.
         
         If you didn't create an account, please ignore this email.
         

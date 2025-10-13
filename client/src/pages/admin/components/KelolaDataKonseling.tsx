@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
+import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
 
 interface Consultation {
   consultation_id: string;
@@ -193,6 +194,7 @@ const KelolaDataKonseling = () => {
           );
 
           toast.success("Konseling berhasil ditolak");
+          triggerNotificationRefresh(); // Refresh notification badge
         }
       } else {
         // For other status changes (ACCEPTED), use the regular confirmation
@@ -237,6 +239,7 @@ const KelolaDataKonseling = () => {
           );
 
           toast.success("Status konseling berhasil diperbarui");
+          triggerNotificationRefresh(); // Refresh notification badge
         }
       }
     } catch (error) {
@@ -298,6 +301,7 @@ const KelolaDataKonseling = () => {
         );
 
         toast.success("Konseling berhasil diakhiri");
+        triggerNotificationRefresh(); // Refresh notification badge
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -571,7 +575,19 @@ const KelolaDataKonseling = () => {
                         <div>
                           {new Date(
                             consultation.consultation_date
-                          ).toLocaleDateString("id-ID")}
+                          ).toLocaleDateString("id-ID", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </div>
+                        <div>
+                          {new Date(
+                            consultation.consultation_time
+                          ).toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </div>
                       </div>
 

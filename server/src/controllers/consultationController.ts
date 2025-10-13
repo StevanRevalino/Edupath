@@ -86,19 +86,26 @@ export class ConsultationController {
   async getAllConsultations(req: Request, res: Response) {
     try {
       const { status, murid_id, admin_id, limit, offset } = req.query;
+      const user = req.user; // Get authenticated user from JWT
 
       const filters: any = {};
 
+      // Filter based on user role
+      if (user?.role === "STUDENT") {
+        // If user is a student, only show their own consultations
+        filters.murid_id = user.user_id;
+      } else if (user?.role === "ADMIN") {
+        // Admin only sees consultations assigned to them
+        filters.admin_id = user.user_id;
+        
+        // Admin can additionally filter by specific murid_id if provided
+        if (murid_id) {
+          filters.murid_id = murid_id as string;
+        }
+      }
+
       if (status) {
         filters.status = status as string;
-      }
-
-      if (murid_id) {
-        filters.murid_id = murid_id as string;
-      }
-
-      if (admin_id) {
-        filters.admin_id = admin_id as string;
       }
 
       if (limit) {
@@ -436,15 +443,22 @@ export class ConsultationController {
     }
   }
 
-  // Get booked slots for a specific date
+  // Get booked slots for a specific date and admin
   async getBookedSlotsForDate(req: Request, res: Response) {
     try {
-      const { date } = req.query;
+      const { date, adminId } = req.query;
 
       if (!date) {
         return res.status(400).json({
           success: false,
           message: "Tanggal wajib diisi",
+        });
+      }
+
+      if (!adminId) {
+        return res.status(400).json({
+          success: false,
+          message: "Admin ID wajib diisi",
         });
       }
 
@@ -457,7 +471,8 @@ export class ConsultationController {
       }
 
       const bookedSlots = await this.consultationService.getBookedSlotsForDate(
-        targetDate
+        targetDate,
+        adminId as string
       );
 
       return res.status(200).json({

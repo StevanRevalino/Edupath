@@ -34,35 +34,6 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-// Helper function to check if a time slot is in the past for today
-const isTimeSlotDisabled = (timeSlot: string, selectedDate?: Date): boolean => {
-  if (!selectedDate) return false;
-
-  const today = new Date();
-  const isToday = selectedDate.toDateString() === today.toDateString();
-
-  if (!isToday) return false;
-
-  const [hours, minutes] = timeSlot.split(":").map(Number);
-  const slotTime = new Date();
-  slotTime.setHours(hours, minutes, 0, 0);
-
-  return slotTime <= today;
-};
-
-// Helper function to get available time slots
-const getAvailableTimeSlots = (selectedDate?: Date): string[] => {
-  if (!selectedDate) return timeSlots;
-
-  const today = new Date();
-  const isToday = selectedDate.toDateString() === today.toDateString();
-
-  if (!isToday) return timeSlots;
-
-  // Filter out past time slots for today
-  return timeSlots.filter((slot) => !isTimeSlotDisabled(slot, selectedDate));
-};
-
 interface Admin {
   user_id: string;
   firstname: string;
@@ -90,11 +61,46 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [fullyBookedDates, setFullyBookedDates] = useState<Set<string>>(
+    new Set()
+  );
   const [formData, setFormData] = useState({
     message: "",
     expertName: "",
     notes: "",
   });
+
+  // Helper function to check if a time slot is disabled
+  const isTimeSlotDisabled = (
+    timeSlot: string,
+    selectedDate?: Date
+  ): boolean => {
+    if (!selectedDate) return false;
+
+    // Check if slot is already booked
+    if (bookedSlots.includes(timeSlot)) {
+      return true;
+    }
+
+    // Check if slot is in the past (for today only)
+    const today = new Date();
+    const isToday = selectedDate.toDateString() === today.toDateString();
+
+    if (!isToday) return false;
+
+    const [hours, minutes] = timeSlot.split(":").map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+
+    return slotTime <= today;
+  };
+
+  // Helper function to get all time slots (don't filter, just return all)
+  const getAvailableTimeSlots = (): string[] => {
+    // Return ALL slots - disabled status will be handled by isTimeSlotDisabled
+    return timeSlots;
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -109,8 +115,19 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchAdmins();
+      // Fetch booked slots for initial date and selected admin
+      if (selectedDate && formData.expertName) {
+        fetchBookedSlots(selectedDate, formData.expertName);
+      }
     }
   }, [isOpen]);
+
+  // Fetch booked slots when date or admin changes
+  useEffect(() => {
+    if (selectedDate && isOpen && formData.expertName) {
+      fetchBookedSlots(selectedDate, formData.expertName);
+    }
+  }, [selectedDate, formData.expertName, isOpen]);
 
   const fetchAdmins = async () => {
     try {
@@ -141,6 +158,97 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
     }
   };
 
+  const fetchBookedSlots = async (date: Date, adminId: string) => {
+    try {
+      const token = TokenManager.getToken();
+      // Format date as YYYY-MM-DD in LOCAL timezone (not UTC)
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      const response = await axios.get(
+        `http://localhost:5000/api/consultations/booked-slots?date=${dateStr}&adminId=${adminId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        // Extract ALL time slots that are occupied (start time and slots within the period, but NOT including end time)
+        const bookedTimes: string[] = [];
+
+        response.data.data.forEach((slot: any) => {
+          const startTime = slot.startTime; // e.g., "08:00"
+          const endTime = slot.endTime; // e.g., "09:00"
+
+          // Parse start and end times
+          const [startHour, startMin] = startTime.split(":").map(Number);
+          const [endHour, endMin] = endTime.split(":").map(Number);
+
+          // Add all 30-minute slots from start up to (but NOT including) end
+          let currentHour = startHour;
+          let currentMin = startMin;
+
+          while (
+            currentHour < endHour ||
+            (currentHour === endHour && currentMin < endMin)
+          ) {
+            const timeStr = `${String(currentHour).padStart(2, "0")}:${String(
+              currentMin
+            ).padStart(2, "0")}`;
+            bookedTimes.push(timeStr);
+
+            // Move to next 30-minute slot
+            currentMin += 30;
+            if (currentMin >= 60) {
+              currentHour++;
+              currentMin = 0;
+            }
+          }
+        });
+
+        setBookedSlots(bookedTimes);
+
+        // Check if this date is fully booked for this admin
+        const today = new Date();
+        const isToday = date.toDateString() === today.toDateString();
+
+        let availableSlotCount = timeSlots.length;
+
+        if (isToday) {
+          // For today, count only future slots
+          availableSlotCount = timeSlots.filter((slot) => {
+            const [hours, minutes] = slot.split(":").map(Number);
+            const slotTime = new Date(today);
+            slotTime.setHours(hours, minutes, 0, 0);
+            return slotTime > today;
+          }).length;
+        }
+
+        // Update fully booked dates set
+        if (
+          bookedTimes.length >= availableSlotCount &&
+          availableSlotCount > 0
+        ) {
+          setFullyBookedDates((prev) => new Set(prev).add(dateStr));
+        } else {
+          setFullyBookedDates((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(dateStr);
+            return newSet;
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+      setBookedSlots([]); // Reset on error
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
@@ -160,9 +268,14 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       await konselingSchema.validate(validationData, { abortEarly: false });
 
       // Combine date and time for consultation_date
+      // Create a proper Date object in local timezone
       const consultationDateTime = new Date(selectedDate!);
       const [hours, minutes] = selectedTimeStart.split(":");
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      // Convert to ISO string (this will be in UTC)
+      // The backend will receive this and store it correctly
+      const consultationDateStr = consultationDateTime.toISOString();
 
       // Get user ID from token
       const userData = TokenManager.getUserData();
@@ -176,7 +289,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         murid_id: userData.userId,
         admin_id: formData.expertName,
         topic: formData.message,
-        consultation_date: consultationDateTime.toISOString(),
+        consultation_date: consultationDateStr,
         notes: formData.notes,
       };
 
@@ -323,9 +436,18 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                       setErrors((prev) => ({ ...prev, selectedDate: "" }));
                     }
                   }}
-                  disabled={(date) =>
-                    date < new Date(new Date().setHours(0, 0, 0, 0))
-                  }
+                  disabled={(date) => {
+                    // Disable past dates
+                    if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                      return true;
+                    }
+                    // Disable fully booked dates - use LOCAL timezone format
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    const day = String(date.getDate()).padStart(2, "0");
+                    const dateStr = `${year}-${month}-${day}`;
+                    return fullyBookedDates.has(dateStr);
+                  }}
                   captionLayout="dropdown"
                   className="rounded-md border"
                 />
@@ -360,7 +482,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                      {getAvailableTimeSlots(selectedDate).map((time) => {
+                      {getAvailableTimeSlots().map((time) => {
                         const isDisabled = isTimeSlotDisabled(
                           time,
                           selectedDate
@@ -419,7 +541,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                   disabled
                 >
                   <Clock className="mr-2 h-4 w-4" />
-                  {selectedTimeEnd || "Otomatis +1 jam"}
+                  {selectedTimeEnd || "waktu selesai"}
                 </Button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
+import { useNotificationCount } from "../hooks/useNotificationCount";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -13,6 +14,7 @@ interface AdminSidebarProps {
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { counts, clearBadge } = useNotificationCount();
 
   const handleLogout = () => {
     Swal.fire({
@@ -41,6 +43,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const handleMenuItemClick = (tabId: string) => {
     setActiveTab(tabId);
     setIsMobileMenuOpen(false);
+    clearBadge(tabId); // Clear badge when menu is clicked
   };
   const menuItems = useMemo(
     () => [
@@ -48,24 +51,28 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         id: "kelola-data-murid",
         label: "Kelola Data Murid",
         icon: "/src/assets/icons/kelola-data-murid.png",
+        badgeCount: 0,
       },
       {
         id: "kelola-data-konseling",
         label: "Kelola Data Konseling",
         icon: "/src/assets/icons/kelola-data-konseling.png",
+        badgeCount: counts.pendingConsultations,
       },
       {
         id: "kelola-live-chat",
         label: "Chat Murid",
         icon: "/src/assets/icons/kelola-chat-murid.png",
+        badgeCount: counts.unreadChats,
       },
       {
         id: "kelola-data-beasiswa",
         label: "Kelola Data Beasiswa",
         icon: "/src/assets/icons/kelola-data-beasiswa.png",
+        badgeCount: 0,
       },
     ],
-    []
+    [counts]
   );
 
   return (
@@ -88,7 +95,10 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
               {menuItems.map((item) => (
                 <li key={item.id}>
                   <button
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      clearBadge(item.id);
+                    }}
                     className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-[#4BB8FF] ${
                       activeTab === item.id ? "bg-[#4BB8FF]" : "bg-transparent"
                     }`}
@@ -98,7 +108,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                       alt={`${item.label} Icon`}
                       className="w-12 h-14 mr-3"
                     />
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium flex-1">{item.label}</span>
+                    {item.badgeCount > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center px-2 animate-pulse">
+                        {item.badgeCount > 99 ? "99+" : item.badgeCount}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}
@@ -169,9 +184,14 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                           alt={`${item.label} Icon`}
                           className="w-8 h-9 mr-3"
                         />
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-sm flex-1">
                           {item.label}
                         </span>
+                        {item.badgeCount > 0 && (
+                          <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5 animate-pulse">
+                            {item.badgeCount > 99 ? "99+" : item.badgeCount}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}

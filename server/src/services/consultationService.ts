@@ -335,18 +335,17 @@ export class ConsultationService {
   }
 
   // Get booked time slots for a specific date
-  async getBookedSlotsForDate(date: Date) {
+  async getBookedSlotsForDate(date: Date, adminId: string) {
     try {
-      // Set time to start of day
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
+      // Extract year, month, day from the input date in UTC
+      const targetYear = date.getUTCFullYear();
+      const targetMonth = date.getUTCMonth();
+      const targetDay = date.getUTCDate();
 
-      // Set time to end of day
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      // Get all consultations for this date
-      const allConsultations = await this.consultationRepository.findMany({});
+      // Get all consultations for this specific admin
+      const allConsultations = await this.consultationRepository.findMany({
+        admin_id: adminId,
+      });
 
       // Filter for consultations on this specific date
       const bookedSlots = allConsultations
@@ -365,10 +364,23 @@ export class ConsultationService {
           }
 
           const consultationDate = new Date(consultation.consultation_date);
-          return consultationDate >= startOfDay && consultationDate <= endOfDay;
+
+          // Compare using UTC date components to match input format
+          const consultationYear = consultationDate.getUTCFullYear();
+          const consultationMonth = consultationDate.getUTCMonth();
+          const consultationDay = consultationDate.getUTCDate();
+
+          // Compare year, month, day in UTC
+          return (
+            consultationYear === targetYear &&
+            consultationMonth === targetMonth &&
+            consultationDay === targetDay
+          );
         })
         .map((consultation) => {
           const consultationDate = new Date(consultation.consultation_date);
+
+          // Get hours and minutes in LOCAL timezone for display
           const startHour = consultationDate.getHours();
           const startMinute = consultationDate.getMinutes();
           const startTime = `${startHour
