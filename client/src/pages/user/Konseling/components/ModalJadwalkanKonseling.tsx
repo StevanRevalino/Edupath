@@ -20,7 +20,7 @@ import {
   type KonselingFormData,
 } from "../../../../schema/KonselingSchema";
 
-// Generate time slots
+// Generate time slots (8:00 - 17:00, since consultation is 1 hour, last slot is 17:00)
 const generateTimeSlots = () => {
   const slots = [];
   for (let hour = 8; hour <= 17; hour++) {
@@ -214,6 +214,15 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         });
         setErrors(validationErrors);
         toast.error("Mohon periksa input Anda");
+      } else if (error.response?.status === 409) {
+        // Handle schedule conflict (409 Conflict)
+        toast.error(
+          error.response?.data?.message ||
+            "Jadwal konseling bertabrakan. Silakan pilih waktu lain."
+        );
+      } else if (error.response?.data?.message) {
+        // Handle other API errors
+        toast.error(error.response.data.message);
       } else {
         toast.error("Gagal menjadwalkan konsultasi. Silakan coba lagi.");
       }
@@ -330,7 +339,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
           {/* Time Input - Time Picker Popover */}
           <div className="flex flex-col">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Jam
+              Jam (Durasi: 1 jam)
             </label>
             <div className="flex gap-1 items-center">
               {/* Start Time */}
@@ -366,14 +375,18 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                             onClick={() => {
                               if (!isDisabled) {
                                 setSelectedTimeStart(time);
+                                // Auto-set end time to 1 hour later
+                                const [hours, minutes] = time
+                                  .split(":")
+                                  .map(Number);
+                                let endHour = hours + 1;
+                                const endTime = `${endHour
+                                  .toString()
+                                  .padStart(2, "0")}:${minutes
+                                  .toString()
+                                  .padStart(2, "0")}`;
+                                setSelectedTimeEnd(endTime);
                                 setStartTimeOpen(false);
-                                // Clear end time if it's before or equal to start time
-                                if (
-                                  selectedTimeEnd &&
-                                  selectedTimeEnd <= time
-                                ) {
-                                  setSelectedTimeEnd("");
-                                }
                                 // Clear error when user selects time
                                 if (errors.selectedTimeStart) {
                                   setErrors((prev) => ({
@@ -395,68 +408,19 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
                 </Popover>
               </div>
               <Minus />
-              {/* End Time */}
+              {/* End Time - Auto calculated (1 hour after start) */}
               <div className="flex-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !selectedTimeEnd && "text-muted-foreground",
-                        errors.selectedTimeEnd && "border-red-500"
-                      )}
-                    >
-                      <Clock className="mr-2 h-4 w-4" />
-                      {selectedTimeEnd || "Pilih waktu"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
-                      {getAvailableTimeSlots(selectedDate)
-                        .filter(
-                          (time) =>
-                            !selectedTimeStart || time > selectedTimeStart
-                        )
-                        .map((time) => {
-                          const isDisabled = isTimeSlotDisabled(
-                            time,
-                            selectedDate
-                          );
-                          return (
-                            <Button
-                              key={time}
-                              variant={
-                                selectedTimeEnd === time ? "default" : "outline"
-                              }
-                              size="sm"
-                              onClick={() => {
-                                if (!isDisabled) {
-                                  setSelectedTimeEnd(time);
-                                  // Clear error when user selects time
-                                  if (errors.selectedTimeEnd) {
-                                    setErrors((prev) => ({
-                                      ...prev,
-                                      selectedTimeEnd: "",
-                                    }));
-                                  }
-                                }
-                              }}
-                              className="h-10"
-                              disabled={
-                                isDisabled ||
-                                !!(
-                                  selectedTimeStart && time <= selectedTimeStart
-                                )
-                              }
-                            >
-                              {time}
-                            </Button>
-                          );
-                        })}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedTimeEnd && "text-muted-foreground"
+                  )}
+                  disabled
+                >
+                  <Clock className="mr-2 h-4 w-4" />
+                  {selectedTimeEnd || "Otomatis +1 jam"}
+                </Button>
               </div>
             </div>
             {(errors.selectedTimeStart || errors.selectedTimeEnd) && (

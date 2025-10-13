@@ -35,7 +35,12 @@ const ConsultationInfo = ({
   }
 
   const getStatusText = (status: string, isActive: boolean) => {
-    // Jika konsultasi sudah tidak aktif, tampilkan "Selesai"
+    // Special case: DECLINED always shows as "Ditolak" regardless of isActive
+    if (status === "DECLINED") {
+      return "Ditolak";
+    }
+
+    // Jika konsultasi sudah tidak aktif dan bukan DECLINED, tampilkan "Selesai"
     if (!isActive) {
       return "Selesai";
     }
@@ -53,7 +58,12 @@ const ConsultationInfo = ({
   };
 
   const getStatusColor = (status: string, isActive: boolean) => {
-    // Jika konsultasi sudah tidak aktif, tampilkan warna abu-abu
+    // Special case: DECLINED always shows red regardless of isActive
+    if (status === "DECLINED") {
+      return "text-red-600";
+    }
+
+    // Jika konsultasi sudah tidak aktif dan bukan DECLINED, tampilkan warna abu-abu
     if (!isActive) {
       return "text-gray-600";
     }
@@ -137,10 +147,36 @@ const ConsultationInfo = ({
           <p className="text-sm text-gray-800">{consultation.topic}</p>
         </div>
 
-        {consultation.notes && (
-          <div>
+        {/* Show decline reason prominently if declined */}
+        {consultation.status === "DECLINED" && consultation.notes && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <label className="text-base font-semibold text-red-700 flex items-center gap-2">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              Alasan Penolakan:
+            </label>
+            <p className="text-sm text-red-800 mt-2 leading-relaxed">
+              {consultation.notes}
+            </p>
+          </div>
+        )}
+
+        {/* Show regular notes for other statuses */}
+        {consultation.notes && consultation.status !== "DECLINED" && (
+          <div className="border-b pb-3">
             <label className="text-base font-semibold text-gray-600">
-              Deskripsi:
+              Catatan:
             </label>
             <p className="text-sm text-gray-800">{consultation.notes}</p>
           </div>

@@ -148,6 +148,9 @@ export class ConsultationRepository {
       data: {
         status: data.status,
         notes: data.notes,
+        // Set is_active to false when status is DECLINED
+        is_active:
+          data.status === ConsultationStatus.DECLINED ? false : undefined,
       },
       include: {
         murid: {

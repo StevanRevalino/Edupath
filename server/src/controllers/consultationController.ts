@@ -67,6 +67,14 @@ export class ConsultationController {
         data: consultation,
       });
     } catch (error: any) {
+      // Check for specific error messages
+      if (error.message && error.message.includes("bertabrakan")) {
+        return res.status(409).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: error.message || "Terjadi kesalahan saat membuat konseling",
@@ -424,6 +432,45 @@ export class ConsultationController {
       return res.status(500).json({
         success: false,
         message: error.message || "Terjadi kesalahan saat mengakhiri konseling",
+      });
+    }
+  }
+
+  // Get booked slots for a specific date
+  async getBookedSlotsForDate(req: Request, res: Response) {
+    try {
+      const { date } = req.query;
+
+      if (!date) {
+        return res.status(400).json({
+          success: false,
+          message: "Tanggal wajib diisi",
+        });
+      }
+
+      const targetDate = new Date(date as string);
+      if (isNaN(targetDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Format tanggal tidak valid",
+        });
+      }
+
+      const bookedSlots = await this.consultationService.getBookedSlotsForDate(
+        targetDate
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil data slot yang sudah terisi",
+        data: bookedSlots,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message ||
+          "Terjadi kesalahan saat mengambil data slot yang terisi",
       });
     }
   }

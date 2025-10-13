@@ -35,6 +35,13 @@ router.get(
   consultationController.getConsultationStats.bind(consultationController)
 );
 
+// Get booked slots for a specific date
+router.get(
+  "/booked-slots",
+  authenticateToken,
+  consultationController.getBookedSlotsForDate.bind(consultationController)
+);
+
 // Get consultations by status
 router.get(
   "/status/:status",

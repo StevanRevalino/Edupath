@@ -12,7 +12,12 @@ const ConsultationCard = ({
   onClick,
 }: ConsultationCardProps) => {
   const getStatusText = (status: string, isActive: boolean) => {
-    // Jika konsultasi sudah tidak aktif, tampilkan "Selesai"
+    // Special case: DECLINED always shows as "Sesi ditolak" regardless of isActive
+    if (status === "DECLINED") {
+      return "Sesi ditolak";
+    }
+
+    // Jika konsultasi sudah tidak aktif dan bukan DECLINED, tampilkan "Selesai"
     if (!isActive) {
       return "Selesai";
     }
@@ -30,7 +35,12 @@ const ConsultationCard = ({
   };
 
   const getStatusColor = (status: string, isActive: boolean) => {
-    // Jika konsultasi sudah tidak aktif, tampilkan warna abu-abu
+    // Special case: DECLINED always shows red regardless of isActive
+    if (status === "DECLINED") {
+      return "bg-red-600";
+    }
+
+    // Jika konsultasi sudah tidak aktif dan bukan DECLINED, tampilkan warna abu-abu
     if (!isActive) {
       return "bg-gray-600";
     }
@@ -53,16 +63,26 @@ const ConsultationCard = ({
       className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer relative ${
         isSelected
           ? "bg-blue-100 border-blue-500"
-          : !consultation.is_active
+          : !consultation.is_active && consultation.status !== "DECLINED"
           ? "bg-gray-50 border-gray-300 opacity-75"
+          : consultation.status === "DECLINED"
+          ? "bg-red-50 border-red-300 opacity-75"
           : "bg-blue-50 border-[#00437A] hover:bg-blue-100"
       }`}
     >
-      {/* Badge "Selesai" untuk konsultasi yang tidak aktif */}
-      {!consultation.is_active && (
+      {/* Badge "Selesai" untuk konsultasi yang tidak aktif dan bukan DECLINED */}
+      {!consultation.is_active && consultation.status !== "DECLINED" && (
         <div className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
           <span>✓</span>
           <span>Selesai</span>
+        </div>
+      )}
+
+      {/* Badge "Ditolak" untuk konsultasi yang DECLINED */}
+      {consultation.status === "DECLINED" && (
+        <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+          <span>✕</span>
+          <span>Ditolak</span>
         </div>
       )}
 

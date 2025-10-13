@@ -41,6 +41,57 @@ export class ConsultationService {
     const nextNumber = lastNumber + 1;
     return `CS${String(nextNumber).padStart(3, "0")}`;
   }
+
+  // Check if there's a scheduling conflict
+  private async checkScheduleConflict(
+    consultationDate: Date,
+    excludeConsultationId?: string
+  ): Promise<boolean> {
+    // Calculate the end time (1 hour after start)
+    const startTime = new Date(consultationDate);
+    const endTime = new Date(consultationDate);
+    endTime.setHours(endTime.getHours() + 1);
+
+    // Get all active consultations (not declined or completed inactive ones)
+    const allConsultations = await this.consultationRepository.findMany({});
+
+    // Filter for consultations that could conflict
+    for (const consultation of allConsultations) {
+      // Skip if it's the same consultation (for updates)
+      if (
+        excludeConsultationId &&
+        consultation.consultation_id === excludeConsultationId
+      ) {
+        continue;
+      }
+
+      // Skip declined consultations
+      if (consultation.status === ConsultationStatus.DECLINED) {
+        continue;
+      }
+
+      // Skip completed and inactive consultations
+      if (
+        consultation.status === ConsultationStatus.COMPLETED &&
+        !consultation.is_active
+      ) {
+        continue;
+      }
+
+      const existingStart = new Date(consultation.consultation_date);
+      const existingEnd = new Date(consultation.consultation_date);
+      existingEnd.setHours(existingEnd.getHours() + 1);
+
+      // Check for overlap:
+      // New consultation starts before existing ends AND new consultation ends after existing starts
+      if (startTime < existingEnd && endTime > existingStart) {
+        return true; // Conflict found
+      }
+    }
+
+    return false; // No conflict
+  }
+
   // Create new consultation
   async createConsultation(data: CreateConsultationData) {
     try {
@@ -67,6 +118,16 @@ export class ConsultationService {
       if (admin.role !== "ADMIN") {
         throw new Error(
           "User harus berperan sebagai admin untuk menerima konseling"
+        );
+      }
+
+      // Check for scheduling conflicts
+      const hasConflict = await this.checkScheduleConflict(
+        data.consultation_date
+      );
+      if (hasConflict) {
+        throw new Error(
+          "Jadwal konseling bentrok dengan konseling lain. Silakan pilih waktu yang berbeda."
         );
       }
 
@@ -268,6 +329,66 @@ export class ConsultationService {
       await this.consultationRepository.delete(consultation_id);
 
       return { message: "Konseling berhasil dihapus" };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get booked time slots for a specific date
+  async getBookedSlotsForDate(date: Date) {
+    try {
+      // Set time to start of day
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      // Set time to end of day
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Get all consultations for this date
+      const allConsultations = await this.consultationRepository.findMany({});
+
+      // Filter for consultations on this specific date
+      const bookedSlots = allConsultations
+        .filter((consultation) => {
+          // Skip declined consultations
+          if (consultation.status === ConsultationStatus.DECLINED) {
+            return false;
+          }
+
+          // Skip completed and inactive consultations
+          if (
+            consultation.status === ConsultationStatus.COMPLETED &&
+            !consultation.is_active
+          ) {
+            return false;
+          }
+
+          const consultationDate = new Date(consultation.consultation_date);
+          return consultationDate >= startOfDay && consultationDate <= endOfDay;
+        })
+        .map((consultation) => {
+          const consultationDate = new Date(consultation.consultation_date);
+          const startHour = consultationDate.getHours();
+          const startMinute = consultationDate.getMinutes();
+          const startTime = `${startHour
+            .toString()
+            .padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+
+          const endHour = startHour + 1;
+          const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute
+            .toString()
+            .padStart(2, "0")}`;
+
+          return {
+            startTime,
+            endTime,
+            consultation_id: consultation.consultation_id,
+            status: consultation.status,
+          };
+        });
+
+      return bookedSlots;
     } catch (error) {
       throw error;
     }

@@ -103,7 +103,6 @@ const KelolaDataKonseling = () => {
     }
   };
 
-
   const filteredConsultations = consultations.filter((consultation) => {
     const fullName =
       `${consultation.murid.firstname} ${consultation.murid.lastname}`.trim();
@@ -129,20 +128,89 @@ const KelolaDataKonseling = () => {
     newStatus: string
   ) => {
     try {
-      Swal.fire({
-        title: "Apakah Anda yakin?",
-        text: `Anda akan mengubah status konseling menjadi "${getStatusText(
-          newStatus
-        )}".`,
-        imageUrl: questionIcon,
-        imageWidth: 80,
-        imageHeight: 90,
-        showCancelButton: true,
-        confirmButtonColor: "#6CCBFF",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Ya, ubah status",
-        cancelButtonText: "Batal",
-      }).then(async (result) => {
+      // If declining, show a modal to get the decline reason
+      if (newStatus === "DECLINED") {
+        const result = await Swal.fire({
+          title: "Tolak Konseling",
+          html: `
+            <div class="text-left">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Alasan penolakan <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="decline-notes"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                rows="4"
+                placeholder="Masukkan alasan mengapa konseling ditolak..."
+              ></textarea>
+            </div>
+          `,
+          imageUrl: questionIcon,
+          imageWidth: 80,
+          imageHeight: 90,
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#6CCBFF",
+          confirmButtonText: "Tolak Konseling",
+          cancelButtonText: "Batal",
+          preConfirm: () => {
+            const notes = (
+              document.getElementById("decline-notes") as HTMLTextAreaElement
+            )?.value;
+            if (!notes || notes.trim() === "") {
+              Swal.showValidationMessage("Alasan penolakan harus diisi");
+              return false;
+            }
+            return notes;
+          },
+        });
+
+        if (result.isConfirmed && result.value) {
+          const token = TokenManager.getToken();
+
+          await axios.patch(
+            `${API_URL}/api/consultations/${consultationId}/status`,
+            { status: newStatus, notes: result.value },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          setConsultations(
+            consultations.map((consultation) =>
+              consultation.consultation_id === consultationId
+                ? {
+                    ...consultation,
+                    status: newStatus as Consultation["status"],
+                    notes: result.value,
+                    is_active: false, // Set is_active to false when declined
+                  }
+                : consultation
+            )
+          );
+
+          toast.success("Konseling berhasil ditolak");
+        }
+      } else {
+        // For other status changes (ACCEPTED), use the regular confirmation
+        const result = await Swal.fire({
+          title: "Apakah Anda yakin?",
+          text: `Anda akan mengubah status konseling menjadi "${getStatusText(
+            newStatus
+          )}".`,
+          imageUrl: questionIcon,
+          imageWidth: 80,
+          imageHeight: 90,
+          showCancelButton: true,
+          confirmButtonColor: "#6CCBFF",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Ya, ubah status",
+          cancelButtonText: "Batal",
+        });
+
         if (result.isConfirmed) {
           const token = TokenManager.getToken();
 
@@ -170,7 +238,7 @@ const KelolaDataKonseling = () => {
 
           toast.success("Status konseling berhasil diperbarui");
         }
-      });
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401 || error.response?.status === 403) {
@@ -477,11 +545,24 @@ const KelolaDataKonseling = () => {
                           {consultation.topic}
                         </div>
                         {consultation.notes && (
-                          <div
-                            className="text-sm text-gray-500 mt-1 max-w-[200px] text-wrap overflow-hidden text-ellipsis"
-                            title={consultation.notes}
-                          >
-                            {consultation.notes}
+                          <div className="text-sm mt-1">
+                            {consultation.status === "DECLINED" ? (
+                              <div className="bg-red-50 border border-red-200 rounded-md p-2 max-w-[250px]">
+                                <div className="text-xs font-semibold text-red-700 mb-1">
+                                  Alasan Penolakan:
+                                </div>
+                                <div className="text-xs text-red-600 text-wrap overflow-hidden text-ellipsis">
+                                  {consultation.notes}
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                className="text-gray-500 max-w-[200px] text-wrap overflow-hidden text-ellipsis"
+                                title={consultation.notes}
+                              >
+                                {consultation.notes}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -672,8 +753,21 @@ const KelolaDataKonseling = () => {
                         Topik: {consultation.topic}
                       </div>
                       {consultation.notes && (
-                        <div className="text-sm text-gray-500">
-                          Catatan: {consultation.notes}
+                        <div className="text-sm mt-2">
+                          {consultation.status === "DECLINED" ? (
+                            <div className="bg-red-50 border border-red-200 rounded-md p-2">
+                              <div className="text-xs font-semibold text-red-700 mb-1">
+                                Alasan Penolakan:
+                              </div>
+                              <div className="text-xs text-red-600">
+                                {consultation.notes}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-gray-500">
+                              Catatan: {consultation.notes}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

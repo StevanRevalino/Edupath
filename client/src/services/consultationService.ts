@@ -39,7 +39,7 @@ export interface Consultation {
   admin_id: string;
   topic: string;
   consultation_date: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED";
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
   is_active: boolean;
   notes?: string;
   created_at: string;
@@ -116,6 +116,21 @@ class ConsultationService {
     } catch (error) {
       console.error("Error checking active consultation:", error);
       return false;
+    }
+  }
+
+  async getBookedSlotsForDate(
+    date: Date
+  ): Promise<ApiResponse<Array<{ startTime: string; endTime: string }>>> {
+    try {
+      const dateString = date.toISOString();
+      const response = await axiosInstance.get(
+        `/consultations/booked-slots?date=${dateString}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+      throw error;
     }
   }
 }
