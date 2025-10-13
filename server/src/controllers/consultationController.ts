@@ -97,7 +97,7 @@ export class ConsultationController {
       } else if (user?.role === "ADMIN") {
         // Admin only sees consultations assigned to them
         filters.admin_id = user.user_id;
-        
+
         // Admin can additionally filter by specific murid_id if provided
         if (murid_id) {
           filters.murid_id = murid_id as string;
