@@ -236,6 +236,93 @@ export class ConsultationController {
     }
   }
 
+  // Cancel consultation (by student)
+  async cancelConsultation(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { cancelReason } = req.body;
+      const user = (req as any).user;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "ID konseling wajib diisi",
+        });
+      }
+
+      if (!cancelReason || cancelReason.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          message: "Alasan pembatalan wajib diisi",
+        });
+      }
+
+      // Get consultation to verify it belongs to the user
+      const consultation = await this.consultationService.getConsultationById(
+        id
+      );
+
+      if (!consultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
+        });
+      }
+
+      // Verify user is the owner (murid)
+      if (consultation.murid_id !== user.user_id) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak memiliki akses untuk membatalkan konseling ini",
+        });
+      }
+
+      // Only allow canceling PENDING or ACCEPTED consultations
+      if (
+        consultation.status !== ConsultationStatus.PENDING &&
+        consultation.status !== ConsultationStatus.ACCEPTED
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Hanya konseling dengan status PENDING atau ACCEPTED yang dapat dibatalkan",
+        });
+      }
+
+      // If PENDING, delete the consultation (no need for admin to see)
+      // If ACCEPTED, update status to DECLINED with reason (admin needs to see)
+      if (consultation.status === ConsultationStatus.PENDING) {
+        await this.consultationService.deleteConsultation(id);
+
+        return res.status(200).json({
+          success: true,
+          message: "Konseling berhasil dibatalkan",
+          data: null,
+        });
+      } else {
+        // ACCEPTED - update to DECLINED with cancel reason
+        const updatedConsultation =
+          await this.consultationService.updateConsultationStatus({
+            consultation_id: id,
+            status: ConsultationStatus.DECLINED,
+            notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
+          });
+
+        return res.status(200).json({
+          success: true,
+          message: "Konseling berhasil dibatalkan",
+          data: updatedConsultation,
+        });
+      }
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || "Terjadi kesalahan saat membatalkan konseling",
+      });
+    }
+  }
+
   // Get consultations by status
   async getConsultationsByStatus(req: Request, res: Response) {
     try {

@@ -647,12 +647,59 @@ const KelolaDataKonseling = () => {
                             <span>View Details</span>
                           </button>
                         )}
-                        {(consultation.status === "DECLINED" ||
-                          consultation.status === "COMPLETED") && (
-                          <span className="text-sm text-gray-500">
-                            {consultation.status === "DECLINED" && "Ditolak"}
-                            {consultation.status === "COMPLETED" && "Selesai"}
-                          </span>
+                        {consultation.status === "DECLINED" && (
+                          <button
+                            onClick={() => handleViewDetail(consultation)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-gray-500 text-white text-sm rounded-full hover:bg-gray-600 transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            <span>View Details</span>
+                          </button>
+                        )}
+                        {consultation.status === "COMPLETED" && (
+                          <button
+                            onClick={() => handleViewDetail(consultation)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-sm rounded-full hover:bg-green-600 transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            <span>View Details</span>
+                          </button>
                         )}
                       </div>
                     </div>
@@ -756,12 +803,59 @@ const KelolaDataKonseling = () => {
                             <span>Details</span>
                           </button>
                         )}
-                        {(consultation.status === "DECLINED" ||
-                          consultation.status === "COMPLETED") && (
-                          <span className="text-xs text-gray-500 text-center">
-                            {consultation.status === "DECLINED" && "Ditolak"}
-                            {consultation.status === "COMPLETED" && "Selesai"}
-                          </span>
+                        {consultation.status === "DECLINED" && (
+                          <button
+                            onClick={() => handleViewDetail(consultation)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-gray-500 text-white text-xs rounded-full hover:bg-gray-600 transition-colors whitespace-nowrap"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            <span>Details</span>
+                          </button>
+                        )}
+                        {consultation.status === "COMPLETED" && (
+                          <button
+                            onClick={() => handleViewDetail(consultation)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors whitespace-nowrap"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            <span>Details</span>
+                          </button>
                         )}
                       </div>
                     </div>
@@ -1004,12 +1098,47 @@ const KelolaDataKonseling = () => {
 
               {/* Notes */}
               {selectedConsultation.notes && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Catatan
+                <div
+                  className={`rounded-lg p-4 ${
+                    selectedConsultation.notes.includes(
+                      "[DIBATALKAN OLEH MURID]"
+                    )
+                      ? "bg-red-50 border border-red-200"
+                      : selectedConsultation.status === "DECLINED"
+                      ? "bg-red-50 border border-red-200"
+                      : "bg-gray-50"
+                  }`}
+                >
+                  <div
+                    className={`text-sm font-semibold uppercase tracking-wide mb-2 ${
+                      selectedConsultation.notes.includes(
+                        "[DIBATALKAN OLEH MURID]"
+                      ) || selectedConsultation.status === "DECLINED"
+                        ? "text-red-700"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {selectedConsultation.notes.includes(
+                      "[DIBATALKAN OLEH MURID]"
+                    )
+                      ? "Alasan Pembatalan (Oleh Murid)"
+                      : selectedConsultation.status === "DECLINED"
+                      ? "Alasan Penolakan"
+                      : "Catatan"}
                   </div>
-                  <div className="text-base text-gray-700">
-                    {selectedConsultation.notes}
+                  <div
+                    className={`text-base ${
+                      selectedConsultation.notes.includes(
+                        "[DIBATALKAN OLEH MURID]"
+                      ) || selectedConsultation.status === "DECLINED"
+                        ? "text-red-700"
+                        : "text-gray-700"
+                    }`}
+                  >
+                    {selectedConsultation.notes.replace(
+                      "[DIBATALKAN OLEH MURID] ",
+                      ""
+                    )}
                   </div>
                 </div>
               )}

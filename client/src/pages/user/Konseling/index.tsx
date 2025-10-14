@@ -187,6 +187,7 @@ const Konseling = () => {
                   <ConsultationInfo
                     consultation={selectedConsultation}
                     onOpenChat={openChat}
+                    onCancelSuccess={fetchConsultations}
                   />
                 </>
               ) : selectedConsultation ? (

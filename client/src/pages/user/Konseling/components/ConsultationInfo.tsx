@@ -1,15 +1,144 @@
 import { MessageCircle } from "lucide-react";
 import { type Consultation } from "../../../../services/consultationService";
+import { useState } from "react";
+import Swal from "sweetalert2";
+import toast from "react-hot-toast";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
 
 interface ConsultationInfoProps {
   consultation: Consultation | null;
   onOpenChat: (consultation: Consultation) => void;
+  onCancelSuccess?: () => void;
 }
 
 const ConsultationInfo = ({
   consultation,
   onOpenChat,
+  onCancelSuccess,
 }: ConsultationInfoProps) => {
+  const [canceling, setCanceling] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleCancelConsultation = async () => {
+    if (!consultation) return;
+
+    // If PENDING, just confirm without reason (will be deleted)
+    // If ACCEPTED, ask for reason (will be marked as DECLINED)
+    const isPending = consultation.status === "PENDING";
+
+    if (isPending) {
+      const result = await Swal.fire({
+        title: "Batalkan Konseling?",
+        text: "Apakah Anda yakin ingin membatalkan konseling ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6CCBFF",
+        confirmButtonText: "Ya, Batalkan",
+        cancelButtonText: "Batal",
+      });
+
+      if (!result.isConfirmed) return;
+    } else {
+      const result = await Swal.fire({
+        title: "Batalkan Konseling?",
+        html: `
+          <div class="text-left">
+            <p class="text-sm text-gray-600 mb-3">Apakah Anda yakin ingin membatalkan konseling yang sudah diterima ini?</p>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Alasan pembatalan <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="cancel-reason"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+              rows="4"
+              placeholder="Masukkan alasan mengapa Anda membatalkan konseling ini..."
+            ></textarea>
+          </div>
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6CCBFF",
+        confirmButtonText: "Ya, Batalkan",
+        cancelButtonText: "Batal",
+        preConfirm: () => {
+          const reason = (
+            document.getElementById("cancel-reason") as HTMLTextAreaElement
+          )?.value;
+          if (!reason || reason.trim() === "") {
+            Swal.showValidationMessage("Alasan pembatalan harus diisi");
+            return false;
+          }
+          return reason;
+        },
+      });
+
+      if (!result.isConfirmed || !result.value) return;
+
+      try {
+        setCanceling(true);
+        const token = TokenManager.getToken();
+
+        await axios.patch(
+          `${API_URL}/api/consultations/${consultation.consultation_id}/cancel`,
+          { cancelReason: result.value },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        toast.success("Konseling berhasil dibatalkan");
+
+        if (onCancelSuccess) {
+          onCancelSuccess();
+        }
+      } catch (error: any) {
+        console.error("Error canceling consultation:", error);
+        toast.error(
+          error.response?.data?.message || "Gagal membatalkan konseling"
+        );
+      } finally {
+        setCanceling(false);
+      }
+      return;
+    }
+
+    // Handle PENDING cancellation (no reason needed)
+    try {
+      setCanceling(true);
+      const token = TokenManager.getToken();
+
+      await axios.patch(
+        `${API_URL}/api/consultations/${consultation.consultation_id}/cancel`,
+        { cancelReason: "Dibatalkan oleh murid" }, // Dummy reason, will be deleted anyway
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success("Konseling berhasil dibatalkan");
+
+      if (onCancelSuccess) {
+        onCancelSuccess();
+      }
+    } catch (error: any) {
+      console.error("Error canceling consultation:", error);
+      toast.error(
+        error.response?.data?.message || "Gagal membatalkan konseling"
+      );
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   if (!consultation) {
     return (
       <div>
@@ -164,10 +293,12 @@ const ConsultationInfo = ({
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              Alasan Penolakan:
+              {consultation.notes.includes("[DIBATALKAN OLEH MURID]")
+                ? "Alasan Pembatalan (Anda):"
+                : "Alasan Penolakan:"}
             </label>
             <p className="text-sm text-red-800 mt-2 leading-relaxed">
-              {consultation.notes}
+              {consultation.notes.replace("[DIBATALKAN OLEH MURID] ", "")}
             </p>
           </div>
         )}
@@ -191,6 +322,51 @@ const ConsultationInfo = ({
             >
               <MessageCircle size={20} />
               Buka Chat Konseling
+            </button>
+          </div>
+        )}
+
+        {/* Cancel Button - Show for PENDING or ACCEPTED consultations */}
+        {(consultation.status === "PENDING" ||
+          consultation.status === "ACCEPTED") && (
+          <div
+            className={
+              consultation.status === "ACCEPTED" && consultation.is_active
+                ? "pt-2"
+                : "pt-4 border-t"
+            }
+          >
+            <button
+              onClick={handleCancelConsultation}
+              disabled={canceling}
+              className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              {canceling ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Membatalkan...
+                </>
+              ) : (
+                "Batalkan Konseling"
+              )}
             </button>
           </div>
         )}

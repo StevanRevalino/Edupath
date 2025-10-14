@@ -81,6 +81,13 @@ router.patch(
   consultationController.updateConsultationStatus.bind(consultationController)
 );
 
+// Cancel consultation (by student)
+router.patch(
+  "/:id/cancel",
+  authenticateToken,
+  consultationController.cancelConsultation.bind(consultationController)
+);
+
 // End consultation (set is_active to false)
 router.patch(
   "/:id/end",
