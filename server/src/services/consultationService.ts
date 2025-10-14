@@ -450,4 +450,54 @@ export class ConsultationService {
       throw error;
     }
   }
+
+  // Auto-complete consultations that have passed their end time (1 hour after start)
+  async autoCompleteExpiredConsultations() {
+    try {
+      const now = new Date();
+
+      // Get all accepted consultations (they should be active)
+      const activeConsultations = await this.consultationRepository.findMany({
+        status: ConsultationStatus.ACCEPTED,
+      });
+
+      // Filter only active consultations that have passed their end time
+      const expiredConsultations = activeConsultations.filter(
+        (consultation) => {
+          if (!consultation.is_active) return false;
+
+          const consultationDate = new Date(consultation.consultation_date);
+          const endTime = new Date(consultationDate.getTime() + 60 * 60 * 1000); // +1 hour
+
+          // Check if current time is past the end time
+          return now >= endTime;
+        }
+      );
+
+      const completedConsultations = [];
+
+      // Update each expired consultation to COMPLETED
+      for (const consultation of expiredConsultations) {
+        const updated = await this.consultationRepository.updateStatus({
+          consultation_id: consultation.consultation_id,
+          status: ConsultationStatus.COMPLETED,
+          notes: consultation.notes || undefined,
+        });
+
+        // Also set is_active to false
+        await this.consultationRepository.setInactive(
+          consultation.consultation_id
+        );
+
+        completedConsultations.push(updated);
+      }
+
+      return {
+        count: completedConsultations.length,
+        consultations: completedConsultations,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

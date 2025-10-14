@@ -35,12 +35,35 @@ const KelolaDataKonseling = () => {
   >("active");
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Auto-complete expired consultations
+  const autoCompleteExpiredConsultations = async () => {
+    try {
+      const token = TokenManager.getToken();
+      await axios.post(
+        `${API_URL}/api/consultations/auto-complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      // Silent error - just log it, don't show to user
+      console.error("Error auto-completing consultations:", error);
+    }
+  };
+
   // Fetch consultations from API
   useEffect(() => {
     const fetchConsultations = async () => {
       try {
         setLoading(true);
         const token = TokenManager.getToken();
+
+        // First, auto-complete any expired consultations
+        await autoCompleteExpiredConsultations();
 
         const response = await axios.get(`${API_URL}/api/consultations`, {
           headers: {
@@ -72,6 +95,13 @@ const KelolaDataKonseling = () => {
     };
 
     fetchConsultations();
+
+    // Set interval to auto-complete expired consultations every 1 minute
+    const interval = setInterval(() => {
+      autoCompleteExpiredConsultations();
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -254,69 +284,6 @@ const KelolaDataKonseling = () => {
       } else {
         console.error("Error updating consultation:", error);
         toast.error("Gagal memperbarui status konseling");
-      }
-    }
-  };
-
-  const handleEndConsultation = async (consultationId: string) => {
-    try {
-      const result = await Swal.fire({
-        title: "Akhiri Konseling?",
-        text: "Apakah Anda yakin ingin mengakhiri konseling ini?",
-        imageUrl: questionIcon,
-        imageWidth: 80,
-        imageHeight: 90,
-        showCancelButton: true,
-        confirmButtonColor: "#6CCBFF",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Ya, akhiri konseling",
-        cancelButtonText: "Batal",
-      });
-
-      if (result.isConfirmed) {
-        const token = TokenManager.getToken();
-
-        await axios.patch(
-          `${API_URL}/api/consultations/${consultationId}/end`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        // Update local state
-        setConsultations(
-          consultations.map((consultation) =>
-            consultation.consultation_id === consultationId
-              ? {
-                  ...consultation,
-                  status: "COMPLETED" as Consultation["status"],
-                  is_active: false,
-                }
-              : consultation
-          )
-        );
-
-        toast.success("Konseling berhasil diakhiri");
-        triggerNotificationRefresh(); // Refresh notification badge
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error(
-            error.response?.data?.message || "Gagal mengakhiri konseling"
-          );
-        }
-      } else {
-        console.error("Error ending consultation:", error);
-        toast.error("Gagal mengakhiri konseling");
       }
     }
   };
@@ -582,12 +549,21 @@ const KelolaDataKonseling = () => {
                           })}
                         </div>
                         <div>
-                          {new Date(
-                            consultation.consultation_time
-                          ).toLocaleTimeString("id-ID", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {(() => {
+                            const startTime = new Date(
+                              consultation.consultation_date
+                            );
+                            const endTime = new Date(
+                              startTime.getTime() + 60 * 60 * 1000
+                            ); // +1 hour
+                            return `${startTime.toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })} - ${endTime.toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}`;
+                          })()}
                         </div>
                       </div>
 
@@ -631,26 +607,11 @@ const KelolaDataKonseling = () => {
                             </button>
                           </>
                         )}
-                        {consultation.status === "ACCEPTED" &&
-                          consultation.is_active && (
-                            <button
-                              onClick={() =>
-                                handleEndConsultation(
-                                  consultation.consultation_id
-                                )
-                              }
-                              className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
-                            >
-                              <span className="w-2 h-2 bg-white rounded-full"></span>
-                              <span>End Consultation</span>
-                            </button>
-                          )}
-                        {consultation.status === "ACCEPTED" &&
-                          !consultation.is_active && (
-                            <span className="text-sm text-gray-500">
-                              Selesai
-                            </span>
-                          )}
+                        {consultation.status === "ACCEPTED" && (
+                          <span className="text-sm text-green-500 font-medium">
+                            Active
+                          </span>
+                        )}
                         {(consultation.status === "DECLINED" ||
                           consultation.status === "COMPLETED") && (
                           <span className="text-sm text-gray-500">
@@ -733,26 +694,11 @@ const KelolaDataKonseling = () => {
                             </button>
                           </>
                         )}
-                        {consultation.status === "ACCEPTED" &&
-                          consultation.is_active && (
-                            <button
-                              onClick={() =>
-                                handleEndConsultation(
-                                  consultation.consultation_id
-                                )
-                              }
-                              className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors whitespace-nowrap"
-                            >
-                              <span className="w-2 h-2 bg-white rounded-full"></span>
-                              <span>End</span>
-                            </button>
-                          )}
-                        {consultation.status === "ACCEPTED" &&
-                          !consultation.is_active && (
-                            <span className="text-xs text-gray-500 text-center">
-                              Selesai
-                            </span>
-                          )}
+                        {consultation.status === "ACCEPTED" && (
+                          <span className="text-xs text-green-500 font-medium text-center">
+                            Active
+                          </span>
+                        )}
                         {(consultation.status === "DECLINED" ||
                           consultation.status === "COMPLETED") && (
                           <span className="text-xs text-gray-500 text-center">
@@ -794,7 +740,22 @@ const KelolaDataKonseling = () => {
                         <strong>Jadwal:</strong>{" "}
                         {new Date(
                           consultation.consultation_date
-                        ).toLocaleDateString("id-ID")}
+                        ).toLocaleDateString("id-ID")}{" "}
+                        {(() => {
+                          const startTime = new Date(
+                            consultation.consultation_date
+                          );
+                          const endTime = new Date(
+                            startTime.getTime() + 60 * 60 * 1000
+                          );
+                          return `${startTime.toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })} - ${endTime.toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}`;
+                        })()}
                       </div>
 
                       <span

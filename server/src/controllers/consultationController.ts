@@ -489,4 +489,25 @@ export class ConsultationController {
       });
     }
   }
+
+  // Auto-complete expired consultations
+  async autoCompleteExpiredConsultations(req: Request, res: Response) {
+    try {
+      const result =
+        await this.consultationService.autoCompleteExpiredConsultations();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.count} konseling berhasil diselesaikan otomatis`,
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message ||
+          "Terjadi kesalahan saat menyelesaikan konseling otomatis",
+      });
+    }
+  }
 }

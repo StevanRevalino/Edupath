@@ -42,6 +42,15 @@ router.get(
   consultationController.getBookedSlotsForDate.bind(consultationController)
 );
 
+// Auto-complete expired consultations
+router.post(
+  "/auto-complete",
+  authenticateToken,
+  consultationController.autoCompleteExpiredConsultations.bind(
+    consultationController
+  )
+);
+
 // Get consultations by status
 router.get(
   "/status/:status",
