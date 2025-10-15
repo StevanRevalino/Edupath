@@ -81,7 +81,8 @@ const ConsultationTable = ({
                   </div>
                   <div className="min-w-0">
                     <div className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                      {consultation.murid.firstname} {consultation.murid.lastname}
+                      {consultation.murid.firstname}{" "}
+                      {consultation.murid.lastname}
                     </div>
                     {consultation.murid.kelas && (
                       <div className="text-xs text-gray-500">
