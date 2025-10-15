@@ -43,12 +43,32 @@ export const useNotificationCount = () => {
         }));
       }
 
-      // TODO: Fetch unread chats count when chat feature is ready
-      // For now, set to 0
-      setCounts((prev) => ({
-        ...prev,
-        unreadChats: 0,
-      }));
+      // Fetch unread chats count
+      try {
+        const chatsResponse = await axios.get(
+          `${API_URL}/api/chat/unread-count`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (chatsResponse.data.success) {
+          setCounts((prev) => ({
+            ...prev,
+            unreadChats: chatsResponse.data.data.unreadCount || 0,
+          }));
+        }
+      } catch (chatError) {
+        // If chat endpoint not ready, set to 0
+        console.log("Chat unread count not available yet");
+        setCounts((prev) => ({
+          ...prev,
+          unreadChats: 0,
+        }));
+      }
     } catch (error) {
       console.error("Error fetching notification counts:", error);
     } finally {
@@ -74,18 +94,43 @@ export const useNotificationCount = () => {
   useEffect(() => {
     fetchCounts();
 
-    // Refresh counts every 30 seconds
-    const interval = setInterval(fetchCounts, 30000);
+    // Refresh counts every 15 seconds (instead of 30)
+    const interval = setInterval(fetchCounts, 15000);
 
     // Listen for custom events to refresh immediately
     const handleConsultationUpdate = () => {
       fetchCounts();
     };
 
+    const handleChatUpdate = () => {
+      fetchCounts();
+    };
+
+    // Listen for visibility change - refresh when user comes back to tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchCounts();
+      }
+    };
+
     window.addEventListener(
       NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
       handleConsultationUpdate
     );
+    
+    // Add chat update listener if available
+    if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
+      window.addEventListener(
+        NOTIFICATION_EVENTS.CHAT_UPDATED,
+        handleChatUpdate
+      );
+    }
+
+    // Listen for tab visibility changes
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Listen for window focus (when user switches back to this window)
+    window.addEventListener("focus", fetchCounts);
 
     return () => {
       clearInterval(interval);
@@ -93,6 +138,14 @@ export const useNotificationCount = () => {
         NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
         handleConsultationUpdate
       );
+      if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
+        window.removeEventListener(
+          NOTIFICATION_EVENTS.CHAT_UPDATED,
+          handleChatUpdate
+        );
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", fetchCounts);
     };
   }, []);
 

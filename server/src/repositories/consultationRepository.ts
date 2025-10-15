@@ -6,19 +6,19 @@ interface CreateConsultationDTO {
   admin_id: string;
   topic: string;
   consultation_date: Date;
-  notes?: string;
+  description?: string; // Catatan dari murid
 }
 
 interface UpdateConsultationStatusDTO {
   consultation_id: string;
   status: ConsultationStatus;
-  notes?: string;
+  admin_notes?: string; // Catatan dari admin (alasan decline/accept)
 }
 
 interface RescheduleConsultationDTO {
   consultation_id: string;
   newDate: Date;
-  rescheduleReason: string;
+  rescheduleReason: string; // Akan disimpan ke admin_notes
 }
 
 interface ConsultationFilters {
@@ -153,7 +153,7 @@ export class ConsultationRepository {
       where: { consultation_id: data.consultation_id },
       data: {
         status: data.status,
-        notes: data.notes,
+        admin_notes: data.admin_notes,
         // Set is_active to false when status is DECLINED
         is_active:
           data.status === ConsultationStatus.DECLINED ? false : undefined,
@@ -186,7 +186,7 @@ export class ConsultationRepository {
       where: { consultation_id: data.consultation_id },
       data: {
         consultation_date: data.newDate,
-        notes: `[DIJADWALKAN ULANG] ${data.rescheduleReason}`,
+        admin_notes: `[DIJADWALKAN ULANG] ${data.rescheduleReason}`,
       },
       include: {
         murid: {

@@ -108,7 +108,8 @@ model Consultation {
   admin_id          String
   topic             String
   consultation_date DateTime
-  notes             String?
+  description       String? // Catatan dari murid saat membuat konsultasi
+  admin_notes       String? // Catatan dari admin (alasan reschedule/decline)
   status            ConsultationStatus @default(PENDING)
   is_active         Boolean            @default(true)
   created_at        DateTime           @default(now())

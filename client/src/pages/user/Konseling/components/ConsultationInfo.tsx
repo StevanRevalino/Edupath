@@ -277,7 +277,7 @@ const ConsultationInfo = ({
         </div>
 
         {/* Show decline reason prominently if declined */}
-        {consultation.status === "DECLINED" && consultation.notes && (
+        {consultation.status === "DECLINED" && consultation.admin_notes && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <label className="text-base font-semibold text-red-700 flex items-center gap-2">
               <svg
@@ -293,18 +293,18 @@ const ConsultationInfo = ({
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              {consultation.notes.includes("[DIBATALKAN OLEH MURID]")
+              {consultation.admin_notes.includes("[DIBATALKAN OLEH MURID]")
                 ? "Alasan Pembatalan (Anda):"
                 : "Alasan Penolakan:"}
             </label>
             <p className="text-sm text-red-800 mt-2 leading-relaxed">
-              {consultation.notes.replace("[DIBATALKAN OLEH MURID] ", "")}
+              {consultation.admin_notes.replace("[DIBATALKAN OLEH MURID] ", "")}
             </p>
           </div>
         )}
 
         {/* Show reschedule info prominently if rescheduled */}
-        {consultation.notes?.includes("[DIJADWALKAN ULANG]") && (
+        {consultation.admin_notes?.includes("[DIJADWALKAN ULANG]") && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <label className="text-base font-semibold text-blue-700 flex items-center gap-2">
               <svg
@@ -323,22 +323,20 @@ const ConsultationInfo = ({
               Konseling Dijadwalkan Ulang:
             </label>
             <p className="text-sm text-blue-800 mt-2 leading-relaxed">
-              {consultation.notes.replace("[DIJADWALKAN ULANG] ", "")}
+              {consultation.admin_notes.replace("[DIJADWALKAN ULANG] ", "")}
             </p>
           </div>
         )}
 
-        {/* Show regular notes for other statuses */}
-        {consultation.notes &&
-          consultation.status !== "DECLINED" &&
-          !consultation.notes.includes("[DIJADWALKAN ULANG]") && (
-            <div className="border-b pb-3">
-              <label className="text-base font-semibold text-gray-600">
-                Catatan:
-              </label>
-              <p className="text-sm text-gray-800">{consultation.notes}</p>
-            </div>
-          )}
+        {/* Show description from user (catatan saat buat konsultasi) */}
+        {consultation.description && (
+          <div className="border-b pb-3">
+            <label className="text-base font-semibold text-gray-600">
+              Deskripsi Anda:
+            </label>
+            <p className="text-sm text-gray-800">{consultation.description}</p>
+          </div>
+        )}
 
         {/* Chat Button - Only show for ACCEPTED and ACTIVE consultations */}
         {consultation.status === "ACCEPTED" && consultation.is_active && (

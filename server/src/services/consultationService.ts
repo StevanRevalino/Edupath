@@ -7,19 +7,19 @@ interface CreateConsultationData {
   admin_id: string;
   topic: string;
   consultation_date: Date;
-  notes?: string;
+  description?: string; // Catatan dari murid
 }
 
 interface UpdateConsultationStatusData {
   consultation_id: string;
   status: ConsultationStatus;
-  notes?: string;
+  admin_notes?: string; // Catatan dari admin
 }
 
 interface RescheduleConsultationData {
   consultation_id: string;
   newDate: Date;
-  rescheduleReason: string;
+  rescheduleReason: string; // Akan disimpan ke admin_notes
 }
 
 export class ConsultationService {
@@ -145,7 +145,7 @@ export class ConsultationService {
         admin_id: data.admin_id,
         topic: data.topic,
         consultation_date: data.consultation_date,
-        notes: data.notes,
+        description: data.description,
       });
 
       return consultation;
@@ -250,7 +250,8 @@ export class ConsultationService {
         await this.consultationRepository.updateStatus({
           consultation_id: data.consultation_id,
           status: data.status,
-          notes: data.notes || existingConsultation.notes || undefined,
+          admin_notes:
+            data.admin_notes || existingConsultation.admin_notes || undefined,
         });
 
       return updatedConsultation;
@@ -523,7 +524,7 @@ export class ConsultationService {
         const updated = await this.consultationRepository.updateStatus({
           consultation_id: consultation.consultation_id,
           status: ConsultationStatus.COMPLETED,
-          notes: consultation.notes || undefined,
+          admin_notes: consultation.admin_notes || undefined,
         });
 
         // Also set is_active to false

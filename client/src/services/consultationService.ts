@@ -41,7 +41,8 @@ export interface Consultation {
   consultation_date: string;
   status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
   is_active: boolean;
-  notes?: string;
+  description?: string; // Catatan dari murid
+  admin_notes?: string; // Catatan dari admin (reschedule/decline)
   created_at: string;
   updated_at: string;
 }

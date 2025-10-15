@@ -68,7 +68,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   const [formData, setFormData] = useState({
     message: "",
     expertName: "",
-    notes: "",
+    description: "",
   });
 
   // Helper function to check if a time slot is disabled
@@ -260,7 +260,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         selectedTimeStart,
         selectedTimeEnd,
         message: formData.message,
-        notes: formData.notes,
+        description: formData.description,
         expertName: formData.expertName,
       };
 
@@ -290,7 +290,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         admin_id: formData.expertName,
         topic: formData.message,
         consultation_date: consultationDateStr,
-        notes: formData.notes,
+        description: formData.description,
       };
 
       const response = await consultationService.createConsultation(
@@ -306,7 +306,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         setFormData({
           message: "",
           expertName: admins.length > 0 ? admins[0].user_id : "",
-          notes: "",
+          description: "",
         });
         setErrors({});
         onSuccess(); // Call parent callback to refresh data
@@ -352,7 +352,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
     setFormData({
       message: "",
       expertName: admins.length > 0 ? admins[0].user_id : "",
-      notes: "",
+      description: "",
     });
     setErrors({});
     onClose();
@@ -582,24 +582,24 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
               Deskripsi
             </label>
             <textarea
-              name="notes"
-              value={formData.notes}
+              name="description"
+              value={formData.description}
               onChange={(e) => {
                 handleInputChange(e);
                 // Clear error when user types
-                if (errors.notes) {
-                  setErrors((prev) => ({ ...prev, notes: "" }));
+                if (errors.description) {
+                  setErrors((prev) => ({ ...prev, description: "" }));
                 }
               }}
               rows={4}
               className={cn(
                 "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none",
-                errors.notes && "border-red-500"
+                errors.description && "border-red-500"
               )}
               placeholder="Tuliskan Deskripsi Anda..."
             />
-            {errors.notes && (
-              <p className="text-red-500 text-xs mt-1">{errors.notes}</p>
+            {errors.description && (
+              <p className="text-red-500 text-xs mt-1">{errors.description}</p>
             )}
           </div>
 

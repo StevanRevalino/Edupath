@@ -47,4 +47,11 @@ router.get(
   chatController.getChatHistory.bind(chatController)
 );
 
+// ✨ NEW: Get unread messages count for admin
+router.get(
+  "/unread-count",
+  authenticateToken,
+  chatController.getUnreadCount.bind(chatController)
+);
+
 export default router;

@@ -228,4 +228,63 @@ export class ChatController {
       });
     }
   }
+
+  // ✨ NEW: Get unread messages count for admin
+  async getUnreadCount(req: Request, res: Response) {
+    try {
+      const userId = req.user?.user_id;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
+      // Get all active chat rooms for this admin
+      const chatRooms = await prisma.chatRoom.findMany({
+        where: {
+          admin_id: userId,
+          is_active: true,
+        },
+        include: {
+          messages: {
+            where: {
+              sender_id: {
+                not: userId, // Messages not from admin
+              },
+              is_read: false,
+            },
+          },
+        },
+      });
+
+      // Count total unread messages
+      const unreadCount = chatRooms.reduce(
+        (total, room) => total + room.messages.length,
+        0
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Berhasil mengambil unread count",
+        data: {
+          unreadCount,
+          roomsWithUnread: chatRooms
+            .filter((room) => room.messages.length > 0)
+            .map((room) => ({
+              room_id: room.room_id,
+              unreadCount: room.messages.length,
+            })),
+        },
+      });
+    } catch (error: any) {
+      console.error("Error in getUnreadCount:", error);
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || "Terjadi kesalahan saat mengambil unread count",
+      });
+    }
+  }
 }

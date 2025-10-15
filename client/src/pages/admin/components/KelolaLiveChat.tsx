@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
+import { triggerChatRefresh } from "../../../utils/notificationEvents";
 
 interface ChatUser {
   user_id: string;
@@ -359,6 +360,9 @@ const KelolaLiveChat = () => {
                 : user
             )
           );
+
+          // Trigger chat refresh for notification badge
+          triggerChatRefresh();
         } else {
           // Remove optimistic message if sending failed
           setChatMessages((prev) =>

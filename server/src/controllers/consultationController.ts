@@ -11,7 +11,8 @@ export class ConsultationController {
   // Create a new consultation
   async createConsultation(req: Request, res: Response) {
     try {
-      const { murid_id, admin_id, topic, consultation_date, notes } = req.body;
+      const { murid_id, admin_id, topic, consultation_date, description } =
+        req.body;
 
       // Basic validation
       if (!murid_id || !admin_id || !topic || !consultation_date) {
@@ -58,7 +59,7 @@ export class ConsultationController {
         admin_id,
         topic,
         consultation_date: consultationDate,
-        notes,
+        description,
       });
 
       return res.status(201).json({
@@ -188,7 +189,7 @@ export class ConsultationController {
   async updateConsultationStatus(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { status, notes } = req.body;
+      const { status, admin_notes } = req.body;
 
       if (!id) {
         return res.status(400).json({
@@ -218,7 +219,7 @@ export class ConsultationController {
         await this.consultationService.updateConsultationStatus({
           consultation_id: id,
           status: status as ConsultationStatus,
-          notes,
+          admin_notes,
         });
 
       return res.status(200).json({
@@ -305,7 +306,7 @@ export class ConsultationController {
           await this.consultationService.updateConsultationStatus({
             consultation_id: id,
             status: ConsultationStatus.DECLINED,
-            notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
+            admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
           });
 
         return res.status(200).json({
@@ -391,7 +392,7 @@ export class ConsultationController {
         });
       }
 
-      // Update consultation with new date and reschedule reason in notes
+      // Update consultation with new date and reschedule reason in admin_notes
       const updatedConsultation =
         await this.consultationService.rescheduleConsultation({
           consultation_id: id,

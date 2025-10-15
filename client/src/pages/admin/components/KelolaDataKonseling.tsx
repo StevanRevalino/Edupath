@@ -239,7 +239,7 @@ const KelolaDataKonseling = () => {
 
           await axios.patch(
             `${API_URL}/api/consultations/${consultationId}/status`,
-            { status: newStatus, notes: result.value },
+            { status: newStatus, admin_notes: result.value },
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -254,7 +254,7 @@ const KelolaDataKonseling = () => {
                 ? {
                     ...consultation,
                     status: newStatus as Consultation["status"],
-                    notes: result.value,
+                    admin_notes: result.value,
                     is_active: false, // Set is_active to false when declined
                   }
                 : consultation
@@ -373,7 +373,7 @@ const KelolaDataKonseling = () => {
       const newDateTime = new Date(rescheduleDate);
       newDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      await axios.patch(
+      const response = await axios.patch(
         `${API_URL}/api/consultations/${selectedConsultation.consultation_id}/reschedule`,
         {
           newDate: newDateTime.toISOString(),
@@ -387,15 +387,12 @@ const KelolaDataKonseling = () => {
         }
       );
 
-      // Update local state
+      // Update local state with data from server to ensure consistency
+      const updatedConsultation = response.data.data;
       setConsultations(
         consultations.map((c) =>
           c.consultation_id === selectedConsultation.consultation_id
-            ? {
-                ...c,
-                consultation_date: newDateTime.toISOString(),
-                notes: `[DIJADWALKAN ULANG] ${rescheduleReason}`,
-              }
+            ? updatedConsultation
             : c
         )
       );
@@ -703,10 +700,31 @@ const KelolaDataKonseling = () => {
                             {consultation.status === "DECLINED" ? (
                               <div className="bg-red-50 border border-red-200 rounded-md p-2 max-w-[250px]">
                                 <div className="text-xs font-semibold text-red-700 mb-1">
-                                  Alasan Penolakan:
+                                  {consultation.notes.includes(
+                                    "[DIBATALKAN OLEH MURID]"
+                                  )
+                                    ? "Dibatalkan Oleh Murid:"
+                                    : "Alasan Penolakan:"}
                                 </div>
                                 <div className="text-xs text-red-600 text-wrap overflow-hidden text-ellipsis">
-                                  {consultation.notes}
+                                  {consultation.notes.replace(
+                                    "[DIBATALKAN OLEH MURID] ",
+                                    ""
+                                  )}
+                                </div>
+                              </div>
+                            ) : consultation.notes.includes(
+                                "[DIJADWALKAN ULANG]"
+                              ) ? (
+                              <div className="bg-blue-50 border border-blue-200 rounded-md p-2 max-w-[250px]">
+                                <div className="text-xs font-semibold text-blue-700 mb-1">
+                                  Dijadwalkan Ulang:
+                                </div>
+                                <div className="text-xs text-blue-600 text-wrap overflow-hidden text-ellipsis">
+                                  {consultation.notes.replace(
+                                    "[DIJADWALKAN ULANG] ",
+                                    ""
+                                  )}
                                 </div>
                               </div>
                             ) : (
@@ -759,6 +777,20 @@ const KelolaDataKonseling = () => {
                           <span className="w-2 h-2 bg-current rounded-full opacity-60"></span>
                           <span>{getStatusText(consultation.status)}</span>
                         </span>
+                        {consultation.notes?.includes(
+                          "[DIJADWALKAN ULANG]"
+                        ) && (
+                          <div className="mt-2 text-xs text-blue-600 font-medium">
+                            📅 Dijadwalkan Ulang
+                          </div>
+                        )}
+                        {consultation.notes?.includes(
+                          "[DIBATALKAN OLEH MURID]"
+                        ) && (
+                          <div className="mt-2 text-xs text-red-600 font-medium">
+                            ❌ Dibatalkan Murid
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex items-center space-x-2">
@@ -1040,10 +1072,31 @@ const KelolaDataKonseling = () => {
                           {consultation.status === "DECLINED" ? (
                             <div className="bg-red-50 border border-red-200 rounded-md p-2">
                               <div className="text-xs font-semibold text-red-700 mb-1">
-                                Alasan Penolakan:
+                                {consultation.notes.includes(
+                                  "[DIBATALKAN OLEH MURID]"
+                                )
+                                  ? "Dibatalkan Oleh Murid:"
+                                  : "Alasan Penolakan:"}
                               </div>
                               <div className="text-xs text-red-600">
-                                {consultation.notes}
+                                {consultation.notes.replace(
+                                  "[DIBATALKAN OLEH MURID] ",
+                                  ""
+                                )}
+                              </div>
+                            </div>
+                          ) : consultation.notes.includes(
+                              "[DIJADWALKAN ULANG]"
+                            ) ? (
+                            <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
+                              <div className="text-xs font-semibold text-blue-700 mb-1">
+                                Dijadwalkan Ulang:
+                              </div>
+                              <div className="text-xs text-blue-600">
+                                {consultation.notes.replace(
+                                  "[DIJADWALKAN ULANG] ",
+                                  ""
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -1079,14 +1132,30 @@ const KelolaDataKonseling = () => {
                         })()}
                       </div>
 
-                      <span
-                        className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium w-fit ${getStatusColor(
-                          consultation.status
-                        )}`}
-                      >
-                        <span className="w-2 h-2 bg-current rounded-full opacity-60"></span>
-                        <span>{getStatusText(consultation.status)}</span>
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium w-fit ${getStatusColor(
+                            consultation.status
+                          )}`}
+                        >
+                          <span className="w-2 h-2 bg-current rounded-full opacity-60"></span>
+                          <span>{getStatusText(consultation.status)}</span>
+                        </span>
+                        {consultation.notes?.includes(
+                          "[DIJADWALKAN ULANG]"
+                        ) && (
+                          <div className="text-xs text-blue-600 font-medium">
+                            📅 Dijadwalkan Ulang
+                          </div>
+                        )}
+                        {consultation.notes?.includes(
+                          "[DIBATALKAN OLEH MURID]"
+                        ) && (
+                          <div className="text-xs text-red-600 font-medium">
+                            ❌ Dibatalkan Murid
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
