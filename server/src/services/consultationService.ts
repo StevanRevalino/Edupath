@@ -16,6 +16,12 @@ interface UpdateConsultationStatusData {
   notes?: string;
 }
 
+interface RescheduleConsultationData {
+  consultation_id: string;
+  newDate: Date;
+  rescheduleReason: string;
+}
+
 export class ConsultationService {
   private consultationRepository: ConsultationRepository;
   private userRepository: UserRepository;
@@ -246,6 +252,42 @@ export class ConsultationService {
           status: data.status,
           notes: data.notes || existingConsultation.notes || undefined,
         });
+
+      return updatedConsultation;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Reschedule consultation (by admin)
+  async rescheduleConsultation(data: RescheduleConsultationData) {
+    try {
+      const existingConsultation = await this.consultationRepository.findById(
+        data.consultation_id
+      );
+
+      if (!existingConsultation) {
+        throw new Error("Konseling tidak ditemukan");
+      }
+
+      // Check for scheduling conflict (exclude current consultation)
+      const hasConflict = await this.checkScheduleConflict(
+        data.newDate,
+        data.consultation_id
+      );
+
+      if (hasConflict) {
+        throw new Error(
+          "Jadwal konseling bentrok dengan konseling lain. Silakan pilih waktu lain."
+        );
+      }
+
+      // Update consultation date and add reschedule note
+      const updatedConsultation = await this.consultationRepository.reschedule({
+        consultation_id: data.consultation_id,
+        newDate: data.newDate,
+        rescheduleReason: data.rescheduleReason,
+      });
 
       return updatedConsultation;
     } catch (error) {

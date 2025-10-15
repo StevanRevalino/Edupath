@@ -7,6 +7,31 @@ import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { CalendarIcon, Clock, X, Minus } from "lucide-react";
+
+// Generate time slots (8:00 - 17:00)
+const generateTimeSlots = () => {
+  const slots = [];
+  for (let hour = 8; hour <= 17; hour++) {
+    slots.push(`${hour.toString().padStart(2, "0")}:00`);
+    if (hour < 17) {
+      slots.push(`${hour.toString().padStart(2, "0")}:30`);
+    }
+  }
+  return slots;
+};
+
+const timeSlots = generateTimeSlots();
 
 interface Consultation {
   consultation_id: string;
@@ -36,6 +61,16 @@ const KelolaDataKonseling = () => {
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [rescheduleTime, setRescheduleTime] = useState<string>("");
+  const [rescheduleEndTime, setRescheduleEndTime] = useState<string>("");
+  const [rescheduleReason, setRescheduleReason] = useState<string>("");
+  const [dateOpen, setDateOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const API_URL = import.meta.env.VITE_API_URL;
 
   // Auto-complete expired consultations
@@ -299,6 +334,141 @@ const KelolaDataKonseling = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedConsultation(null);
+  };
+
+  const handleReschedule = (consultation: Consultation) => {
+    setSelectedConsultation(consultation);
+    setRescheduleDate(new Date());
+    setRescheduleTime("");
+    setRescheduleEndTime("");
+    setRescheduleReason("");
+    setIsRescheduleModalOpen(true);
+    setIsDetailModalOpen(false); // Close detail modal
+  };
+
+  const handleCloseRescheduleModal = () => {
+    setIsRescheduleModalOpen(false);
+    setRescheduleDate(new Date());
+    setRescheduleTime("");
+    setRescheduleEndTime("");
+    setRescheduleReason("");
+  };
+
+  const handleSubmitReschedule = async () => {
+    if (
+      !selectedConsultation ||
+      !rescheduleDate ||
+      !rescheduleTime ||
+      !rescheduleReason.trim()
+    ) {
+      toast.error("Mohon lengkapi semua field");
+      return;
+    }
+
+    try {
+      const token = TokenManager.getToken();
+
+      // Combine date and time
+      const [hours, minutes] = rescheduleTime.split(":");
+      const newDateTime = new Date(rescheduleDate);
+      newDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      await axios.patch(
+        `${API_URL}/api/consultations/${selectedConsultation.consultation_id}/reschedule`,
+        {
+          newDate: newDateTime.toISOString(),
+          rescheduleReason: rescheduleReason,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Update local state
+      setConsultations(
+        consultations.map((c) =>
+          c.consultation_id === selectedConsultation.consultation_id
+            ? {
+                ...c,
+                consultation_date: newDateTime.toISOString(),
+                notes: `[DIJADWALKAN ULANG] ${rescheduleReason}`,
+              }
+            : c
+        )
+      );
+
+      toast.success("Konseling berhasil di-reschedule");
+      triggerNotificationRefresh();
+      handleCloseRescheduleModal();
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          toast.error("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          toast.error(
+            error.response?.data?.message || "Gagal reschedule konseling"
+          );
+        }
+      } else {
+        console.error("Error rescheduling consultation:", error);
+        toast.error("Gagal reschedule konseling");
+      }
+    }
+  };
+
+  // Fetch booked slots for selected date
+  const fetchBookedSlots = async (date: Date) => {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/consultations/booked-slots`,
+        {
+          params: {
+            date: format(date, "yyyy-MM-dd"),
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setBookedSlots(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+    }
+  };
+
+  // Update booked slots when reschedule date changes
+  useEffect(() => {
+    if (rescheduleDate && isRescheduleModalOpen) {
+      fetchBookedSlots(rescheduleDate);
+    }
+  }, [rescheduleDate, isRescheduleModalOpen]);
+
+  // Helper function to check if a time slot is disabled
+  const isTimeSlotDisabled = (timeSlot: string): boolean => {
+    if (!rescheduleDate) return false;
+
+    // Check if slot is already booked
+    if (bookedSlots.includes(timeSlot)) {
+      return true;
+    }
+
+    // Check if slot is in the past (for today only)
+    const today = new Date();
+    const isToday = rescheduleDate.toDateString() === today.toDateString();
+
+    if (!isToday) return false;
+
+    const [hours, minutes] = timeSlot.split(":").map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+
+    return slotTime <= today;
   };
 
   return (
@@ -1104,6 +1274,10 @@ const KelolaDataKonseling = () => {
                       "[DIBATALKAN OLEH MURID]"
                     )
                       ? "bg-red-50 border border-red-200"
+                      : selectedConsultation.notes.includes(
+                          "[DIJADWALKAN ULANG]"
+                        )
+                      ? "bg-blue-50 border border-blue-200"
                       : selectedConsultation.status === "DECLINED"
                       ? "bg-red-50 border border-red-200"
                       : "bg-gray-50"
@@ -1115,6 +1289,10 @@ const KelolaDataKonseling = () => {
                         "[DIBATALKAN OLEH MURID]"
                       ) || selectedConsultation.status === "DECLINED"
                         ? "text-red-700"
+                        : selectedConsultation.notes.includes(
+                            "[DIJADWALKAN ULANG]"
+                          )
+                        ? "text-blue-700"
                         : "text-gray-500"
                     }`}
                   >
@@ -1122,6 +1300,10 @@ const KelolaDataKonseling = () => {
                       "[DIBATALKAN OLEH MURID]"
                     )
                       ? "Alasan Pembatalan (Oleh Murid)"
+                      : selectedConsultation.notes.includes(
+                          "[DIJADWALKAN ULANG]"
+                        )
+                      ? "Alasan Reschedule"
                       : selectedConsultation.status === "DECLINED"
                       ? "Alasan Penolakan"
                       : "Catatan"}
@@ -1132,25 +1314,259 @@ const KelolaDataKonseling = () => {
                         "[DIBATALKAN OLEH MURID]"
                       ) || selectedConsultation.status === "DECLINED"
                         ? "text-red-700"
+                        : selectedConsultation.notes.includes(
+                            "[DIJADWALKAN ULANG]"
+                          )
+                        ? "text-blue-700"
                         : "text-gray-700"
                     }`}
                   >
-                    {selectedConsultation.notes.replace(
-                      "[DIBATALKAN OLEH MURID] ",
-                      ""
-                    )}
+                    {selectedConsultation.notes
+                      .replace("[DIBATALKAN OLEH MURID] ", "")
+                      .replace("[DIJADWALKAN ULANG] ", "")}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-3">
+              {selectedConsultation.status === "ACCEPTED" && (
+                <button
+                  onClick={() => handleReschedule(selectedConsultation)}
+                  className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium flex items-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Reschedule
+                </button>
+              )}
               <button
                 onClick={handleCloseDetailModal}
                 className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
               >
                 Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {isRescheduleModalOpen && selectedConsultation && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 relative max-h-[90vh] overflow-y-auto">
+            {/* Close button */}
+            <button
+              onClick={handleCloseRescheduleModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Reschedule Konseling
+              </h2>
+              <p className="text-sm text-gray-600">
+                Ubah jadwal konseling dengan{" "}
+                <span className="font-semibold">
+                  {selectedConsultation.murid.firstname}{" "}
+                  {selectedConsultation.murid.lastname}
+                </span>
+              </p>
+              <div className="h-1 w-20 bg-yellow-500 rounded-full mt-2"></div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-6">
+              {/* Current Schedule Info */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Jadwal Saat Ini
+                </div>
+                <div className="text-base text-gray-900">
+                  {new Date(
+                    selectedConsultation.consultation_date
+                  ).toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}{" "}
+                  pukul{" "}
+                  {new Date(
+                    selectedConsultation.consultation_date
+                  ).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+
+              {/* New Date Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Pilih Tanggal Baru <span className="text-red-500">*</span>
+                </label>
+                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-11",
+                        !rescheduleDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {rescheduleDate ? (
+                        format(rescheduleDate, "PPP", { locale: id })
+                      ) : (
+                        <span>Pilih tanggal</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={rescheduleDate}
+                      onSelect={(date) => {
+                        setRescheduleDate(date);
+                        setDateOpen(false);
+                      }}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Time Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Pilih Waktu Baru <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  {/* Start Time */}
+                  <div className="flex-1">
+                    <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-11",
+                            !rescheduleTime && "text-muted-foreground"
+                          )}
+                        >
+                          <Clock className="mr-2 h-4 w-4" />
+                          {rescheduleTime || "Pilih waktu"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <div className="grid grid-cols-3 gap-2 p-4 max-h-60 overflow-y-auto">
+                          {timeSlots.map((slot) => {
+                            const disabled = isTimeSlotDisabled(slot);
+                            return (
+                              <Button
+                                key={slot}
+                                variant={
+                                  rescheduleTime === slot
+                                    ? "default"
+                                    : "outline"
+                                }
+                                size="sm"
+                                onClick={() => {
+                                  if (!disabled) {
+                                    setRescheduleTime(slot);
+                                    // Auto-set end time to 1 hour later
+                                    const [hours, minutes] = slot
+                                      .split(":")
+                                      .map(Number);
+                                    const endHour = hours + 1;
+                                    const endTime = `${endHour
+                                      .toString()
+                                      .padStart(2, "0")}:${minutes
+                                      .toString()
+                                      .padStart(2, "0")}`;
+                                    setRescheduleEndTime(endTime);
+                                    setTimeOpen(false);
+                                  }
+                                }}
+                                disabled={disabled}
+                                className="h-10"
+                              >
+                                {slot}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <Minus className="text-gray-400" />
+                  {/* End Time - Auto calculated (1 hour after start) */}
+                  <div className="flex-1">
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-11",
+                        !rescheduleEndTime && "text-muted-foreground"
+                      )}
+                      disabled
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      {rescheduleEndTime || "waktu selesai"}
+                    </Button>
+                  </div>
+                </div>
+                {rescheduleTime && bookedSlots.includes(rescheduleTime) && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ Slot ini sudah dibooking oleh konseling lain
+                  </p>
+                )}
+              </div>
+
+              {/* Reason */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Alasan Reschedule <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
+                  rows={4}
+                  placeholder="Masukkan alasan mengapa jadwal perlu diubah..."
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={handleCloseRescheduleModal}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSubmitReschedule}
+                className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium"
+              >
+                Reschedule
               </button>
             </div>
           </div>

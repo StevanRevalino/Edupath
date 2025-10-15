@@ -88,6 +88,13 @@ router.patch(
   consultationController.cancelConsultation.bind(consultationController)
 );
 
+// Reschedule consultation (by admin)
+router.patch(
+  "/:id/reschedule",
+  authenticateToken,
+  consultationController.rescheduleConsultation.bind(consultationController)
+);
+
 // End consultation (set is_active to false)
 router.patch(
   "/:id/end",

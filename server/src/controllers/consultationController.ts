@@ -323,6 +323,95 @@ export class ConsultationController {
     }
   }
 
+  // Reschedule consultation (by admin)
+  async rescheduleConsultation(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { newDate, rescheduleReason } = req.body;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "ID konseling wajib diisi",
+        });
+      }
+
+      if (!newDate) {
+        return res.status(400).json({
+          success: false,
+          message: "Tanggal baru wajib diisi",
+        });
+      }
+
+      if (!rescheduleReason || rescheduleReason.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          message: "Alasan reschedule wajib diisi",
+        });
+      }
+
+      // Validate date format
+      const newConsultationDate = new Date(newDate);
+      if (isNaN(newConsultationDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Format tanggal tidak valid",
+        });
+      }
+
+      // Check if new date is in the future
+      const now = new Date();
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+      if (newConsultationDate < fiveMinutesFromNow) {
+        return res.status(400).json({
+          success: false,
+          message: "Tanggal konseling harus minimal 5 menit dari sekarang",
+        });
+      }
+
+      // Get consultation to verify it exists and is ACCEPTED
+      const consultation = await this.consultationService.getConsultationById(
+        id
+      );
+
+      if (!consultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
+        });
+      }
+
+      // Only allow rescheduling ACCEPTED consultations
+      if (consultation.status !== ConsultationStatus.ACCEPTED) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Hanya konseling dengan status ACCEPTED yang dapat di-reschedule",
+        });
+      }
+
+      // Update consultation with new date and reschedule reason in notes
+      const updatedConsultation =
+        await this.consultationService.rescheduleConsultation({
+          consultation_id: id,
+          newDate: newConsultationDate,
+          rescheduleReason,
+        });
+
+      return res.status(200).json({
+        success: true,
+        message: "Konseling berhasil di-reschedule",
+        data: updatedConsultation,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Terjadi kesalahan saat reschedule konseling",
+      });
+    }
+  }
+
   // Get consultations by status
   async getConsultationsByStatus(req: Request, res: Response) {
     try {

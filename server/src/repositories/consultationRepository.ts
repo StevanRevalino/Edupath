@@ -15,6 +15,12 @@ interface UpdateConsultationStatusDTO {
   notes?: string;
 }
 
+interface RescheduleConsultationDTO {
+  consultation_id: string;
+  newDate: Date;
+  rescheduleReason: string;
+}
+
 interface ConsultationFilters {
   status?: ConsultationStatus;
   murid_id?: string;
@@ -151,6 +157,36 @@ export class ConsultationRepository {
         // Set is_active to false when status is DECLINED
         is_active:
           data.status === ConsultationStatus.DECLINED ? false : undefined,
+      },
+      include: {
+        murid: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            kelas: true,
+          },
+        },
+        admin: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  // Reschedule consultation
+  async reschedule(data: RescheduleConsultationDTO) {
+    return this.prisma.consultation.update({
+      where: { consultation_id: data.consultation_id },
+      data: {
+        consultation_date: data.newDate,
+        notes: `[DIJADWALKAN ULANG] ${data.rescheduleReason}`,
       },
       include: {
         murid: {
