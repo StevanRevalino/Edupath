@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { CalendarIcon, Clock, X, Minus } from "lucide-react";
 import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
+import TokenManager from "../../../../utils/tokenManager";
 
 interface Consultation {
   consultation_id: string;

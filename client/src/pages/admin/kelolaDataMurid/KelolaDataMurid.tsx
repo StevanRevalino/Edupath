@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { X, Trash2, ChevronRight } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
+import AdminDataTable from "../components/AdminDataTable";
 
 interface Student {
   user_id: string;
@@ -34,6 +35,7 @@ const KelolaDataMurid = () => {
     kelas: null as number | null,
   });
   const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
@@ -72,6 +74,7 @@ const KelolaDataMurid = () => {
 
     fetchUsers();
   }, []);
+
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.lastname}`.trim();
     const matchesSearch =
@@ -242,7 +245,6 @@ const KelolaDataMurid = () => {
             toast.error("Gagal menghapus data murid");
           }
         }
-        toast.success("Data murid berhasil dihapus");
       }
     });
   };
@@ -438,111 +440,77 @@ const KelolaDataMurid = () => {
 
         <DataTableContainer loading={loading}>
           {/* Desktop Table View - Hidden on Mobile */}
-          <div className="hidden lg:block overflow-hidden">
-            <div className="overflow-hidden rounded-xl border border-gray-100 shadow-lg bg-white">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-50 border-b border-gray-200">
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Nama
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Kelas
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Tanggal Daftar
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Aksi
-                    </th>
-                    <th className="px-4 py-4 w-12"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredStudents.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-8">
-                        <div className="text-center text-gray-500">
-                          Tidak ada data.
+          <div className="hidden lg:block">
+            <AdminDataTable
+              columns={[
+                {
+                  header: "Nama",
+                  accessor: (student) => (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-semibold text-sm">
+                          {(student.firstname || "N/A").charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-gray-900">
+                          {`${student.firstname || ""} ${
+                            student.lastname || ""
+                          }`.trim() || "N/A"}
                         </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredStudents.map((student) => (
-                      <tr
-                        key={student.user_id}
-                        onClick={() => handleEdit(student.user_id)}
-                        className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all duration-200 cursor-pointer group"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg transition-shadow">
-                              <span className="text-white font-bold text-lg">
-                                {(student.firstname || "N/A")
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                                {`${student.firstname || ""} ${
-                                  student.lastname || ""
-                                }`.trim() || "N/A"}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full shadow-sm ${getKelasColor(
-                              student.kelas
-                            )}`}
-                          >
-                            {student.kelas}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-gray-700 truncate block max-w-[250px]">
-                            {student.email || "N/A"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-600 font-medium">
-                            {new Date(student.created_at).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )}
-                          </span>
-                        </td>
-                        <td
-                          className="px-6 py-4"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="flex items-center justify-center">
-                            <button
-                              onClick={() => handleEdit(student.user_id)}
-                              className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:shadow-md transition-all"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  header: "Kelas",
+                  accessor: (student) => (
+                    <span
+                      className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${getKelasColor(
+                        student.kelas
+                      )}`}
+                    >
+                      {student.kelas || "-"}
+                    </span>
+                  ),
+                },
+                {
+                  header: "Email",
+                  accessor: (student) => (
+                    <span className="text-sm text-gray-700">
+                      {student.email || "N/A"}
+                    </span>
+                  ),
+                },
+                {
+                  header: "Tanggal Daftar",
+                  accessor: (student) =>
+                    new Date(student.created_at).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }),
+                },
+                {
+                  header: "Aksi",
+                  accessor: (student) => (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(student.user_id);
+                      }}
+                      className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Edit
+                    </button>
+                  ),
+                },
+              ]}
+              data={filteredStudents}
+              keyExtractor={(student) => student.user_id}
+              onRowClick={(student) => handleEdit(student.user_id)}
+              emptyMessage="Tidak ada data murid"
+            />
           </div>
 
           {/* Mobile Card View - Hidden on Desktop */}
@@ -560,8 +528,8 @@ const KelolaDataMurid = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-[#6CCBFF] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-[#050051] font-bold text-lg">
+                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-lg">
                             {(student.firstname || "N/A")
                               .charAt(0)
                               .toUpperCase()}
@@ -683,7 +651,7 @@ const KelolaDataMurid = () => {
             </div>
 
             {/* Responsive Button Layout */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3 ">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3">
               <button
                 onClick={() =>
                   selectedStudent && handleDelete(selectedStudent.user_id)

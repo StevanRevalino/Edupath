@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { X, Trash2, Plus, Upload, ExternalLink } from "lucide-react";
+import { X, Plus, Upload, ExternalLink, Trash2 } from "lucide-react";
 import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
+import AdminDataTable from "../components/AdminDataTable";
 import {
   beasiswaSchema,
   type BeasiswaFormData,
@@ -314,7 +315,7 @@ const KelolaDataBeasiswa = () => {
   };
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       <PageHeader
         title="Kelola Data Beasiswa"
         description="Kelola informasi beasiswa dan bantuan pendidikan"
@@ -332,88 +333,78 @@ const KelolaDataBeasiswa = () => {
       </div>
 
       {/* Table */}
-      <DataTableContainer>
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : beasiswaList.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Belum ada data beasiswa
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  No
-                </th>
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  Poster
-                </th>
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  Judul
-                </th>
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  Link
-                </th>
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  Tanggal Dibuat
-                </th>
-                <th className="text-left p-4 font-semibold text-gray-700">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {beasiswaList.map((beasiswa, index) => (
-                <tr
-                  key={beasiswa.beasiswa_id}
-                  className="border-b hover:bg-gray-50"
+      <DataTableContainer loading={loading}>
+        <AdminDataTable
+          columns={[
+            {
+              header: "No",
+              accessor: (_, index) => index + 1,
+            },
+            {
+              header: "Poster",
+              accessor: (beasiswa) => (
+                <img
+                  src={beasiswa.image_url}
+                  alt={beasiswa.title}
+                  className="w-16 h-16 object-cover rounded"
+                />
+              ),
+            },
+            {
+              header: "Judul",
+              accessor: "title",
+            },
+            {
+              header: "Link",
+              accessor: (beasiswa) => (
+                <a
+                  href={beasiswa.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline flex items-center gap-1"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <td className="p-4">{index + 1}</td>
-                  <td className="p-4">
-                    <img
-                      src={beasiswa.image_url}
-                      alt={beasiswa.title}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                  </td>
-                  <td className="p-4">{beasiswa.title}</td>
-                  <td className="p-4">
-                    <a
-                      href={beasiswa.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline flex items-center gap-1"
-                    >
-                      Lihat Link
-                      <ExternalLink size={14} />
-                    </a>
-                  </td>
-                  <td className="p-4">
-                    {new Date(beasiswa.created_at).toLocaleDateString("id-ID")}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleOpenModal(beasiswa)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(beasiswa.beasiswa_id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors flex items-center gap-1"
-                      >
-                        <Trash2 size={16} />
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                  Lihat Link
+                  <ExternalLink size={14} />
+                </a>
+              ),
+            },
+            {
+              header: "Tanggal Dibuat",
+              accessor: (beasiswa) =>
+                new Date(beasiswa.created_at).toLocaleDateString("id-ID"),
+            },
+            {
+              header: "Aksi",
+              accessor: (beasiswa) => (
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenModal(beasiswa);
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(beasiswa.beasiswa_id);
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-1"
+                  >
+                    <Trash2 size={14} />
+                    Hapus
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+          data={beasiswaList}
+          keyExtractor={(beasiswa) => beasiswa.beasiswa_id}
+          emptyMessage="Belum ada data beasiswa"
+        />
       </DataTableContainer>
 
       {/* Modal */}
