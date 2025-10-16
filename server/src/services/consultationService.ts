@@ -14,6 +14,7 @@ interface UpdateConsultationStatusData {
   consultation_id: string;
   status: ConsultationStatus;
   admin_notes?: string; // Catatan dari admin
+  is_active?: boolean; // Flag untuk soft delete
 }
 
 interface RescheduleConsultationData {
@@ -252,6 +253,10 @@ export class ConsultationService {
           status: data.status,
           admin_notes:
             data.admin_notes || existingConsultation.admin_notes || undefined,
+          is_active:
+            data.is_active !== undefined
+              ? data.is_active
+              : existingConsultation.is_active,
         });
 
       return updatedConsultation;

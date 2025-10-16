@@ -7,11 +7,11 @@ import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
-import ConsultationFilters from "./Components/ConsultationFilters";
-import ConsultationDetailModal from "./Components/ConsultationDetailModal";
-import RescheduleModal from "./Components/RescheduleModal";
-import ConsultationTable from "./Components/ConsultationTable";
-import ConsultationCards from "./Components/ConsultationCards";
+import ConsultationFilters from "../kelolaKonseling/Components/ConsultationFilters";
+import ConsultationDetailModal from "../kelolaKonseling/Components/ConsultationDetailModal";
+import RescheduleModal from "../kelolaKonseling/Components/RescheduleModal";
+import ConsultationTable from "../kelolaKonseling/Components/ConsultationTable";
+import ConsultationCards from "../kelolaKonseling/Components/ConsultationCards";
 
 // Generate time slots (8:00 - 17:00)
 const generateTimeSlots = () => {
@@ -492,13 +492,13 @@ const KelolaDataKonseling = () => {
             ) : (
               <ConsultationTable
                 consultations={filteredConsultations}
-                onViewDetails={handleViewDetail as any}
+                onViewDetails={handleViewDetail}
                 onAccept={(id: string) => handleUpdateStatus(id, "ACCEPTED")}
-                onDecline={((consultation: Consultation) => {
+                onDecline={(consultation: Consultation) => {
                   setSelectedConsultation(consultation);
                   handleUpdateStatus(consultation.consultation_id, "DECLINED");
-                }) as any}
-                onReschedule={handleReschedule as any}
+                }}
+                onReschedule={handleReschedule}
                 onCancel={handleCancelConsultation}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
@@ -519,13 +519,13 @@ const KelolaDataKonseling = () => {
             ) : (
               <ConsultationCards
                 consultations={filteredConsultations}
-                onViewDetails={handleViewDetail as any}
+                onViewDetails={handleViewDetail}
                 onAccept={(id: string) => handleUpdateStatus(id, "ACCEPTED")}
-                onDecline={((consultation: Consultation) => {
+                onDecline={(consultation: Consultation) => {
                   setSelectedConsultation(consultation);
                   handleUpdateStatus(consultation.consultation_id, "DECLINED");
-                }) as any}
-                onReschedule={handleReschedule as any}
+                }}
+                onReschedule={handleReschedule}
                 onCancel={handleCancelConsultation}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}

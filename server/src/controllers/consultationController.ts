@@ -290,23 +290,30 @@ export class ConsultationController {
         });
       }
 
-      // If PENDING, delete the consultation (no need for admin to see)
-      // If ACCEPTED, update status to DECLINED with reason (admin needs to see)
+      // Update consultation to inactive (is_active = false) instead of deleting
+      // This allows consultation to appear in history
       if (consultation.status === ConsultationStatus.PENDING) {
-        await this.consultationService.deleteConsultation(id);
-
-        return res.status(200).json({
-          success: true,
-          message: "Konseling berhasil dibatalkan",
-          data: null,
-        });
-      } else {
-        // ACCEPTED - update to DECLINED with cancel reason
         const updatedConsultation =
           await this.consultationService.updateConsultationStatus({
             consultation_id: id,
             status: ConsultationStatus.DECLINED,
             admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
+            is_active: false,
+          });
+
+        return res.status(200).json({
+          success: true,
+          message: "Konseling berhasil dibatalkan",
+          data: updatedConsultation,
+        });
+      } else {
+        // ACCEPTED - update to DECLINED with cancel reason and set inactive
+        const updatedConsultation =
+          await this.consultationService.updateConsultationStatus({
+            consultation_id: id,
+            status: ConsultationStatus.DECLINED,
+            admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
+            is_active: false,
           });
 
         return res.status(200).json({

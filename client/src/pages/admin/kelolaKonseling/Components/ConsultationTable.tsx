@@ -87,7 +87,21 @@ const ConsultationTable = ({
               </div>
               <div className="flex items-center text-sm text-gray-700">
                 <Clock className="w-4 h-4 mr-2 text-blue-600" />
-                {consultation.consultation_time}
+                {new Date(consultation.consultation_date).toLocaleTimeString(
+                  "id-ID",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}{" "}
+                -{" "}
+                {new Date(
+                  new Date(consultation.consultation_date).getTime() +
+                    1 * 60 * 60 * 1000 // +1 jam (dalam ms)
+                ).toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </div>
             </div>
           ),

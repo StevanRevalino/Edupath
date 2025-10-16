@@ -13,6 +13,7 @@ interface UpdateConsultationStatusDTO {
   consultation_id: string;
   status: ConsultationStatus;
   admin_notes?: string; // Catatan dari admin (alasan decline/accept)
+  is_active?: boolean; // Flag untuk soft delete
 }
 
 interface RescheduleConsultationDTO {
@@ -154,9 +155,13 @@ export class ConsultationRepository {
       data: {
         status: data.status,
         admin_notes: data.admin_notes,
-        // Set is_active to false when status is DECLINED
+        // Allow explicit is_active override, otherwise auto-set based on status
         is_active:
-          data.status === ConsultationStatus.DECLINED ? false : undefined,
+          data.is_active !== undefined
+            ? data.is_active
+            : data.status === ConsultationStatus.DECLINED
+            ? false
+            : undefined,
       },
       include: {
         murid: {

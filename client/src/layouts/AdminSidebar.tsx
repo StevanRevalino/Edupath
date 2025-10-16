@@ -109,10 +109,9 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                       className="w-12 h-14 mr-3"
                     />
                     <span className="font-medium flex-1">{item.label}</span>
+                    {/* Tompel merah kecil - muncul jika ada notifikasi */}
                     {item.badgeCount > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center px-2 animate-pulse">
-                        {item.badgeCount > 99 ? "99+" : item.badgeCount}
-                      </span>
+                      <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
                     )}
                   </button>
                 </li>
@@ -187,10 +186,9 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                         <span className="font-medium text-sm flex-1">
                           {item.label}
                         </span>
+                        {/* Tompel merah kecil - muncul jika ada notifikasi */}
                         {item.badgeCount > 0 && (
-                          <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5 animate-pulse">
-                            {item.badgeCount > 99 ? "99+" : item.badgeCount}
-                          </span>
+                          <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
                         )}
                       </button>
                     </li>

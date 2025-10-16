@@ -75,6 +75,12 @@ const Konseling = () => {
     fetchConsultations(); // Refresh consultations when modal succeeds
   };
 
+  const handleCancelSuccess = () => {
+    fetchConsultations(); // Refresh consultations list
+    setSelectedConsultation(null); // Clear selected consultation
+    setShowChat(false); // Close chat if open
+  };
+
   const handleOpenModal = () => {
     if (hasActiveConsultation) {
       toast.error(
@@ -187,7 +193,7 @@ const Konseling = () => {
                   <ConsultationInfo
                     consultation={selectedConsultation}
                     onOpenChat={openChat}
-                    onCancelSuccess={fetchConsultations}
+                    onCancelSuccess={handleCancelSuccess}
                   />
                 </>
               ) : selectedConsultation ? (
