@@ -7,6 +7,10 @@ import Swal from "sweetalert2";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
+import {
+  beasiswaSchema,
+  type BeasiswaFormData,
+} from "../../../schema/BeasiswaSchema";
 
 interface Beasiswa {
   beasiswa_id: string;
@@ -32,6 +36,9 @@ const KelolaDataBeasiswa = () => {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof BeasiswaFormData, string>>
+  >({});
 
   const API_URL = import.meta.env.VITE_API_URL;
   const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -74,6 +81,8 @@ const KelolaDataBeasiswa = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
+        // Clear image_url error when file is selected
+        setErrors((prev) => ({ ...prev, image_url: undefined }));
       };
       reader.readAsDataURL(file);
     }
@@ -118,6 +127,7 @@ const KelolaDataBeasiswa = () => {
       setImagePreview("");
     }
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -132,22 +142,66 @@ const KelolaDataBeasiswa = () => {
     });
     setImageFile(null);
     setImagePreview("");
+    setErrors({});
+  };
+
+  // Handle input change with validation
+  const handleInputChange = (field: keyof BeasiswaFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Clear error for this field when user types
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  // Validate form
+  const validateForm = async (): Promise<boolean> => {
+    try {
+      const validationData = {
+        ...formData,
+        image_url:
+          formData.image_url || (imageFile ? "uploaded_temp_placeholder" : ""),
+      };
+
+      await beasiswaSchema.validate(validationData, {
+        abortEarly: false,
+        context: { isEdit: !!selectedBeasiswa },
+      });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const validationErrors: Partial<Record<keyof BeasiswaFormData, string>> =
+        {};
+
+      if (err.inner) {
+        err.inner.forEach((error: any) => {
+          if (error.path) {
+            validationErrors[error.path as keyof BeasiswaFormData] =
+              error.message;
+          }
+        });
+      }
+
+      setErrors(validationErrors);
+
+      // Show first error in toast
+      const firstError = Object.values(validationErrors)[0];
+      if (firstError) {
+        toast.error(firstError);
+      }
+
+      return false;
+    }
   };
 
   // Handle form submit
   const handleSubmit = async () => {
-    // Validate
-    if (!formData.title.trim()) {
-      toast.error("Judul harus diisi");
-      return;
-    }
+    // Validate form first
+    const isValid = await validateForm();
+    if (!isValid) return;
 
-    if (!formData.link.trim()) {
-      toast.error("Link harus diisi");
-      return;
-    }
-
+    // Check if image is required for new beasiswa
     if (!selectedBeasiswa && !imageFile) {
+      setErrors((prev) => ({ ...prev, image_url: "Gambar harus diupload" }));
       toast.error("Gambar harus diupload");
       return;
     }
@@ -163,8 +217,8 @@ const KelolaDataBeasiswa = () => {
 
       const token = TokenManager.getToken();
       const payload = {
-        title: formData.title,
-        link: formData.link,
+        title: formData.title.trim(),
+        link: formData.link.trim(),
         image_url: imageUrl,
       };
 
@@ -389,13 +443,16 @@ const KelolaDataBeasiswa = () => {
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.title ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="Contoh: Beasiswa LPDP 2025"
                     disabled={isUploading}
                   />
+                  {errors.title && (
+                    <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                  )}
                 </div>
 
                 {/* Link */}
@@ -407,13 +464,16 @@ const KelolaDataBeasiswa = () => {
                   <input
                     type="url"
                     value={formData.link}
-                    onChange={(e) =>
-                      setFormData({ ...formData, link: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => handleInputChange("link", e.target.value)}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.link ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="https://..."
                     disabled={isUploading}
                   />
+                  {errors.link && (
+                    <p className="text-red-500 text-sm mt-1">{errors.link}</p>
+                  )}
                 </div>
 
                 {/* Image Upload */}
@@ -421,7 +481,11 @@ const KelolaDataBeasiswa = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Poster/Gambar <span className="text-red-500">*</span>
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-4 ${
+                      errors.image_url ? "border-red-500" : "border-gray-300"
+                    }`}
+                  >
                     <input
                       type="file"
                       accept="image/*"
@@ -461,6 +525,11 @@ const KelolaDataBeasiswa = () => {
                       )}
                     </label>
                   </div>
+                  {errors.image_url && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.image_url}
+                    </p>
+                  )}
                 </div>
 
                 {/* Buttons */}
