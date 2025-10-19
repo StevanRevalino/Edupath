@@ -177,19 +177,27 @@ export class ConsultationService {
   async getStudentsWithAcceptedConsultations() {
     try {
       const now = new Date();
-      
+
       const acceptedConsultations = await this.consultationRepository.findMany({
         status: ConsultationStatus.ACCEPTED,
       });
 
       // Filter consultations that are currently ongoing (started and not yet ended)
-      const ongoingConsultations = acceptedConsultations.filter((consultation) => {
-        const consultationStart = new Date(consultation.consultation_date);
-        const consultationEnd = new Date(consultationStart.getTime() + 60 * 60 * 1000); // +1 hour
+      const ongoingConsultations = acceptedConsultations.filter(
+        (consultation) => {
+          const consultationStart = new Date(consultation.consultation_date);
+          const consultationEnd = new Date(
+            consultationStart.getTime() + 60 * 60 * 1000
+          ); // +1 hour
 
-        // Check if current time is between start and end time
-        return now >= consultationStart && now < consultationEnd && consultation.is_active;
-      });
+          // Check if current time is between start and end time
+          return (
+            now >= consultationStart &&
+            now < consultationEnd &&
+            consultation.is_active
+          );
+        }
+      );
 
       // Extract unique murid_ids from ongoing consultations only
       const uniqueMuridIds = [

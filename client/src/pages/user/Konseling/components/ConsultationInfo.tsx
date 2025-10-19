@@ -22,13 +22,19 @@ const ConsultationInfo = ({
 
   // Check if chat is available (consultation has started and not ended yet)
   const isChatAvailable = () => {
-    if (!consultation || consultation.status !== "ACCEPTED" || !consultation.is_active) {
+    if (
+      !consultation ||
+      consultation.status !== "ACCEPTED" ||
+      !consultation.is_active
+    ) {
       return false;
     }
 
     const now = new Date();
     const consultationStart = new Date(consultation.consultation_date);
-    const consultationEnd = new Date(consultationStart.getTime() + 60 * 60 * 1000); // +1 hour
+    const consultationEnd = new Date(
+      consultationStart.getTime() + 60 * 60 * 1000
+    ); // +1 hour
 
     // Chat is available if current time is between start and end time
     return now >= consultationStart && now < consultationEnd;
