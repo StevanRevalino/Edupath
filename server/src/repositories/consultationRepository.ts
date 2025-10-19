@@ -264,6 +264,9 @@ export class ConsultationRepository {
       where: {
         murid_id,
         is_active: true,
+        status: {
+          in: [ConsultationStatus.PENDING, ConsultationStatus.ACCEPTED],
+        },
       },
       include: {
         murid: {

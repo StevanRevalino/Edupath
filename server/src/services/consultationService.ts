@@ -247,16 +247,22 @@ export class ConsultationService {
         throw new Error("Konseling tidak ditemukan");
       }
 
+      // Automatically set is_active to false for DECLINED and COMPLETED status
+      let isActive = existingConsultation.is_active;
+      if (
+        data.status === ConsultationStatus.DECLINED ||
+        data.status === ConsultationStatus.COMPLETED
+      ) {
+        isActive = false;
+      }
+
       const updatedConsultation =
         await this.consultationRepository.updateStatus({
           consultation_id: data.consultation_id,
           status: data.status,
           admin_notes:
             data.admin_notes || existingConsultation.admin_notes || undefined,
-          is_active:
-            data.is_active !== undefined
-              ? data.is_active
-              : existingConsultation.is_active,
+          is_active: data.is_active !== undefined ? data.is_active : isActive,
         });
 
       return updatedConsultation;
