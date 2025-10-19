@@ -35,7 +35,8 @@ export default function AboutUs() {
         </div>
 
         {/* Introduction Card */}
-        <div className="bg-gradient-to-br from-white via-blue-50/30 to-white rounded-3xl shadow-xl p-6 sm:p-8 md:p-10 border border-gray-200/50">
+        <div className="group relative bg-gradient-to-br from-white via-blue-50/30 to-white rounded-b-3xl shadow-xl p-6 sm:p-8 md:p-10 border border-gray-200/50">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00437A] to-[#4FC3F7]"></div>
           <div className="text-gray-700 leading-relaxed space-y-4">
             <p className="text-justify text-sm sm:text-base">
               EduPath adalah platform digital yang membantu siswa SMA/SMK
@@ -70,8 +71,8 @@ export default function AboutUs() {
         {/* Vision & Mission Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* Vision Card */}
-          <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00437A] to-[#4FC3F7] rounded-t-2xl"></div>
+          <div className="group relative bg-white/80 backdrop-blur-sm rounded-b-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00437A] to-[#4FC3F7]"></div>
 
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-gradient-to-br from-[#00437A] to-[#0066B3] rounded-xl shadow-md">
@@ -90,8 +91,8 @@ export default function AboutUs() {
           </div>
 
           {/* Mission Card */}
-          <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#4FC3F7] to-[#00437A] rounded-t-2xl"></div>
+          <div className="group relative bg-white/80 backdrop-blur-sm rounded-b-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#4FC3F7] to-[#00437A]"></div>
 
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-gradient-to-br from-[#4FC3F7] to-[#00B4D8] rounded-xl shadow-md">
