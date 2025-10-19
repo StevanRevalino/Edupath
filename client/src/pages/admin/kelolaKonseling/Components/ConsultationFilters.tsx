@@ -11,6 +11,8 @@ interface ConsultationFiltersProps {
     completed: number;
     declined: number;
   };
+  showPendingBadge: boolean;
+  onClearPendingBadge: () => void;
 }
 
 const ConsultationFilters: FC<ConsultationFiltersProps> = ({
@@ -19,20 +21,33 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
   searchTerm,
   setSearchTerm,
   counts,
+  showPendingBadge,
+  onClearPendingBadge,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
       {/* Tab Navigation with Inline Stats */}
       <div className="grid grid-cols-4">
         <button
-          onClick={() => setActiveTab("pending")}
+          onClick={() => {
+            setActiveTab("pending");
+            onClearPendingBadge();
+          }}
           className={`px-4 py-5 transition-all duration-200 relative ${
             activeTab === "pending"
               ? "bg-gradient-to-b from-blue-50 to-white"
               : "bg-gray-50 hover:bg-gray-100"
           }`}
         >
-          <div className="flex flex-col items-center space-y-1.5">
+          <div className="flex flex-col items-center space-y-1.5 relative">
+            {/* 🔸 Badge di pojok kanan atas */}
+            {counts.pending > 0 && showPendingBadge && (
+              <span className="absolute -top-1 right-3 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            )}
+
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
                 activeTab === "pending" ? "text-yellow-700" : "text-gray-500"
@@ -48,6 +63,7 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
               {counts.pending}
             </span>
           </div>
+
           {activeTab === "pending" && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-500"></div>
           )}

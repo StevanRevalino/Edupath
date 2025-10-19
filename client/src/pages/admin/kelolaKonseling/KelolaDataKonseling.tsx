@@ -58,6 +58,8 @@ const KelolaDataKonseling = () => {
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [showPendingBadge, setShowPendingBadge] = useState(true);
+  const [lastPendingCount, setLastPendingCount] = useState(0);
   const API_URL = import.meta.env.VITE_API_URL;
 
   // Auto-complete expired consultations
@@ -127,6 +129,24 @@ const KelolaDataKonseling = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Monitor pending count changes to show badge again when new pending appears
+  useEffect(() => {
+    const currentPendingCount = consultations.filter(
+      (c) => c.status === "PENDING"
+    ).length;
+
+    // Show badge if pending count increased
+    if (currentPendingCount > lastPendingCount) {
+      setShowPendingBadge(true);
+    }
+
+    setLastPendingCount(currentPendingCount);
+  }, [consultations]);
+
+  const handleClearPendingBadge = () => {
+    setShowPendingBadge(false);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -475,6 +495,8 @@ const KelolaDataKonseling = () => {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         counts={tabCounts}
+        showPendingBadge={showPendingBadge}
+        onClearPendingBadge={handleClearPendingBadge}
       />
 
       <DataTableContainer loading={loading}>
@@ -494,10 +516,15 @@ const KelolaDataKonseling = () => {
                 consultations={filteredConsultations}
                 onViewDetails={handleViewDetail as any}
                 onAccept={(id: string) => handleUpdateStatus(id, "ACCEPTED")}
-                onDecline={((consultation: Consultation) => {
-                  setSelectedConsultation(consultation);
-                  handleUpdateStatus(consultation.consultation_id, "DECLINED");
-                }) as any}
+                onDecline={
+                  ((consultation: Consultation) => {
+                    setSelectedConsultation(consultation);
+                    handleUpdateStatus(
+                      consultation.consultation_id,
+                      "DECLINED"
+                    );
+                  }) as any
+                }
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
                 getStatusColor={getStatusColor}
@@ -521,10 +548,15 @@ const KelolaDataKonseling = () => {
                 consultations={filteredConsultations}
                 onViewDetails={handleViewDetail as any}
                 onAccept={(id: string) => handleUpdateStatus(id, "ACCEPTED")}
-                onDecline={((consultation: Consultation) => {
-                  setSelectedConsultation(consultation);
-                  handleUpdateStatus(consultation.consultation_id, "DECLINED");
-                }) as any}
+                onDecline={
+                  ((consultation: Consultation) => {
+                    setSelectedConsultation(consultation);
+                    handleUpdateStatus(
+                      consultation.consultation_id,
+                      "DECLINED"
+                    );
+                  }) as any
+                }
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
                 getStatusColor={getStatusColor}
