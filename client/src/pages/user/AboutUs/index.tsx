@@ -171,7 +171,7 @@ export default function AboutUs() {
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
                     {member.name}
                   </h3>
-                  <div className="inline-block px-4 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-full">
+                  <div className="inline-block px-4 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-tl-2xl rounded-br-2xl">
                     <p className="text-xs sm:text-sm font-semibold text-[#00437A]">
                       {member.role}
                     </p>
