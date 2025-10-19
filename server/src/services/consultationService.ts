@@ -176,13 +176,24 @@ export class ConsultationService {
   // Get students with accepted consultations for live chat
   async getStudentsWithAcceptedConsultations() {
     try {
+      const now = new Date();
+      
       const acceptedConsultations = await this.consultationRepository.findMany({
         status: ConsultationStatus.ACCEPTED,
       });
 
-      // Extract unique murid_ids
+      // Filter consultations that are currently ongoing (started and not yet ended)
+      const ongoingConsultations = acceptedConsultations.filter((consultation) => {
+        const consultationStart = new Date(consultation.consultation_date);
+        const consultationEnd = new Date(consultationStart.getTime() + 60 * 60 * 1000); // +1 hour
+
+        // Check if current time is between start and end time
+        return now >= consultationStart && now < consultationEnd && consultation.is_active;
+      });
+
+      // Extract unique murid_ids from ongoing consultations only
       const uniqueMuridIds = [
-        ...new Set(acceptedConsultations.map((c) => c.murid_id)),
+        ...new Set(ongoingConsultations.map((c) => c.murid_id)),
       ];
 
       // Get student details for each unique murid
@@ -190,8 +201,8 @@ export class ConsultationService {
         uniqueMuridIds.map(async (muridId) => {
           const student = await this.userRepository.findById(muridId);
           if (student) {
-            // Get the latest accepted consultation for this student
-            const latestConsultation = acceptedConsultations
+            // Get the latest ongoing consultation for this student
+            const latestConsultation = ongoingConsultations
               .filter((c) => c.murid_id === muridId)
               .sort(
                 (a, b) =>

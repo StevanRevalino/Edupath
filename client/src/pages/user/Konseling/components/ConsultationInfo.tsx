@@ -20,6 +20,20 @@ const ConsultationInfo = ({
   const [canceling, setCanceling] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Check if chat is available (consultation has started and not ended yet)
+  const isChatAvailable = () => {
+    if (!consultation || consultation.status !== "ACCEPTED" || !consultation.is_active) {
+      return false;
+    }
+
+    const now = new Date();
+    const consultationStart = new Date(consultation.consultation_date);
+    const consultationEnd = new Date(consultationStart.getTime() + 60 * 60 * 1000); // +1 hour
+
+    // Chat is available if current time is between start and end time
+    return now >= consultationStart && now < consultationEnd;
+  };
+
   const handleCancelConsultation = async () => {
     if (!consultation) return;
 
@@ -338,16 +352,30 @@ const ConsultationInfo = ({
           </div>
         )}
 
-        {/* Chat Button - Only show for ACCEPTED and ACTIVE consultations */}
+        {/* Chat Button - Only show when consultation is ongoing (started and not ended) */}
         {consultation.status === "ACCEPTED" && consultation.is_active && (
           <div className="pt-4 border-t">
-            <button
-              onClick={() => onOpenChat(consultation)}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <MessageCircle size={20} />
-              Buka Chat Konseling
-            </button>
+            {isChatAvailable() ? (
+              <button
+                onClick={() => onOpenChat(consultation)}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <MessageCircle size={20} />
+                Buka Chat Konseling
+              </button>
+            ) : (
+              <div className="w-full bg-gray-100 border border-gray-300 text-gray-600 py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                <MessageCircle size={20} />
+                <div className="text-center">
+                  <div className="font-semibold">Chat Belum Tersedia</div>
+                  <div className="text-xs">
+                    {new Date() < new Date(consultation.consultation_date)
+                      ? "Chat akan dibuka saat konseling dimulai"
+                      : "Sesi konseling telah berakhir"}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
