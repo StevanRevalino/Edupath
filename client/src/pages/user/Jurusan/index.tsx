@@ -638,13 +638,14 @@ const Jurusan: React.FC = () => {
                   />
 
                   {/* Results Table with Sortable Headers - Modern Design */}
-                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white relative">
+                    <table className="w-full text-left text-sm rtl:text-right text-gray-500">
+                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase">
                         <tr className="border-b-2 border-gray-200">
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("nama_prodi")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Nama Program Studi
@@ -669,8 +670,9 @@ const Jurusan: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("jenjang")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Jenjang
@@ -695,8 +697,9 @@ const Jurusan: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("universitas")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Universitas
@@ -721,8 +724,9 @@ const Jurusan: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("akreditasi")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Akreditasi
@@ -764,7 +768,7 @@ const Jurusan: React.FC = () => {
                                   : "bg-white"
                               }`}
                             >
-                              <td className="px-6 py-4">
+                              <th className="px-6 py-4" scope="row">
                                 <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
                                   {p.nama_prodi}
                                 </div>
@@ -773,7 +777,7 @@ const Jurusan: React.FC = () => {
                                     {p.bidang}
                                   </div>
                                 )}
-                              </td>
+                              </th>
                               <td className="px-6 py-4">
                                 {p.jenjang ? (
                                   <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 ring-1 ring-blue-600/20">

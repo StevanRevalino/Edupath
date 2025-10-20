@@ -738,13 +738,14 @@ const Universitas: React.FC = () => {
                   />
 
                   {/* Results Table with Sortable Headers - Modern Design */}
-                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white relative">
+                    <table className="w-full text-left text-sm rtl:text-right text-gray-500">
+                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase">
                         <tr className="border-b-2 border-gray-200">
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("nama")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Nama
@@ -769,8 +770,9 @@ const Universitas: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("kota")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Kota
@@ -795,8 +797,9 @@ const Universitas: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("provinsi")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Provinsi
@@ -821,8 +824,9 @@ const Universitas: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("akreditasi")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Akreditasi
@@ -847,8 +851,9 @@ const Universitas: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("rank_country")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Rank Country
@@ -873,8 +878,9 @@ const Universitas: React.FC = () => {
                             </div>
                           </th>
                           <th
-                            className="px-6 py-3.5 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                            className="px-6 py-3 hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
                             onClick={() => handleHeaderClick("rank_qs")}
+                            scope="col"
                           >
                             <div className="flex items-center gap-1.5">
                               Rank QS
@@ -908,14 +914,14 @@ const Universitas: React.FC = () => {
                               onClick={() =>
                                 handleUniversitasClick(u.university_id)
                               }
-                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
+                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 odd:bg-white even:bg-gray-50 ${
                                 selectedUniversitas?.university_id ===
                                 u.university_id
                                   ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
                                   : "bg-white"
                               }`}
                             >
-                              <td className="px-6 py-4">
+                              <th className="px-6 py-4" scope="row">
                                 <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
                                   {u.nama}
                                 </div>
@@ -924,7 +930,7 @@ const Universitas: React.FC = () => {
                                     {u.nama_singkat}
                                   </div>
                                 )}
-                              </td>
+                              </th>
                               <td className="px-6 py-4 text-gray-700">
                                 {u.kota || "-"}
                               </td>
