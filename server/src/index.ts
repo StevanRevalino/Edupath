@@ -8,6 +8,7 @@ import consultationRoutes from "./routes/consultationRoutes";
 import userRoutes from "./routes/userRoutes";
 import chatRoutes from "./routes/chatRoutes";
 import beasiswaRoutes from "./routes/beasiswaRoutes";
+import riasecRoutes from "./routes/riasecRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
@@ -48,6 +49,7 @@ app.use("/api/consultations", consultationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/beasiswa", beasiswaRoutes);
+app.use("/api/riasec", riasecRoutes);
 
 const PORT = 5000;
 

@@ -1,390 +1,161 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import FormatPertanyaan from "./Components/FormatPertanyaan";
 import Pagination from "./Components/Pagination";
 import { useNavigate } from "react-router-dom";
+import {
+  getQuestions,
+  submitAssessment,
+} from "../../../services/riasecService";
+import type { RiasecQuestion, RiasecResponse } from "../../../types/riasec";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
-const DummyQuestions = [
-  // Text type questions
-  {
-    id: "q1",
-    type: "text" as const,
-    questionText: "Bagaimana cara Anda biasanya belajar konsep baru?",
-    options: [
-      { id: "opt1", text: "Membaca buku" },
-      { id: "opt2", text: "Menonton video" },
-      { id: "opt3", text: "Praktik langsung" },
-      { id: "opt4", text: "Diskusi kelompok" },
-    ],
-  },
-  {
-    id: "q2",
-    type: "text" as const,
-    questionText: "Kapan waktu terbaik Anda untuk belajar?",
-    options: [
-      { id: "opt1", text: "Pagi hari" },
-      { id: "opt2", text: "Siang hari" },
-      { id: "opt3", text: "Sore hari" },
-      { id: "opt4", text: "Malam hari" },
-    ],
-  },
-  {
-    id: "q3",
-    type: "text" as const,
-    questionText: "Metode pembelajaran mana yang paling efektif untuk Anda?",
-    options: [
-      { id: "opt1", text: "Visual" },
-      { id: "opt2", text: "Audio" },
-      { id: "opt3", text: "Kinestetik" },
-      { id: "opt4", text: "Reading/Writing" },
-    ],
-  },
-  {
-    id: "q4",
-    type: "text" as const,
-    questionText: "Bagaimana Anda mengatur jadwal belajar?",
-    options: [
-      { id: "opt1", text: "Rutin harian" },
-      { id: "opt2", text: "Mingguan" },
-      { id: "opt3", text: "Menjelang ujian" },
-      { id: "opt4", text: "Tidak teratur" },
-    ],
-  },
-  {
-    id: "q5",
-    type: "text" as const,
-    questionText: "Media pembelajaran mana yang Anda sukai?",
-    options: [
-      { id: "opt1", text: "E-book" },
-      { id: "opt2", text: "Video tutorial" },
-      { id: "opt3", text: "Podcast" },
-      { id: "opt4", text: "Interactive quiz" },
-    ],
-  },
-
-  // Yes/No questions
-  {
-    id: "q6",
-    type: "yesno" as const,
-    questionText: "Apakah Anda suka belajar dalam kelompok?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q7",
-    type: "yesno" as const,
-    questionText: "Apakah Anda mudah terdistraksi saat belajar?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q8",
-    type: "yesno" as const,
-    questionText: "Apakah Anda lebih suka belajar dengan musik?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q9",
-    type: "yesno" as const,
-    questionText: "Apakah Anda membutuhkan deadline untuk memotivasi belajar?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q10",
-    type: "yesno" as const,
-    questionText: "Apakah Anda suka mencatat saat belajar?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-
-  // Likert scale questions
-  {
-    id: "q11",
-    type: "likert" as const,
-    questionText: "Saya lebih suka belajar sendiri daripada berkelompok.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q12",
-    type: "likert" as const,
-    questionText:
-      "Saya mudah memahami materi yang dijelaskan dengan diagram atau gambar.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q13",
-    type: "likert" as const,
-    questionText:
-      "Saya perlu lingkungan yang tenang untuk belajar dengan efektif.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q14",
-    type: "likert" as const,
-    questionText: "Saya lebih suka belajar dengan cara praktik langsung.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q15",
-    type: "likert" as const,
-    questionText: "Saya mudah mengingat informasi yang saya dengar.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q16",
-    type: "likert" as const,
-    questionText: "Saya suka menggunakan teknologi dalam proses pembelajaran.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q17",
-    type: "likert" as const,
-    questionText:
-      "Saya dapat belajar dengan baik dalam waktu yang lama tanpa istirahat.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q18",
-    type: "likert" as const,
-    questionText:
-      "Saya lebih memahami konsep ketika dijelaskan dengan contoh nyata.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q19",
-    type: "likert" as const,
-    questionText: "Saya suka membuat mind map atau diagram saat belajar.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q20",
-    type: "likert" as const,
-    questionText: "Saya lebih suka belajar dengan sistem try and error.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-
-  // Mixed additional questions
-  {
-    id: "q21",
-    type: "text" as const,
-    questionText: "Berapa lama durasi belajar yang ideal untuk Anda?",
-    options: [
-      { id: "opt1", text: "15-30 menit" },
-      { id: "opt2", text: "30-60 menit" },
-      { id: "opt3", text: "1-2 jam" },
-      { id: "opt4", text: "Lebih dari 2 jam" },
-    ],
-  },
-  {
-    id: "q22",
-    type: "yesno" as const,
-    questionText: "Apakah Anda suka mengulang materi yang sudah dipelajari?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q23",
-    type: "likert" as const,
-    questionText: "Saya mudah memahami instruksi tertulis.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q24",
-    type: "text" as const,
-    questionText: "Bagaimana cara Anda mengingat informasi penting?",
-    options: [
-      { id: "opt1", text: "Menulis catatan" },
-      { id: "opt2", text: "Mengulang verbal" },
-      { id: "opt3", text: "Membuat asosiasi" },
-      { id: "opt4", text: "Praktik berulang" },
-    ],
-  },
-  {
-    id: "q25",
-    type: "yesno" as const,
-    questionText: "Apakah Anda suka belajar dengan sistem kompetisi?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q26",
-    type: "likert" as const,
-    questionText: "Saya belajar lebih baik ketika ada reward atau penghargaan.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q27",
-    type: "text" as const,
-    questionText: "Platform pembelajaran online mana yang Anda sukai?",
-    options: [
-      { id: "opt1", text: "Video interaktif" },
-      { id: "opt2", text: "Gamifikasi" },
-      { id: "opt3", text: "Forum diskusi" },
-      { id: "opt4", text: "Live streaming" },
-    ],
-  },
-  {
-    id: "q28",
-    type: "yesno" as const,
-    questionText: "Apakah Anda mudah kehilangan fokus saat belajar online?",
-    options: [
-      { id: "opt1", text: "Ya" },
-      { id: "opt2", text: "Tidak" },
-    ],
-  },
-  {
-    id: "q29",
-    type: "likert" as const,
-    questionText: "Saya lebih suka feedback yang detail dan konstruktif.",
-    options: [
-      { id: "opt1", text: "Sangat tidak setuju" },
-      { id: "opt2", text: "" },
-      { id: "opt3", text: "" },
-      { id: "opt4", text: "" },
-      { id: "opt5", text: "Sangat setuju" },
-    ],
-  },
-  {
-    id: "q30",
-    type: "text" as const,
-    questionText: "Bagaimana Anda mengukur keberhasilan pembelajaran Anda?",
-    options: [
-      { id: "opt1", text: "Nilai ujian" },
-      { id: "opt2", text: "Pemahaman konsep" },
-      { id: "opt3", text: "Kemampuan aplikasi" },
-      { id: "opt4", text: "Feedback orang lain" },
-    ],
-  },
+// Likert scale options (1-5)
+const LIKERT_OPTIONS = [
+  { id: "1", text: "Sangat Tidak Setuju" },
+  { id: "2", text: "Tidak Setuju" },
+  { id: "3", text: "Netral" },
+  { id: "4", text: "Setuju" },
+  { id: "5", text: "Sangat Setuju" },
 ];
 
-interface Answer {
-  questionId: string;
-  selectedOption: string;
-}
+const QUESTIONS_PER_PAGE = 10;
 
-export default function PertanyaanTes() {
-  const [answers, setAnswers] = useState<Answer[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const questionsPerPage = 10;
+const TesPertanyaan = () => {
   const navigate = useNavigate();
+  const topRef = useRef<HTMLDivElement>(null);
+  const [questions, setQuestions] = useState<RiasecQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [answers, setAnswers] = useState<Map<number, number>>(new Map());
 
-  // Calculate pagination
-  const totalPages = Math.ceil(DummyQuestions.length / questionsPerPage);
-  const startIndex = (currentPage - 1) * questionsPerPage;
-  const endIndex = startIndex + questionsPerPage;
-  const currentQuestions = DummyQuestions.slice(startIndex, endIndex);
+  // Load questions on mount
+  useEffect(() => {
+    loadQuestions();
+  }, []);
 
-  const handleAnswerChange = (questionId: string, optionId: string) => {
-    setAnswers((prev) => {
-      const existingIndex = prev.findIndex((a) => a.questionId === questionId);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = { questionId, selectedOption: optionId };
-        return updated;
-      } else {
-        return [...prev, { questionId, selectedOption: optionId }];
-      }
-    });
+  // Fisher-Yates shuffle algorithm
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const loadQuestions = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await getQuestions();
+      // Acak urutan pertanyaan
+      const shuffledData = shuffleArray(data);
+      setQuestions(shuffledData);
+    } catch (err: any) {
+      setError(err.message || "Gagal memuat pertanyaan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnswerChange = (questionId: number, answerValue: string) => {
+    const newAnswers = new Map(answers);
+    newAnswers.set(questionId, parseInt(answerValue));
+    setAnswers(newAnswers);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top when page changes
+
+    // Scroll to top using ref for more reliable scrolling
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // Fallback methods
     window.scrollTo({ top: 0, behavior: "smooth" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Also scroll the main container if it exists
+    const mainContainer = document.querySelector("main");
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
+    }
   };
 
+  const handleSubmit = async () => {
+    if (answers.size !== questions.length) {
+      alert("Mohon jawab semua pertanyaan terlebih dahulu");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      // Convert Map to array of responses
+      const responses: RiasecResponse[] = Array.from(answers.entries()).map(
+        ([question_id, answer_value]) => ({
+          question_id,
+          answer_value,
+        })
+      );
+
+      // Submit to backend
+      const result = await submitAssessment(responses);
+
+      // Navigate to hasil page with assessment_id
+      navigate(`/tes/hasil/${result.assessment_id}`, { state: { result } });
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      alert(err.message || "Gagal submit assessment");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
+  const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
+  const endIndex = startIndex + QUESTIONS_PER_PAGE;
+  const currentQuestions = questions.slice(startIndex, endIndex);
   const isLastPage = currentPage === totalPages;
-  const allQuestionsAnswered = answers.length === DummyQuestions.length;
+  const allQuestionsAnswered = answers.size === questions.length;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={loadQuestions}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
+      {/* Scroll anchor */}
+      <div ref={topRef} />
+
+      {/* Back button */}
       <div className="top-6 left-6 z-0 pl-5 pt-5">
         <button
           onClick={() => navigate("/tes")}
@@ -396,29 +167,65 @@ export default function PertanyaanTes() {
       </div>
 
       <div className="max-w-4xl mx-auto p-5 -mb-24">
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">
-          Tes Gaya Belajar - Halaman {currentPage} dari {totalPages}
-        </h1>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Tes Minat & Bakat Karier
+          </h1>
+          <p className="text-gray-600">
+            Halaman {currentPage} dari {totalPages} • Pertanyaan{" "}
+            {startIndex + 1}-{Math.min(endIndex, questions.length)} dari{" "}
+            {questions.length}
+          </p>
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Petunjuk:</strong> Jawab setiap pertanyaan dengan jujur
+              sesuai dengan diri Anda. Tidak ada jawaban benar atau salah.
+              Gunakan skala 1-5:
+            </p>
+            <ul className="text-sm text-blue-700 mt-2 ml-4 list-disc">
+              <li>1 = Sangat Tidak Setuju</li>
+              <li>2 = Tidak Setuju</li>
+              <li>3 = Netral</li>
+              <li>4 = Setuju</li>
+              <li>5 = Sangat Setuju</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Progress Pengerjaan</span>
+            <span>
+              {answers.size} / {questions.length} terjawab
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${(answers.size / questions.length) * 100}%` }}
+            />
+          </div>
+        </div>
 
         {/* Questions */}
         {currentQuestions.map((question, index) => (
           <FormatPertanyaan
-            key={question.id}
+            key={question.question_id}
             questionNumber={startIndex + index + 1}
-            questionText={question.questionText}
-            questionType={question.type}
-            options={question.options}
-            selectedAnswer={
-              answers.find((a) => a.questionId === question.id)?.selectedOption
-            }
+            questionText={question.question_text}
+            questionType="likert"
+            options={LIKERT_OPTIONS}
+            selectedAnswer={answers.get(question.question_id)?.toString()}
             onAnswerChange={(optionId) =>
-              handleAnswerChange(question.id, optionId)
+              handleAnswerChange(question.question_id, optionId)
             }
           />
         ))}
 
         {/* Pagination */}
-        <div className="mt-5">
+        <div className="mt-8">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -431,20 +238,24 @@ export default function PertanyaanTes() {
           <div className="flex justify-center mt-10">
             <button
               className={`font-medium py-3 px-8 rounded-3xl transition-colors ${
-                allQuestionsAnswered
+                allQuestionsAnswered && !submitting
                   ? "bg-[#3FBBFE] hover:bg-[#3FA9F5] text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
-              disabled={!allQuestionsAnswered}
-              onClick={() => navigate("/tes/selesai")}
+              disabled={!allQuestionsAnswered || submitting}
+              onClick={handleSubmit}
             >
-              {allQuestionsAnswered
-                ? `Selesai`
-                : `Jawab Semua Pertanyaan (${answers.length}/${DummyQuestions.length})`}
+              {submitting
+                ? "Mengirim..."
+                : allQuestionsAnswered
+                ? `Selesai & Lihat Hasil`
+                : `Jawab Semua Pertanyaan (${answers.size}/${questions.length})`}
             </button>
           </div>
         )}
       </div>
     </>
   );
-}
+};
+
+export default TesPertanyaan;

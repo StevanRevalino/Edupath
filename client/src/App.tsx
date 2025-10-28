@@ -17,8 +17,8 @@ import AboutUs from "./pages/user/AboutUs";
 import ContactUs from "./pages/user/ContactUs";
 import ScrollToTop from "./components/ScrollToTop";
 import TutorialTes from "./pages/user/Tutorial Tes";
-import PertanyaanTes from "./pages/user/Tes-Pertanyaan";
-import TesCompleted from "./pages/user/Tes Completed";
+import PertanyaanTes from "./pages/user/Tes-Pertanyaan";  
+import HasilTes from "./pages/user/Tes-Hasil";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuthMonitor();
@@ -92,7 +92,17 @@ function App() {
           <Route index element={<Tes />} />
           <Route path="tutorial" element={<TutorialTes />} />
           <Route path="pertanyaan" element={<PertanyaanTes />} />
-          <Route path="selesai" element={<TesCompleted />} />
+          <Route path="hasil/:assessmentId" element={<HasilTes />} />
+        </Route>
+        <Route
+          path="/tes-hasil"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index path="hasil/:assessmentId" element={<HasilTes />} />
         </Route>
         <Route
           path="/jurusan"

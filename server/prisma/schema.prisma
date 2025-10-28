@@ -1,12 +1,3 @@
-// generator client {
-//     provider = "prisma-client-js"
-// }
-
-// datasource db {
-//     provider = "postgresql"
-//     url      = env("DATABASE_URL")
-// }
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,29 +8,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  ADMIN // Guru BK/Admin
-  STUDENT // Murid
-}
-
 model User {
-  user_id    String   @id
-  firstname  String
-  lastname   String
-  email      String   @unique
-  password   String
-  role       Role     @default(STUDENT)
-  kelas      Int?
-  created_at DateTime @default(now())
-
-  // Consultation relationships
-  consultationsAsMurid Consultation[] @relation("ConsultationMurid")
-  consultationsAsAdmin Consultation[] @relation("ConsultationAdmin")
-
-  // Chat relationships
-  chatRoomsAsMurid ChatRoom[]    @relation("ChatRoomMurid")
-  chatRoomsAsAdmin ChatRoom[]    @relation("ChatRoomAdmin")
-  sentMessages     ChatMessage[] @relation("ChatMessageSender")
+  user_id              String             @id
+  firstname            String
+  lastname             String
+  email                String             @unique
+  password             String
+  role                 Role               @default(STUDENT)
+  kelas                Int?
+  created_at           DateTime           @default(now())
+  sentMessages         ChatMessage[]      @relation("ChatMessageSender")
+  chatRoomsAsAdmin     ChatRoom[]         @relation("ChatRoomAdmin")
+  chatRoomsAsMurid     ChatRoom[]         @relation("ChatRoomMurid")
+  consultationsAsAdmin Consultation[]     @relation("ConsultationAdmin")
+  consultationsAsMurid Consultation[]     @relation("ConsultationMurid")
+  riasecAssessments    RiasecAssessment[]
 }
 
 model Universitas {
@@ -67,32 +50,104 @@ model Universitas {
 }
 
 model Prodi {
-  prodi_id   Int       @id
-  nama_prodi String
-  jenjang    String?
-  created_at DateTime  @default(now())
-  prodi_pt   ProdiPT[]
+  prodi_id              Int                    @id
+  nama_prodi            String
+  jenjang               String?
+  created_at            DateTime               @default(now())
+  prodi_pt              ProdiPT[]
+  riasecMappings        RiasecProdiMapping[]
+  riasecRecommendations RiasecRecommendation[]
 
   @@index([nama_prodi])
   @@index([jenjang])
 }
 
 model ProdiPT {
-  id               Int      @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   prodi_id         Int
   university_id    Int
   akreditasi_prodi String?
   ukt_min          String?
   ukt_max          String?
   link_prodi       String?
-  created_at       DateTime @default(now())
-
-  prodi       Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
-  universitas Universitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
+  created_at       DateTime    @default(now())
+  prodi            Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  universitas      Universitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
 
   @@unique([prodi_id, university_id])
   @@index([prodi_id])
   @@index([university_id])
+}
+
+model Consultation {
+  consultation_id   String             @id
+  murid_id          String
+  admin_id          String
+  topic             String
+  consultation_date DateTime
+  description       String?
+  admin_notes       String?
+  status            ConsultationStatus @default(PENDING)
+  is_active         Boolean            @default(true)
+  created_at        DateTime           @default(now())
+  chatRoom          ChatRoom?
+  admin             User               @relation("ConsultationAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
+  murid             User               @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
+
+  @@index([murid_id])
+  @@index([admin_id])
+  @@index([status])
+  @@index([consultation_date])
+  @@index([is_active])
+}
+
+model ChatRoom {
+  room_id         String        @id @default(cuid())
+  consultation_id String        @unique
+  murid_id        String
+  admin_id        String
+  is_active       Boolean       @default(true)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  messages        ChatMessage[]
+  admin           User          @relation("ChatRoomAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
+  consultation    Consultation  @relation(fields: [consultation_id], references: [consultation_id], onDelete: Cascade)
+  murid           User          @relation("ChatRoomMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
+
+  @@index([murid_id])
+  @@index([admin_id])
+  @@index([is_active])
+}
+
+model ChatMessage {
+  message_id String   @id @default(cuid())
+  room_id    String
+  sender_id  String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+  chatRoom   ChatRoom @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+  sender     User     @relation("ChatMessageSender", fields: [sender_id], references: [user_id], onDelete: Cascade)
+
+  @@index([room_id])
+  @@index([sender_id])
+  @@index([created_at])
+}
+
+model Beasiswa {
+  beasiswa_id String   @id @default(cuid())
+  title       String
+  image_url   String
+  link        String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([created_at])
+}
+
+enum Role {
+  ADMIN
+  STUDENT
 }
 
 enum ConsultationStatus {
@@ -102,78 +157,89 @@ enum ConsultationStatus {
   COMPLETED
 }
 
-model Consultation {
-  consultation_id   String             @id
-  murid_id          String
-  admin_id          String
-  topic             String
-  consultation_date DateTime
-  description       String? // Catatan dari murid saat membuat konsultasi
-  admin_notes       String? // Catatan dari admin (alasan reschedule/decline)
-  status            ConsultationStatus @default(PENDING)
-  is_active         Boolean            @default(true)
-  created_at        DateTime           @default(now())
-
-  murid User @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
-  admin User @relation("ConsultationAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
-
-  // Relationship to chat room
-  chatRoom ChatRoom?
-
-  @@index([murid_id])
-  @@index([admin_id])
-  @@index([status])
-  @@index([consultation_date])
-  @@index([is_active])
+// RIASEC Assessment models
+enum RiasecType {
+  REALISTIC
+  INVESTIGATIVE
+  ARTISTIC
+  SOCIAL
+  ENTERPRISING
+  CONVENTIONAL
 }
 
-// Chat Room model - represents a conversation between a student and admin
-model ChatRoom {
-  room_id         String   @id @default(cuid())
-  consultation_id String   @unique
-  murid_id        String
-  admin_id        String
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+model RiasecQuestion {
+  question_id   Int              @id @default(autoincrement())
+  question_text String
+  riasec_type   RiasecType
+  dimension     String
+  created_at    DateTime         @default(now())
+  responses     RiasecResponse[]
 
-  // Relationships
-  consultation Consultation  @relation(fields: [consultation_id], references: [consultation_id], onDelete: Cascade)
-  murid        User          @relation("ChatRoomMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
-  admin        User          @relation("ChatRoomAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
-  messages     ChatMessage[]
-
-  @@index([murid_id])
-  @@index([admin_id])
-  @@index([is_active])
+  @@index([riasec_type])
+  @@index([dimension])
 }
 
-// Chat Message model - individual messages in a chat room
-model ChatMessage {
-  message_id String   @id @default(cuid())
-  room_id    String
-  sender_id  String
-  message    String
-  is_read    Boolean  @default(false)
-  created_at DateTime @default(now())
+model RiasecAssessment {
+  assessment_id       String                 @id @default(cuid())
+  user_id             String
+  realistic_score     Int                    @default(0)
+  investigative_score Int                    @default(0)
+  artistic_score      Int                    @default(0)
+  social_score        Int                    @default(0)
+  enterprising_score  Int                    @default(0)
+  conventional_score  Int                    @default(0)
+  primary_type        RiasecType
+  secondary_type      RiasecType?
+  holland_code        String
+  completed_at        DateTime               @default(now())
+  user                User                   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  responses           RiasecResponse[]
+  recommendations     RiasecRecommendation[]
 
-  // Relationships
-  chatRoom ChatRoom @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
-  sender   User     @relation("ChatMessageSender", fields: [sender_id], references: [user_id], onDelete: Cascade)
-
-  @@index([room_id])
-  @@index([sender_id])
-  @@index([created_at])
+  @@index([user_id])
+  @@index([primary_type])
+  @@index([completed_at])
 }
 
-// Scholarship/Beasiswa model
-model Beasiswa {
-  beasiswa_id String   @id @default(cuid())
-  title       String
-  image_url   String // Cloudinary URL
-  link        String // Link to medsos/website universitas
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+model RiasecResponse {
+  response_id   String           @id @default(cuid())
+  assessment_id String
+  question_id   Int
+  answer_value  Int
+  created_at    DateTime         @default(now())
+  assessment    RiasecAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
+  question      RiasecQuestion   @relation(fields: [question_id], references: [question_id], onDelete: Cascade)
 
-  @@index([created_at])
+  @@unique([assessment_id, question_id])
+  @@index([assessment_id])
+  @@index([question_id])
+}
+
+model RiasecProdiMapping {
+  mapping_id          Int         @id @default(autoincrement())
+  prodi_id            Int
+  primary_type        RiasecType
+  secondary_type      RiasecType?
+  compatibility_score Int         @default(100)
+  created_at          DateTime    @default(now())
+  prodi               Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+
+  @@index([primary_type])
+  @@index([secondary_type])
+  @@index([prodi_id])
+}
+
+model RiasecRecommendation {
+  recommendation_id String           @id @default(cuid())
+  assessment_id     String
+  prodi_id          Int
+  match_percentage  Float
+  rank              Int
+  created_at        DateTime         @default(now())
+  assessment        RiasecAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
+  prodi             Prodi            @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+
+  @@index([assessment_id])
+  @@index([prodi_id])
+  @@index([rank])
 }
