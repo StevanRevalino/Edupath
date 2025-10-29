@@ -1,9 +1,10 @@
 /**
  * RIASEC Assessment Service
- * Implements rule-based algorithm for Holland's RIASEC theory
+ * Implements Fuzzy Logic for Holland's RIASEC theory
  */
 
 import prisma from "../configs/prisma";
+import { fuzzyLogicService } from "./fuzzyLogic";
 
 // Types for RIASEC assessment
 type RiasecType =
@@ -127,69 +128,38 @@ class RiasecService {
       tertiary: sortedTypes[2] ? typeMapping[sortedTypes[2][0]] : null,
     };
   }
-
-  /**
-   * Calculate match percentage between user's Holland code and prodi mapping
-   */
   private calculateMatchPercentage(
-    userPrimary: RiasecType,
-    userSecondary: RiasecType | null,
-    userTertiary: RiasecType | null,
     prodiPrimary: RiasecType,
     prodiSecondary: RiasecType | null,
-    baseCompatibility: number
+    scores: RiasecScores
   ): number {
-    let matchScore = 0;
+    // Convert RiasecScores to UserRiasecScores format
+    const userScores = {
+      R: scores.realistic,
+      I: scores.investigative,
+      A: scores.artistic,
+      S: scores.social,
+      E: scores.enterprising,
+      C: scores.conventional,
+    };
 
-    // Primary type match (most important - 60%)
-    if (userPrimary === prodiPrimary) {
-      matchScore += 60;
-    } else if (
-      userSecondary === prodiPrimary ||
-      userTertiary === prodiPrimary
-    ) {
-      matchScore += 30;
-    }
-
-    // Secondary type match (30%)
-    if (prodiSecondary) {
-      if (userPrimary === prodiSecondary) {
-        matchScore += 30;
-      } else if (userSecondary === prodiSecondary) {
-        matchScore += 20;
-      } else if (userTertiary === prodiSecondary) {
-        matchScore += 10;
-      }
-    } else {
-      // If prodi doesn't have secondary type, give some credit
-      matchScore += 15;
-    }
-
-    // Add base compatibility bonus (10%)
-    matchScore += (baseCompatibility / 100) * 10;
-
-    return Math.min(Math.round(matchScore), 100);
+    // Use Fuzzy Logic to calculate match percentage
+    return fuzzyLogicService.calculateMatchPercentage(
+      userScores,
+      prodiPrimary,
+      prodiSecondary
+    );
   }
 
   /**
    * Get program study recommendations based on RIASEC scores
+   * Uses Fuzzy Logic for match calculation
    */
   private async getRecommendations(
-    primary: RiasecType,
-    secondary: RiasecType | null,
-    tertiary: RiasecType | null,
-    baseCompatibility: number = 80
+    scores: RiasecScores
   ): Promise<RecommendationResult[]> {
-    // Get mappings that match user's primary or secondary types
+    // Get all prodi mappings
     const mappings = await prisma.riasecProdiMapping.findMany({
-      where: {
-        OR: [
-          { primary_type: primary },
-          { primary_type: secondary || undefined },
-          { secondary_type: primary },
-          { secondary_type: secondary || undefined },
-        ],
-      },
       include: {
         prodi: {
           include: {
@@ -208,15 +178,12 @@ class RiasecService {
       return [];
     }
 
-    // Calculate match percentage for each prodi
+    // Calculate match percentage for each prodi using Fuzzy Logic
     const recommendations = mappings.map((mapping: any) => {
       const matchPercentage = this.calculateMatchPercentage(
-        primary,
-        secondary,
-        tertiary,
         mapping.primary_type,
         mapping.secondary_type,
-        mapping.compatibility_score
+        scores
       );
 
       return {
@@ -271,12 +238,8 @@ class RiasecService {
     // Get Holland code
     const { code, primary, secondary, tertiary } = this.getHollandCode(scores);
 
-    // Get recommendations
-    const recommendations = await this.getRecommendations(
-      primary,
-      secondary,
-      tertiary
-    );
+    // Get recommendations using Fuzzy Logic
+    const recommendations = await this.getRecommendations(scores);
 
     // Save assessment to database
     const assessment = await prisma.riasecAssessment.create({

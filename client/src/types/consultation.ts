@@ -1,7 +1,3 @@
-// Type definition untuk Consultation setelah refactoring
-// notes → description (catatan dari murid)
-// admin_notes (baru) → catatan dari admin untuk reschedule/decline
-
 export interface Consultation {
   consultation_id: string;
   murid_id: string;
@@ -27,35 +23,3 @@ export interface Consultation {
     email: string;
   };
 }
-
-/**
- * MIGRATION NOTES:
- *
- * 1. Database schema sudah diupdate:
- *    - Kolom `notes` → `description`
- *    - Tambah kolom baru `admin_notes`
- *
- * 2. Backend sudah diupdate:
- *    - Repository interfaces: CreateConsultationDTO, UpdateConsultationStatusDTO
- *    - Service interfaces: CreateConsultationData, UpdateConsultationStatusData
- *    - Controller: createConsultation(), updateConsultationStatus(), cancelConsultation()
- *
- * 3. Frontend yang perlu diupdate:
- *    a. ModalJadwalkanKonseling.tsx:
- *       - formData.notes → formData.description
- *       - API call: notes → description
- *
- *    b. KelolaDataKonseling.tsx (Admin):
- *       - consultation.notes (untuk reschedule/decline) → consultation.admin_notes
- *       - consultation.notes (regular notes dari murid) → consultation.description
- *       - API call saat update status: notes → admin_notes
- *
- *    c. ConsultationInfo.tsx (User):
- *       - consultation.notes untuk reschedule/decline → consultation.admin_notes
- *       - consultation.notes untuk description murid → consultation.description
- *
- * 4. Pattern pencarian di frontend:
- *    - Reschedule/Decline related: .includes("[DIJADWALKAN ULANG]") → gunakan admin_notes
- *    - Declined by student: .includes("[DIBATALKAN OLEH MURID]") → gunakan admin_notes
- *    - Regular notes dari murid → gunakan description
- */
