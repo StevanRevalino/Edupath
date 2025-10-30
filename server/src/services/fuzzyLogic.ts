@@ -1,14 +1,3 @@
-/**
- * Fuzzy Logic Tsukamoto Implementation for RIASEC Recommendation System
- *
- * This service implements Tsukamoto fuzzy inference method to calculate
- * match percentage between user's RIASEC scores and program study requirements.
- *
- * References:
- * - Tsukamoto, Y. (1979). An approach to fuzzy reasoning method
- * - Kusumadewi, S., & Purnomo, H. (2010). Aplikasi Logika Fuzzy untuk Pendukung Keputusan
- */
-
 type RiasecType =
   | "REALISTIC"
   | "INVESTIGATIVE"
@@ -45,9 +34,6 @@ interface FuzzyRule {
 }
 
 export class FuzzyLogicService {
-  /**
-   * Helper: Map short type to full type name
-   */
   private mapToFullType(short: keyof UserRiasecScores): RiasecType {
     const map: Record<keyof UserRiasecScores, RiasecType> = {
       R: "REALISTIC",
@@ -60,9 +46,6 @@ export class FuzzyLogicService {
     return map[short];
   }
 
-  /**
-   * Helper: Get highest scoring type from user scores
-   */
   private getHighestType(scores: UserRiasecScores): RiasecType {
     const entries = Object.entries(scores) as [
       keyof UserRiasecScores,
@@ -72,9 +55,6 @@ export class FuzzyLogicService {
     return this.mapToFullType(sorted[0][0]);
   }
 
-  /**
-   * Helper: Get second highest scoring type from user scores
-   */
   private getSecondHighestType(scores: UserRiasecScores): RiasecType | null {
     const entries = Object.entries(scores) as [
       keyof UserRiasecScores,
@@ -89,51 +69,42 @@ export class FuzzyLogicService {
    * Convert crisp input (skor 10-50) to fuzzy membership values
    */
   private fuzzifyScore(score: number): FuzzyMembershipValue {
-    // Membership function untuk skor RIASEC (10-50)
-    // Low: 10-30 (di bawah rata-rata)
-    // Medium: 25-40 (rata-rata)
-    // High: 38-50 (di atas rata-rata, smooth transition dari 38)
-
     let low = 0;
     let medium = 0;
     let high = 0;
 
     // Membership function untuk "Low" (10-30)
     if (score <= 20) {
-      low = 1; // Maksimal membership untuk score 10-20
+      low = 1; 
     } else if (score > 20 && score < 30) {
-      low = (30 - score) / 10; // Linear turun dari 1 ke 0
+      low = (30 - score) / 10;
     }
 
     // Membership function untuk "Medium" (25-40)
     if (score >= 25 && score <= 32.5) {
-      medium = (score - 25) / 7.5; // Linear naik dari 0 ke 1
+      medium = (score - 25) / 7.5;
     } else if (score > 32.5 && score < 40) {
-      medium = (40 - score) / 7.5; // Linear turun dari 1 ke 0
+      medium = (40 - score) / 7.5;
     }
 
     // Membership function untuk "High" (38-50)
-    // Smooth transition: mulai naik dari 38, full membership di 42-50
     if (score >= 38 && score <= 42) {
-      high = (score - 38) / 4; // Linear naik dari 0 ke 1 (38→42)
+      high = (score - 38) / 4; 
     } else if (score > 42) {
-      high = 1; // Maksimal membership untuk score 42-50
+      high = 1;
     }
 
     return { low, medium, high };
   }
 
-  /**
+  /*
    * STEP 2: RULE BASE
-   * Rules hanya berdasarkan SCORE yang prodi butuhkan
-   * TIDAK peduli tipe primary/secondary user!
    */
   private getFuzzyRules(): FuzzyRule[] {
     const rules: FuzzyRule[] = [];
     let ruleId = 1;
 
     // Rule 1: HIGH + HIGH = VERY_HIGH (90-100%)
-    // User punya score tinggi untuk KEDUA tipe yang prodi butuhkan
     rules.push({
       id: ruleId++,
       primaryScoreFuzzy: "high",
@@ -142,7 +113,6 @@ export class FuzzyLogicService {
     });
 
     // Rule 2-3: HIGH + MEDIUM = HIGH (75-85%)
-    // Primary tinggi, secondary sedang
     rules.push(
       {
         id: ruleId++,
@@ -159,7 +129,6 @@ export class FuzzyLogicService {
     );
 
     // Rule 4: HIGH + LOW = MEDIUM (60-70%)
-    // Primary tinggi tapi secondary rendah
     rules.push({
       id: ruleId++,
       primaryScoreFuzzy: "high",
@@ -168,7 +137,6 @@ export class FuzzyLogicService {
     });
 
     // Rule 5: MEDIUM + MEDIUM = MEDIUM (55-65%)
-    // Kedua score sedang
     rules.push({
       id: ruleId++,
       primaryScoreFuzzy: "medium",
@@ -177,7 +145,6 @@ export class FuzzyLogicService {
     });
 
     // Rule 6: LOW + HIGH = LOW (50-60%)
-    // Primary rendah, secondary tinggi - kurang ideal
     rules.push({
       id: ruleId++,
       primaryScoreFuzzy: "low",
@@ -202,7 +169,6 @@ export class FuzzyLogicService {
     );
 
     // Rule 9: LOW + LOW = VERY_LOW (20-30%)
-    // Kedua score rendah
     rules.push({
       id: ruleId++,
       primaryScoreFuzzy: "low",
@@ -213,11 +179,9 @@ export class FuzzyLogicService {
     return rules;
   }
 
-  /**
-   * STEP 3: INFERENCE ENGINE
-   * Apply fuzzy rules and calculate firing strength (α)
-   * HANYA berdasarkan score fuzzy, TIDAK cek type match!
-   */
+  /*
+   STEP 3: INFERENCE ENGINE
+  */
   private inferenceEngine(
     input: FuzzyInput,
     primaryFuzzy: FuzzyMembershipValue,
@@ -237,14 +201,11 @@ export class FuzzyLogicService {
           rule.secondaryScoreFuzzy.toLowerCase() as keyof FuzzyMembershipValue
         ];
 
-      // Calculate firing strength (α-predicate) using MIN operator
-      // HANYA dari score fuzzy, TIDAK cek match type!
       const alpha = Math.min(primaryScoreMembership, secondaryScoreMembership);
 
       // Only fire rules with alpha > 0
       if (alpha > 0) {
         // STEP 4: DEFUZZIFICATION (Tsukamoto method)
-        // Calculate crisp output (z) using inverse membership function
         const z = this.defuzzifyConsequent(rule.consequent, alpha);
         firedRules.push({ rule, alpha, z });
       }
@@ -256,9 +217,6 @@ export class FuzzyLogicService {
   /**
    * STEP 4: DEFUZZIFICATION - Tsukamoto Method
    * Calculate crisp output (z) from fuzzy consequent
-   *
-   * Tsukamoto uses monotonic membership functions where each output
-   * is represented by a crisp value derived from the firing strength
    */
   private defuzzifyConsequent(
     consequent: "very_low" | "low" | "medium" | "high" | "very_high",
@@ -296,8 +254,7 @@ export class FuzzyLogicService {
 
   /**
    * STEP 5: WEIGHTED AVERAGE
-   * Calculate final crisp output using weighted average of all fired rules
-   * Formula: z* = Σ(αi * zi) / Σ(αi)
+   * z* = Σ(αi * zi) / Σ(αi)
    */
   private calculateWeightedAverage(
     firedRules: { rule: FuzzyRule; alpha: number; z: number }[]
