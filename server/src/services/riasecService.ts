@@ -45,7 +45,6 @@ interface RecommendationResult {
   jenjang: string | null;
   match_percentage: number;
   rank: number;
-  university_count: number;
   primary_type: RiasecType;
   secondary_type: RiasecType | null;
 }
@@ -192,7 +191,6 @@ class RiasecService {
         jenjang: mapping.prodi.jenjang,
         match_percentage: matchPercentage,
         rank: 0, // Will be set after sorting
-        university_count: mapping.prodi.prodi_pt.length,
         primary_type: mapping.primary_type,
         secondary_type: mapping.secondary_type,
       };
@@ -380,7 +378,6 @@ class RiasecService {
           jenjang: rec.prodi.jenjang,
           match_percentage: rec.match_percentage,
           rank: rec.rank,
-          university_count: rec.prodi.prodi_pt.length,
           primary_type: mapping?.primary_type || assessment.primary_type,
           secondary_type: mapping?.secondary_type || assessment.secondary_type,
         };

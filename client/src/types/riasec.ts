@@ -37,7 +37,6 @@ export interface ProdiRecommendation {
   jenjang: string | null;
   match_percentage: number;
   rank: number;
-  university_count: number;
   primary_type: RiasecType;
   secondary_type: RiasecType | null;
 }

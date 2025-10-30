@@ -64,14 +64,33 @@ export const riasecProdiMapping: ProdiMapping[] = [
       "Informatika",
       "Ilmu Komputer",
       "Computer Science",
-      "Teknik Komputer",
+      "Ilmu Informatika",
+      "PJJ Teknik Informatika",
+      "Pendidikan Teknik Informatika",
+      "Pendidikan Ilmu Komputer",
+      "Pendidikan Informatika",
     ],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
     compatibility_score: 85,
   },
   {
-    keywords: ["Sistem Informasi", "Information System"],
+    keywords: [
+      "Teknik Komputer",
+      "Computer Engineering",
+      "Sistem Komputer",
+      "Rekayasa Sistem Komputer",
+    ],
+    primary_type: "REALISTIC",
+    secondary_type: "INVESTIGATIVE",
+    compatibility_score: 85,
+  },
+  {
+    keywords: [
+      "Sistem Informasi",
+      "Information System",
+      "Manajemen Informatika",
+    ],
     primary_type: "REALISTIC",
     secondary_type: "CONVENTIONAL",
     compatibility_score: 85,
@@ -84,6 +103,18 @@ export const riasecProdiMapping: ProdiMapping[] = [
   },
   {
     keywords: ["Teknik Kimia", "Chemical Engineering"],
+    primary_type: "REALISTIC",
+    secondary_type: "INVESTIGATIVE",
+    compatibility_score: 90,
+  },
+  {
+    keywords: ["Teknik Geologi", "Geological Engineering", "Geologi Teknik"],
+    primary_type: "REALISTIC",
+    secondary_type: "INVESTIGATIVE",
+    compatibility_score: 90,
+  },
+  {
+    keywords: ["Teknik Lingkungan", "Environmental Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
     compatibility_score: 90,
@@ -179,12 +210,6 @@ export const riasecProdiMapping: ProdiMapping[] = [
     compatibility_score: 90,
   },
   {
-    keywords: ["Ilmu Komputer", "Computer Science"],
-    primary_type: "INVESTIGATIVE",
-    secondary_type: "REALISTIC",
-    compatibility_score: 90,
-  },
-  {
     keywords: ["Bioteknologi", "Biotechnology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "REALISTIC",
@@ -227,13 +252,13 @@ export const riasecProdiMapping: ProdiMapping[] = [
   // Examples: composer, music, stage director, writer, interior decoration, acting
   // ========================================
   {
-    keywords: ["Desain Grafis", "Graphic Design", "Desain"],
+    keywords: ["Desain Grafis", "Graphic Design"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
     compatibility_score: 95,
   },
   {
-    keywords: ["Desain Interior", "Interior Design"],
+    keywords: ["Desain Interior", "Interior Design", "Desain Ruang"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
     compatibility_score: 95,
@@ -249,6 +274,12 @@ export const riasecProdiMapping: ProdiMapping[] = [
     compatibility_score: 95,
   },
   {
+    keywords: ["Desain Produk", "Product Design"],
+    primary_type: "ARTISTIC",
+    secondary_type: "REALISTIC",
+    compatibility_score: 90,
+  },
+  {
     keywords: ["Seni Rupa", "Fine Arts"],
     primary_type: "ARTISTIC",
     secondary_type: null,
@@ -261,10 +292,22 @@ export const riasecProdiMapping: ProdiMapping[] = [
     compatibility_score: 100,
   },
   {
-    keywords: ["Seni Tari", "Dance"],
+    keywords: ["Seni Tari", "Dance", "Tari"],
     primary_type: "ARTISTIC",
     secondary_type: null,
     compatibility_score: 100,
+  },
+  {
+    keywords: ["Seni Teater", "Theater", "Theatre"],
+    primary_type: "ARTISTIC",
+    secondary_type: "SOCIAL",
+    compatibility_score: 95,
+  },
+  {
+    keywords: ["Kriya", "Craft", "Seni Kriya"],
+    primary_type: "ARTISTIC",
+    secondary_type: "REALISTIC",
+    compatibility_score: 90,
   },
   {
     keywords: [
@@ -287,7 +330,16 @@ export const riasecProdiMapping: ProdiMapping[] = [
     compatibility_score: 90,
   },
   {
-    keywords: ["Ilmu Komunikasi", "Communication", "Komunikasi"],
+    keywords: [
+      "Ilmu Komunikasi",
+      "Communication",
+      "Komunikasi",
+      "Communication Science",
+      "Komunikasi Penyiaran Islam",
+      "Komunikasi Dan Penyiaran Islam",
+      "Manajemen Komunikasi",
+      "Komunikasi Terapan",
+    ],
     primary_type: "ARTISTIC",
     secondary_type: "SOCIAL",
     compatibility_score: 85,
@@ -427,13 +479,29 @@ export const riasecProdiMapping: ProdiMapping[] = [
   // Examples: marketing, business, sales, hospitality management, entrepreneurship
   // ========================================
   {
-    keywords: ["Manajemen", "Management"],
+    keywords: [
+      "Manajemen",
+      "Management",
+      "Manajemen Bisnis",
+      "Business Management",
+      "Manajemen Bisnis Syariah",
+      "Manajemen Dakwah",
+      "Manajemen Zakat Dan Wakaf",
+      "Manajemen Haji Dan Umroh",
+    ],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
     compatibility_score: 100,
   },
   {
-    keywords: ["Ilmu Ekonomi", "Economics", "Ekonomi"],
+    keywords: [
+      "Ilmu Ekonomi",
+      "Economics",
+      "Ekonomi",
+      "Ekonomi Syariah",
+      "Ekonomi Syari'ah",
+      "Ekonomi Syari`ah",
+    ],
     primary_type: "ENTERPRISING",
     secondary_type: "INVESTIGATIVE",
     compatibility_score: 90,
@@ -442,6 +510,17 @@ export const riasecProdiMapping: ProdiMapping[] = [
     keywords: ["Ekonomi Pembangunan", "Development Economics"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
+    compatibility_score: 85,
+  },
+  {
+    keywords: [
+      "Agribisnis",
+      "Agribusiness",
+      "Agrobisnis",
+      "Agrobisnis Perikanan",
+    ],
+    primary_type: "ENTERPRISING",
+    secondary_type: "REALISTIC",
     compatibility_score: 85,
   },
   {
@@ -463,13 +542,13 @@ export const riasecProdiMapping: ProdiMapping[] = [
     compatibility_score: 90,
   },
   {
-    keywords: ["Administrasi Bisnis", "Business Administration"],
-    primary_type: "ENTERPRISING",
-    secondary_type: "CONVENTIONAL",
-    compatibility_score: 90,
-  },
-  {
-    keywords: ["Administrasi Niaga", "Business Management"],
+    keywords: [
+      "Administrasi Bisnis",
+      "Business Administration",
+      "Administrasi Niaga",
+      "Ilmu Administrasi Niaga",
+      "Business Management",
+    ],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
     compatibility_score: 90,
@@ -517,7 +596,15 @@ export const riasecProdiMapping: ProdiMapping[] = [
   // Examples: bookkeeping, accounting, office manager, medical laboratory assisting
   // ========================================
   {
-    keywords: ["Akuntansi", "Accounting"],
+    keywords: [
+      "Akuntansi",
+      "Accounting",
+      "Akuntansi Bisnis",
+      "Akuntansi Syariah",
+      "Komputerisasi Akuntansi",
+      "PJJ Akuntansi",
+      "Pendidikan Akuntansi",
+    ],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
     compatibility_score: 100,

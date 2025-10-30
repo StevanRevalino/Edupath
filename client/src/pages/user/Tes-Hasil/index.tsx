@@ -340,12 +340,6 @@ const HasilTes: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <div className="text-right ml-2">
-                      <div className="text-2xl font-bold text-green-600">
-                        {Math.round(rec.match_percentage)}%
-                      </div>
-                      <div className="text-xs text-gray-500">Match</div>
-                    </div>
                   </div>
 
                   <div className="mt-3 flex items-center gap-2 flex-wrap">
@@ -365,10 +359,6 @@ const HasilTes: React.FC = () => {
                         {getRiasecTypeName(rec.secondary_type)}
                       </span>
                     )}
-                  </div>
-
-                  <div className="mt-3 text-sm text-gray-600">
-                    📍 Tersedia di {rec.university_count} universitas
                   </div>
                 </div>
               ))}
