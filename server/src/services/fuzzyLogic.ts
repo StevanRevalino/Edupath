@@ -75,7 +75,7 @@ export class FuzzyLogicService {
 
     // Membership function untuk "Low" (10-30)
     if (score <= 20) {
-      low = 1; 
+      low = 1;
     } else if (score > 20 && score < 30) {
       low = (30 - score) / 10;
     }
@@ -89,7 +89,7 @@ export class FuzzyLogicService {
 
     // Membership function untuk "High" (38-50)
     if (score >= 38 && score <= 42) {
-      high = (score - 38) / 4; 
+      high = (score - 38) / 4;
     } else if (score > 42) {
       high = 1;
     }
@@ -278,193 +278,40 @@ export class FuzzyLogicService {
    * @param userScores - User's scores for all 6 RIASEC types
    * @param prodiPrimaryType - Prodi's primary RIASEC type
    * @param prodiSecondaryType - Prodi's secondary RIASEC type
-   * @param enableLog - Enable detailed console logging
    * @returns Match percentage (0-100)
    */
   public calculateMatchPercentage(
     userScores: UserRiasecScores,
     prodiPrimaryType: RiasecType,
-    prodiSecondaryType: RiasecType | null,
-    enableLog: boolean = false
+    prodiSecondaryType: RiasecType | null
   ): number {
-    // Extract scores yang prodi butuhkan (PENTING!)
+    // Extract scores yang prodi butuhkan
     const primaryScore =
       userScores[prodiPrimaryType[0] as keyof UserRiasecScores];
     const secondaryScore = prodiSecondaryType
       ? userScores[prodiSecondaryType[0] as keyof UserRiasecScores]
       : 0;
 
-    // Determine user's top types
-    const userPrimaryType = this.getHighestType(userScores);
-    const userSecondaryType = this.getSecondHighestType(userScores);
-
-    if (enableLog) {
-      console.log("\n" + "=".repeat(80));
-      console.log("🧮 FUZZY LOGIC TSUKAMOTO - CALCULATION PROCESS");
-      console.log("=".repeat(80));
-      console.log("\n📥 INPUT:");
-      console.log(`   User RIASEC Scores:`);
-      console.log(`   ├─ R (Realistic): ${userScores.R}`);
-      console.log(`   ├─ I (Investigative): ${userScores.I}`);
-      console.log(`   ├─ A (Artistic): ${userScores.A}`);
-      console.log(`   ├─ S (Social): ${userScores.S}`);
-      console.log(`   ├─ E (Enterprising): ${userScores.E}`);
-      console.log(`   └─ C (Conventional): ${userScores.C}`);
-      console.log(`\n   User Holland Code:`);
-      console.log(`   ├─ Primary: ${userPrimaryType}`);
-      console.log(`   └─ Secondary: ${userSecondaryType || "N/A"}`);
-      console.log(`\n   Program Studi Requirements:`);
-      console.log(
-        `   ├─ Primary: ${prodiPrimaryType} (user score: ${primaryScore})`
-      );
-      console.log(
-        `   └─ Secondary: ${
-          prodiSecondaryType || "N/A"
-        } (user score: ${secondaryScore})`
-      );
-    }
-
     // STEP 1: FUZZIFICATION
     const primaryFuzzy = this.fuzzifyScore(primaryScore);
     const secondaryFuzzy = this.fuzzifyScore(secondaryScore);
 
-    if (enableLog) {
-      console.log("\n" + "─".repeat(80));
-      console.log("📊 STEP 1: FUZZIFICATION");
-      console.log("─".repeat(80));
-      console.log(`\n   Primary Score (${prodiPrimaryType}=${primaryScore}):`);
-      console.log(`   ├─ μLow    = ${(primaryFuzzy.low * 100).toFixed(1)}%`);
-      console.log(`   ├─ μMedium = ${(primaryFuzzy.medium * 100).toFixed(1)}%`);
-      console.log(`   └─ μHigh   = ${(primaryFuzzy.high * 100).toFixed(1)}%`);
-      console.log(
-        `\n   Secondary Score (${
-          prodiSecondaryType || "N/A"
-        }=${secondaryScore}):`
-      );
-      console.log(`   ├─ μLow    = ${(secondaryFuzzy.low * 100).toFixed(1)}%`);
-      console.log(
-        `   ├─ μMedium = ${(secondaryFuzzy.medium * 100).toFixed(1)}%`
-      );
-      console.log(`   └─ μHigh   = ${(secondaryFuzzy.high * 100).toFixed(1)}%`);
-    }
-
-    // Prepare fuzzy input
+    // STEP 2 & 3: INFERENCE ENGINE
     const fuzzyInput: FuzzyInput = {
       primaryScore,
       secondaryScore,
     };
-
-    // STEP 2 & 3: INFERENCE ENGINE
     const firedRules = this.inferenceEngine(
       fuzzyInput,
       primaryFuzzy,
       secondaryFuzzy
     );
 
-    if (enableLog) {
-      console.log("\n" + "─".repeat(80));
-      console.log("⚙️  STEP 2: INFERENCE ENGINE (Rule Evaluation)");
-      console.log("─".repeat(80));
-      console.log(`\n   Total Rules Evaluated: 9`);
-      console.log(`   Rules Fired: ${firedRules.length}\n`);
-
-      if (firedRules.length > 0) {
-        console.log("   Fired Rules Details:");
-        firedRules.forEach((fr, index) => {
-          console.log(`   ${index + 1}. Rule ${fr.rule.id}:`);
-          console.log(
-            `      ├─ Condition: ${fr.rule.primaryScoreFuzzy.toUpperCase()} + ${fr.rule.secondaryScoreFuzzy.toUpperCase()}`
-          );
-          console.log(`      ├─ α (firing strength) = ${fr.alpha.toFixed(3)}`);
-          console.log(
-            `      ├─ Consequent: ${fr.rule.consequent.toUpperCase()}`
-          );
-          console.log(`      └─ z (crisp output) = ${fr.z.toFixed(2)}%`);
-        });
-      } else {
-        console.log("   ⚠️  No rules fired!");
-      }
-    }
-
-    // STEP 3 & 4: DEFUZZIFICATION & WEIGHTED AVERAGE
+    // STEP 4: WEIGHTED AVERAGE (Defuzzification)
     const matchPercentage = this.calculateWeightedAverage(firedRules);
 
-    if (enableLog) {
-      console.log("\n" + "─".repeat(80));
-      console.log("📐 STEP 3 & 4: WEIGHTED AVERAGE CALCULATION");
-      console.log("─".repeat(80));
-
-      if (firedRules.length > 0) {
-        console.log("\n   Formula: z* = Σ(αi × zi) / Σ(αi)\n");
-
-        const numerator = firedRules.reduce(
-          (sum, fired) => sum + fired.alpha * fired.z,
-          0
-        );
-        const denominator = firedRules.reduce(
-          (sum, fired) => sum + fired.alpha,
-          0
-        );
-
-        console.log("   Numerator (Σ αi × zi):");
-        firedRules.forEach((fr, index) => {
-          const contribution = fr.alpha * fr.z;
-          console.log(
-            `   ${index + 1}. α${fr.rule.id} × z${
-              fr.rule.id
-            } = ${fr.alpha.toFixed(3)} × ${fr.z.toFixed(
-              2
-            )} = ${contribution.toFixed(2)}`
-          );
-        });
-        console.log(`   └─ Total: ${numerator.toFixed(2)}`);
-
-        console.log("\n   Denominator (Σ αi):");
-        firedRules.forEach((fr, index) => {
-          console.log(
-            `   ${index + 1}. α${fr.rule.id} = ${fr.alpha.toFixed(3)}`
-          );
-        });
-        console.log(`   └─ Total: ${denominator.toFixed(3)}`);
-
-        console.log(`\n   Calculation:`);
-        console.log(
-          `   z* = ${numerator.toFixed(2)} / ${denominator.toFixed(3)}`
-        );
-        console.log(`      = ${matchPercentage.toFixed(2)}%`);
-      } else {
-        console.log("   No calculation (no rules fired)");
-      }
-    }
-
     // Round to nearest integer and cap at 100
-    const finalResult = Math.min(Math.round(matchPercentage), 100);
-
-    if (enableLog) {
-      console.log("\n" + "=".repeat(80));
-      console.log("✅ FINAL RESULT");
-      console.log("=".repeat(80));
-      console.log(`\n   Match Percentage: ${finalResult}%`);
-
-      // Interpretation
-      let interpretation = "";
-      if (finalResult >= 90) {
-        interpretation = "🟢 SANGAT COCOK - Excellent Match!";
-      } else if (finalResult >= 75) {
-        interpretation = "🟢 COCOK - Good Match";
-      } else if (finalResult >= 60) {
-        interpretation = "🟡 CUKUP COCOK - Fair Match";
-      } else if (finalResult >= 45) {
-        interpretation = "🟠 KURANG COCOK - Below Average";
-      } else {
-        interpretation = "🔴 TIDAK COCOK - Poor Match";
-      }
-
-      console.log(`   Interpretation: ${interpretation}`);
-      console.log("\n" + "=".repeat(80) + "\n");
-    }
-
-    return finalResult;
+    return Math.min(Math.round(matchPercentage), 100);
   }
 
   /**
