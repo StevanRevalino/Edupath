@@ -9,326 +9,325 @@
 
 export const riasecQuestions = [
   // ========================================
-  // REALISTIC (R) - 10 Questions
+  // REALISTIC (R)
   // ========================================
   {
     question_text:
-      "Saya senang bekerja dengan alat-alat mekanik, mesin, atau peralatan teknis.",
+      "Saya suka bekerja langsung dengan mesin, alat, atau peralatan teknis.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang melibatkan aktivitas fisik daripada duduk di meja sepanjang hari.",
+      "Saya lebih senang melakukan aktivitas fisik daripada duduk lama di depan komputer atau meja.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya tertarik untuk memperbaiki atau merakit barang-barang dengan tangan saya sendiri.",
+      "Saya menikmati kegiatan seperti memperbaiki, merakit, atau membuat sesuatu dengan tangan saya sendiri.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya menganggap pencapaian yang nyata dan berwujud lebih penting daripada ide-ide abstrak.",
+      "Saya merasa puas ketika bisa melihat hasil kerja saya secara nyata dan berwujud.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih menghargai hadiah atau penghargaan yang bisa saya lihat atau gunakan secara langsung.",
+      "Saya lebih menghargai hasil kerja yang konkret dibandingkan ide-ide abstrak.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang praktis dan memiliki keterampilan manual yang baik.",
+      "Saya menganggap diri saya orang yang praktis dan terampil secara teknis.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya merasa nyaman bekerja dengan hal-hal konkret daripada konsep teoritis.",
+      "Saya lebih nyaman bekerja di luar ruangan atau di bengkel daripada di kantor.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di lingkungan outdoor atau bengkel daripada di kantor.",
+      "Saya senang menggunakan alat atau mesin untuk menyelesaikan suatu pekerjaan.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya cenderung menghindari pekerjaan yang membutuhkan banyak interaksi sosial.",
+      "Saya biasanya menghindari pekerjaan yang terlalu banyak berinteraksi dengan orang.",
     riasec_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya senang bekerja dengan benda-benda seperti kendaraan, tanaman, atau material bangunan.",
+      "Saya tertarik pada hal-hal seperti mesin, peralatan elektronik, atau bahan bangunan.",
     riasec_type: "REALISTIC",
   },
 
   // ========================================
-  // INVESTIGATIVE (I) - 10 Questions
+  // INVESTIGATIVE (I)
   // ========================================
   {
     question_text:
-      "Saya senang melakukan eksperimen dan penelitian untuk memahami bagaimana sesuatu bekerja.",
+      "Saya suka mencari tahu bagaimana sesuatu bisa bekerja atau terjadi.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya tertarik untuk menganalisis data dan memecahkan masalah yang kompleks.",
+      "Saya menikmati memecahkan masalah yang rumit dan menantang pikiran.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya suka membaca jurnal ilmiah atau artikel tentang penemuan baru dalam sains dan teknologi.",
+      "Saya tertarik membaca atau menonton hal-hal baru tentang sains dan teknologi.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Bagi saya, mengembangkan pengetahuan dan pemahaman lebih penting daripada uang atau status sosial.",
+      "Bagi saya, belajar dan menemukan hal baru lebih penting daripada mengejar status atau uang.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya sangat menghargai pembelajaran dan penemuan hal-hal baru melalui riset.",
+      "Saya merasa senang saat melakukan riset atau mencari informasi untuk menjawab pertanyaan tertentu.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang analitis, intelektual, dan skeptis.",
+      "Saya menganggap diri saya sebagai orang yang logis, analitis, dan suka berpikir kritis.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Orang-orang sering mengatakan bahwa saya memiliki bakat akademik yang kuat.",
+      "Orang lain sering menilai saya sebagai pribadi yang cerdas atau punya rasa ingin tahu tinggi.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di laboratorium atau lingkungan riset yang tenang.",
+      "Saya lebih suka bekerja sendiri di lingkungan yang tenang, seperti laboratorium atau perpustakaan.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya cenderung menghindari aktivitas yang melibatkan penjualan atau persuasi orang lain.",
+      "Saya tidak terlalu suka pekerjaan yang menuntut kemampuan menjual atau membujuk orang lain.",
     riasec_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya senang memahami fenomena alam dan sosial melalui observasi sistematis.",
+      "Saya senang memahami fenomena alam atau sosial melalui pengamatan dan analisis.",
     riasec_type: "INVESTIGATIVE",
   },
 
   // ========================================
-  // ARTISTIC (A) - 10 Questions
+  // ARTISTIC (A)
   // ========================================
   {
     question_text:
-      "Saya senang menciptakan karya seni, musik, atau tulisan yang orisinal.",
+      "Saya senang menciptakan sesuatu yang unik seperti karya seni, musik, atau tulisan.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang memungkinkan saya mengekspresikan kreativitas dan imajinasi.",
+      "Saya lebih suka pekerjaan yang memberi kebebasan untuk berkreasi dan berimajinasi.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya tertarik pada aktivitas yang melibatkan desain, pertunjukan, atau penulisan kreatif.",
+      "Saya tertarik pada kegiatan seperti menggambar, menulis, mendesain, atau tampil di depan umum.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Bagi saya, ekspresi kreatif dan kebebasan berimajinasi sangat penting dalam hidup.",
+      "Saya menghargai kebebasan berekspresi lebih dari aturan atau rutinitas yang kaku.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya menghargai keindahan estetika dan nilai artistik lebih dari hal-hal praktis.",
+      "Saya mudah terinspirasi oleh keindahan visual, musik, atau ide-ide kreatif.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang terbuka terhadap pengalaman baru dan inovatif.",
+      "Saya menganggap diri saya sebagai orang yang terbuka terhadap pengalaman baru dan penuh imajinasi.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya merasa saya memiliki bakat dalam bidang seni atau intelektual yang kreatif.",
+      "Saya merasa punya bakat dalam bidang seni, desain, atau ekspresi kreatif lainnya.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di lingkungan yang tidak terlalu terstruktur dan memberikan kebebasan kreatif.",
+      "Saya lebih nyaman bekerja di lingkungan yang bebas, fleksibel, dan tidak terlalu terstruktur.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya cenderung menghindari rutinitas dan aturan yang kaku dalam bekerja.",
+      "Saya kurang cocok dengan pekerjaan yang terlalu rutin dan berulang-ulang.",
     riasec_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya senang mengeksplorasi ide-ide baru melalui seni visual, musik, atau sastra.",
+      "Saya senang menyalurkan ide melalui seni, musik, tulisan, atau media kreatif lainnya.",
     riasec_type: "ARTISTIC",
   },
 
   // ========================================
-  // SOCIAL (S) - 10 Questions
+  // SOCIAL (S)
   // ========================================
   {
     question_text:
-      "Saya senang membantu orang lain mengatasi masalah pribadi atau mengembangkan potensi mereka.",
+      "Saya merasa senang ketika bisa membantu orang lain menyelesaikan masalahnya.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya tertarik untuk mengajar, melatih, atau membimbing orang lain.",
+      "Saya tertarik menjadi pengajar, pembimbing, atau pelatih bagi orang lain.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya lebih suka bekerja dalam tim dan berinteraksi dengan banyak orang.",
+      "Saya menikmati bekerja dalam tim dan berinteraksi dengan banyak orang.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Bagi saya, membantu kesejahteraan orang lain dan memberikan pelayanan sosial sangat berarti.",
+      "Saya merasa puas jika bisa berkontribusi untuk kesejahteraan orang lain.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya sangat menghargai hubungan interpersonal dan kepedulian terhadap sesama.",
+      "Saya menghargai hubungan baik dan komunikasi yang positif dengan orang di sekitar saya.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang empatik, sabar, dan memiliki keterampilan interpersonal yang baik.",
+      "Saya menganggap diri saya sabar, ramah, dan mudah memahami perasaan orang lain.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Orang-orang sering datang kepada saya untuk meminta nasihat atau dukungan emosional.",
+      "Orang lain sering datang kepada saya untuk bercerita atau meminta saran.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di lingkungan yang fokus pada pelayanan dan interaksi dengan orang lain.",
+      "Saya lebih suka pekerjaan yang melibatkan pelayanan atau membantu orang secara langsung.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya cenderung menghindari pekerjaan yang bersifat mekanis atau teknis tanpa interaksi manusia.",
+      "Saya kurang tertarik pada pekerjaan yang bersifat mekanis atau terlalu teknis.",
     riasec_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya senang berkontribusi pada komunitas melalui konseling, pengajaran, atau pekerjaan sosial.",
+      "Saya menikmati kegiatan sosial seperti mengajar, konseling, atau kegiatan sukarela.",
     riasec_type: "SOCIAL",
   },
 
   // ========================================
-  // ENTERPRISING (E) - 10 Questions
+  // ENTERPRISING (E)
   // ========================================
   {
     question_text:
-      "Saya senang memimpin proyek dan membujuk orang lain untuk mengikuti visi saya.",
+      "Saya senang memimpin dan memotivasi orang lain untuk mencapai tujuan bersama.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya tertarik pada aktivitas yang melibatkan penjualan, negosiasi, atau persuasi.",
+      "Saya menikmati kegiatan seperti bernegosiasi, menjual, atau mempresentasikan ide.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang memberikan kesempatan untuk mempengaruhi dan mengarahkan orang lain.",
+      "Saya merasa percaya diri saat berbicara di depan orang banyak.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Bagi saya, mencapai kesuksesan material dan status sosial yang tinggi sangat penting.",
+      "Saya termotivasi untuk mencapai kesuksesan, pengaruh, atau posisi kepemimpinan.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya sangat menghargai pencapaian dalam bisnis dan kekuasaan dalam organisasi.",
+      "Saya menghargai tantangan dan kompetisi dalam dunia kerja atau bisnis.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang memiliki kemampuan penjualan dan persuasi yang kuat.",
+      "Saya menganggap diri saya sebagai orang yang energik, ambisius, dan percaya diri.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Orang-orang sering mengatakan bahwa saya energetik dan ambisius.",
+      "Saya senang mengarahkan proyek dan membuat keputusan yang berpengaruh besar.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di lingkungan bisnis yang kompetitif dan dinamis.",
+      "Saya lebih suka lingkungan kerja yang dinamis dan kompetitif.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya cenderung menghindari pekerjaan yang bersifat ilmiah atau membutuhkan banyak riset mendalam.",
+      "Saya kurang tertarik pada pekerjaan yang terlalu ilmiah atau analitis.",
     riasec_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya senang mengambil risiko dalam bisnis untuk mencapai tujuan finansial atau organisasi.",
+      "Saya tidak takut mengambil risiko untuk mencapai hasil yang besar.",
     riasec_type: "ENTERPRISING",
   },
 
   // ========================================
-  // CONVENTIONAL (C) - 10 Questions
+  // CONVENTIONAL (C)
   // ========================================
   {
     question_text:
-      "Saya senang mengorganisir data dan informasi dengan cara yang sistematis dan teratur.",
+      "Saya suka mengatur data, dokumen, atau informasi agar tersusun dengan rapi.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang mengikuti prosedur dan standar yang jelas.",
+      "Saya lebih nyaman dengan pekerjaan yang memiliki prosedur dan aturan yang jelas.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya tertarik pada pekerjaan administrasi, akuntansi, atau manajemen data.",
+      "Saya tertarik pada kegiatan administrasi, pembukuan, atau pengelolaan data.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Bagi saya, keteraturan, presisi, dan efisiensi sangat penting dalam bekerja.",
+      "Saya merasa puas jika pekerjaan saya dilakukan dengan rapi, efisien, dan tepat waktu.",
+    riasec_type: "CONVENTIONAL",
+  },
+  {
+    question_text: "Saya menghargai stabilitas dan keamanan dalam pekerjaan.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya sangat menghargai stabilitas dan keamanan dalam pekerjaan.",
+      "Saya menganggap diri saya orang yang teliti, hati-hati, dan dapat diandalkan.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang teliti dan memiliki keterampilan teknis dalam produksi atau bisnis.",
+      "Orang lain sering melihat saya sebagai orang yang terorganisir dan bertanggung jawab.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Orang-orang sering mengatakan bahwa saya sangat terorganisir dan dapat diandalkan.",
+      "Saya lebih suka lingkungan kerja yang terstruktur dan teratur.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya lebih suka bekerja di lingkungan yang terstruktur dengan tugas-tugas yang dapat diprediksi.",
+      "Saya tidak nyaman dengan situasi kerja yang terlalu bebas atau tidak jelas arahannya.",
     riasec_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya cenderung menghindari situasi yang ambigu atau tidak terstruktur.",
-    riasec_type: "CONVENTIONAL",
-  },
-  {
-    question_text:
-      "Saya senang bekerja dengan angka, dokumen, dan sistem yang membutuhkan ketelitian tinggi.",
+      "Saya senang bekerja dengan angka, sistem, atau pekerjaan yang membutuhkan ketelitian tinggi.",
     riasec_type: "CONVENTIONAL",
   },
 ];
