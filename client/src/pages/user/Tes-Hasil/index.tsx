@@ -266,41 +266,111 @@ const HasilTes: React.FC = () => {
 
         {/* Scores Chart */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Skor RIASEC Kamu
           </h2>
+          <p className="text-gray-600 mb-6">
+            Grafik ini menunjukkan profil kepribadian kariermu berdasarkan
+            Holland's Theory
+          </p>
 
-          <div className="max-w-2xl mx-auto">
-            <Radar data={getRadarChartData()} options={radarChartOptions} />
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Radar Chart */}
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <Radar data={getRadarChartData()} options={radarChartOptions} />
+              </div>
+            </div>
 
-          {/* Score Legend */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-            {Object.entries(result.scores).map(([type, score]) => {
-              const riasecType = type.toUpperCase() as RiasecType;
+            {/* Score Details */}
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+              <h3 className="font-semibold text-gray-800 mb-4 sticky top-0 bg-white pb-2">
+                Detail Skor (Rentang 10-50)
+              </h3>
+              {Object.entries(result.scores).map(([type, score]) => {
+                const riasecType = type.toUpperCase() as RiasecType;
+                const percentage = ((score - 10) / 40) * 100; // Normalized to 10-50 range
 
-              return (
-                <div
-                  key={type}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full ${getRiasecTypeColor(
-                      riasecType
-                    )}`}
-                  />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-700">
-                      {getRiasecTypeName(riasecType)}
+                return (
+                  <div key={type} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-3 h-3 rounded-full ${getRiasecTypeColor(
+                            riasecType
+                          )}`}
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {getRiasecTypeName(riasecType)}
+                        </span>
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">
+                        {score}/50
+                      </span>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {type[0].toUpperCase()}
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        className={`h-3 rounded-full ${getRiasecTypeColor(
+                          riasecType
+                        )} transition-all duration-500`}
+                        style={{ width: `${percentage}%` }}
+                      />
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-gray-900">{score}</div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIASEC Type Descriptions */}
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-semibold text-2xl text-blue-900 mb-3">
+              Pengertian Tipe RIASEC
+            </h4>
+            <div className="space-y-2 text-sm text-blue-900">
+              <div>
+                <strong className="text-blue-700">R - Realistis:</strong>{" "}
+                <span className="text-blue-800">
+                  Praktis, suka bekerja dengan alat/mesin, aktivitas fisik, dan
+                  hasil nyata
+                </span>
+              </div>
+              <div>
+                <strong className="text-purple-700">I - Investigatif:</strong>{" "}
+                <span className="text-blue-800">
+                  Analitis, suka berpikir, memecahkan masalah, dan melakukan
+                  riset
+                </span>
+              </div>
+              <div>
+                <strong className="text-pink-700">A - Artistik:</strong>{" "}
+                <span className="text-blue-800">
+                  Kreatif, imajinatif, suka mengekspresikan diri melalui seni
+                  dan desain
+                </span>
+              </div>
+              <div>
+                <strong className="text-green-700">S - Sosial:</strong>{" "}
+                <span className="text-blue-800">
+                  Empatik, suka membantu, berinteraksi, mengajar, dan melayani
+                  orang lain
+                </span>
+              </div>
+              <div>
+                <strong className="text-orange-700">E - Enterprising:</strong>{" "}
+                <span className="text-blue-800">
+                  Persuasif, ambisius, suka memimpin, berbisnis, dan
+                  mempengaruhi orang
+                </span>
+              </div>
+              <div>
+                <strong className="text-gray-700">C - Konvensional:</strong>{" "}
+                <span className="text-blue-800">
+                  Terorganisir, detail-oriented, suka bekerja dengan data dan
+                  sistem terstruktur
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

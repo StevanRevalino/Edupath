@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import HeroSection from "../../../components/HeroSection";
 import InfoSection from "../../../components/InfoSection";
 import HeroSectionBG from "../../../assets/hero-section.png";
@@ -10,41 +10,26 @@ import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
 import { useNavigate } from "react-router-dom";
+import { getAssessmentHistory } from "../../../services/riasecService";
+import type { AssessmentHistory } from "../../../types/riasec";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
-// Dummy data for test sessions
-const dummyTesSessions: TesSession[] = [
-  {
-    test_id: "TES001",
-    murid_id: "MRD001",
-    test_date: "2024-01-15T10:00:00Z",
+// Helper function to map AssessmentHistory to TesSession
+const mapAssessmentToTesSession = (
+  assessment: AssessmentHistory
+): TesSession => {
+  return {
+    test_id: assessment.assessment_id,
+    murid_id: "", // Not needed for display
+    test_date: assessment.completed_at,
     status: "COMPLETED",
-    score: 85,
-    result_summary:
-      "Anda memiliki minat yang kuat di bidang teknologi dan sains, dengan bakat analitis yang baik.",
-    notes:
-      "Hasil tes menunjukkan kesesuaian dengan jurusan Teknik Informatika atau Sistem Informasi.",
-    created_at: "2024-01-10T08:00:00Z",
-    updated_at: "2024-01-15T11:30:00Z",
-  },
-  {
-    test_id: "TES002",
-    murid_id: "MRD001",
-    test_date: "2024-02-20T14:00:00Z",
-    status: "COMPLETED",
-    score: 78,
-    result_summary: "Minat tinggi pada bidang komunikasi dan media.",
-    created_at: "2024-02-18T09:00:00Z",
-    updated_at: "2024-02-20T15:00:00Z",
-  },
-  {
-    test_id: "TES003",
-    murid_id: "MRD001",
-    test_date: "2024-03-25T09:00:00Z",
-    status: "CANCELLED",
-    created_at: "2024-03-20T10:00:00Z",
-    updated_at: "2024-03-20T10:00:00Z",
-  },
-];
+    result_summary: `Holland Code: ${assessment.holland_code} (${
+      assessment.primary_type
+    }${assessment.secondary_type ? ` - ${assessment.secondary_type}` : ""})`,
+    created_at: assessment.completed_at,
+    updated_at: assessment.completed_at,
+  };
+};
 
 const items = [
   {
@@ -67,14 +52,31 @@ const items = [
 const Tes = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-  const [tesSessions] = useState<TesSession[]>(dummyTesSessions);
+  const [tesSessions, setTesSessions] = useState<TesSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedTesSession, setSelectedTesSession] =
     useState<TesSession | null>(null);
 
-  const handleViewResult = (tesSession: TesSession) => {
-    console.log("Viewing result for test:", tesSession.test_id);
-    // Here you would implement the logic to show test results
-  };
+  // Fetch assessment history on component mount
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const assessments = await getAssessmentHistory();
+        const mappedSessions = assessments.map(mapAssessmentToTesSession);
+        setTesSessions(mappedSessions);
+      } catch (err: any) {
+        console.error("Error fetching assessment history:", err);
+        setError(err.response?.data?.message || "Gagal memuat riwayat tes");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, []);
 
   const tesSessionRef = useRef<HTMLElement>(null);
 
@@ -133,7 +135,15 @@ const Tes = () => {
                   Riwayat Tes
                 </h3>
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 overscroll-contain pt-3">
-                  {tesSessions.length > 0 ? (
+                  {isLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : error ? (
+                    <div className="text-center text-red-500 py-8">
+                      <p className="text-sm">{error}</p>
+                    </div>
+                  ) : tesSessions.length > 0 ? (
                     tesSessions.map((tesSession, index) => (
                       <TesCard
                         key={tesSession.test_id}
@@ -156,10 +166,7 @@ const Tes = () => {
 
             {/* Right Column - Info Panel */}
             <div className="bg-white rounded-xl shadow-md p-6 h-fit">
-              <InfoTes
-                tesSession={selectedTesSession}
-                onViewResult={handleViewResult}
-              />
+              <InfoTes tesSession={selectedTesSession} />
             </div>
           </div>
         </div>

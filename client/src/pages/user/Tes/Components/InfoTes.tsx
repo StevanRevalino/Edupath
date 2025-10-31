@@ -1,10 +1,15 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getAssessmentResult } from "../../../../services/riasecService";
+import type { AssessmentResult, RiasecType } from "../../../../types/riasec";
+import LoadingSpinner from "../../../../components/LoadingSpinner";
+
 // Define the Test interface similar to Consultation
 export interface TesSession {
   test_id: string;
   murid_id: string;
   test_date: string;
   status: "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
-  score?: number;
   result_summary?: string;
   notes?: string;
   created_at: string;
@@ -13,10 +18,60 @@ export interface TesSession {
 
 interface InfoTesProps {
   tesSession: TesSession | null;
-  onViewResult?: (tesSession: TesSession) => void;
 }
 
 const InfoTes = ({ tesSession }: InfoTesProps) => {
+  const navigate = useNavigate();
+  const [assessmentDetail, setAssessmentDetail] =
+    useState<AssessmentResult | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  useEffect(() => {
+    if (tesSession?.status === "COMPLETED") {
+      fetchAssessmentDetail();
+    } else {
+      setAssessmentDetail(null);
+    }
+  }, [tesSession?.test_id]);
+
+  const fetchAssessmentDetail = async () => {
+    if (!tesSession) return;
+
+    try {
+      setLoadingDetail(true);
+      const result = await getAssessmentResult(tesSession.test_id);
+      setAssessmentDetail(result);
+    } catch (error) {
+      console.error("Error fetching assessment detail:", error);
+      setAssessmentDetail(null);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const getRiasecTypeName = (type: RiasecType): string => {
+    const names: Record<RiasecType, string> = {
+      REALISTIC: "Realistis",
+      INVESTIGATIVE: "Investigatif",
+      ARTISTIC: "Artistik",
+      SOCIAL: "Sosial",
+      ENTERPRISING: "Enterprising",
+      CONVENTIONAL: "Konvensional",
+    };
+    return names[type];
+  };
+
+  const getRiasecTypeColor = (type: RiasecType): string => {
+    const colors: Record<RiasecType, string> = {
+      REALISTIC: "bg-blue-500",
+      INVESTIGATIVE: "bg-purple-500",
+      ARTISTIC: "bg-pink-500",
+      SOCIAL: "bg-green-500",
+      ENTERPRISING: "bg-orange-500",
+      CONVENTIONAL: "bg-gray-500",
+    };
+    return colors[type];
+  };
   const getStatusText = (status: string) => {
     switch (status) {
       case "COMPLETED":
@@ -45,7 +100,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
 
   if (!tesSession) {
     return (
-      <div className="min-h-[815px] -mb-24">
+      <div className="h-full">
         <h4 className="text-lg font-semibold text-gray-800 text-center mb-8">
           tes minat & bakat #
           {Array(8)
@@ -59,7 +114,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
           <p className="text-sm">
             Pilih sesi tes dari riwayat untuk melihat detail informasi
           </p>
-          <div className="bg-gray-100 rounded-lg p-8 min-h-[600px] flex items-center justify-center">
+          <div className="bg-gray-100 rounded-lg p-8 min-h-[400px] flex items-center justify-center">
             <p className="text-xs">Detail sesi akan ditampilkan di sini</p>
           </div>
         </div>
@@ -68,14 +123,15 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
   }
 
   return (
-    <div className="min-h-[800px] -mb-24">
-      <h4 className="text-lg font-semibold text-gray-800 text-center mb-8">
-        tes minat & bakat #{tesSession.test_id}
+    <div className="h-full flex flex-col">
+      <h4 className="text-lg font-semibold text-gray-800 text-center mb-6">
+        tes minat & bakat #{tesSession.test_id.slice(0, 8)}
       </h4>
 
-      <div className="space-y-4 min-h-[600px]">
-        <div className="border-b pb-3">
-          <label className="text-base font-semibold text-gray-600">
+      <div className="space-y-6 flex-1 overflow-y-auto pr-2 max-h-full">
+        {/* Status & Date */}
+        <div className="border-b pb-4">
+          <label className="text-base font-semibold text-gray-600 block mb-1">
             Status:
           </label>
           <p
@@ -87,8 +143,8 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
           </p>
         </div>
 
-        <div className="border-b pb-3">
-          <label className="text-base font-semibold text-gray-600">
+        <div className="border-b pb-4">
+          <label className="text-base font-semibold text-gray-600 block mb-1">
             Tanggal & Waktu:
           </label>
           <p className="text-sm text-gray-800">
@@ -99,7 +155,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
               day: "numeric",
             })}
           </p>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-600">
             {new Date(tesSession.test_date).toLocaleTimeString("id-ID", {
               hour: "2-digit",
               minute: "2-digit",
@@ -108,35 +164,103 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
           </p>
         </div>
 
-        {tesSession.score !== undefined && (
-          <div className="border-b pb-3">
-            <label className="text-base font-semibold text-gray-600">
-              Skor:
-            </label>
-            <p className="text-sm text-gray-800">{tesSession.score}/100</p>
+        {/* Holland Code & Primary Type */}
+        {loadingDetail ? (
+          <div className="flex justify-center py-8">
+            <LoadingSpinner />
           </div>
+        ) : assessmentDetail ? (
+          <>
+            {/* Holland Code */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+              <label className="text-sm font-semibold text-white/80 block mb-2">
+                Kode Kepribadian:
+              </label>
+              <div className="text-4xl font-black tracking-wider mb-2">
+                {assessmentDetail.holland_code}
+              </div>
+              <p className="text-sm text-white/90">
+                {getRiasecTypeName(assessmentDetail.primary_type)}
+                {assessmentDetail.secondary_type &&
+                  ` • ${getRiasecTypeName(assessmentDetail.secondary_type)}`}
+              </p>
+            </div>
+
+            {/* RIASEC Scores Preview */}
+            <div className="border-b pb-4">
+              <label className="text-base font-semibold text-gray-600 block mb-3">
+                Skor RIASEC:
+              </label>
+              <div className="space-y-2">
+                {Object.entries(assessmentDetail.scores).map(
+                  ([type, score]) => {
+                    const riasecType = type.toUpperCase() as RiasecType;
+                    const percentage = (score / 50) * 100;
+
+                    return (
+                      <div key={type}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-gray-700">
+                            {getRiasecTypeName(riasecType)} (
+                            {type[0].toUpperCase()})
+                          </span>
+                          <span className="text-xs font-bold text-gray-900">
+                            {score}/50
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${getRiasecTypeColor(
+                              riasecType
+                            )}`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </div>
+
+            {/* Recommendations Count */}
+            <div className="border-b pb-4">
+              <label className="text-base font-semibold text-gray-600 block mb-1">
+                Rekomendasi Program Studi:
+              </label>
+              <p className="text-sm text-gray-800">
+                {assessmentDetail.recommendations.length} program studi yang
+                cocok
+              </p>
+            </div>
+          </>
+        ) : (
+          tesSession.result_summary && (
+            <div className="border-b pb-4">
+              <label className="text-base font-semibold text-gray-600 block mb-1">
+                Ringkasan Hasil:
+              </label>
+              <p className="text-sm text-gray-800">
+                {tesSession.result_summary}
+              </p>
+            </div>
+          )
         )}
 
-        {tesSession.result_summary && (
-          <div className="border-b pb-3">
-            <label className="text-base font-semibold text-gray-600">
-              Ringkasan Hasil:
-            </label>
-            <p className="text-sm text-gray-800">{tesSession.result_summary}</p>
-          </div>
-        )}
-
-        {tesSession.notes && (
-          <div>
-            <label className="text-base font-semibold text-gray-600">
-              Catatan:
-            </label>
-            <p className="text-sm text-gray-800">{tesSession.notes}</p>
+        {/* View Detail Button */}
+        {tesSession.status === "COMPLETED" && (
+          <div className="pt-4 sticky bottom-0 bg-white">
+            <button
+              onClick={() => navigate(`/tes/hasil/${tesSession.test_id}`)}
+              className="w-full bg-[#00437A] text-white py-3 rounded-lg font-semibold hover:bg-[#003060] transition-colors shadow-lg"
+            >
+              Lihat Detail Lengkap
+            </button>
           </div>
         )}
       </div>
 
-      <div className="pt-4 text-xs text-gray-500 text-center">
+      <div className="pt-4 text-xs text-gray-500 text-center flex-shrink-0">
         Dibuat: {new Date(tesSession.created_at).toLocaleDateString("id-ID")}
       </div>
     </div>

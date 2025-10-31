@@ -14,7 +14,6 @@ export interface RiasecQuestion {
   question_id: number;
   question_text: string;
   riasec_type: RiasecType;
-  dimension: string;
 }
 
 export interface RiasecResponse {

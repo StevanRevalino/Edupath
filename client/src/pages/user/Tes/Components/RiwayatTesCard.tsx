@@ -61,9 +61,6 @@ const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
           minute: "2-digit",
         })}
       </p>
-      <p className="text-xs text-gray-600 mt-1">
-        Skor: {tesSession?.score ?? "-"}/100
-      </p>
     </div>
   );
 };
