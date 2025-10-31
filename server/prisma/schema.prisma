@@ -171,12 +171,10 @@ model RiasecQuestion {
   question_id   Int              @id @default(autoincrement())
   question_text String
   riasec_type   RiasecType
-  dimension     String
   created_at    DateTime         @default(now())
   responses     RiasecResponse[]
 
   @@index([riasec_type])
-  @@index([dimension])
 }
 
 model RiasecAssessment {

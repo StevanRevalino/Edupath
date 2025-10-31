@@ -23,7 +23,6 @@ async function seedRiasecQuestions() {
       data: {
         question_text: question.question_text,
         riasec_type: question.riasec_type as RiasecType,
-        dimension: question.dimension,
       },
     });
     count++;
