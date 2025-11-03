@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes";
 import chatRoutes from "./routes/chatRoutes";
 import beasiswaRoutes from "./routes/beasiswaRoutes";
 import riasecRoutes from "./routes/riasecRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
@@ -50,6 +51,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/beasiswa", beasiswaRoutes);
 app.use("/api/riasec", riasecRoutes);
+app.use("/api/admin/dashboard", dashboardRoutes);
 
 const PORT = 5000;
 

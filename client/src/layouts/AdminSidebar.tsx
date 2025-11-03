@@ -1,7 +1,7 @@
 import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
 import { useNotificationCount } from "../hooks/useNotificationCount";
@@ -47,6 +47,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   };
   const menuItems = useMemo(
     () => [
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: "/src/assets/icons/home-icon.png",
+        badgeCount: 0,
+      },
       {
         id: "kelola-data-murid",
         label: "Kelola Data Murid",

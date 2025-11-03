@@ -21,6 +21,7 @@ interface ChatUser {
   lastMessageTime?: string;
   room_id?: string;
   consultation_id?: string;
+  consultation_date?: string;
   unreadCount?: number;
 }
 
@@ -75,6 +76,21 @@ const KelolaLiveChat = () => {
       block: "nearest",
     });
   };
+
+  // Check if consultation has started (current time >= consultation time)
+  const isConsultationStarted = (consultationDate?: string): boolean => {
+    if (!consultationDate) return false;
+
+    const now = new Date();
+    const consultationTime = new Date(consultationDate);
+
+    return now >= consultationTime;
+  };
+
+  // Filter users to only show those with started consultations
+  const availableChatUsers = chatUsers.filter((user) =>
+    isConsultationStarted(user.consultation_date)
+  );
 
   useEffect(() => {
     scrollToBottom();
@@ -185,6 +201,39 @@ const KelolaLiveChat = () => {
       const selectedUserData = chatUsers.find(
         (user) => user.user_id === userId
       );
+
+      // Check if consultation has started
+      if (
+        selectedUserData &&
+        !isConsultationStarted(selectedUserData.consultation_date)
+      ) {
+        const consultationTime = selectedUserData.consultation_date
+          ? new Date(selectedUserData.consultation_date).toLocaleString(
+              "id-ID",
+              {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            )
+          : "belum ditentukan";
+
+        setChatMessages([
+          {
+            id: "waiting-1",
+            message: `Chat belum dapat dimulai. Konseling dijadwalkan pada ${consultationTime}. Silakan tunggu hingga waktu konseling dimulai.`,
+            senderId: "system",
+            senderName: "Sistem",
+            timestamp: new Date().toISOString(),
+            isFromAdmin: true,
+          },
+        ]);
+        setMessagesLoading(false);
+        return;
+      }
 
       if (selectedUserData && selectedUserData.consultation_id) {
         // Get or create chat room first
@@ -458,7 +507,8 @@ const KelolaLiveChat = () => {
     }
   };
 
-  const filteredUsers = chatUsers.filter(
+  // Filter users: only show those with started consultations + search term
+  const filteredUsers = availableChatUsers.filter(
     (user) =>
       `${user.firstname} ${user.lastname}`
         .toLowerCase()
@@ -603,6 +653,28 @@ const KelolaLiveChat = () => {
                         </span>
                       )}
                     </div>
+                    {user.consultation_date && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {isConsultationStarted(user.consultation_date) ? (
+                          <span className="text-green-600 font-medium">
+                            ● Konseling aktif
+                          </span>
+                        ) : (
+                          <span className="text-orange-500">
+                            ⏱ Dimulai:{" "}
+                            {new Date(user.consultation_date).toLocaleString(
+                              "id-ID",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                day: "numeric",
+                                month: "short",
+                              }
+                            )}
+                          </span>
+                        )}
+                      </p>
+                    )}
                     {user.lastMessage && (
                       <p className="text-sm text-gray-500 truncate mt-1">
                         {user.lastMessage}

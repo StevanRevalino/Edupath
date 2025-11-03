@@ -1,15 +1,18 @@
 import { useState } from "react";
 import AdminSidebar from "../../layouts/AdminSidebar";
+import Dashboard from "./Dashboard";
 import KelolaDataMurid from "./kelolaDataMurid/KelolaDataMurid";
 import KelolaDataKonseling from "./kelolaKonseling/KelolaDataKonseling";
 import KelolaLiveChat from "./kelolaLiveChat/KelolaLiveChat";
 import KelolaDataBeasiswa from "./kelolaBeasiswa/KelolaDataBeasiswa";
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("kelola-data-murid");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const getActiveTab = () => {
     switch (activeTab) {
+      case "dashboard":
+        return <Dashboard />;
       case "kelola-data-murid":
         return <KelolaDataMurid />;
       case "kelola-data-konseling":
@@ -19,7 +22,7 @@ const AdminDashboard = () => {
       case "kelola-data-beasiswa":
         return <KelolaDataBeasiswa />;
       default:
-        return <KelolaDataMurid />;
+        return <Dashboard />;
     }
   };
 

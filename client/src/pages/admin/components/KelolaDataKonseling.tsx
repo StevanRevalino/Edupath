@@ -58,6 +58,7 @@ const KelolaDataKonseling = () => {
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [showPendingBadge, setShowPendingBadge] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL;
 
   // Auto-complete expired consultations
@@ -461,6 +462,10 @@ const KelolaDataKonseling = () => {
     declined: consultations.filter((c) => c.status === "DECLINED").length,
   };
 
+  const handleClearPendingBadge = () => {
+    setShowPendingBadge(false);
+  };
+
   return (
     <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
       <PageHeader
@@ -475,6 +480,8 @@ const KelolaDataKonseling = () => {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         counts={tabCounts}
+        showPendingBadge={showPendingBadge}
+        onClearPendingBadge={handleClearPendingBadge}
       />
 
       <DataTableContainer loading={loading}>
