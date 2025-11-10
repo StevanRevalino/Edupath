@@ -53,7 +53,7 @@ const KelolaDataKonseling = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<
     "pending" | "active" | "completed" | "declined"
-  >("active");
+  >("pending");
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);

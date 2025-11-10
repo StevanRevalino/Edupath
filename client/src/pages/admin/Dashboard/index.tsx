@@ -39,6 +39,10 @@ ChartJS.register(
   LineElement
 );
 
+interface DashboardProps {
+  setActiveTab?: (tab: string) => void;
+}
+
 interface DashboardStats {
   totalStudents: number;
   totalConsultations: number;
@@ -66,7 +70,7 @@ interface RecentChat {
   unread_count: number;
 }
 
-const AdminDashboard = () => {
+const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalConsultations: 0,
@@ -465,7 +469,12 @@ const AdminDashboard = () => {
                 upcomingConsultations.map((consultation) => (
                   <div
                     key={consultation.consultation_id}
-                    className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow"
+                    className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => {
+                      if (setActiveTab) {
+                        setActiveTab("kelola-data-konseling");
+                      }
+                    }}
                   >
                     <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">
                       <div className="text-center">

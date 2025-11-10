@@ -12,7 +12,7 @@ const AdminDashboard = () => {
   const getActiveTab = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard setActiveTab={setActiveTab} />;
       case "kelola-data-murid":
         return <KelolaDataMurid />;
       case "kelola-data-konseling":
@@ -22,7 +22,7 @@ const AdminDashboard = () => {
       case "kelola-data-beasiswa":
         return <KelolaDataBeasiswa />;
       default:
-        return <Dashboard />;
+        return <Dashboard setActiveTab={setActiveTab} />;
     }
   };
 
