@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Loader } from "lucide-react";
+import { ArrowLeft, Send, Loader, Image as ImageIcon, X } from "lucide-react";
 import { type Consultation } from "../../../../services/consultationService";
 import { useChat } from "../../../../hooks/useChat";
+import toast from "react-hot-toast";
+import {
+  uploadImageToCloudinary,
+  parseMessageWithImage,
+} from "../../../../utils/cloudinary";
 
 interface ChatViewProps {
   consultation: Consultation;
@@ -28,6 +33,10 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
   // Local state for message input
   const [newMessage, setNewMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -43,14 +52,75 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
     }
   }, [messages]);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("File harus berupa gambar");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran gambar maksimal 5MB");
+      return;
+    }
+
+    setSelectedImage(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    return await uploadImageToCloudinary(file, "edupath/chat");
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || sendingMessage) return;
+    if ((!newMessage.trim() && !selectedImage) || sendingMessage) return;
 
     try {
-      await sendMessage(newMessage.trim());
+      let messageToSend = newMessage.trim();
+
+      // If there's an image, upload it first
+      if (selectedImage) {
+        setUploadingImage(true);
+        try {
+          const imageUrl = await uploadToCloudinary(selectedImage);
+          // Add image URL to message (without [IMAGE] prefix)
+          messageToSend = messageToSend
+            ? `${messageToSend}\n${imageUrl}`
+            : imageUrl;
+        } catch (error: any) {
+          console.error("Error uploading image:", error);
+          toast.error(error.message || "Gagal mengupload gambar");
+          setUploadingImage(false);
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+
+      await sendMessage(messageToSend);
       setNewMessage("");
+      handleRemoveImage();
     } catch (error) {
       console.error("Error sending message:", error);
+      toast.error("Gagal mengirim pesan");
     }
   };
 
@@ -123,6 +193,12 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           messages.map((message) => {
             // Student's messages go to the right, admin's to the left
             const isMine = message.senderId === currentUserId;
+
+            // Parse message to check for image
+            const { imageUrl, textMessage } = parseMessageWithImage(
+              message.message
+            );
+
             return (
               <div
                 key={message.message_id}
@@ -136,7 +212,15 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                         : "bg-gray-200 text-gray-800"
                     }`}
                   >
-                    <p className="text-sm">{message.message}</p>
+                    {imageUrl && (
+                      <img
+                        src={imageUrl}
+                        alt="Shared image"
+                        className="rounded-lg mb-2 max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(imageUrl, "_blank")}
+                      />
+                    )}
+                    {textMessage && <p className="text-sm">{textMessage}</p>}
                   </div>
                   <div
                     className={`flex items-center mt-1 text-xs text-gray-500 ${
@@ -155,7 +239,42 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
       {/* Message Input */}
       <div className="pt-4 border-t">
-        <div className="flex items-center space-x-2">
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mb-3 relative inline-block">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="max-h-32 rounded-lg border-2 border-blue-300"
+            />
+            <button
+              onClick={handleRemoveImage}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-end space-x-2">
+          {/* Image Upload Button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingImage || sendingMessage}
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Kirim gambar"
+          >
+            <ImageIcon size={20} />
+          </button>
+
+          {/* Text Input */}
           <div className="flex-1 flex items-center">
             <textarea
               value={newMessage}
@@ -165,14 +284,25 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
               rows={1}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               style={{ minHeight: "40px", maxHeight: "120px" }}
+              disabled={uploadingImage || sendingMessage}
             />
           </div>
+
+          {/* Send Button */}
           <button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim() || sendingMessage}
-            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            disabled={
+              (!newMessage.trim() && !selectedImage) ||
+              sendingMessage ||
+              uploadingImage
+            }
+            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
           >
-            <Send size={20} />
+            {uploadingImage ? (
+              <Loader className="animate-spin" size={20} />
+            ) : (
+              <Send size={20} />
+            )}
           </button>
         </div>
       </div>

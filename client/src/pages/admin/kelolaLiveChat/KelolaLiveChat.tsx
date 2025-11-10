@@ -6,11 +6,18 @@ import {
   Phone,
   Video,
   MoreVertical,
+  Image as ImageIcon,
+  X,
+  Loader,
 } from "lucide-react";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import { triggerChatRefresh } from "../../../utils/notificationEvents";
+import {
+  uploadImageToCloudinary,
+  parseMessageWithImage,
+} from "../../../utils/cloudinary";
 
 interface ChatUser {
   user_id: string;
@@ -64,6 +71,10 @@ const KelolaLiveChat = () => {
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const API_URL = import.meta.env.VITE_API_URL;
@@ -77,20 +88,8 @@ const KelolaLiveChat = () => {
     });
   };
 
-  // Check if consultation has started (current time >= consultation time)
-  const isConsultationStarted = (consultationDate?: string): boolean => {
-    if (!consultationDate) return false;
-
-    const now = new Date();
-    const consultationTime = new Date(consultationDate);
-
-    return now >= consultationTime;
-  };
-
-  // Filter users to only show those with started consultations
-  const availableChatUsers = chatUsers.filter((user) =>
-    isConsultationStarted(user.consultation_date)
-  );
+  // All users are available for chat now (no time restriction)
+  const availableChatUsers = chatUsers;
 
   useEffect(() => {
     scrollToBottom();
@@ -202,38 +201,8 @@ const KelolaLiveChat = () => {
         (user) => user.user_id === userId
       );
 
-      // Check if consultation has started
-      if (
-        selectedUserData &&
-        !isConsultationStarted(selectedUserData.consultation_date)
-      ) {
-        const consultationTime = selectedUserData.consultation_date
-          ? new Date(selectedUserData.consultation_date).toLocaleString(
-              "id-ID",
-              {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            )
-          : "belum ditentukan";
-
-        setChatMessages([
-          {
-            id: "waiting-1",
-            message: `Chat belum dapat dimulai. Konseling dijadwalkan pada ${consultationTime}. Silakan tunggu hingga waktu konseling dimulai.`,
-            senderId: "system",
-            senderName: "Sistem",
-            timestamp: new Date().toISOString(),
-            isFromAdmin: true,
-          },
-        ]);
-        setMessagesLoading(false);
-        return;
-      }
+      // Chat is now always available - no time restriction check needed
+      setSelectedUser(selectedUserData || null);
 
       if (selectedUserData && selectedUserData.consultation_id) {
         // Get or create chat room first
@@ -326,14 +295,75 @@ const KelolaLiveChat = () => {
     fetchChatMessages(user.user_id);
   };
 
+  // Handle image selection
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("File harus berupa gambar");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran gambar maksimal 5MB");
+      return;
+    }
+
+    setSelectedImage(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedUser || sendingMessage) return;
+    if (
+      (!newMessage.trim() && !selectedImage) ||
+      sendingMessage ||
+      !selectedUser
+    )
+      return;
 
     setSendingMessage(true);
-    const messageText = newMessage.trim();
+    let messageText = newMessage.trim();
 
     try {
       const token = TokenManager.getToken();
+
+      // If there's an image, upload it first
+      if (selectedImage) {
+        setUploadingImage(true);
+        try {
+          const imageUrl = await uploadImageToCloudinary(
+            selectedImage,
+            "edupath/chat"
+          );
+          // Add image URL to message (without [IMAGE] prefix)
+          messageText = messageText ? `${messageText}\n${imageUrl}` : imageUrl;
+        } catch (error: any) {
+          console.error("Error uploading image:", error);
+          toast.error(error.message || "Gagal mengupload gambar");
+          setUploadingImage(false);
+          setSendingMessage(false);
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
 
       // Make sure we have room_id in selectedUser
       if (!selectedUser.room_id && selectedUser.consultation_id) {
@@ -396,10 +426,14 @@ const KelolaLiveChat = () => {
             )
           );
 
+          // Clear message input and image
+          setNewMessage("");
+          handleRemoveImage();
+
           // Update last message in chat users list
           setChatUsers((prev) =>
             prev.map((user) =>
-              user.user_id === selectedUser.user_id
+              user.user_id === selectedUser?.user_id
                 ? {
                     ...user,
                     lastMessage: messageText,
@@ -608,10 +642,6 @@ const KelolaLiveChat = () => {
                   selectedUser?.user_id === user.user_id
                     ? "bg-blue-50 border-blue-200"
                     : ""
-                } ${
-                  user.user_id === "US005"
-                    ? "border-l-4 border-l-green-500"
-                    : ""
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -628,11 +658,6 @@ const KelolaLiveChat = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-gray-800 truncate">
                         {user.firstname} {user.lastname}
-                        {user.user_id === "US005" && (
-                          <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                            {user.user_id}
-                          </span>
-                        )}
                         {typeof user.unreadCount === "number" &&
                           user.unreadCount > 0 && (
                             <span
@@ -655,24 +680,9 @@ const KelolaLiveChat = () => {
                     </div>
                     {user.consultation_date && (
                       <p className="text-xs text-gray-500 mt-1">
-                        {isConsultationStarted(user.consultation_date) ? (
-                          <span className="text-green-600 font-medium">
-                            ● Konseling aktif
-                          </span>
-                        ) : (
-                          <span className="text-orange-500">
-                            ⏱ Dimulai:{" "}
-                            {new Date(user.consultation_date).toLocaleString(
-                              "id-ID",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                day: "numeric",
-                                month: "short",
-                              }
-                            )}
-                          </span>
-                        )}
+                        <span className="text-green-600 font-medium">
+                          ● Chat tersedia
+                        </span>
                       </p>
                     )}
                     {user.lastMessage && (
@@ -705,11 +715,6 @@ const KelolaLiveChat = () => {
                   <div>
                     <h3 className="font-semibold text-gray-800">
                       {selectedUser.firstname} {selectedUser.lastname}
-                      {selectedUser.user_id === "US005" && (
-                        <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                          US005
-                        </span>
-                      )}
                     </h3>
                     <p className="text-sm text-gray-600">
                       Kelas {selectedUser.kelas}
@@ -751,6 +756,12 @@ const KelolaLiveChat = () => {
                   // Robust alignment logic: prioritize isFromAdmin flag for better reliability
                   const isMine =
                     message.isFromAdmin || message.senderId === currentUserId;
+
+                  // Parse message to check for image
+                  const { imageUrl, textMessage } = parseMessageWithImage(
+                    message.message
+                  );
+
                   return (
                     <div
                       key={message.id}
@@ -770,7 +781,17 @@ const KelolaLiveChat = () => {
                               : "bg-gray-200 text-gray-800"
                           }`}
                         >
-                          <p className="text-sm">{message.message}</p>
+                          {imageUrl && (
+                            <img
+                              src={imageUrl}
+                              alt="Shared image"
+                              className="rounded-lg mb-2 max-w-[300px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(imageUrl, "_blank")}
+                            />
+                          )}
+                          {textMessage && (
+                            <p className="text-sm">{textMessage}</p>
+                          )}
                         </div>
                         <div
                           className={`flex items-center mt-1 text-xs text-gray-500 ${
@@ -789,7 +810,42 @@ const KelolaLiveChat = () => {
 
             {/* Message Input */}
             <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center space-x-2">
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="mb-3 relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-h-32 rounded-lg border-2 border-blue-300"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-end space-x-2">
+                {/* Image Upload Button */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage || sendingMessage}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Kirim gambar"
+                >
+                  <ImageIcon size={20} />
+                </button>
+
+                {/* Text Input */}
                 <div className="flex-1 flex items-center">
                   <textarea
                     value={newMessage}
@@ -799,14 +855,25 @@ const KelolaLiveChat = () => {
                     rows={1}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     style={{ minHeight: "40px", maxHeight: "120px" }}
+                    disabled={uploadingImage || sendingMessage}
                   />
                 </div>
+
+                {/* Send Button */}
                 <button
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || sendingMessage}
-                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  disabled={
+                    (!newMessage.trim() && !selectedImage) ||
+                    sendingMessage ||
+                    uploadingImage
+                  }
+                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
                 >
-                  <Send size={20} />
+                  {uploadingImage ? (
+                    <Loader className="animate-spin" size={20} />
+                  ) : (
+                    <Send size={20} />
+                  )}
                 </button>
               </div>
             </div>

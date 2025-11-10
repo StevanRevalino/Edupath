@@ -20,7 +20,7 @@ const ConsultationInfo = ({
   const [canceling, setCanceling] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // Check if chat is available (consultation has started and not ended yet)
+  // Check if chat is available (only check status and active state)
   const isChatAvailable = () => {
     if (
       !consultation ||
@@ -30,14 +30,8 @@ const ConsultationInfo = ({
       return false;
     }
 
-    const now = new Date();
-    const consultationStart = new Date(consultation.consultation_date);
-    const consultationEnd = new Date(
-      consultationStart.getTime() + 60 * 60 * 1000
-    ); // +1 hour
-
-    // Chat is available if current time is between start and end time
-    return now >= consultationStart && now < consultationEnd;
+    // Chat is available anytime as long as consultation is accepted and active
+    return true;
   };
 
   const handleCancelConsultation = async () => {
@@ -358,7 +352,7 @@ const ConsultationInfo = ({
           </div>
         )}
 
-        {/* Chat Button - Only show when consultation is ongoing (started and not ended) */}
+        {/* Chat Button - Available anytime for accepted and active consultations */}
         {consultation.status === "ACCEPTED" && consultation.is_active && (
           <div className="pt-4 border-t">
             {isChatAvailable() ? (

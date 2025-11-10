@@ -12,6 +12,7 @@ import {
   beasiswaSchema,
   type BeasiswaFormData,
 } from "../../../schema/BeasiswaSchema";
+import { uploadImageToCloudinary } from "../../../utils/cloudinary";
 
 interface Beasiswa {
   beasiswa_id: string;
@@ -42,9 +43,6 @@ const KelolaDataBeasiswa = () => {
   >({});
 
   const API_URL = import.meta.env.VITE_API_URL;
-  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const CLOUDINARY_UPLOAD_PRESET = import.meta.env
-    .VITE_CLOUDINARY_UPLOAD_PRESET;
 
   // Fetch beasiswa data
   useEffect(() => {
@@ -86,25 +84,6 @@ const KelolaDataBeasiswa = () => {
         setErrors((prev) => ({ ...prev, image_url: undefined }));
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  // Upload image to Cloudinary
-  const uploadToCloudinary = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
-
-    try {
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        formData
-      );
-      return response.data.secure_url;
-    } catch (error) {
-      console.error("Error uploading to Cloudinary:", error);
-      throw new Error("Gagal upload gambar");
     }
   };
 
@@ -213,7 +192,16 @@ const KelolaDataBeasiswa = () => {
 
       // Upload new image if file is selected
       if (imageFile) {
-        imageUrl = await uploadToCloudinary(imageFile);
+        try {
+          imageUrl = await uploadImageToCloudinary(
+            imageFile,
+            "edupath/beasiswa"
+          );
+        } catch (error: any) {
+          toast.error(error.message || "Gagal mengupload gambar");
+          setIsUploading(false);
+          return;
+        }
       }
 
       const token = TokenManager.getToken();
