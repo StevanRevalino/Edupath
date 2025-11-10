@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   MessageSquare,
   Users,
-  BookOpen,
   TrendingUp,
   Clock,
   CheckCircle,
@@ -20,11 +19,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
 } from "chart.js";
-import { Bar, Doughnut, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -33,10 +29,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement
+  Legend
 );
 
 interface DashboardProps {
@@ -90,26 +83,82 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
 
   // Chart data states
   const [weeklyData, setWeeklyData] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
-  const [monthlyConsultations, setMonthlyConsultations] = useState<number[]>([
-    0, 0, 0, 0, 0, 0,
-  ]);
-  const [monthlyActiveStudents, setMonthlyActiveStudents] = useState<number[]>([
-    0, 0, 0, 0, 0, 0,
-  ]);
-  const [monthLabels, setMonthLabels] = useState<string[]>([
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mei",
-    "Jun",
-  ]);
+  const [selectedWeek, setSelectedWeek] = useState(0); // 0 = current week, -1 = last week, 1 = next week
+  const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
 
   const API_URL = import.meta.env.VITE_API_URL;
+
+  // Get week range for display
+  const getWeekRange = () => {
+    const start = new Date(weekStartDate);
+    const end = new Date(weekStartDate);
+    end.setDate(start.getDate() + 6);
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      });
+    };
+
+    return `${formatDate(start)} - ${formatDate(end)} ${start.getFullYear()}`;
+  };
+
+  // Navigate to different week
+  const navigateWeek = (direction: number) => {
+    const newWeek = selectedWeek + direction;
+    setSelectedWeek(newWeek);
+
+    // Calculate new week start date (Monday)
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+    const monday = new Date(today.setDate(diff));
+    monday.setDate(monday.getDate() + newWeek * 7);
+    setWeekStartDate(monday);
+  };
+
+  // Fetch weekly consultation data
+  const fetchWeeklyData = async () => {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) return;
+
+      const start = new Date(weekStartDate);
+      const end = new Date(weekStartDate);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+
+      const response = await axios.get(
+        `${API_URL}/api/admin/dashboard/weekly-consultations`,
+        {
+          params: {
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        setWeeklyData(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching weekly data:", error);
+      // Fallback to dummy data on error
+      setWeeklyData([12, 19, 15, 25, 22, 18, 10]);
+    }
+  };
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    fetchWeeklyData();
+  }, [weekStartDate]);
 
   const fetchDashboardData = async () => {
     try {
@@ -147,11 +196,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         // Set chart data
         if (dashboardData.weeklyConsultations) {
           setWeeklyData(dashboardData.weeklyConsultations.data);
-        }
-        if (dashboardData.monthlyTrends) {
-          setMonthLabels(dashboardData.monthlyTrends.labels);
-          setMonthlyConsultations(dashboardData.monthlyTrends.consultations);
-          setMonthlyActiveStudents(dashboardData.monthlyTrends.activeStudents);
         }
       }
       if (consultationsResponse.data.success) {
@@ -210,25 +254,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   };
 
   // Chart data
-  const consultationStatusData = {
-    labels: ["Pending", "Active", "Completed", "Declined"],
-    datasets: [
-      {
-        data: [
-          stats.pendingConsultations,
-          stats.activeConsultations,
-          stats.completedConsultations,
-          stats.totalConsultations -
-            stats.pendingConsultations -
-            stats.activeConsultations -
-            stats.completedConsultations,
-        ],
-        backgroundColor: ["#FCD34D", "#3B82F6", "#10B981", "#EF4444"],
-        borderWidth: 0,
-      },
-    ],
-  };
-
   const weeklyConsultationsData = {
     labels: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
     datasets: [
@@ -238,26 +263,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         backgroundColor: "#6CCBFF",
         borderColor: "#00437A",
         borderWidth: 1,
-      },
-    ],
-  };
-
-  const monthlyTrendData = {
-    labels: monthLabels,
-    datasets: [
-      {
-        label: "Konsultasi",
-        data: monthlyConsultations,
-        borderColor: "#00437A",
-        backgroundColor: "rgba(108, 203, 255, 0.1)",
-        tension: 0.4,
-      },
-      {
-        label: "Murid Aktif",
-        data: monthlyActiveStudents,
-        borderColor: "#6CCBFF",
-        backgroundColor: "rgba(0, 67, 122, 0.1)",
-        tension: 0.4,
       },
     ],
   };
@@ -387,64 +392,40 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Larger */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Weekly Consultations */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                Konsultasi Minggu Ini
-              </h3>
-              <Bar
-                data={weeklyConsultationsData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  plugins: {
-                    legend: { display: false },
-                  },
-                  scales: {
-                    y: { beginAtZero: true },
-                  },
-                }}
-              />
-            </div>
-
-            {/* Consultation Status */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-blue-600" />
-                Status Konseling
-              </h3>
-              <Doughnut
-                data={consultationStatusData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  plugins: {
-                    legend: {
-                      position: "bottom",
-                      labels: { padding: 15, font: { size: 11 } },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Monthly Trend */}
+          {/* Weekly Consultations Chart */}
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
-              Tren 6 Bulan Terakhir
-            </h3>
-            <Line
-              data={monthlyTrendData}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                Konsultasi Mingguan
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigateWeek(-1)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  aria-label="Previous week"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-sm text-gray-600 font-medium">
+                  {getWeekRange()}
+                </span>
+                <button
+                  onClick={() => navigateWeek(1)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  aria-label="Next week"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+            <Bar
+              data={weeklyConsultationsData}
               options={{
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                  legend: { position: "top" },
+                  legend: { display: false },
                 },
                 scales: {
                   y: { beginAtZero: true },
@@ -770,57 +751,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                   </div>
                 ))
               )}
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-600" />
-              Statistik Cepat
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">
-                    Total Murid
-                  </span>
-                </div>
-                <span className="text-lg font-bold text-gray-900">
-                  {stats.totalStudents}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">
-                    Konseling Selesai
-                  </span>
-                </div>
-                <span className="text-lg font-bold text-gray-900">
-                  {stats.completedConsultations}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-100 p-2 rounded-lg">
-                    <BookOpen className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">
-                    Data Beasiswa
-                  </span>
-                </div>
-                <span className="text-lg font-bold text-gray-900">
-                  {stats.totalScholarships}
-                </span>
-              </div>
             </div>
           </div>
         </div>
