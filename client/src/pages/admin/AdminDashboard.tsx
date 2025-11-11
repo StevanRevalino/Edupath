@@ -16,7 +16,7 @@ const AdminDashboard = () => {
       case "kelola-data-murid":
         return <KelolaDataMurid />;
       case "kelola-data-konseling":
-        return <KelolaDataKonseling />;
+        return <KelolaDataKonseling setActiveTab={setActiveTab} />;
       case "kelola-live-chat":
         return <KelolaLiveChat />;
       case "kelola-data-beasiswa":

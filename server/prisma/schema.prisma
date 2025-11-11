@@ -172,7 +172,6 @@ model ZoomMeeting {
   host_id          String
   topic            String
   scheduled_time   DateTime
-  duration         Int
   description      String?
   meeting_password String
   status           ZoomStatus   @default(scheduled)

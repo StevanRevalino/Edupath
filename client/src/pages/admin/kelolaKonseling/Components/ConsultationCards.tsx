@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { Calendar, Clock, Eye } from "lucide-react";
+import { Calendar, Clock, Eye, MessageCircle } from "lucide-react";
 
 interface Consultation {
   consultation_id: string;
@@ -28,6 +28,7 @@ interface ConsultationCardsProps {
   onDecline: (consultation: Consultation) => void;
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
+  onOpenLiveChat?: () => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
 }
@@ -39,6 +40,7 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
   onDecline,
   onReschedule,
   onCancel,
+  onOpenLiveChat,
   getStatusColor,
   getStatusText,
 }) => {
@@ -146,6 +148,13 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
 
             {consultation.status === "ACCEPTED" && (
               <div className="flex gap-2">
+                <button
+                  onClick={onOpenLiveChat}
+                  className="flex-1 px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Chat
+                </button>
                 <button
                   onClick={() => onReschedule(consultation)}
                   className="flex-1 px-4 py-2.5 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-colors"

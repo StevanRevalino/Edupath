@@ -15,7 +15,6 @@ export class ZoomController {
         topic,
         scheduledDate,
         scheduledTime,
-        duration,
         description,
       } = req.body;
 
@@ -32,8 +31,7 @@ export class ZoomController {
         !userId ||
         !topic ||
         !scheduledDate ||
-        !scheduledTime ||
-        !duration
+        !scheduledTime
       ) {
         return res.status(400).json({
           success: false,
@@ -79,9 +77,18 @@ export class ZoomController {
       // Combine date and time
       const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
 
-      // Generate unique meeting ID and password
-      const meetingId = crypto.randomBytes(8).toString("hex");
-      const meetingPassword = crypto.randomBytes(4).toString("hex");
+      // Generate Zoom-like meeting ID (11 digits, format: XXX XXXX XXXX)
+      const generateZoomMeetingId = () => {
+        const part1 = Math.floor(100 + Math.random() * 900); // 3 digits
+        const part2 = Math.floor(1000 + Math.random() * 9000); // 4 digits
+        const part3 = Math.floor(1000 + Math.random() * 9000); // 4 digits
+        return `${part1}${part2}${part3}`;
+      };
+
+      const meetingId = generateZoomMeetingId();
+      const meetingPassword = Math.floor(
+        100000 + Math.random() * 900000
+      ).toString(); // 6 digit password
 
       // Create Zoom meeting record in database
       const zoomMeeting = await prisma.zoomMeeting.create({
@@ -91,18 +98,15 @@ export class ZoomController {
           host_id: adminId,
           topic: topic,
           scheduled_time: scheduledDateTime,
-          duration: duration,
           description: description || null,
           meeting_password: meetingPassword,
           status: "scheduled",
         },
       });
 
-      // Generate join URL (placeholder - in production, you'd use Zoom API)
+      // Generate join URL in Zoom format
       const joinUrl = `https://zoom.us/j/${meetingId}?pwd=${meetingPassword}`;
-      const startUrl = `https://zoom.us/s/${meetingId}?zak=${crypto
-        .randomBytes(8)
-        .toString("hex")}`;
+      const startUrl = `https://zoom.us/s/${meetingId}?pwd=${meetingPassword}`;
 
       // Create notification for student
       await prisma.notification.create({
@@ -110,7 +114,7 @@ export class ZoomController {
           user_id: userId,
           type: "zoom_meeting",
           title: "Zoom Meeting Dibuat",
-          message: `Admin telah membuat Zoom meeting: ${topic}\nJadwal: ${scheduledDate} ${scheduledTime}\nDurasi: ${duration} menit`,
+          message: `Admin telah membuat Zoom meeting: ${topic}\nJadwal: ${scheduledDate} ${scheduledTime}`,
           related_id: zoomMeeting.zoom_meeting_id,
           link: joinUrl,
         },
@@ -124,7 +128,6 @@ export class ZoomController {
           zoomMeetingId: meetingId,
           topic: topic,
           scheduledTime: scheduledDateTime,
-          duration: duration,
           joinUrl: joinUrl,
           startUrl: startUrl,
           password: meetingPassword,

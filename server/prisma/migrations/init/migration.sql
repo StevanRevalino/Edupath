@@ -128,7 +128,6 @@ CREATE TABLE "public"."RiasecQuestion" (
     "question_id" SERIAL NOT NULL,
     "question_text" TEXT NOT NULL,
     "riasec_type" "public"."RiasecType" NOT NULL,
-    "dimension" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "RiasecQuestion_pkey" PRIMARY KEY ("question_id")
@@ -255,9 +254,6 @@ CREATE INDEX "Beasiswa_created_at_idx" ON "public"."Beasiswa"("created_at");
 
 -- CreateIndex
 CREATE INDEX "RiasecQuestion_riasec_type_idx" ON "public"."RiasecQuestion"("riasec_type");
-
--- CreateIndex
-CREATE INDEX "RiasecQuestion_dimension_idx" ON "public"."RiasecQuestion"("dimension");
 
 -- CreateIndex
 CREATE INDEX "RiasecAssessment_user_id_idx" ON "public"."RiasecAssessment"("user_id");

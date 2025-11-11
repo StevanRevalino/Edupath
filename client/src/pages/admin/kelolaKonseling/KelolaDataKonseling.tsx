@@ -47,7 +47,13 @@ interface Consultation {
   };
 }
 
-const KelolaDataKonseling = () => {
+interface KelolaDataKonselingProps {
+  setActiveTab: (tab: string) => void;
+}
+
+const KelolaDataKonseling = ({
+  setActiveTab: setParentActiveTab,
+}: KelolaDataKonselingProps) => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +67,11 @@ const KelolaDataKonseling = () => {
   const [showPendingBadge, setShowPendingBadge] = useState(true);
   const [lastPendingCount, setLastPendingCount] = useState(0);
   const API_URL = import.meta.env.VITE_API_URL;
+
+  // Handler to open live chat tab
+  const handleOpenLiveChat = () => {
+    setParentActiveTab("kelola-live-chat");
+  };
 
   // Auto-complete expired consultations
   const autoCompleteExpiredConsultations = async () => {
@@ -527,6 +538,7 @@ const KelolaDataKonseling = () => {
                 }
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
+                onOpenLiveChat={handleOpenLiveChat}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />
@@ -559,6 +571,7 @@ const KelolaDataKonseling = () => {
                 }
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
+                onOpenLiveChat={handleOpenLiveChat}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />
@@ -573,6 +586,7 @@ const KelolaDataKonseling = () => {
         consultation={selectedConsultation}
         onClose={handleCloseDetailModal}
         onReschedule={handleReschedule}
+        onOpenLiveChat={handleOpenLiveChat}
         getStatusColor={getStatusColor}
         getStatusText={getStatusText}
       />

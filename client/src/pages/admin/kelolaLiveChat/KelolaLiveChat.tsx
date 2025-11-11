@@ -551,7 +551,6 @@ const KelolaLiveChat = () => {
           topic: data.topic,
           scheduledDate: data.scheduledDate,
           scheduledTime: data.scheduledTime,
-          duration: data.duration,
           description: data.description,
         },
         {
@@ -567,8 +566,8 @@ const KelolaLiveChat = () => {
 
         // Optionally send a message to chat with zoom link
         if (selectedUser.room_id && response.data.data.joinUrl) {
-          const zoomMessage = `🎥 Zoom Meeting telah dibuat!\n\nTopik: ${data.topic}\nWaktu: ${data.scheduledDate} ${data.scheduledTime}\nDurasi: ${data.duration} menit\n\nLink: ${response.data.data.joinUrl}`;
-
+          const zoomData = response.data.data;
+          const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n📅 ${data.scheduledDate} | ${data.scheduledTime}\n\n🔗 ${zoomData.joinUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}\n\n⚠️ Buat meeting manual di zoom.us`;
           await axios.post(
             `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
             { message: zoomMessage },
@@ -856,7 +855,9 @@ const KelolaLiveChat = () => {
                             />
                           )}
                           {textMessage && (
-                            <p className="text-sm">{textMessage}</p>
+                            <p className="text-sm whitespace-pre-line">
+                              {textMessage}
+                            </p>
                           )}
                         </div>
                         <div

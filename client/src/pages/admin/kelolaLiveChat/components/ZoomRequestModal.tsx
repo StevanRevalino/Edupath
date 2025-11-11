@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { X, Video, Calendar, Clock, FileText } from "lucide-react";
+import { X, Video, FileText } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { CalendarIcon, Clock } from "lucide-react";
 
 interface ZoomRequestModalProps {
   isOpen: boolean;
@@ -14,7 +25,6 @@ export interface ZoomRequestData {
   topic: string;
   scheduledDate: string;
   scheduledTime: string;
-  duration: number;
   description: string;
 }
 
@@ -29,9 +39,13 @@ const ZoomRequestModal = ({
     topic: "Konseling Akademik",
     scheduledDate: "",
     scheduledTime: "",
-    duration: 30,
     description: "",
   });
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(
+    undefined
+  );
+  const [dateOpen, setDateOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -46,9 +60,9 @@ const ZoomRequestModal = ({
         topic: "Konseling Akademik",
         scheduledDate: "",
         scheduledTime: "",
-        duration: 30,
         description: "",
       });
+      setRescheduleDate(undefined);
       onClose();
     } catch (error) {
       console.error("Error submitting zoom request:", error);
@@ -57,11 +71,10 @@ const ZoomRequestModal = ({
     }
   };
 
-  // Get minimum date (today)
-  const today = new Date().toISOString().split("T")[0];
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
@@ -114,63 +127,107 @@ const ZoomRequestModal = ({
             </div>
 
             {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                  <Calendar size={16} className="mr-2 text-gray-500" />
-                  Tanggal
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="date"
-                  required
-                  min={today}
-                  value={formData.scheduledDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, scheduledDate: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                  <Clock size={16} className="mr-2 text-gray-500" />
-                  Waktu
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="time"
-                  required
-                  value={formData.scheduledTime}
-                  onChange={(e) =>
-                    setFormData({ ...formData, scheduledTime: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Pilih Tanggal <span className="text-red-500">*</span>
+              </label>
+              <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-11",
+                      !rescheduleDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {rescheduleDate ? (
+                      format(rescheduleDate, "PPP", { locale: id })
+                    ) : (
+                      <span>Pilih tanggal</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={rescheduleDate}
+                    onSelect={(date) => {
+                      setRescheduleDate(date);
+                      if (date) {
+                        setFormData({
+                          ...formData,
+                          scheduledDate: format(date, "yyyy-MM-dd"),
+                        });
+                      }
+                      setDateOpen(false);
+                    }}
+                    disabled={(date) =>
+                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Duration */}
+            {/* Time Selection */}
             <div>
-              <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                <Clock size={16} className="mr-2 text-gray-500" />
-                Durasi Meeting
-                <span className="text-red-500 ml-1">*</span>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Pilih Waktu <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: Number(e.target.value) })
-                }
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-              >
-                <option value={15}>15 menit</option>
-                <option value={30}>30 menit</option>
-                <option value={45}>45 menit</option>
-                <option value={60}>1 jam</option>
-                <option value={90}>1.5 jam</option>
-                <option value={120}>2 jam</option>
-              </select>
+              <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-11",
+                      !formData.scheduledTime && "text-muted-foreground"
+                    )}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    {formData.scheduledTime ? (
+                      formData.scheduledTime
+                    ) : (
+                      <span>Pilih waktu</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-2" align="start">
+                  <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
+                    {Array.from({ length: 10 }, (_, i) => {
+                      const hour = 8 + i;
+                      return [
+                        `${hour.toString().padStart(2, "0")}:00`,
+                        `${hour.toString().padStart(2, "0")}:30`,
+                      ];
+                    })
+                      .flat()
+                      .filter((_, i, arr) => i < arr.length - 1)
+                      .map((timeSlot) => (
+                        <Button
+                          key={timeSlot}
+                          variant={
+                            formData.scheduledTime === timeSlot
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              scheduledTime: timeSlot,
+                            });
+                            setTimeOpen(false);
+                          }}
+                          className="h-9"
+                        >
+                          {timeSlot}
+                        </Button>
+                      ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Description */}

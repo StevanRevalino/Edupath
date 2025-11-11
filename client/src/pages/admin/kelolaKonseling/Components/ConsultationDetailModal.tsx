@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { MessageCircle } from "lucide-react";
 
 interface Consultation {
   consultation_id: string;
@@ -25,6 +26,7 @@ interface ConsultationDetailModalProps {
   consultation: Consultation | null;
   onClose: () => void;
   onReschedule?: (consultation: Consultation) => void;
+  onOpenLiveChat?: () => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
 }
@@ -34,6 +36,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
   consultation,
   onClose,
   onReschedule,
+  onOpenLiveChat,
   getStatusColor,
   getStatusText,
 }) => {
@@ -317,6 +320,15 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
 
         {/* Modal Footer */}
         <div className="mt-6 flex justify-end gap-3">
+          {consultation.status === "ACCEPTED" && (
+            <button
+              onClick={onOpenLiveChat}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Buka Live Chat
+            </button>
+          )}
           {consultation.status === "ACCEPTED" && onReschedule && (
             <button
               onClick={() => onReschedule(consultation)}

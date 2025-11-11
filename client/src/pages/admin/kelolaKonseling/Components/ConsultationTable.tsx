@@ -1,4 +1,4 @@
-import { Calendar, Clock, Eye } from "lucide-react";
+import { Calendar, Clock, Eye, MessageCircle } from "lucide-react";
 import AdminDataTable from "../../components/AdminDataTable";
 
 interface Consultation {
@@ -28,6 +28,7 @@ interface ConsultationTableProps {
   onDecline: (consultation: Consultation) => void;
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
+  onOpenLiveChat?: () => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
 }
@@ -39,6 +40,7 @@ const ConsultationTable = ({
   onDecline,
   onReschedule,
   onCancel,
+  onOpenLiveChat,
   getStatusColor,
   getStatusText,
 }: ConsultationTableProps) => {
@@ -156,6 +158,16 @@ const ConsultationTable = ({
               )}
               {consultation.status === "ACCEPTED" && (
                 <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenLiveChat?.();
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1"
+                  >
+                    <MessageCircle size={14} />
+                    Chat
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
