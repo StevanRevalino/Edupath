@@ -169,7 +169,7 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
   const handleChangePassword = () => {
     Swal.fire({
       title: "Apakah Anda yakin?",
-      text: "Mengubah password akan mengeluarkan Anda dari sistem.",
+      text: "Mengubah password akan mengeluarkan Anda dari aplikasi.",
       imageUrl: WarningLogo,
       imageWidth: 100,
       imageHeight: 120,
@@ -301,12 +301,12 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
             </button>
             <p className="text-xs text-gray-500 mt-2 text-center">
               <CircleAlert className="inline w-4 h-4 mr-1 text-yellow-500" />
-              Mengubah password akan mengeluarkan Anda dari sistem
+              Mengubah password akan mengeluarkan Anda dari aplikasi.
             </p>
           </div>
 
           {/* Submit Button */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={handleClose}
