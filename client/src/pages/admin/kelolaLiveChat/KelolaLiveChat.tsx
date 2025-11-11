@@ -18,6 +18,8 @@ import {
   uploadImageToCloudinary,
   parseMessageWithImage,
 } from "../../../utils/cloudinary";
+import ZoomRequestModal from "./components/ZoomRequestModal";
+import type { ZoomRequestData } from "./components/ZoomRequestModal";
 
 interface ChatUser {
   user_id: string;
@@ -74,6 +76,7 @@ const KelolaLiveChat = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -534,6 +537,65 @@ const KelolaLiveChat = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   void handleIncomingMessageFromStudent; // hindari unused warning tanpa deklarasi variabel
 
+  // Handle Zoom Meeting Request
+  const handleZoomRequest = async (data: ZoomRequestData) => {
+    if (!selectedUser) return;
+
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.post(
+        `${API_URL}/api/zoom/create-meeting`,
+        {
+          consultationId: selectedUser.consultation_id,
+          userId: selectedUser.user_id,
+          topic: data.topic,
+          scheduledDate: data.scheduledDate,
+          scheduledTime: data.scheduledTime,
+          duration: data.duration,
+          description: data.description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Zoom meeting berhasil dibuat!");
+
+        // Optionally send a message to chat with zoom link
+        if (selectedUser.room_id && response.data.data.joinUrl) {
+          const zoomMessage = `🎥 Zoom Meeting telah dibuat!\n\nTopik: ${data.topic}\nWaktu: ${data.scheduledDate} ${data.scheduledTime}\nDurasi: ${data.duration} menit\n\nLink: ${response.data.data.joinUrl}`;
+
+          await axios.post(
+            `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
+            { message: zoomMessage },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          // Refresh messages
+          fetchChatMessages(selectedUser.user_id);
+        }
+      }
+    } catch (error) {
+      console.error("Error creating zoom meeting:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Gagal membuat Zoom meeting"
+        );
+      } else {
+        toast.error("Gagal membuat Zoom meeting");
+      }
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -727,7 +789,11 @@ const KelolaLiveChat = () => {
                   <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                     <Phone size={20} />
                   </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setIsZoomModalOpen(true)}
+                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Buat Zoom Meeting"
+                  >
                     <Video size={20} />
                   </button>
                   <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -893,6 +959,18 @@ const KelolaLiveChat = () => {
           </div>
         )}
       </div>
+
+      {/* Zoom Request Modal */}
+      {selectedUser && (
+        <ZoomRequestModal
+          isOpen={isZoomModalOpen}
+          onClose={() => setIsZoomModalOpen(false)}
+          studentId={selectedUser.user_id}
+          studentName={`${selectedUser.firstname} ${selectedUser.lastname}`}
+          consultationId={selectedUser.consultation_id || ""}
+          onSubmit={handleZoomRequest}
+        />
+      )}
     </div>
   );
 };

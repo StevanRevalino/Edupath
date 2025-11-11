@@ -23,6 +23,8 @@ model User {
   consultationsAsAdmin Consultation[]     @relation("ConsultationAdmin")
   consultationsAsMurid Consultation[]     @relation("ConsultationMurid")
   riasecAssessments    RiasecAssessment[]
+  notifications        Notification[]
+  zoomMeetingsAsHost   ZoomMeeting[]      @relation("ZoomMeetingHost")
 }
 
 model Universitas {
@@ -91,6 +93,7 @@ model Consultation {
   is_active         Boolean            @default(true)
   created_at        DateTime           @default(now())
   chatRoom          ChatRoom?
+  zoomMeetings      ZoomMeeting[]
   admin             User               @relation("ConsultationAdmin", fields: [admin_id], references: [user_id], onDelete: Cascade)
   murid             User               @relation("ConsultationMurid", fields: [murid_id], references: [user_id], onDelete: Cascade)
 
@@ -145,6 +148,45 @@ model Beasiswa {
   @@index([created_at])
 }
 
+model Notification {
+  notification_id String   @id @default(cuid())
+  user_id         String
+  type            String
+  title           String
+  message         String
+  is_read         Boolean  @default(false)
+  related_id      String?
+  link            String?
+  created_at      DateTime @default(now())
+  user            User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_read])
+  @@index([created_at])
+}
+
+model ZoomMeeting {
+  zoom_meeting_id  String       @id @default(cuid())
+  meeting_id       String       @unique
+  consultation_id  String
+  host_id          String
+  topic            String
+  scheduled_time   DateTime
+  duration         Int
+  description      String?
+  meeting_password String
+  status           ZoomStatus   @default(scheduled)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+  consultation     Consultation @relation(fields: [consultation_id], references: [consultation_id], onDelete: Cascade)
+  host             User         @relation("ZoomMeetingHost", fields: [host_id], references: [user_id], onDelete: Cascade)
+
+  @@index([consultation_id])
+  @@index([host_id])
+  @@index([scheduled_time])
+  @@index([status])
+}
+
 enum Role {
   ADMIN
   STUDENT
@@ -155,6 +197,13 @@ enum ConsultationStatus {
   ACCEPTED
   DECLINED
   COMPLETED
+}
+
+enum ZoomStatus {
+  scheduled
+  started
+  ended
+  cancelled
 }
 
 // RIASEC Assessment models
