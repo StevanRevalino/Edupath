@@ -533,6 +533,7 @@ export class ConsultationService {
     try {
       // Get current time in Indonesia (WIB - UTC+7)
       const now = new Date();
+      console.log("Auto-completing consultations at:", now);
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
       );
