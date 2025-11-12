@@ -147,8 +147,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       }
     } catch (error) {
       console.error("Error fetching weekly data:", error);
-      // Fallback to dummy data on error
-      setWeeklyData([12, 19, 15, 25, 22, 18, 10]);
     }
   };
 
@@ -206,48 +204,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-      // Use dummy data for now
-      setStats({
-        totalStudents: 45,
-        totalConsultations: 128,
-        pendingConsultations: 5,
-        activeConsultations: 12,
-        completedConsultations: 98,
-        totalScholarships: 23,
-        totalChats: 34,
-        unreadChats: 7,
-      });
-      setUpcomingConsultations([
-        {
-          consultation_id: "CONS001",
-          murid_name: "Ahmad Rizki",
-          topic: "Konsultasi Pemilihan Jurusan",
-          consultation_date: new Date(
-            Date.now() + 2 * 60 * 60 * 1000
-          ).toISOString(),
-          status: "ACCEPTED",
-        },
-        {
-          consultation_id: "CONS002",
-          murid_name: "Siti Nurhaliza",
-          topic: "Info Beasiswa",
-          consultation_date: new Date(
-            Date.now() + 5 * 60 * 60 * 1000
-          ).toISOString(),
-          status: "ACCEPTED",
-        },
-      ]);
-      setRecentChats([
-        {
-          room_id: "ROOM001",
-          murid_name: "Budi Santoso",
-          last_message: "Terima kasih atas bantuannya pak/bu",
-          last_message_time: new Date(
-            Date.now() - 10 * 60 * 1000
-          ).toISOString(),
-          unread_count: 2,
-        },
-      ]);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import crypto from "crypto";
+import zoomService from "../services/zoomService";
 
 const prisma = new PrismaClient();
 
@@ -77,21 +77,77 @@ export class ZoomController {
       // Combine date and time
       const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
 
-      // Generate Zoom-like meeting ID (11 digits, format: XXX XXXX XXXX)
-      const generateZoomMeetingId = () => {
-        const part1 = Math.floor(100 + Math.random() * 900); // 3 digits
-        const part2 = Math.floor(1000 + Math.random() * 9000); // 4 digits
-        const part3 = Math.floor(1000 + Math.random() * 9000); // 4 digits
-        return `${part1}${part2}${part3}`;
-      };
+      let meetingId: string;
+      let meetingPassword: string;
+      let joinUrl: string;
+      let startUrl: string;
+      let zoomMeetingId: number | null = null;
 
-      const meetingId = generateZoomMeetingId();
-      const meetingPassword = Math.floor(
-        100000 + Math.random() * 900000
-      ).toString(); // 6 digit password
+      // Try to create real Zoom meeting if configured
+      if (zoomService.isConfigured()) {
+        try {
+          console.log("🎥 Creating real Zoom meeting via API...");
+
+          const zoomMeeting = await zoomService.createMeeting({
+            topic: topic,
+            start_time: scheduledDateTime.toISOString(),
+            duration: 60, // Default 60 minutes
+            timezone: "Asia/Jakarta",
+            password: undefined, // Let Zoom generate or use custom
+            agenda:
+              description ||
+              `Konsultasi dengan ${user.firstname} ${user.lastname}`,
+          });
+
+          meetingId = zoomMeeting.id.toString();
+          meetingPassword = zoomMeeting.password;
+          joinUrl = zoomMeeting.join_url;
+          startUrl = zoomMeeting.start_url;
+          zoomMeetingId = zoomMeeting.id;
+
+          console.log("✅ Real Zoom meeting created:", meetingId);
+        } catch (zoomError: any) {
+          console.error(
+            "❌ Failed to create Zoom meeting, falling back to placeholder:",
+            zoomError.message
+          );
+
+          // Fallback to placeholder if Zoom API fails
+          const generateZoomMeetingId = () => {
+            const part1 = Math.floor(100 + Math.random() * 900);
+            const part2 = Math.floor(1000 + Math.random() * 9000);
+            const part3 = Math.floor(1000 + Math.random() * 9000);
+            return `${part1}${part2}${part3}`;
+          };
+
+          meetingId = generateZoomMeetingId();
+          meetingPassword = Math.floor(
+            100000 + Math.random() * 900000
+          ).toString();
+          joinUrl = `https://zoom.us/j/${meetingId}?pwd=${meetingPassword}`;
+          startUrl = `https://zoom.us/s/${meetingId}?pwd=${meetingPassword}`;
+        }
+      } else {
+        console.log("⚠️ Zoom API not configured, using placeholder...");
+
+        // Generate placeholder Zoom-like meeting ID
+        const generateZoomMeetingId = () => {
+          const part1 = Math.floor(100 + Math.random() * 900);
+          const part2 = Math.floor(1000 + Math.random() * 9000);
+          const part3 = Math.floor(1000 + Math.random() * 9000);
+          return `${part1}${part2}${part3}`;
+        };
+
+        meetingId = generateZoomMeetingId();
+        meetingPassword = Math.floor(
+          100000 + Math.random() * 900000
+        ).toString();
+        joinUrl = `https://zoom.us/j/${meetingId}?pwd=${meetingPassword}`;
+        startUrl = `https://zoom.us/s/${meetingId}?pwd=${meetingPassword}`;
+      }
 
       // Create Zoom meeting record in database
-      const zoomMeeting = await prisma.zoomMeeting.create({
+      const dbZoomMeeting = await prisma.zoomMeeting.create({
         data: {
           meeting_id: meetingId,
           consultation_id: consultationId,
@@ -104,10 +160,6 @@ export class ZoomController {
         },
       });
 
-      // Generate join URL in Zoom format
-      const joinUrl = `https://zoom.us/j/${meetingId}?pwd=${meetingPassword}`;
-      const startUrl = `https://zoom.us/s/${meetingId}?pwd=${meetingPassword}`;
-
       // Create notification for student
       await prisma.notification.create({
         data: {
@@ -115,7 +167,7 @@ export class ZoomController {
           type: "zoom_meeting",
           title: "Zoom Meeting Dibuat",
           message: `Admin telah membuat Zoom meeting: ${topic}\nJadwal: ${scheduledDate} ${scheduledTime}`,
-          related_id: zoomMeeting.zoom_meeting_id,
+          related_id: dbZoomMeeting.zoom_meeting_id,
           link: joinUrl,
         },
       });
@@ -124,14 +176,16 @@ export class ZoomController {
         success: true,
         message: "Zoom meeting berhasil dibuat",
         data: {
-          meetingId: zoomMeeting.zoom_meeting_id,
+          meetingId: dbZoomMeeting.zoom_meeting_id,
           zoomMeetingId: meetingId,
+          realZoomMeetingId: zoomMeetingId, // null if placeholder
           topic: topic,
           scheduledTime: scheduledDateTime,
           joinUrl: joinUrl,
           startUrl: startUrl,
           password: meetingPassword,
           status: "scheduled",
+          isRealZoom: zoomMeetingId !== null,
         },
       });
     } catch (error: any) {

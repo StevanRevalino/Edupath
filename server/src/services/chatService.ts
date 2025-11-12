@@ -295,21 +295,24 @@ export class ChatService {
         orderBy: { consultation_date: "desc" },
       });
 
-      return acceptedConsultations.map((consultation) => ({
-        user_id: consultation.murid.user_id,
-        firstname: consultation.murid.firstname,
-        lastname: consultation.murid.lastname,
-        kelas: consultation.murid.kelas,
-        consultation_id: consultation.consultation_id,
-        latestConsultationTopic: consultation.topic,
-        room_id: consultation.chatRoom?.room_id,
-        lastMessage:
-          consultation.chatRoom?.messages[0]?.message || consultation.topic,
-        lastMessageTime:
-          consultation.chatRoom?.messages[0]?.created_at.toISOString() ||
-          consultation.created_at.toISOString(),
-        unreadCount: consultation.chatRoom?._count.messages || 0,
-      }));
+      return acceptedConsultations.map((consultation) => {
+        return {
+          user_id: consultation.murid.user_id,
+          firstname: consultation.murid.firstname,
+          lastname: consultation.murid.lastname,
+          kelas: consultation.murid.kelas,
+          consultation_id: consultation.consultation_id,
+          consultation_date: consultation.consultation_date?.toISOString(),
+          latestConsultationTopic: consultation.topic,
+          room_id: consultation.chatRoom?.room_id,
+          lastMessage:
+            consultation.chatRoom?.messages[0]?.message || consultation.topic,
+          lastMessageTime:
+            consultation.chatRoom?.messages[0]?.created_at.toISOString() ||
+            consultation.created_at.toISOString(),
+          unreadCount: consultation.chatRoom?._count.messages || 0,
+        };
+      });
     } catch (error) {
       console.error("Error in getStudentsWithAcceptedConsultations:", error);
       throw error;
