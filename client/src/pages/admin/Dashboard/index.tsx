@@ -310,7 +310,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   }
 
   return (
-    <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 overflow-y-auto">
+    <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard Admin</h1>
@@ -740,7 +740,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-600 mt-1 truncate">
+                        <p className="text-xs text-gray-600 mt-1 truncate max-w-[300px]">
                           {chat.last_message}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
