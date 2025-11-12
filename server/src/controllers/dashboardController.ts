@@ -59,7 +59,10 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     ).length;
 
     // Get weekly consultations (last 7 days)
-    const today = new Date();
+    const now = new Date();
+    const today = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 6); // Last 7 days including today
 
@@ -86,7 +89,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     });
 
     // Get monthly trends (last 6 months)
-    const sixMonthsAgo = new Date();
+    const sixMonthsAgo = new Date(today);
     sixMonthsAgo.setMonth(today.getMonth() - 5);
 
     const monthlyConsultations = await prisma.consultation.findMany({
@@ -120,7 +123,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 
     // Calculate month labels
     for (let i = 5; i >= 0; i--) {
-      const date = new Date();
+      const date = new Date(today);
       date.setMonth(today.getMonth() - i);
       monthLabels.push(monthNames[date.getMonth()]);
     }
@@ -153,7 +156,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 
     // Count unique students per month
     for (let i = 0; i < 6; i++) {
-      const monthStart = new Date();
+      const monthStart = new Date(today);
       monthStart.setMonth(today.getMonth() - (5 - i));
       monthStart.setDate(1);
       monthStart.setHours(0, 0, 0, 0);
@@ -219,11 +222,14 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 export const getUpcomingConsultations = async (req: Request, res: Response) => {
   try {
     const now = new Date();
+    const indonesiaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
 
     const upcomingConsultations = await prisma.consultation.findMany({
       where: {
         consultation_date: {
-          gte: now,
+          gte: indonesiaTime,
         },
         status: {
           in: ["PENDING", "ACCEPTED"],

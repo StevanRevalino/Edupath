@@ -37,7 +37,7 @@ class NotificationService {
     };
   }
 
-  // Get all notifications for admin
+  // Get all notifications
   async getNotifications(): Promise<{
     success: boolean;
     data: Notification[];
@@ -45,7 +45,7 @@ class NotificationService {
   }> {
     try {
       const response = await axios.get(
-        `${API_URL}/api/admin/notifications`,
+        `${API_URL}/api/notifications`,
         this.getAuthHeader()
       );
       return {
@@ -79,7 +79,7 @@ class NotificationService {
   async markAsRead(notificationId: string): Promise<boolean> {
     try {
       await axios.patch(
-        `${API_URL}/api/admin/notifications/${notificationId}/read`,
+        `${API_URL}/api/notifications/${notificationId}/read`,
         {},
         this.getAuthHeader()
       );
@@ -94,7 +94,7 @@ class NotificationService {
   async markAllAsRead(): Promise<boolean> {
     try {
       await axios.patch(
-        `${API_URL}/api/admin/notifications/read-all`,
+        `${API_URL}/api/notifications/read-all`,
         {},
         this.getAuthHeader()
       );
@@ -109,7 +109,7 @@ class NotificationService {
   async deleteNotification(notificationId: string): Promise<boolean> {
     try {
       await axios.delete(
-        `${API_URL}/api/admin/notifications/${notificationId}`,
+        `${API_URL}/api/notifications/${notificationId}`,
         this.getAuthHeader()
       );
       return true;

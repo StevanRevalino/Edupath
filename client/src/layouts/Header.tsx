@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
 import axios from "axios";
+import NotificationPanel from "../pages/user/components/NotificationPanel";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -146,23 +147,46 @@ const Header = () => {
         </nav>
 
         {/* Profil untuk Desktop */}
-        <div
-          className="hidden md:flex flex-row gap-2 items-center text-white cursor-pointer"
-          onClick={() => navigate("/profil")}
-        >
+        <div className="hidden md:flex flex-row gap-3 items-center">
+          {/* Notification Panel */}
+          <NotificationPanel
+            onNotificationClick={(_referenceId, type) => {
+              // Handle notification click - navigate based on type
+              if (
+                type === "CONSULTATION_ACCEPTED" ||
+                type === "CONSULTATION_REJECTED"
+              ) {
+                navigate("/konseling");
+              } else if (type === "CHAT_MESSAGE") {
+                // Navigate to konseling page and trigger chat open
+                navigate("/konseling", {
+                  state: { openChatForConsultation: _referenceId },
+                });
+              } else if (type === "ZOOM_MEETING") {
+                navigate("/konseling");
+              }
+            }}
+          />
+
+          {/* Profile */}
           <div
-            className="w-10 h-10 rounded-full bg-white/90 shadow-inner ring-2 flex items-center justify-center select-none"
-            aria-label={`Avatar ${
-              user ? `${user.firstname} ${user.lastname}`.trim() : "User"
-            }`}
+            className="flex flex-row gap-2 items-center text-white cursor-pointer"
+            onClick={() => navigate("/profil")}
           >
-            <span className="text-[#003B73] font-extrabold text-xl tracking-wide">
-              {getInitials(user)}
+            <div
+              className="w-10 h-10 rounded-full bg-white/90 shadow-inner ring-2 flex items-center justify-center select-none"
+              aria-label={`Avatar ${
+                user ? `${user.firstname} ${user.lastname}`.trim() : "User"
+              }`}
+            >
+              <span className="text-[#003B73] font-extrabold text-xl tracking-wide">
+                {getInitials(user)}
+              </span>
+            </div>
+            <span className="text-base font-semibold">
+              {user ? `${user.firstname} ${user.lastname}`.trim() : "User"}
             </span>
           </div>
-          <span className="text-base font-semibold">
-            {user ? `${user.firstname} ${user.lastname}`.trim() : "User"}
-          </span>
         </div>
 
         {/* Hamburger Menu untuk Mobile */}

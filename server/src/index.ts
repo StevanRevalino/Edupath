@@ -11,6 +11,7 @@ import beasiswaRoutes from "./routes/beasiswaRoutes";
 import riasecRoutes from "./routes/riasecRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 import zoomRoutes from "./routes/zoomRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 
@@ -54,6 +55,7 @@ app.use("/api/beasiswa", beasiswaRoutes);
 app.use("/api/riasec", riasecRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
 app.use("/api/zoom", zoomRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = 5000;
 

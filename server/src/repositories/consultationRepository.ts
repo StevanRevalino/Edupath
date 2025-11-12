@@ -150,7 +150,7 @@ export class ConsultationRepository {
 
   // Update status
   async updateStatus(data: UpdateConsultationStatusDTO) {
-    return this.prisma.consultation.update({
+    const updatedConsultation = await this.prisma.consultation.update({
       where: { consultation_id: data.consultation_id },
       data: {
         status: data.status,
@@ -183,6 +183,35 @@ export class ConsultationRepository {
         },
       },
     });
+
+    // ✨ Create notification for student
+    if (data.status === ConsultationStatus.ACCEPTED) {
+      await this.prisma.notification.create({
+        data: {
+          user_id: updatedConsultation.murid_id,
+          type: "CONSULTATION_ACCEPTED",
+          title: "Konsultasi Diterima",
+          message: `Konsultasi Anda tentang "${updatedConsultation.topic}" telah diterima oleh ${updatedConsultation.admin.firstname} ${updatedConsultation.admin.lastname}.`,
+          related_id: updatedConsultation.consultation_id,
+          is_read: false,
+        },
+      });
+    } else if (data.status === ConsultationStatus.DECLINED) {
+      await this.prisma.notification.create({
+        data: {
+          user_id: updatedConsultation.murid_id,
+          type: "CONSULTATION_REJECTED",
+          title: "Konsultasi Ditolak",
+          message: `Konsultasi Anda tentang "${
+            updatedConsultation.topic
+          }" ditolak. ${data.admin_notes ? `Alasan: ${data.admin_notes}` : ""}`,
+          related_id: updatedConsultation.consultation_id,
+          is_read: false,
+        },
+      });
+    }
+
+    return updatedConsultation;
   }
 
   // Reschedule consultation

@@ -176,7 +176,11 @@ export class ConsultationService {
   // Get students with accepted consultations for live chat
   async getStudentsWithAcceptedConsultations() {
     try {
+      // Get current time in Indonesia (WIB - UTC+7)
       const now = new Date();
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
 
       const acceptedConsultations = await this.consultationRepository.findMany({
         status: ConsultationStatus.ACCEPTED,
@@ -190,10 +194,10 @@ export class ConsultationService {
             consultationStart.getTime() + 60 * 60 * 1000
           ); // +1 hour
 
-          // Check if current time is between start and end time
+          // Check if current time (Indonesia) is between start and end time
           return (
-            now >= consultationStart &&
-            now < consultationEnd &&
+            indonesiaTime >= consultationStart &&
+            indonesiaTime < consultationEnd &&
             consultation.is_active
           );
         }
@@ -527,7 +531,11 @@ export class ConsultationService {
   // Auto-complete consultations that have passed their end time (1 hour after start)
   async autoCompleteExpiredConsultations() {
     try {
+      // Get current time in Indonesia (WIB - UTC+7)
       const now = new Date();
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
 
       // Get all accepted consultations (they should be active)
       const activeConsultations = await this.consultationRepository.findMany({
@@ -542,8 +550,8 @@ export class ConsultationService {
           const consultationDate = new Date(consultation.consultation_date);
           const endTime = new Date(consultationDate.getTime() + 60 * 60 * 1000); // +1 hour
 
-          // Check if current time is past the end time
-          return now >= endTime;
+          // Check if current time (Indonesia) is past the end time
+          return indonesiaTime >= endTime;
         }
       );
 

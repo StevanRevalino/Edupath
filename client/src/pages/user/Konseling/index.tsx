@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import {
@@ -19,6 +20,7 @@ import conseling2 from "../../../assets/conseling-2.png";
 import conseling3 from "../../../assets/conseling-3.png";
 
 const Konseling = () => {
+  const location = useLocation();
   const [showModal, setShowModal] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [selectedConsultation, setSelectedConsultation] =
@@ -54,6 +56,29 @@ const Konseling = () => {
   useEffect(() => {
     fetchConsultations();
   }, []);
+
+  // Handle navigation from notification - open specific chat
+  useEffect(() => {
+    if (location.state?.openChatForConsultation && consultations.length > 0) {
+      const consultationId = location.state.openChatForConsultation;
+      const consultation = consultations.find(
+        (c) => c.consultation_id === consultationId
+      );
+
+      if (consultation) {
+        if (consultation.status === "ACCEPTED") {
+          setSelectedConsultation(consultation);
+          setShowChat(true);
+          // Clear the state to prevent re-triggering
+          window.history.replaceState({}, document.title);
+        } else {
+          toast.error(
+            "Chat hanya tersedia untuk konsultasi yang sudah diterima"
+          );
+        }
+      }
+    }
+  }, [location.state, consultations]);
 
   const fetchConsultations = async () => {
     try {

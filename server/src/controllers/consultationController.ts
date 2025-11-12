@@ -45,7 +45,12 @@ export class ConsultationController {
 
       // Check if consultation date is in the future (with 5 minute margin to account for processing time)
       const now = new Date();
-      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+      const fiveMinutesFromNow = new Date(
+        indonesiaTime.getTime() + 5 * 60 * 1000
+      );
 
       if (consultationDate < fiveMinutesFromNow) {
         return res.status(400).json({
@@ -369,7 +374,12 @@ export class ConsultationController {
 
       // Check if new date is in the future
       const now = new Date();
-      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+      const fiveMinutesFromNow = new Date(
+        indonesiaTime.getTime() + 5 * 60 * 1000
+      );
 
       if (newConsultationDate < fiveMinutesFromNow) {
         return res.status(400).json({

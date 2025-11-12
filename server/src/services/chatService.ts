@@ -240,6 +240,29 @@ export class ChatService {
         data: { updated_at: new Date() },
       });
 
+      // ✨ Create notification if message is from admin to student
+      if (newMessage.sender.role === "ADMIN") {
+        const receiverId = chatRoom.murid_id; // Student is the receiver
+
+        // Only create notification if message is not a Zoom meeting message
+        const isZoomMessage = message.includes("🎥 Zoom Meeting Dibuat");
+
+        if (!isZoomMessage) {
+          await prisma.notification.create({
+            data: {
+              user_id: receiverId,
+              type: "CHAT_MESSAGE",
+              title: "Pesan Baru dari Admin",
+              message: `${newMessage.sender.firstname} ${
+                newMessage.sender.lastname
+              }: ${message.slice(0, 50)}${message.length > 50 ? "..." : ""}`,
+              related_id: chatRoom.consultation_id,
+              is_read: false,
+            },
+          });
+        }
+      }
+
       return {
         id: newMessage.message_id,
         message: newMessage.message,
