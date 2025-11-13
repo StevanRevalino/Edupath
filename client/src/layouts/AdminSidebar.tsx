@@ -106,7 +106,9 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                       clearBadge(item.id);
                     }}
                     className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-primary-lighter ${
-                      activeTab === item.id ? "bg-primary-lighter" : "bg-transparent"
+                      activeTab === item.id
+                        ? "bg-primary-lighter"
+                        : "bg-transparent"
                     }`}
                   >
                     <img

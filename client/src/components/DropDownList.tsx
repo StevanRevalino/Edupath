@@ -51,7 +51,6 @@ export default function DropdownList({
           }),
           valueContainer: (base) => ({
             ...base,
-            
           }),
         }}
         isSearchable={false}

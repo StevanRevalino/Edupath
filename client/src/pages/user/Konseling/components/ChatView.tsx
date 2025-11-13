@@ -260,9 +260,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
               );
 
               // Check if this is a Zoom meeting message
-              const isZoomMessage = textMessage.includes(
-                "Zoom Meeting Dibuat"
-              );
+              const isZoomMessage = textMessage.includes("Zoom Meeting Dibuat");
 
               return (
                 <div

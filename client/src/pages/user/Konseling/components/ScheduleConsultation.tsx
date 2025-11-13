@@ -31,11 +31,7 @@ const ScheduleConsultation = ({
         className="w-full bg-gray-100 border-2 border-dashed border-primary-dark rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer"
       >
         <div className="p-2 lg:p-4 bg-gray-200 rounded-md flex">
-          <Plus
-            size={24}
-            className="lg:hidden text-gray-500"
-            strokeWidth={2}
-          />
+          <Plus size={24} className="lg:hidden text-gray-500" strokeWidth={2} />
           <Plus
             size={32}
             className="hidden lg:block text-gray-500"
