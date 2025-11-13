@@ -280,9 +280,13 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white opacity-90 text-sm font-medium">Total Murid</p>
+              <p className="text-white opacity-90 text-sm font-medium">
+                Total Murid
+              </p>
               <h3 className="text-3xl font-bold mt-2">{stats.totalStudents}</h3>
-              <p className="text-white opacity-75 text-xs mt-2">Terdaftar aktif</p>
+              <p className="text-white opacity-75 text-xs mt-2">
+                Terdaftar aktif
+              </p>
             </div>
             <div className="bg-white/20 p-3 rounded-lg">
               <Users className="w-8 h-8" />

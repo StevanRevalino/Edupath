@@ -338,7 +338,10 @@ export default function Register() {
       <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
         <p className="text-center text-xs sm:text-sm">
           Sudah punya akun?{" "}
-          <a href="/login" className="text-primary hover:text-primary-dark underline">
+          <a
+            href="/login"
+            className="text-primary hover:text-primary-dark underline"
+          >
             Log in!
           </a>
         </p>

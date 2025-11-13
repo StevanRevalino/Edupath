@@ -143,7 +143,10 @@ export default function Login() {
         {/* Daftar Link */}
         <p className="text-center text-xs sm:text-sm">
           Tidak punya akun?{" "}
-          <a href="/register" className="text-primary hover:text-primary-dark underline">
+          <a
+            href="/register"
+            className="text-primary hover:text-primary-dark underline"
+          >
             Daftar!
           </a>
         </p>

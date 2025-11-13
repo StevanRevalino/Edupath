@@ -100,7 +100,8 @@ const Jurusan: React.FC = () => {
   const badgeClass = (value?: string | null) => {
     const v = (value || "").toLowerCase();
     if (v === "unggul" || v === "a") return "bg-green-100 text-green-800";
-    if (v === "baik sekali" || v === "b") return "bg-secondary-light text-primary-dark";
+    if (v === "baik sekali" || v === "b")
+      return "bg-secondary-light text-primary-dark";
     if (v === "baik" || v === "c") return "bg-yellow-100 text-yellow-800";
     return "bg-gray-100 text-gray-800";
   };

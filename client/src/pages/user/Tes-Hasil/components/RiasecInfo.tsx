@@ -33,7 +33,9 @@ const RiasecInfo: React.FC = () => {
                   R
                 </div>
                 <div>
-                  <h4 className="font-bold text-primary-dark text-lg">Realistic</h4>
+                  <h4 className="font-bold text-primary-dark text-lg">
+                    Realistic
+                  </h4>
                   <p className="text-primary text-sm">Realistis</p>
                 </div>
               </div>

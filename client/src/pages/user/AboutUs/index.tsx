@@ -114,8 +114,8 @@ export default function AboutUs() {
               <li className="flex items-start gap-2">
                 <span className="text-[#00437A] font-bold mt-1">•</span>
                 <span className="text-justify">
-                  Memberikan informasi tentang jurusan dan universitas
-                  di Indonesia.
+                  Memberikan informasi tentang jurusan dan universitas di
+                  Indonesia.
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -191,7 +191,9 @@ export default function AboutUs() {
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
               "Langkah kecil hari ini menentukan besar masa depanmu nanti"
             </p>
-            <p className="text-white opacity-90 text-sm sm:text-base">- Tim EduPath</p>
+            <p className="text-white opacity-90 text-sm sm:text-base">
+              - Tim EduPath
+            </p>
           </div>
         </div>
       </div>
