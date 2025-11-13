@@ -135,7 +135,7 @@ const KelolaDataMurid = () => {
         showDenyButton: true,
         confirmButtonText: "Simpan",
         denyButtonText: `Jangan Simpan`,
-        confirmButtonColor: "#6CCBFF",
+        confirmButtonColor: "var(--primary)",
         denyButtonColor: "#d33",
         imageUrl: questionIcon,
         imageWidth: 80,
@@ -204,7 +204,7 @@ const KelolaDataMurid = () => {
       imageWidth: 80,
       imageHeight: 90,
       showCancelButton: true,
-      confirmButtonColor: "#6CCBFF",
+      confirmButtonColor: "var(--primary)",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {

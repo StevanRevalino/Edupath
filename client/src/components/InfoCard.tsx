@@ -22,7 +22,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
         loading="lazy"
         decoding="async"
       />
-      <h4 className="mt-4 font-extrabold text-[#0B4F85]">{title}</h4>
+      <h4 className="mt-4 font-extrabold text-primary-dark">{title}</h4>
       <p className="mt-2 text-sm text-gray-600 leading-relaxed">{desc}</p>
     </div>
   );

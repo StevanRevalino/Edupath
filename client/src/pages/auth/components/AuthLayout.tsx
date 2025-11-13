@@ -41,7 +41,7 @@ const AuthLayout = ({
           </div>
 
           {/* Form Container */}
-          <div className="w-full flex flex-col gap-4 sm:gap-5 bg-[#f5f5f5] px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
+          <div className="w-full flex flex-col gap-4 sm:gap-5 bg-gray-100 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10 rounded-2xl sm:rounded-3xl lg:rounded-4xl">
             {children}
           </div>
         </div>

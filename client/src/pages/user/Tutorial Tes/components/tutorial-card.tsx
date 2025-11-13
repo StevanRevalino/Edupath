@@ -59,7 +59,7 @@ export default function TutorialCard({ onStartTest }: TutorialCardProps) {
 
   return (
     <div
-      className="bg-[#E5F6FF] rounded-3xl p-8 w-[500px] h-[550px] text-center relative overflow-hidden z-0 cursor-pointer transition-transform hover:scale-105"
+      className="bg-secondary-light rounded-3xl p-8 w-[500px] h-[550px] text-center relative overflow-hidden z-0 cursor-pointer transition-transform hover:scale-105"
       onClick={handleCardClick}
     >
       {/* Content */}
@@ -84,7 +84,7 @@ export default function TutorialCard({ onStartTest }: TutorialCardProps) {
       {isLastStep && (
         <button
           onClick={handleNext}
-          className="bg-[#3FBBFE] hover:bg-[#3FA9F5] text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
+          className="bg-primary-lighter hover:bg-primary-light text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
         >
           {currentTutorial.buttonText}
         </button>

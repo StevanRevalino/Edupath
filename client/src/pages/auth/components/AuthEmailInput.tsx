@@ -44,7 +44,7 @@ const AuthEmailInput = forwardRef<HTMLInputElement, AuthEmailInputProps>(
             <button
               type="button"
               onClick={onVerify}
-              className="bg-primary hover:bg-[#4BB8FF] text-white px-4 sm:px-3 py-2.5 sm:py-2 rounded-full text-sm sm:text-lg font-semibold cursor-pointer whitespace-nowrap flex-shrink-0"
+              className="bg-primary hover:bg-primary-lighter text-white px-4 sm:px-3 py-2.5 sm:py-2 rounded-full text-sm sm:text-lg font-semibold cursor-pointer whitespace-nowrap flex-shrink-0"
             >
               {verifyButtonText}
             </button>

@@ -348,7 +348,7 @@ export default function Register() {
           disabled={!isFormValid}
           className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl ${
             isFormValid
-              ? "bg-primary hover:bg-[#4BB8FF] text-white"
+              ? "bg-primary hover:bg-primary-lighter text-white"
               : "bg-gray-300 text-gray-500"
           }`}
         >

@@ -648,7 +648,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full bg-[#6CCBFF] hover:bg-[#6CCBFF]/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-2xl transition-all"
+              className="w-full bg-primary hover:bg-primary/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-2xl transition-all"
             >
               {submitting ? "Menjadwalkan..." : "Simpan perubahan"}
             </button>

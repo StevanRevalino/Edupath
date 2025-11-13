@@ -239,7 +239,7 @@ const TesPertanyaan = () => {
             <button
               className={`font-medium py-3 px-8 rounded-3xl transition-colors ${
                 allQuestionsAnswered && !submitting
-                  ? "bg-[#3FBBFE] hover:bg-[#3FA9F5] text-white"
+                  ? "bg-primary-lighter hover:bg-primary-light text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
               disabled={!allQuestionsAnswered || submitting}

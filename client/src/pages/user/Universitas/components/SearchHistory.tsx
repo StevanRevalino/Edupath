@@ -16,7 +16,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
   return (
     <div className="mt-6 sm:mt-8">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B0B0B]">
+        <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900">
           Pencarian terakhir
         </h3>
         {searches.length > 0 && (

@@ -179,7 +179,7 @@ const Header = () => {
                 user ? `${user.firstname} ${user.lastname}`.trim() : "User"
               }`}
             >
-              <span className="text-[#003B73] font-extrabold text-xl tracking-wide">
+              <span className="text-primary-dark font-extrabold text-xl tracking-wide">
                 {getInitials(user)}
               </span>
             </div>
@@ -213,7 +213,7 @@ const Header = () => {
                 setMenuOpen(false);
               }}
               className={`py-2 border-t w-full text-center text-white ${
-                location.pathname === item.path ? "font-bold bg-[#5AB6E8]" : ""
+                location.pathname === item.path ? "font-bold bg-secondary" : ""
               }`}
             >
               {item.label}

@@ -23,7 +23,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       imageWidth: 80,
       imageHeight: 90,
       showCancelButton: true,
-      confirmButtonColor: "#6CCBFF",
+      confirmButtonColor: "var(--primary)",
       cancelButtonColor: "#d33",
       confirmButtonText: "Ya, Logout",
       cancelButtonText: "Batal",
@@ -105,8 +105,8 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                       setActiveTab(item.id);
                       clearBadge(item.id);
                     }}
-                    className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-[#4BB8FF] ${
-                      activeTab === item.id ? "bg-[#4BB8FF]" : "bg-transparent"
+                    className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-primary-lighter ${
+                      activeTab === item.id ? "bg-primary-lighter" : "bg-transparent"
                     }`}
                   >
                     <img
@@ -130,7 +130,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         <div className="p-4">
           <button
             onClick={handleLogout}
-            className="w-full p-4 cursor-pointer rounded-lg hover:bg-[#4BB8FF] transition-colors duration-200"
+            className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-lighter transition-colors duration-200"
           >
             <img
               src="/src/assets/icons/log-out.png"

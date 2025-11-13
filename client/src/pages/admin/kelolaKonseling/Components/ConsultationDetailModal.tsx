@@ -82,7 +82,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
             </h3>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-[#050051] font-bold text-2xl">
+                <span className="text-primary-dark font-bold text-2xl">
                   {consultation.murid.firstname.charAt(0).toUpperCase()}
                 </span>
               </div>

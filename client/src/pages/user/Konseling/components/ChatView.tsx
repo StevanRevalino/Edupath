@@ -460,7 +460,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingImage || sendingMessage}
-              className="p-2 bg-[#D0E5FF] text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="p-2 bg-secondary-light text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               title="Kirim gambar"
             >
               <ImageIcon size={25} />

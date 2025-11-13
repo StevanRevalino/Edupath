@@ -206,7 +206,7 @@ const KelolaDataKonseling = () => {
           imageHeight: 90,
           showCancelButton: true,
           confirmButtonColor: "#d33",
-          cancelButtonColor: "#6CCBFF",
+          cancelButtonColor: "var(--primary)",
           confirmButtonText: "Tolak Konseling",
           cancelButtonText: "Batal",
           preConfirm: () => {
@@ -262,7 +262,7 @@ const KelolaDataKonseling = () => {
           imageWidth: 80,
           imageHeight: 90,
           showCancelButton: true,
-          confirmButtonColor: "#6CCBFF",
+          confirmButtonColor: "var(--primary)",
           cancelButtonColor: "#d33",
           confirmButtonText: "Ya, ubah status",
           cancelButtonText: "Batal",

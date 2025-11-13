@@ -150,7 +150,7 @@ const Konseling = () => {
         <button
           onClick={handleOpenModal}
           className="inline-flex items-center rounded-full bg-primary px-4 py-2
-             text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
+             text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
              hover:brightness-95 active:brightness-90 transition"
         >
           Jadwalkan sesi

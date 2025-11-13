@@ -11,7 +11,7 @@ import twitterIcon from "../assets/icons/twitter-icon.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-br from-primary to-[#4A9FD9] text-white py-8 px-4 sm:py-10 sm:px-6 md:py-12 md:px-8 lg:px-12">
+    <footer className="bg-gradient-to-br from-primary to-secondary text-white py-8 px-4 sm:py-10 sm:px-6 md:py-12 md:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {/* Logo dan Deskripsi */}
@@ -33,7 +33,7 @@ const Footer = () => {
             <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
               Navigation
             </h3>
-            <div className="bg-[#417A99] w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
+            <div className="bg-primary-light w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
             <nav className="space-y-2 md:space-y-3">
               <a
                 href="/home"
@@ -150,7 +150,7 @@ const Footer = () => {
               <h4 className="text-base sm:text-lg md:text-xl lg:text-3xl font-bold">
                 Social Media
               </h4>
-              <div className="bg-[#417A99] w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
+              <div className="bg-primary-light w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
               <div className="flex space-x-4 md:space-x-6">
                 <a href="#" className="hover:opacity-80 transition-opacity">
                   <img

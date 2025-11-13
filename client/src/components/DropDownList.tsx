@@ -37,7 +37,7 @@ export default function DropdownList({
         styles={{
           control: (base) => ({
             ...base,
-            borderColor: error ? "#ef4444" : "#ffffff",
+            borderColor: error ? "#ef4444" : "white",
             minHeight: "40px",
             borderRadius: "full",
             paddingTop: "9px",
@@ -47,7 +47,7 @@ export default function DropdownList({
           }),
           placeholder: (base) => ({
             ...base,
-            color: "#757575",
+            color: "gray",
           }),
           valueContainer: (base) => ({
             ...base,

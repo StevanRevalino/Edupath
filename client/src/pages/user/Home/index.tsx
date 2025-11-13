@@ -240,7 +240,7 @@ const Home = () => {
                         : "User"
                     }`}
                   >
-                    <span className="text-[#003B73] font-extrabold text-lg sm:text-2xl md:text-3xl tracking-wide">
+                    <span className="text-primary-dark font-extrabold text-lg sm:text-2xl md:text-3xl tracking-wide">
                       {getInitials(user)}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ const Home = () => {
 
                 <button
                   className="mt-5 inline-flex items-center rounded-full bg-primary px-4 py-2
-                       text-sm font-semibold text-[#063E6B] shadow-[0_6px_16px_rgba(0,0,0,0.15)]
+                       text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
                        hover:brightness-95 active:brightness-90 transition"
                 >
                   Ubah profil
@@ -447,7 +447,7 @@ const Home = () => {
                   placeholder="Jelajahi jurusan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                  className="w-full px-4 py-2 lg:py-3 border-2 border-primary-dark rounded-full text-sm lg:text-base focus:outline-none bg-white"
                 />
               </div>
 
@@ -574,14 +574,14 @@ const Home = () => {
                   onClick={() => navigate("/konseling")}
                 >
                   <div className="flex items-center gap-5 h-full justify-start">
-                    <div className="p-6 bg-[#E9E9E9] rounded-md">
+                    <div className="p-6 bg-gray-200 rounded-md">
                       <Plus
                         size={32}
-                        className="text-[#7E7E7E]"
+                        className="text-gray-500"
                         strokeWidth={2}
                       />
                     </div>
-                    <div className="text-[#7E7E7E] text-lg italic">
+                    <div className="text-gray-500 text-lg italic">
                       Jadwalkan sesi konseling...
                     </div>
                   </div>

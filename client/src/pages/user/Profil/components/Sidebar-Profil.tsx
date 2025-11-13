@@ -110,7 +110,7 @@ export default function SidebarProfil({
       <button
         ref={buttonRef}
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-24 left-4 z-50 bg-primary-dark text-white p-3 rounded-full shadow-lg hover:bg-[#003159] transition-colors"
+        className="lg:hidden fixed top-24 left-4 z-50 bg-primary-dark text-white p-3 rounded-full shadow-lg hover:bg-primary-hover transition-colors"
         aria-label="Toggle menu"
       >
         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

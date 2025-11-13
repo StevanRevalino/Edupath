@@ -48,8 +48,8 @@ const ConsultationInfo = ({
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
-        cancelButtonColor: "#6CCBFF",
-        confirmButtonText: "Ya, Batalkan",
+        cancelButtonColor: "var(--primary)",
+        confirmButtonText: "Ya, Batal",
         cancelButtonText: "Batal",
       });
 

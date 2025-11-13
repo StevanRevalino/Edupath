@@ -266,7 +266,7 @@ const KelolaDataBeasiswa = () => {
       confirmButtonText: "Hapus",
       cancelButtonText: "Batal",
       confirmButtonColor: "#d33",
-      cancelButtonColor: "#6CCBFF",
+      cancelButtonColor: "var(--primary)",
       imageUrl: warningIcon,
       imageWidth: 80,
       imageHeight: 90,

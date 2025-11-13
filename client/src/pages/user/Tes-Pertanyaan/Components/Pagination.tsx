@@ -54,7 +54,7 @@ export default function Pagination({
           onClick={() => onPageChange(i)}
           className={`w-7 h-7 rounded-full flex items-center justify-center font-medium transition-colors ${
             currentPage === i
-              ? "bg-[#3FBBFE] text-white"
+              ? "bg-primary-lighter text-white"
               : "bg-transparent text-gray-700 hover:bg-blue-100"
           }`}
         >
@@ -83,7 +83,7 @@ export default function Pagination({
       </button>
 
       {/* Page Numbers */}
-      <div className="bg-[#C7E5FF] rounded-full px-5 py-2 flex items-center gap-5">
+      <div className="bg-secondary-light rounded-full px-5 py-2 flex items-center gap-5">
         {renderPageNumbers()}
       </div>
 

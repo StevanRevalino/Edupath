@@ -216,8 +216,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       {
         label: "Konsultasi",
         data: weeklyData,
-        backgroundColor: "#6CCBFF",
-        borderColor: "#00437A",
+        backgroundColor: "var(--primary)",
+        borderColor: "var(--primary-dark)",
         borderWidth: 1,
       },
     ],
