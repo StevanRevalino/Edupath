@@ -481,7 +481,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                   }}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <ChevronLeft className="w-5 h-5 text-[#00437A]" />
+                  <ChevronLeft className="w-5 h-5 text-primary-dark" />
                 </button>
                 <h3 className="font-semibold text-gray-800">
                   {selectedDate.toLocaleDateString("id-ID", {
@@ -497,7 +497,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                   }}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <ChevronRight className="w-5 h-5 text-[#00437A]" />
+                  <ChevronRight className="w-5 h-5 text-primary-dark" />
                 </button>
               </div>
 
@@ -558,9 +558,9 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                         onClick={() => setSelectedDate(date)}
                         className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-colors relative ${
                           isSelected
-                            ? "bg-[#00437A] text-white font-semibold"
+                            ? "bg-primary-dark text-white font-semibold"
                             : isToday
-                            ? "bg-blue-100 text-[#00437A] font-semibold"
+                            ? "bg-blue-100 text-primary-dark font-semibold"
                             : "hover:bg-gray-100 text-gray-700"
                         }`}
                         title={
@@ -576,7 +576,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                               <div
                                 key={idx}
                                 className={`w-1 h-1 rounded-full ${
-                                  isSelected ? "bg-white" : "bg-[#6CCBFF]"
+                                  isSelected ? "bg-white" : "bg-primary"
                                 }`}
                               ></div>
                             ))}
@@ -598,8 +598,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="flex gap-0.5">
-                    <div className="w-1 h-1 bg-[#6CCBFF] rounded-full"></div>
-                    <div className="w-1 h-1 bg-[#6CCBFF] rounded-full"></div>
+                    <div className="w-1 h-1 bg-primary rounded-full"></div>
+                    <div className="w-1 h-1 bg-primary rounded-full"></div>
                   </div>
                   <span>Ada konseling</span>
                 </div>
@@ -608,7 +608,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
               {/* Selected Date Display */}
               <div className="pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-600">Tanggal Dipilih:</p>
-                <p className="text-lg font-semibold text-[#00437A]">
+                <p className="text-lg font-semibold text-primary-dark">
                   {selectedDate.toLocaleDateString("id-ID", {
                     weekday: "long",
                     day: "numeric",
@@ -639,7 +639,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                         {consultationsOnSelectedDate.map((consultation) => (
                           <div
                             key={consultation.consultation_id}
-                            className="bg-blue-50 border-l-4 border-[#00437A] p-2 rounded"
+                            className="bg-blue-50 border-l-4 border-primary-dark p-2 rounded"
                           >
                             <p className="text-xs font-semibold text-gray-900">
                               {consultation.murid_name}
@@ -647,7 +647,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                             <p className="text-xs text-gray-600 truncate">
                               {consultation.topic}
                             </p>
-                            <p className="text-xs text-[#00437A] font-medium mt-1">
+                            <p className="text-xs text-primary-dark font-medium mt-1">
                               {formatTime(consultation.consultation_date)}
                             </p>
                           </div>

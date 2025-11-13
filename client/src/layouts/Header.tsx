@@ -113,7 +113,7 @@ const Header = () => {
   return (
     <>
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full bg-[#6CCBFF] flex items-center justify-between px-4 lg:px-12 z-10 h-16 md:h-20 lg:h-22 md:rounded-b-3xl shadow-lg">
+      <header className="fixed top-0 left-0 w-full bg-primary flex items-center justify-between px-4 lg:px-12 z-10 h-16 md:h-20 lg:h-22 md:rounded-b-3xl shadow-lg">
         {/* Logo */}
         <div
           className="flex items-center space-x-4 cursor-pointer"
@@ -203,7 +203,7 @@ const Header = () => {
       {menuOpen && (
         <div
           ref={menuRef}
-          className="fixed top-16 left-0 w-full bg-[#6CCBFF] flex flex-col items-center z-10 md:hidden text-lg font-semibold"
+          className="fixed top-16 left-0 w-full bg-primary flex flex-col items-center z-10 md:hidden text-lg font-semibold"
         >
           {menuItems.map((item) => (
             <button

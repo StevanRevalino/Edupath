@@ -12,7 +12,7 @@ const ScheduleTes = ({ onSchedule }: ScheduleTesProps) => {
       </h3>
       <button
         onClick={onSchedule}
-        className="w-full bg-gray-100 border-2 border-dashed border-[#00437A] rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer"
+        className="w-full bg-gray-100 border-2 border-dashed border-primary-dark rounded-tl-3xl rounded-br-3xl p-6 hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 gap-2 cursor-pointer"
       >
         <div className="p-2 lg:p-4 bg-[#E9E9E9] rounded-md flex">
           <Plus

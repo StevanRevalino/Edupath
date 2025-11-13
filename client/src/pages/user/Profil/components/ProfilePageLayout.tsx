@@ -31,8 +31,8 @@ const ProfilePageLayout = ({
   if (showLoading) {
     return (
       <div className="bg-gray-100 relative -mb-24 w-full min-h-screen flex flex-col items-center justify-center gap-3">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-[#00437A]"></div>
-        <div className="font-semibold text-[#00437A] flex justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-primary-dark"></div>
+        <div className="font-semibold text-primary-dark flex justify-center">
           Loading
         </div>
       </div>

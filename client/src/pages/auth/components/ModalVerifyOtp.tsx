@@ -102,7 +102,7 @@ export default function OTPModal({
               value={val}
               onChange={(e) => handleChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className="w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-[#6CCBFF]"
+              className="w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-primary"
             />
           ))}
         </div>
@@ -122,7 +122,7 @@ export default function OTPModal({
 
         <button
           onClick={handleSubmit}
-          className="bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
+          className="bg-primary hover:bg-[#4BB8FF] text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           Verifikasi Email
         </button>

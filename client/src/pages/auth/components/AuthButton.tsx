@@ -18,17 +18,11 @@ const AuthButton = ({
   const baseClasses =
     "w-full py-2.5 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-  const variantClasses = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
-    secondary:
-      "bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500",
-  };
-
   const isDisabled = disabled || loading;
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${
+      className={`${baseClasses} ${
         isDisabled ? "opacity-50 cursor-not-allowed" : ""
       } ${className}`}
       disabled={isDisabled}

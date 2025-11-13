@@ -11,7 +11,7 @@ import twitterIcon from "../assets/icons/twitter-icon.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-br from-[#6CCBFF] to-[#4A9FD9] text-white py-8 px-4 sm:py-10 sm:px-6 md:py-12 md:px-8 lg:px-12">
+    <footer className="bg-gradient-to-br from-primary to-[#4A9FD9] text-white py-8 px-4 sm:py-10 sm:px-6 md:py-12 md:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {/* Logo dan Deskripsi */}

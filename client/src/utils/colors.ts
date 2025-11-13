@@ -141,7 +141,7 @@ export const getConsultationStatusColor = (
 /*
 // Untuk background primary:
 style={{ backgroundColor: eduPathColors.primary.main }}
-className="bg-[#6CCBFF]"
+className="bg-primary"
 
 // Untuk hover effect:
 style={{ backgroundColor: eduPathColors.primary.hover }}

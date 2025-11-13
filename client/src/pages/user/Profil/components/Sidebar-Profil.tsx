@@ -65,8 +65,8 @@ export default function SidebarProfil({
           <button
             className={`min-w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
               isActive("/profil")
-                ? "bg-white border-[#00437A] text-[#00437A]"
-                : "bg-white/90 border-white text-[#00437A] hover:bg-white"
+                ? "bg-white border-primary-dark text-primary-dark"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white"
             }`}
             onClick={() => navigate("/profil")}
           >
@@ -75,8 +75,8 @@ export default function SidebarProfil({
           <button
             className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
               isActive("/about-us")
-                ? "bg-white border-[#00437A] text-[#00437A]"
-                : "bg-white/90 border-white text-[#00437A] hover:bg-white"
+                ? "bg-white border-primary-dark text-primary-dark"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white"
             }`}
             onClick={() => navigate("/about-us")}
           >
@@ -89,8 +89,8 @@ export default function SidebarProfil({
           <button
             className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
               isActive("/contact-us")
-                ? "bg-white border-[#00437A] text-[#00437A]"
-                : "bg-white/90 border-white text-[#00437A] hover:bg-white"
+                ? "bg-white border-primary-dark text-primary-dark"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white"
             }`}
             onClick={() => navigate("/contact-us")}
           >
@@ -98,7 +98,7 @@ export default function SidebarProfil({
           </button>
           <button
             onClick={onLogout}
-            className="w-full border-3 border-white bg-white/90 rounded-full px-6 py-2.5 text-[#00437A] font-medium shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white transition-all"
+            className="w-full border-3 border-white bg-white/90 rounded-full px-6 py-2.5 text-primary-dark font-medium shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white transition-all"
           >
             <LogOut size={16} />
             Keluar
@@ -110,7 +110,7 @@ export default function SidebarProfil({
       <button
         ref={buttonRef}
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-24 left-4 z-50 bg-[#00437A] text-white p-3 rounded-full shadow-lg hover:bg-[#003159] transition-colors"
+        className="lg:hidden fixed top-24 left-4 z-50 bg-primary-dark text-white p-3 rounded-full shadow-lg hover:bg-[#003159] transition-colors"
         aria-label="Toggle menu"
       >
         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -120,17 +120,19 @@ export default function SidebarProfil({
       {mobileMenuOpen && (
         <div
           ref={menuRef}
-          className="lg:hidden fixed top-40 left-4 right-4 bg-white rounded-2xl shadow-2xl z-40 p-4 space-y-3 border-2 border-[#00437A]"
+          className="lg:hidden fixed top-40 left-4 right-4 bg-white rounded-2xl shadow-2xl z-40 p-4 space-y-3 border-2 border-primary-dark"
         >
-          <h2 className="text-[#00437A] text-xl font-bold mb-2 px-2">Menu</h2>
+          <h2 className="text-primary-dark text-xl font-bold mb-2 px-2">
+            Menu
+          </h2>
 
           {menuItems.map((item) => (
             <button
               key={item.path}
               className={`w-full text-left border-2 rounded-full px-6 py-2.5 font-medium shadow-md cursor-pointer transition-all ${
                 isActive(item.path)
-                  ? "bg-[#00437A] border-[#00437A] text-white"
-                  : "bg-white border-[#00437A] text-[#00437A] hover:bg-[#00437A]/10"
+                  ? "bg-primary-dark border-primary-dark text-white"
+                  : "bg-white border-primary-dark text-primary-dark hover:bg-primary-dark/10"
               }`}
               onClick={() => navigate(item.path)}
             >

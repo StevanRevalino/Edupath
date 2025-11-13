@@ -219,7 +219,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                       className={`${
                         timer > 0
                           ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+                          : "bg-primary hover:bg-[#4BB8FF] text-white"
                       } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap`}
                       disabled={timer > 0}
                     >
@@ -318,7 +318,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                   value={val}
                   onChange={(e) => handleChangeOtp(e.target.value, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
-                  className="sm:w-10 sm:h-10 mb-4 sm:mb-10 w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-[#6CCBFF]"
+                  className="sm:w-10 sm:h-10 mb-4 sm:mb-10 w-12 h-12 border bg-[#dcdddc] font-semibold border-none rounded-lg shadow-md shadow-[#c3c3c3] text-center text-lg focus:outline-none focus:bg-[#c3c3c3] focus:ring-primary"
                 />
               ))}
             </div>
@@ -327,7 +327,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               onClick={handleSubmit}
               className={`${
                 isFormValid
-                  ? "bg-[#6CCBFF] hover:bg-[#4BB8FF] text-white"
+                  ? "bg-primary hover:bg-[#4BB8FF] text-white"
                   : "bg-gray-300 text-gray-500 "
               } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap cursor-pointer`}
             >

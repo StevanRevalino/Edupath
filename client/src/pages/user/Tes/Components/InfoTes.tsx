@@ -252,7 +252,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
           <div className="pt-4 sticky bottom-0 bg-white">
             <button
               onClick={() => navigate(`/tes/hasil/${tesSession.test_id}`)}
-              className="w-full bg-[#00437A] text-white py-3 rounded-lg font-semibold hover:bg-[#003060] transition-colors shadow-lg"
+              className="w-full bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-[#003060] transition-colors shadow-lg"
             >
               Lihat Detail Lengkap
             </button>

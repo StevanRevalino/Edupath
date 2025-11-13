@@ -84,7 +84,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   return (
     <>
       {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden lg:flex bg-[#6CCBFF] text-white w-64 min-h-screen flex-col rounded-br-2xl rounded-tr-2xl">
+      <div className="hidden lg:flex bg-primary text-white w-64 min-h-screen flex-col rounded-br-2xl rounded-tr-2xl">
         <div className="p-4 flex-1">
           {/* Logo Section */}
           <div className="flex items-center justify-center mb-2">
@@ -146,7 +146,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         {/* Floating Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#6CCBFF] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#4BB8FF] transition-colors duration-200"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#4BB8FF] transition-colors duration-200"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -161,7 +161,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
             />
 
             {/* Mobile Menu */}
-            <div className="fixed bottom-24 right-6 z-50 bg-[#6CCBFF] text-white rounded-2xl shadow-xl p-4 min-w-[280px]">
+            <div className="fixed bottom-24 right-6 z-50 bg-primary text-white rounded-2xl shadow-xl p-4 min-w-[280px]">
               {/* Logo Section */}
               <div className="flex items-center justify-center mb-4">
                 <img

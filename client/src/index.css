@@ -99,19 +99,63 @@ html, body {
 
 :root {
   --radius: 0.625rem;
+  
+  /* ========== EDUPATH COLOR SYSTEM ========== */
+  /* Primary Colors - Blue Theme */
+  --primary: #6CCBFF;           /* Sky Blue */
+  --primary-dark: #00437A;      /* Dark Blue */
+  --primary-light: #0066B3;     /* Medium Blue */
+  --primary-lighter: #3FBBFE;   /* Light Blue */
+  --primary-hover: #003060;     /* Darker Blue for hover */
+  
+  /* Secondary Colors */
+  --secondary: #5AB6E8;         /* Medium Sky Blue */
+  --secondary-light: #D0E5FF;   /* Very Light Blue */
+  --secondary-lighter: #EDF5FF; /* Almost White Blue */
+  
+  /* Accent Colors */
+  --accent: #4FC3F7;            /* Bright Blue */
+  --accent-dark: #00B4D8;       /* Teal Blue */
+  
+  /* Text Colors */
+  --text-primary: #003B73;      /* Dark Blue Text */
+  --text-secondary: #063E6B;    /* Medium Dark Blue */
+  --text-muted: #7E7E7E;        /* Gray Text */
+  --text-dark: #0B0B0B;         /* Almost Black */
+  
+  /* Background Colors */
+  --bg-primary: #FFFFFF;        /* White */
+  --bg-secondary: #F1F1F1;      /* Light Gray */
+  --bg-tertiary: #E9E9E9;       /* Medium Gray */
+  --bg-blue-light: #E6F3FF;     /* Light Blue Background */
+  --bg-blue-lighter: #C7E5FF;   /* Lighter Blue Background */
+  
+  /* Border Colors */
+  --border-primary: #0B4F85;    /* Dark Blue Border */
+  --border-secondary: #003B73;  /* Medium Dark Blue Border */
+  
+  /* Status Colors */
+  --success: #25D366;           /* Green */
+  --warning: #FCAF45;           /* Orange/Yellow */
+  --danger: #780000;            /* Dark Red */
+  --info: #180085;              /* Purple */
+  
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(to right, var(--primary), var(--primary-light));
+  --gradient-secondary: linear-gradient(to right, var(--accent), var(--accent-dark));
+  --gradient-light: linear-gradient(to bottom, var(--secondary-light), #81ABDE, #3975BF);
+  
+  /* ========== SHADCN DEFAULT COLORS ========== */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -173,4 +217,61 @@ html, body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ========== EDUPATH CUSTOM UTILITY CLASSES ========== */
+@layer utilities {
+  /* Background Colors */
+  .bg-primary { background-color: var(--primary); }
+  .bg-primary-dark { background-color: var(--primary-dark); }
+  .bg-primary-light { background-color: var(--primary-light); }
+  .bg-primary-lighter { background-color: var(--primary-lighter); }
+  .bg-secondary { background-color: var(--secondary); }
+  .bg-secondary-light { background-color: var(--secondary-light); }
+  .bg-secondary-lighter { background-color: var(--secondary-lighter); }
+  .bg-accent { background-color: var(--accent); }
+  .bg-accent-dark { background-color: var(--accent-dark); }
+  
+  /* Text Colors */
+  .text-primary { color: var(--primary); }
+  .text-primary-dark { color: var(--primary-dark); }
+  .text-primary-light { color: var(--primary-light); }
+  .text-primary-lighter { color: var(--primary-lighter); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
+  .text-dark { color: var(--text-dark); }
+  
+  /* Border Colors */
+  .border-primary { border-color: var(--primary); }
+  .border-primary-dark { border-color: var(--primary-dark); }
+  .border-primary-light { border-color: var(--border-primary); }
+  .border-secondary { border-color: var(--border-secondary); }
+  
+  /* Hover States */
+  .hover\:bg-primary-hover:hover { background-color: var(--primary-hover); }
+  .hover\:bg-primary-dark:hover { background-color: var(--primary-dark); }
+  .hover\:bg-secondary:hover { background-color: var(--secondary); }
+  
+  /* Gradient Backgrounds */
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-secondary { background: var(--gradient-secondary); }
+  .bg-gradient-light { background: var(--gradient-light); }
+  
+  /* From/To Gradient Utilities */
+  .from-primary { --tw-gradient-from: var(--primary); }
+  .from-primary-dark { --tw-gradient-from: var(--primary-dark); }
+  .from-primary-light { --tw-gradient-from: var(--primary-light); }
+  .from-accent { --tw-gradient-from: var(--accent); }
+  .to-primary { --tw-gradient-to: var(--primary); }
+  .to-primary-dark { --tw-gradient-to: var(--primary-dark); }
+  .to-primary-light { --tw-gradient-to: var(--primary-light); }
+  .to-accent-dark { --tw-gradient-to: var(--accent-dark); }
+  
+  /* Via Gradient Utilities */
+  .via-primary { --tw-gradient-via: var(--primary); }
+  .via-primary-dark { --tw-gradient-via: var(--primary-dark); }
+  .via-primary-light { --tw-gradient-via: var(--primary-light); }
+  .via-primary-lighter { --tw-gradient-via: var(--primary-lighter); }
+  .via-accent { --tw-gradient-via: var(--accent); }
+  .via-accent-dark { --tw-gradient-via: var(--accent-dark); }
 }

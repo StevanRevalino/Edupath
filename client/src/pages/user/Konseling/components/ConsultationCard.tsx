@@ -67,7 +67,7 @@ const ConsultationCard = ({
           ? "bg-gray-50 border-gray-300 opacity-75"
           : consultation.status === "DECLINED"
           ? "bg-red-50 border-red-300 opacity-75"
-          : "bg-blue-50 border-[#00437A] hover:bg-blue-100"
+          : "bg-blue-50 border-primary-dark hover:bg-blue-100"
       }`}
     >
       {/* Badge "Selesai" untuk konsultasi yang tidak aktif dan bukan DECLINED */}

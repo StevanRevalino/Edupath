@@ -40,7 +40,7 @@ const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
       className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer ${
         isSelected
           ? "bg-blue-100 border-blue-500"
-          : "bg-blue-50 border-[#00437A] hover:bg-blue-100"
+          : "bg-blue-50 border-primary-dark hover:bg-blue-100"
       } min-h-[125px]`}
     >
       <div className="flex justify-between items-start mb-2">
