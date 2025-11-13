@@ -753,12 +753,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -780,12 +780,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -807,12 +807,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -834,12 +834,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -861,12 +861,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -888,12 +888,12 @@ const Universitas: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -914,15 +914,15 @@ const Universitas: React.FC = () => {
                               onClick={() =>
                                 handleUniversitasClick(u.university_id)
                               }
-                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 odd:bg-white even:bg-gray-50 ${
+                              className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 odd:bg-white even:bg-gray-50 ${
                                 selectedUniversitas?.university_id ===
                                 u.university_id
-                                  ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
+                                  ? "bg-secondary-light ring-2 ring-inset ring-secondary"
                                   : "bg-white"
                               }`}
                             >
                               <th className="px-6 py-4" scope="row">
-                                <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
+                                <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
                                   {u.nama}
                                 </div>
                                 {u.nama_singkat && (
@@ -944,7 +944,7 @@ const Universitas: React.FC = () => {
                                       u.akreditasi === "Unggul"
                                         ? "bg-green-100 text-green-800 ring-1 ring-green-600/20"
                                         : u.akreditasi === "Baik Sekali"
-                                        ? "bg-blue-100 text-blue-800 ring-1 ring-blue-600/20"
+                                        ? "bg-secondary-light text-primary-dark ring-1 ring-primary/20"
                                         : u.akreditasi === "Baik"
                                         ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20"
                                         : "bg-gray-100 text-gray-800 ring-1 ring-gray-600/20"
@@ -1095,7 +1095,7 @@ const Universitas: React.FC = () => {
                                   : selectedUniversitas.akreditasi ===
                                       "Baik Sekali" ||
                                     selectedUniversitas.akreditasi === "B"
-                                  ? "bg-blue-100 text-blue-800"
+                                  ? "bg-secondary-light text-primary-dark"
                                   : selectedUniversitas.akreditasi === "Baik" ||
                                     selectedUniversitas.akreditasi === "C"
                                   ? "bg-yellow-100 text-yellow-800"
@@ -1132,7 +1132,7 @@ const Universitas: React.FC = () => {
                             <dd>
                               <a
                                 href={`mailto:${selectedUniversitas.email}`}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-primary hover:text-primary-dark"
                               >
                                 {selectedUniversitas.email}
                               </a>
@@ -1148,7 +1148,7 @@ const Universitas: React.FC = () => {
                             <dd>
                               <a
                                 href={`tel:${selectedUniversitas.telepon}`}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-primary hover:text-primary-dark"
                               >
                                 {selectedUniversitas.telepon}
                               </a>
@@ -1210,7 +1210,7 @@ const Universitas: React.FC = () => {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
+                        className="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-light transition"
                       >
                         <svg
                           className="w-4 h-4 mr-2"

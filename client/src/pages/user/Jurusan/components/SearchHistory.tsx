@@ -42,7 +42,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             >
               <button
                 type="button"
-                className="text-left text-sm sm:text-[15px] text-gray-800 hover:text-blue-600 hover:underline flex-1 truncate pr-2 transition-colors"
+                className="text-left text-sm sm:text-[15px] text-gray-800 hover:text-primary hover:underline flex-1 truncate pr-2 transition-colors"
                 onClick={() => onSearchClick(term)}
               >
                 {term}

@@ -22,7 +22,7 @@ const StatisticsCards = ({
       case "red":
         return "text-red-600";
       case "blue":
-        return "text-blue-600";
+        return "text-primary";
       default:
         return "text-gray-800";
     }

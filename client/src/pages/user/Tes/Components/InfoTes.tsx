@@ -63,7 +63,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
 
   const getRiasecTypeColor = (type: RiasecType): string => {
     const colors: Record<RiasecType, string> = {
-      REALISTIC: "bg-blue-500",
+      REALISTIC: "bg-primary",
       INVESTIGATIVE: "bg-purple-500",
       ARTISTIC: "bg-pink-500",
       SOCIAL: "bg-green-500",
@@ -90,7 +90,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
       case "COMPLETED":
         return "text-green-600";
       case "IN_PROGRESS":
-        return "text-blue-600";
+        return "text-primary";
       case "SCHEDULED":
         return "text-yellow-600";
       default:

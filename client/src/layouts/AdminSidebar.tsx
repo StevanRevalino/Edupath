@@ -50,7 +50,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       {
         id: "dashboard",
         label: "Dashboard",
-        icon: "/src/assets/icons/home-icon.png",
+        icon: "/src/assets/icons/admin-dashboard.png",
         badgeCount: 0,
       },
       {

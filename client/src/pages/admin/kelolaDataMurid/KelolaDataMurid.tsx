@@ -254,7 +254,7 @@ const KelolaDataMurid = () => {
       case 10:
         return "bg-green-100 text-green-800";
       case 11:
-        return "bg-blue-100 text-blue-800";
+        return "bg-secondary-light text-primary-dark";
       case 12:
         return "bg-purple-100 text-purple-800";
       default:
@@ -343,21 +343,21 @@ const KelolaDataMurid = () => {
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === 11 ? "text-blue-700" : "text-gray-500"
+                    selectedKelas === 11 ? "text-primary-dark" : "text-gray-500"
                   }`}
                 >
                   Kelas 11
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === 11 ? "text-blue-600" : "text-gray-400"
+                    selectedKelas === 11 ? "text-primary" : "text-gray-400"
                   }`}
                 >
                   {students.filter((s) => s.kelas === 11).length}
                 </span>
               </div>
               {selectedKelas === 11 && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
               )}
             </button>
 
@@ -447,7 +447,7 @@ const KelolaDataMurid = () => {
                   header: "Nama",
                   accessor: (student) => (
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                         <span className="text-white font-semibold text-sm">
                           {(student.firstname || "N/A").charAt(0).toUpperCase()}
                         </span>
@@ -499,7 +499,7 @@ const KelolaDataMurid = () => {
                         e.stopPropagation();
                         handleEdit(student.user_id);
                       }}
-                      className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
                     >
                       Edit
                     </button>
@@ -528,7 +528,7 @@ const KelolaDataMurid = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-lg">
                             {(student.firstname || "N/A")
                               .charAt(0)
@@ -550,7 +550,7 @@ const KelolaDataMurid = () => {
                       </div>
                       <button
                         onClick={() => handleEdit(student.user_id)}
-                        className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+                        className="flex items-center space-x-1 px-3 py-1 bg-primary text-white text-sm rounded-full hover:bg-primary-light transition-colors"
                       >
                         <span>Edit</span>
                       </button>
@@ -671,7 +671,7 @@ const KelolaDataMurid = () => {
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     !editForm.firstname || !editForm.lastname || !editForm.kelas
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                      : "bg-primary text-white hover:bg-primary-light cursor-pointer"
                   }`}
                 >
                   Simpan

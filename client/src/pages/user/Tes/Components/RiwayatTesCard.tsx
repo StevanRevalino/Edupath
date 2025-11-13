@@ -26,7 +26,7 @@ const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
       case "COMPLETED":
         return "bg-green-600";
       case "IN_PROGRESS":
-        return "bg-blue-600";
+        return "bg-primary";
       case "SCHEDULED":
         return "bg-yellow-600";
       default:
@@ -39,8 +39,8 @@ const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
       onClick={() => onClick(tesSession)}
       className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer ${
         isSelected
-          ? "bg-blue-100 border-blue-500"
-          : "bg-blue-50 border-primary-dark hover:bg-blue-100"
+          ? "bg-secondary-light border-secondary"
+          : "bg-secondary-lighter border-primary-dark hover:bg-secondary-light"
       } min-h-[125px]`}
     >
       <div className="flex justify-between items-start mb-2">

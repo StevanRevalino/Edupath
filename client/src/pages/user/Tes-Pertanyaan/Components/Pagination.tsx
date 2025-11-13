@@ -55,7 +55,7 @@ export default function Pagination({
           className={`w-7 h-7 rounded-full flex items-center justify-center font-medium transition-colors ${
             currentPage === i
               ? "bg-primary-lighter text-white"
-              : "bg-transparent text-gray-700 hover:bg-blue-100"
+              : "bg-transparent text-gray-700 hover:bg-secondary-light"
           }`}
         >
           {toRomanNumerals(i)}

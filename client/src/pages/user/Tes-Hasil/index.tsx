@@ -65,7 +65,7 @@ const HasilTes: React.FC = () => {
 
   const getRiasecTypeColor = (type: RiasecType): string => {
     const colors: Record<RiasecType, string> = {
-      REALISTIC: "bg-blue-500",
+      REALISTIC: "bg-primary",
       INVESTIGATIVE: "bg-purple-500",
       ARTISTIC: "bg-pink-500",
       SOCIAL: "bg-green-500",
@@ -323,53 +323,53 @@ const HasilTes: React.FC = () => {
           </div>
 
           {/* RIASEC Type Descriptions */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-2xl text-blue-900 mb-3">
+          <div className="mt-6 p-4 bg-secondary-light border border-secondary rounded-lg">
+            <h4 className="font-semibold text-2xl text-primary-dark mb-3">
               Pengertian Tipe RIASEC
             </h4>
-            <div className="space-y-2 text-sm text-blue-900">
-              <div>
-                <strong className="text-blue-700">R - Realistis:</strong>{" "}
-                <span className="text-blue-800">
+            <div className="space-y-2 text-sm text-primary-dark">
+              <p>
+                <strong className="text-primary-dark">R - Realistis:</strong>{" "}
+                <span className="text-gray-700">
                   Praktis, suka bekerja dengan alat/mesin, aktivitas fisik, dan
                   hasil nyata
                 </span>
-              </div>
-              <div>
+              </p>
+              <p>
                 <strong className="text-purple-700">I - Investigatif:</strong>{" "}
-                <span className="text-blue-800">
+                <span className="text-gray-700">
                   Analitis, suka berpikir, memecahkan masalah, dan melakukan
                   riset
                 </span>
-              </div>
-              <div>
+              </p>
+              <p>
                 <strong className="text-pink-700">A - Artistik:</strong>{" "}
-                <span className="text-blue-800">
+                <span className="text-gray-700">
                   Kreatif, imajinatif, suka mengekspresikan diri melalui seni
                   dan desain
                 </span>
-              </div>
-              <div>
+              </p>
+              <p>
                 <strong className="text-green-700">S - Sosial:</strong>{" "}
-                <span className="text-blue-800">
+                <span className="text-gray-700">
                   Empatik, suka membantu, berinteraksi, mengajar, dan melayani
                   orang lain
                 </span>
-              </div>
-              <div>
+              </p>
+              <p>
                 <strong className="text-orange-700">E - Enterprising:</strong>{" "}
-                <span className="text-blue-800">
+                <span className="text-gray-700">
                   Persuasif, ambisius, suka memimpin, berbisnis, dan
                   mempengaruhi orang
                 </span>
-              </div>
-              <div>
+              </p>
+              <p>
                 <strong className="text-gray-700">C - Konvensional:</strong>{" "}
-                <span className="text-blue-800">
+                <span className="text-gray-700">
                   Terorganisir, detail-oriented, suka bekerja dengan data dan
                   sistem terstruktur
                 </span>
-              </div>
+              </p>
             </div>
           </div>
         </div>
@@ -405,7 +405,7 @@ const HasilTes: React.FC = () => {
                         {rec.nama_prodi}
                       </h3>
                       {rec.jenjang && (
-                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                        <span className="inline-block bg-secondary-light text-primary-dark text-xs px-2 py-1 rounded">
                           {rec.jenjang}
                         </span>
                       )}
@@ -441,7 +441,7 @@ const HasilTes: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate("/jurusan")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-light font-medium"
             >
               Jelajahi Semua Program Studi
             </button>

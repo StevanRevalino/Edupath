@@ -80,21 +80,21 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           <div className="flex flex-col items-center space-y-1.5">
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "active" ? "text-blue-700" : "text-gray-500"
+                activeTab === "active" ? "text-primary-dark" : "text-gray-500"
               }`}
             >
               Active
             </span>
             <span
               className={`text-3xl font-bold transition-colors ${
-                activeTab === "active" ? "text-blue-600" : "text-gray-400"
+                activeTab === "active" ? "text-primary" : "text-gray-400"
               }`}
             >
               {counts.active}
             </span>
           </div>
           {activeTab === "active" && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
           )}
         </button>
 

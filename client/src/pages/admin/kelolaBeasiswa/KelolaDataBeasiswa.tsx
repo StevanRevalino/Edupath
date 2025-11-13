@@ -313,7 +313,7 @@ const KelolaDataBeasiswa = () => {
       <div className="mb-6">
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <Plus size={20} />
           Tambah Beasiswa
@@ -349,7 +349,7 @@ const KelolaDataBeasiswa = () => {
                   href={beasiswa.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline flex items-center gap-1"
+                  className="text-primary hover:text-primary-dark hover:underline flex items-center gap-1"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Lihat Link
@@ -522,7 +522,7 @@ const KelolaDataBeasiswa = () => {
                   </button>
                   <button
                     onClick={handleSubmit}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     disabled={isUploading}
                   >
                     {isUploading

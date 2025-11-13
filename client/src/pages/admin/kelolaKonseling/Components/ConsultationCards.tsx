@@ -122,7 +122,7 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
             {/* View Details Button */}
             <button
               onClick={() => onViewDetails(consultation)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-light transition-colors"
             >
               <Eye className="w-4 h-4" />
               Lihat Detail

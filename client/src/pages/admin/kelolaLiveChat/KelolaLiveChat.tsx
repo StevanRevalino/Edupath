@@ -664,7 +664,7 @@ const KelolaLiveChat = () => {
                 Murid dengan konseling ter-accept ({chatUsers.length})
               </p>
             </div>
-            <MessageCircle className="text-blue-500" size={24} />
+            <MessageCircle className="text-primary" size={24} />
           </div>
 
           {/* Search */}
@@ -700,14 +700,14 @@ const KelolaLiveChat = () => {
                 onClick={() => handleUserSelect(user)}
                 className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                   selectedUser?.user_id === user.user_id
-                    ? "bg-blue-50 border-blue-200"
+                    ? "bg-secondary-light border-secondary"
                     : ""
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   {/* Avatar */}
                   <div className="relative">
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
                       {user.firstname.charAt(0)}
                       {user.lastname.charAt(0)}
                     </div>
@@ -760,7 +760,7 @@ const KelolaLiveChat = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="relative">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
                       {selectedUser.firstname.charAt(0)}
                       {selectedUser.lastname.charAt(0)}
                     </div>
@@ -781,12 +781,12 @@ const KelolaLiveChat = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setIsZoomModalOpen(true)}
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors"
                     title="Buat Zoom Meeting"
                   >
                     <Video size={20} />
                   </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <button className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors">
                     <MoreVertical size={20} />
                   </button>
                 </div>
@@ -839,7 +839,7 @@ const KelolaLiveChat = () => {
                           // Special styling for Zoom meeting messages
                           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 shadow-md">
                             <div className="flex items-start gap-3">
-                              <div className="bg-blue-500 p-2 rounded-lg flex-shrink-0">
+                              <div className="bg-primary p-2 rounded-lg flex-shrink-0">
                                 <svg
                                   className="w-6 h-6 text-white"
                                   fill="none"
@@ -855,7 +855,7 @@ const KelolaLiveChat = () => {
                                 </svg>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="font-bold text-blue-900 text-base mb-2 flex items-center gap-2">
+                                <div className="font-bold text-primary-dark text-base mb-2 flex items-center gap-2">
                                   🎥 Zoom Meeting Dibuat
                                 </div>
                                 {/* Parse and display meeting details */}
@@ -901,7 +901,7 @@ const KelolaLiveChat = () => {
                                           rel="noopener noreferrer"
                                           className="block mb-2"
                                         >
-                                          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                          <button className="w-full bg-primary hover:bg-primary-light text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
                                             <svg
                                               className="w-5 h-5"
                                               fill="none"
@@ -953,7 +953,7 @@ const KelolaLiveChat = () => {
                           <div
                             className={`p-3 rounded-lg ${
                               isMine
-                                ? "bg-blue-500 text-white"
+                                ? "bg-primary text-white"
                                 : "bg-gray-200 text-gray-800"
                             }`}
                           >
@@ -1018,7 +1018,7 @@ const KelolaLiveChat = () => {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage || sendingMessage}
-                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Kirim gambar"
                 >
                   <ImageIcon size={20} />
@@ -1046,7 +1046,7 @@ const KelolaLiveChat = () => {
                     sendingMessage ||
                     uploadingImage
                   }
-                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
+                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
                 >
                   {uploadingImage ? (
                     <Loader className="animate-spin" size={20} />

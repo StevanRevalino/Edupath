@@ -138,7 +138,7 @@ const KelolaDataKonseling = () => {
       case "DECLINED":
         return "text-red-500 font-semibold";
       case "COMPLETED":
-        return "text-blue-500 font-semibold";
+        return "text-primary font-semibold";
       default:
         return "text-gray-500 font-semibold";
     }

@@ -122,7 +122,7 @@ export default function Login() {
       <div className="flex justify-end">
         <a
           href="#"
-          className="text-xs sm:text-sm text-blue-600 underline"
+          className="text-xs sm:text-sm text-primary hover:text-primary-dark underline"
           onClick={(e) => {
             e.preventDefault();
             setOpenModalVerifyOtp(true);
@@ -143,7 +143,7 @@ export default function Login() {
         {/* Daftar Link */}
         <p className="text-center text-xs sm:text-sm">
           Tidak punya akun?{" "}
-          <a href="/register" className="text-blue-600 underline">
+          <a href="/register" className="text-primary hover:text-primary-dark underline">
             Daftar!
           </a>
         </p>

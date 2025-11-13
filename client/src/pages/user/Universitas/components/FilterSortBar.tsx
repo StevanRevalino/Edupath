@@ -49,14 +49,14 @@ const FilterSortBar: React.FC<FilterSortBarProps> = ({
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-all ${
             showFilters
-              ? "bg-blue-50 border-blue-500 text-blue-700"
+              ? "bg-secondary-light border-secondary text-primary-dark"
               : "bg-white border-gray-300 text-gray-700 hover:border-blue-400"
           }`}
         >
           <Filter size={18} />
           <span>Filter</span>
           {activeFilterCount > 0 && (
-            <span className="ml-1 bg-blue-500 text-white text-xs rounded-full px-2 py-0.5">
+            <span className="ml-1 bg-primary text-white text-xs rounded-full px-2 py-0.5">
               {activeFilterCount}
             </span>
           )}

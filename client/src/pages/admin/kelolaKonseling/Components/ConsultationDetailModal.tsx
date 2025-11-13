@@ -70,7 +70,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Detail Konseling
           </h2>
-          <div className="h-1 w-20 bg-blue-500 rounded-full"></div>
+          <div className="h-1 w-20 bg-primary rounded-full"></div>
         </div>
 
         {/* Modal Content */}
@@ -226,7 +226,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                 consultation.admin_notes.includes("[DIBATALKAN OLEH MURID]")
                   ? "bg-red-50 border border-red-200"
                   : consultation.admin_notes.includes("[DIJADWALKAN ULANG]")
-                  ? "bg-blue-50 border border-blue-200"
+                  ? "bg-secondary-light border border-secondary"
                   : consultation.status === "DECLINED"
                   ? "bg-red-50 border border-red-200"
                   : "bg-gray-50"
@@ -239,7 +239,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                   ) || consultation.status === "DECLINED"
                     ? "text-red-700"
                     : consultation.admin_notes.includes("[DIJADWALKAN ULANG]")
-                    ? "text-blue-700"
+                    ? "text-primary-dark"
                     : "text-gray-500"
                 }`}
               >
@@ -258,7 +258,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                   ) || consultation.status === "DECLINED"
                     ? "text-red-700"
                     : consultation.admin_notes.includes("[DIJADWALKAN ULANG]")
-                    ? "text-blue-700"
+                    ? "text-primary-dark"
                     : "text-gray-700"
                 }`}
               >
@@ -276,7 +276,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                 consultation.notes.includes("[DIBATALKAN OLEH MURID]")
                   ? "bg-red-50 border border-red-200"
                   : consultation.notes.includes("[DIJADWALKAN ULANG]")
-                  ? "bg-blue-50 border border-blue-200"
+                  ? "bg-secondary-light border border-secondary"
                   : consultation.status === "DECLINED"
                   ? "bg-red-50 border border-red-200"
                   : "bg-gray-50"
@@ -288,7 +288,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                   consultation.status === "DECLINED"
                     ? "text-red-700"
                     : consultation.notes.includes("[DIJADWALKAN ULANG]")
-                    ? "text-blue-700"
+                    ? "text-primary-dark"
                     : "text-gray-500"
                 }`}
               >
@@ -306,7 +306,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
                   consultation.status === "DECLINED"
                     ? "text-red-700"
                     : consultation.notes.includes("[DIJADWALKAN ULANG]")
-                    ? "text-blue-700"
+                    ? "text-primary-dark"
                     : "text-gray-700"
                 }`}
               >
@@ -352,7 +352,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
           )}
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors font-medium"
           >
             Tutup
           </button>

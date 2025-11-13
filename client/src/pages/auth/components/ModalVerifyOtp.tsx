@@ -112,7 +112,7 @@ export default function OTPModal({
           <button
             onClick={onResend}
             disabled={timer > 0}
-            className={`font-semibold text-blue-600 hover:underline disabled:opacity-40 cursor-pointer ${
+            className={`font-semibold text-primary hover:text-primary-dark hover:underline disabled:opacity-40 cursor-pointer ${
               timer > 0 ? "disabled:cursor-not-allowed" : ""
             }`}
           >

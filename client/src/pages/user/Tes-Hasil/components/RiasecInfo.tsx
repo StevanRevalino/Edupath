@@ -15,7 +15,7 @@ const RiasecInfo: React.FC = () => {
       <div className="space-y-6 text-gray-700">
         <p className="text-lg leading-relaxed text-center max-w-3xl mx-auto">
           Tes ini menggunakan{" "}
-          <span className="font-bold text-blue-600">Model RIASEC Holland</span>{" "}
+          <span className="font-bold text-primary">Model RIASEC Holland</span>{" "}
           untuk mengidentifikasi 6 tipe kepribadian kariermu dan memberikan
           rekomendasi program studi yang sesuai.
         </p>
@@ -27,17 +27,17 @@ const RiasecInfo: React.FC = () => {
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             {/* Realistic */}
-            <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-black text-2xl flex-shrink-0">
+            <div className="bg-secondary-light border-2 border-secondary rounded-lg p-5">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-black text-2xl flex-shrink-0">
                   R
                 </div>
                 <div>
-                  <h4 className="font-bold text-blue-900 text-lg">Realistic</h4>
-                  <p className="text-blue-700 text-sm">Realistis</p>
+                  <h4 className="font-bold text-primary-dark text-lg">Realistic</h4>
+                  <p className="text-primary text-sm">Realistis</p>
                 </div>
               </div>
-              <p className="text-blue-900 text-sm leading-relaxed">
+              <p className="text-gray-700 text-sm leading-relaxed">
                 People with <strong>Mechanical and athletic abilities</strong>.
                 Enjoy working outdoors with tools and objects; prefer dealing
                 with things rather than people.
@@ -148,7 +148,7 @@ const RiasecInfo: React.FC = () => {
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 mb-2">
+              <div className="text-2xl font-bold text-primary mb-2">
                 60 Pertanyaan
               </div>
               <p className="text-gray-700">

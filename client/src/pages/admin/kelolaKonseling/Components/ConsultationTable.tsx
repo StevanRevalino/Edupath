@@ -51,7 +51,7 @@ const ConsultationTable = ({
           header: "Murid",
           accessor: (consultation) => (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-semibold text-sm">
                   {consultation.murid.firstname.charAt(0).toUpperCase()}
                   {consultation.murid.lastname.charAt(0).toUpperCase()}
@@ -77,7 +77,7 @@ const ConsultationTable = ({
           accessor: (consultation) => (
             <div className="flex flex-col gap-1">
               <div className="flex items-center text-sm text-gray-700">
-                <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                <Calendar className="w-4 h-4 mr-2 text-primary" />
                 {new Date(consultation.consultation_date).toLocaleDateString(
                   "id-ID",
                   {
@@ -88,7 +88,7 @@ const ConsultationTable = ({
                 )}
               </div>
               <div className="flex items-center text-sm text-gray-700">
-                <Clock className="w-4 h-4 mr-2 text-blue-600" />
+                <Clock className="w-4 h-4 mr-2 text-primary" />
                 {new Date(consultation.consultation_date).toLocaleTimeString(
                   "id-ID",
                   {
@@ -129,7 +129,7 @@ const ConsultationTable = ({
                   e.stopPropagation();
                   onViewDetails(consultation);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center gap-1"
               >
                 <Eye size={14} />
                 Detail

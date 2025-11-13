@@ -100,7 +100,7 @@ const Jurusan: React.FC = () => {
   const badgeClass = (value?: string | null) => {
     const v = (value || "").toLowerCase();
     if (v === "unggul" || v === "a") return "bg-green-100 text-green-800";
-    if (v === "baik sekali" || v === "b") return "bg-blue-100 text-blue-800";
+    if (v === "baik sekali" || v === "b") return "bg-secondary-light text-primary-dark";
     if (v === "baik" || v === "c") return "bg-yellow-100 text-yellow-800";
     return "bg-gray-100 text-gray-800";
   };
@@ -653,12 +653,12 @@ const Jurusan: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -680,12 +680,12 @@ const Jurusan: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -707,12 +707,12 @@ const Jurusan: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -734,12 +734,12 @@ const Jurusan: React.FC = () => {
                                 sortOrder === "asc" ? (
                                   <ChevronUp
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 ) : (
                                   <ChevronDown
                                     size={14}
-                                    className="text-blue-600"
+                                    className="text-primary"
                                   />
                                 )
                               ) : (
@@ -762,14 +762,14 @@ const Jurusan: React.FC = () => {
                               onClick={() =>
                                 fetchProdiDetail(p.prodi_id, index)
                               }
-                              className={`hover:bg-blue-50/50 cursor-pointer transition-all duration-200 ${
+                              className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 ${
                                 selectedRowIndex === index
-                                  ? "bg-blue-50 ring-2 ring-inset ring-blue-200"
+                                  ? "bg-secondary-light ring-2 ring-inset ring-secondary"
                                   : "bg-white"
                               }`}
                             >
                               <th className="px-6 py-4" scope="row">
-                                <div className="font-semibold text-blue-700 hover:text-blue-900 transition-colors">
+                                <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
                                   {p.nama_prodi}
                                 </div>
                                 {p.bidang && (
@@ -780,7 +780,7 @@ const Jurusan: React.FC = () => {
                               </th>
                               <td className="px-6 py-4">
                                 {p.jenjang ? (
-                                  <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 ring-1 ring-blue-600/20">
+                                  <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
                                     {p.jenjang}
                                   </span>
                                 ) : (
@@ -907,7 +907,7 @@ const Jurusan: React.FC = () => {
                         <div>
                           <dt className="font-medium text-gray-500">Jenjang</dt>
                           <dd>
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-secondary-light text-primary-dark">
                               {selectedProdi.jenjang}
                             </span>
                           </dd>

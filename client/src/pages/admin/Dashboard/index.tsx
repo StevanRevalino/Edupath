@@ -216,9 +216,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       {
         label: "Konsultasi",
         data: weeklyData,
-        backgroundColor: "var(--primary)",
-        borderColor: "var(--primary-dark)",
-        borderWidth: 1,
+        backgroundColor: "#6CCBFF",
+        borderWidth: 0.5,
       },
     ],
   };
@@ -281,9 +280,9 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Murid</p>
+              <p className="text-white opacity-90 text-sm font-medium">Total Murid</p>
               <h3 className="text-3xl font-bold mt-2">{stats.totalStudents}</h3>
-              <p className="text-blue-100 text-xs mt-2">Terdaftar aktif</p>
+              <p className="text-white opacity-75 text-xs mt-2">Terdaftar aktif</p>
             </div>
             <div className="bg-white/20 p-3 rounded-lg">
               <Users className="w-8 h-8" />
@@ -352,7 +351,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <TrendingUp className="w-5 h-5 text-primary" />
                 Konsultasi Mingguan
               </h3>
               <div className="flex items-center gap-2">
@@ -393,7 +392,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           {/* Upcoming Consultations */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
+              <Clock className="w-5 h-5 text-primary" />
               Jadwal Konseling Mendatang ({upcomingConsultations.length})
             </h3>
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -406,14 +405,14 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                 upcomingConsultations.map((consultation) => (
                   <div
                     key={consultation.consultation_id}
-                    className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    className="flex items-start gap-4 p-4 bg-secondary-light border border-secondary rounded-lg hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => {
                       if (setActiveTab) {
                         setActiveTab("kelola-data-konseling");
                       }
                     }}
                   >
-                    <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">
+                    <div className="bg-primary text-white p-3 rounded-lg flex-shrink-0">
                       <div className="text-center">
                         <div className="text-2xl font-bold">
                           {
@@ -439,7 +438,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                         {consultation.topic}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-xs">
-                        <span className="text-blue-600 font-medium">
+                        <span className="text-primary font-medium">
                           <Clock className="w-3 h-3 inline mr-1" />
                           {formatTime(consultation.consultation_date)}
                         </span>
@@ -467,7 +466,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           {/* Calendar */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
+              <Clock className="w-5 h-5 text-primary" />
               Kalender
             </h3>
             <div className="space-y-4">
@@ -560,7 +559,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                           isSelected
                             ? "bg-primary-dark text-white font-semibold"
                             : isToday
-                            ? "bg-blue-100 text-primary-dark font-semibold"
+                            ? "bg-secondary-light text-primary-dark font-semibold"
                             : "hover:bg-gray-100 text-gray-700"
                         }`}
                         title={
@@ -593,7 +592,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
               {/* Calendar Legend */}
               <div className="flex items-center gap-4 text-xs text-gray-600 pt-2 border-t border-gray-100">
                 <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-blue-100 rounded"></div>
+                  <div className="w-3 h-3 bg-secondary-light rounded"></div>
                   <span>Hari ini</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -639,7 +638,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                         {consultationsOnSelectedDate.map((consultation) => (
                           <div
                             key={consultation.consultation_id}
-                            className="bg-blue-50 border-l-4 border-primary-dark p-2 rounded"
+                            className="bg-secondary-lighter border-l-4 border-primary-dark p-2 rounded"
                           >
                             <p className="text-xs font-semibold text-gray-900">
                               {consultation.murid_name}
@@ -669,7 +668,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           {/* Recent Chats */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-blue-600" />
+              <MessageSquare className="w-5 h-5 text-primary" />
               Chat Terbaru
             </h3>
             <div className="space-y-3 max-h-[300px] overflow-y-auto">

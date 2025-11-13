@@ -38,7 +38,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
       case "CONSULTATION_REJECTED":
         return <AlertCircle className="w-5 h-5 text-red-500" />;
       case "CHAT_MESSAGE":
-        return <MessageCircle className="w-5 h-5 text-blue-500" />;
+        return <MessageCircle className="w-5 h-5 text-primary" />;
       case "ZOOM_MEETING":
         return <Video className="w-5 h-5 text-purple-500" />;
       default:
@@ -55,7 +55,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
       case "CONSULTATION_REJECTED":
         return "bg-red-50";
       case "CHAT_MESSAGE":
-        return "bg-blue-50";
+        return "bg-secondary-lighter";
       case "ZOOM_MEETING":
         return "bg-purple-50";
       default:
@@ -94,7 +94,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
       {/* Bell Icon with Badge */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-blue-50 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-secondary-lighter transition-colors"
         title="Notifikasi"
       >
         <Bell className="w-6 h-6 text-gray-700" />
@@ -120,7 +120,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
             <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-blue-500" />
+                  <Bell className="w-5 h-5 text-primary" />
                   Notifikasi
                 </h3>
                 <button
@@ -133,7 +133,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
 
               {/* Stats */}
               <div className="flex gap-2 text-xs">
-                <span className="px-2 py-1 bg-white text-blue-700 rounded-full font-semibold">
+                <span className="px-2 py-1 bg-white text-primary-dark rounded-full font-semibold">
                   Total: {stats.total}
                 </span>
                 <span className="px-2 py-1 bg-red-500 text-white rounded-full font-semibold">
@@ -145,7 +145,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
               {stats.unread > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="mt-2 w-full px-3 py-2 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 shadow-sm"
+                  className="mt-2 w-full px-3 py-2 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm"
                 >
                   <CheckCheck className="w-4 h-4" />
                   Tandai Semua Dibaca

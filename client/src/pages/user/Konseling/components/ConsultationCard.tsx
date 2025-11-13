@@ -49,7 +49,7 @@ const ConsultationCard = ({
       case "COMPLETED":
         return "bg-green-600";
       case "ACCEPTED":
-        return "bg-blue-600";
+        return "bg-primary";
       case "PENDING":
         return "bg-yellow-600";
       default:
@@ -62,12 +62,12 @@ const ConsultationCard = ({
       onClick={() => onClick(consultation)}
       className={`border-2 rounded-tl-3xl rounded-br-3xl p-4 transition-colors cursor-pointer relative ${
         isSelected
-          ? "bg-blue-100 border-blue-500"
+          ? "bg-secondary-light border-secondary"
           : !consultation.is_active && consultation.status !== "DECLINED"
           ? "bg-gray-50 border-gray-300 opacity-75"
           : consultation.status === "DECLINED"
           ? "bg-red-50 border-red-300 opacity-75"
-          : "bg-blue-50 border-primary-dark hover:bg-blue-100"
+          : "bg-secondary-lighter border-primary-dark hover:bg-secondary-light"
       }`}
     >
       {/* Badge "Selesai" untuk konsultasi yang tidak aktif dan bukan DECLINED */}

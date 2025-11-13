@@ -105,7 +105,7 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-blue-500 text-white rounded-t-lg">
+        <div className="flex items-center justify-between p-4 bg-primary text-white rounded-t-lg">
           <div className="flex items-center space-x-3">
             <MessageCircle size={20} />
             <div>
@@ -164,7 +164,7 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
                           className={`p-2 rounded-lg text-sm ${
                             message.isFromAdmin
                               ? "bg-gray-200 text-gray-800"
-                              : "bg-blue-500 text-white"
+                              : "bg-primary text-white"
                           }`}
                         >
                           <p>{message.message}</p>
@@ -203,7 +203,7 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim() || sendingMessage}
-                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send size={16} />
                 </button>

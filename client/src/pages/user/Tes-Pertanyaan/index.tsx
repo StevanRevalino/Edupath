@@ -141,7 +141,7 @@ const TesPertanyaan = () => {
           <p className="text-red-500 mb-4">{error}</p>
           <button
             onClick={loadQuestions}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-light"
           >
             Coba Lagi
           </button>
@@ -177,13 +177,13 @@ const TesPertanyaan = () => {
             {startIndex + 1}-{Math.min(endIndex, questions.length)} dari{" "}
             {questions.length}
           </p>
-          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
+          <div className="mt-4 bg-secondary-light border border-secondary rounded-lg p-4">
+            <p className="text-sm text-primary-dark">
               <strong>Petunjuk:</strong> Jawab setiap pertanyaan dengan jujur
               sesuai dengan diri Anda. Tidak ada jawaban benar atau salah.
               Gunakan skala 1-5:
             </p>
-            <ul className="text-sm text-blue-700 mt-2 ml-4 list-disc">
+            <ul className="text-sm text-primary-dark mt-2 ml-4 list-disc">
               <li>1 = Sangat Tidak Setuju</li>
               <li>2 = Tidak Setuju</li>
               <li>3 = Netral</li>
@@ -203,7 +203,7 @@ const TesPertanyaan = () => {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+              className="bg-primary h-3 rounded-full transition-all duration-300"
               style={{ width: `${(answers.size / questions.length) * 100}%` }}
             />
           </div>

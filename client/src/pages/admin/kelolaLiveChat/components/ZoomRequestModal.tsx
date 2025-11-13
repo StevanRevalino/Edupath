@@ -79,8 +79,8 @@ const ZoomRequestModal = ({
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="bg-blue-100 p-2 rounded-lg">
-              <Video className="text-blue-600" size={24} />
+            <div className="bg-secondary-light p-2 rounded-lg">
+              <Video className="text-primary" size={24} />
             </div>
             <h2 className="text-xl font-bold text-gray-800">
               Buat Zoom Meeting
@@ -97,7 +97,7 @@ const ZoomRequestModal = ({
         {/* Content */}
         <div className="p-6">
           {/* Student Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="bg-secondary-light border border-secondary rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600 mb-1">
               Meeting akan dikirim ke:
             </p>
@@ -268,7 +268,7 @@ const ZoomRequestModal = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-light font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 {isSubmitting ? (
                   <>

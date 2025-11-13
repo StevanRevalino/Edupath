@@ -203,7 +203,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           <div className="flex items-center space-x-3">
             <button
               onClick={onBack}
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-light rounded-lg transition-colors"
             >
               <ArrowLeft size={20} />
             </button>
@@ -218,7 +218,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           {/* Expand/Collapse Button */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-light rounded-lg transition-colors"
             title={isExpanded ? "Perkecil" : "Perbesar"}
           >
             {isExpanded ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
@@ -276,7 +276,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                       // Special styling for Zoom meeting messages
                       <div className="bg-gray-200 border-2 border-gray-300 rounded-xl p-4 shadow-md">
                         <div className="flex items-start gap-3">
-                          <div className="bg-blue-500 p-2 rounded-lg flex-shrink-0">
+                          <div className="bg-primary-light p-2 rounded-lg flex-shrink-0">
                             <svg
                               className="w-6 h-6 text-white"
                               fill="none"
@@ -292,7 +292,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                             </svg>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-bold text-blue-900 text-base mb-2 flex items-center gap-2">
+                            <div className="font-bold text-primary-dark text-base mb-2 flex items-center gap-2">
                               🎥 Zoom Meeting Dibuat
                             </div>
                             {/* Parse and display meeting details */}
@@ -336,7 +336,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                                       rel="noopener noreferrer"
                                       className="block mb-2"
                                     >
-                                      <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                      <button className="w-full bg-primary hover:bg-primary-light text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
                                         <svg
                                           className="w-5 h-5"
                                           fill="none"
@@ -393,7 +393,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                       <div
                         className={`p-3 rounded-lg ${
                           isMine
-                            ? "bg-blue-500 text-white"
+                            ? "bg-primary text-white"
                             : "bg-gray-200 text-gray-800"
                         }`}
                       >
@@ -458,7 +458,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingImage || sendingMessage}
-              className="p-2 bg-secondary-light text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="p-2 bg-secondary-light text-gray-600 hover:text-primary hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               title="Kirim gambar"
             >
               <ImageIcon size={25} />
@@ -486,7 +486,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                 sendingMessage ||
                 uploadingImage
               }
-              className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px] min-h-[40px]"
+              className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px] min-h-[40px]"
             >
               {uploadingImage ? (
                 <Loader className="animate-spin" size={20} />

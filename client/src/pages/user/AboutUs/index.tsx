@@ -191,7 +191,7 @@ export default function AboutUs() {
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
               "Langkah kecil hari ini menentukan besar masa depanmu nanti"
             </p>
-            <p className="text-blue-100 text-sm sm:text-base">- Tim EduPath</p>
+            <p className="text-white opacity-90 text-sm sm:text-base">- Tim EduPath</p>
           </div>
         </div>
       </div>
