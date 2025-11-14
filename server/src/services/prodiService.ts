@@ -10,14 +10,19 @@ export class ProdiService {
   // Get all prodi with optional search and pagination
   async getAllProdiLocal({
     search = "",
+    jenjang = "",
+    akreditasi = "",
     skip = 0,
     take = 50,
   }: {
     search?: string;
+    jenjang?: string;
+    akreditasi?: string;
     skip?: number;
     take?: number;
   }) {
     try {
+      // If search keyword exists, use search function (limit 15)
       if (search && search.trim().length > 0) {
         const searchResults = await this.searchProdiLocal(search.trim(), take);
         return {
@@ -73,7 +78,21 @@ export class ProdiService {
         })
       );
 
-      const filteredResults = detailedProdi.filter(Boolean);
+      let filteredResults = detailedProdi.filter(
+        (p): p is NonNullable<typeof p> => p !== null
+      );
+
+      // Apply jenjang filter if specified
+      if (jenjang && jenjang !== "Semua") {
+        filteredResults = filteredResults.filter((p) => p.jenjang === jenjang);
+      }
+
+      // Apply akreditasi filter if specified
+      if (akreditasi && akreditasi !== "Semua") {
+        filteredResults = filteredResults.filter(
+          (p) => p.akreditasi === akreditasi
+        );
+      }
 
       return {
         data: filteredResults,

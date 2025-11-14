@@ -60,6 +60,8 @@ const Jurusan: React.FC = () => {
   const [selectedAkreditasi, setSelectedAkreditasi] = useState<string>("Semua");
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // ===== Search Cache =====
   const searchCacheRef = useRef<Map<string, ProdiItem[]>>(new Map());
@@ -152,46 +154,83 @@ const Jurusan: React.FC = () => {
     []
   );
 
-  // Fetch default prodi (top N prodi)
-  const fetchDefaultProdi = useCallback(async () => {
-    const currentId = ++searchRequestIdRef.current;
-    setLoading(true);
-    setError("");
+  // Unified fetch function:
+  // 1. Search keyword -> limit 15 best matches
+  // 2. Filter only (no search) -> get all matching data
+  // 3. No filter, no search -> limit 15 ascending
+  const fetchProdiWithFilters = useCallback(
+    async (searchKeyword: string = "") => {
+      const currentId = ++searchRequestIdRef.current;
+      setLoading(true);
+      setError("");
 
-    try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const url = `${API_URL}/api/prodi`;
-      const token = TokenManager.getToken();
-      const res = await axios.get(url, {
-        params: { limit: 15 }, // Get top 15 prodi for initial display
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      try {
+        const API_URL =
+          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+        const token = TokenManager.getToken();
 
-      if (currentId !== searchRequestIdRef.current) return;
+        const hasSearch = searchKeyword.trim().length > 0;
+        const hasFilter =
+          selectedJenjang !== "Semua" || selectedAkreditasi !== "Semua";
 
-      const data = (res.data?.data || []) as ProdiItem[];
-      // Filter: Only show prodi with universitas.nama
-      const filtered = data.filter((p) => p.universitas?.nama);
-      setResults(filtered);
-      setHasSearched(true);
-    } catch (e: any) {
-      if (currentId !== searchRequestIdRef.current) return;
-      if (e?.response?.status === 401 || e?.response?.status === 403) {
-        TokenManager.logout();
-        window.location.href = "/login";
-        return;
+        let url: string;
+        let params: any = {};
+
+        if (hasSearch) {
+          // Search with keyword -> use search endpoint (limit 15)
+          url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
+            searchKeyword.trim()
+          )}`;
+        } else {
+          // No search -> use main endpoint
+          url = `${API_URL}/api/prodi`;
+
+          // Send filters to backend
+          if (selectedJenjang !== "Semua") {
+            params.jenjang = selectedJenjang;
+          }
+          if (selectedAkreditasi !== "Semua") {
+            params.akreditasi = selectedAkreditasi;
+          }
+
+          // If no filter and no search, limit to 15
+          if (!hasFilter) {
+            params.limit = 15;
+          }
+          // If filter active, backend will return all matching data
+        }
+
+        const res = await axios.get(url, {
+          params,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (currentId !== searchRequestIdRef.current) return;
+
+        const data = (res.data?.data || []) as ProdiItem[];
+        const filtered = data.filter((p) => p.universitas?.nama);
+
+        setResults(filtered);
+        setHasSearched(true);
+      } catch (e: any) {
+        if (currentId !== searchRequestIdRef.current) return;
+        if (e?.response?.status === 401 || e?.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+          return;
+        }
+        const msg =
+          e?.response?.data?.message || e?.message || "Terjadi kesalahan";
+        setError(msg);
+        setResults([]);
+      } finally {
+        if (currentId === searchRequestIdRef.current) {
+          setLoading(false);
+        }
       }
-      const msg =
-        e?.response?.data?.message || e?.message || "Terjadi kesalahan";
-      setError(msg);
-      setResults([]);
-    } finally {
-      if (currentId === searchRequestIdRef.current) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    },
+    [selectedJenjang, selectedAkreditasi]
+  );
 
   const search = useCallback(
     async (q: string, autoSelectExactMatch = false) => {
@@ -337,21 +376,13 @@ const Jurusan: React.FC = () => {
   }, [results]);
 
   // ===== Filtered and Sorted Results =====
-  const filteredAndSortedResults = useMemo(() => {
-    let filtered = [...results];
+  // Sorted Results (filter sudah dihandle di backend)
+  const sortedResults = useMemo(() => {
+    let sorted = [...results];
 
-    // Apply filters
-    if (selectedJenjang !== "Semua") {
-      filtered = filtered.filter((p) => p.jenjang === selectedJenjang);
-    }
-
-    if (selectedAkreditasi !== "Semua") {
-      filtered = filtered.filter((p) => p.akreditasi === selectedAkreditasi);
-    }
-
-    // Apply sorting
+    // Apply sorting only (filter already done by backend)
     if (sortBy) {
-      filtered.sort((a, b) => {
+      sorted.sort((a, b) => {
         let aVal: any = a[sortBy as keyof ProdiItem];
         let bVal: any = b[sortBy as keyof ProdiItem];
 
@@ -375,8 +406,17 @@ const Jurusan: React.FC = () => {
       });
     }
 
-    return filtered;
-  }, [results, selectedJenjang, selectedAkreditasi, sortBy, sortOrder]);
+    return sorted;
+  }, [results, sortBy, sortOrder]);
+
+  // Pagination
+  const paginatedResults = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedResults.slice(startIndex, endIndex);
+  }, [sortedResults, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sortedResults.length / itemsPerPage);
 
   // Reset filters function
   const handleResetFilters = useCallback(() => {
@@ -384,7 +424,18 @@ const Jurusan: React.FC = () => {
     setSelectedAkreditasi("Semua");
     setSortBy("");
     setSortOrder("asc");
-  }, []);
+    setCurrentPage(1);
+    // Trigger refetch with no filters
+    fetchProdiWithFilters(query);
+  }, [fetchProdiWithFilters, query]);
+
+  // When filter changes, refetch with new filters
+  useEffect(() => {
+    if (hasSearched) {
+      setCurrentPage(1); // Reset to first page
+      fetchProdiWithFilters(query);
+    }
+  }, [selectedJenjang, selectedAkreditasi]); // Only trigger on filter change
 
   // Handle table header click for sorting
   const handleHeaderClick = useCallback(
@@ -417,18 +468,17 @@ const Jurusan: React.FC = () => {
       setHasSearched(true);
       search(selectedMajorName, true);
     } else {
-      // Load default prodi on mount
-      fetchDefaultProdi();
+      // Load default prodi on mount (15 items)
+      fetchProdiWithFilters("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
-  // Auto-reload default prodi when query is cleared
+  // Auto-reload when query is cleared
   useEffect(() => {
-    if (query.trim() === "" && hasSearched && results.length > 0) {
-      // User cleared the search, reload defaults
+    if (query.trim() === "" && hasSearched) {
       setHasSearched(false);
-      fetchDefaultProdi();
+      fetchProdiWithFilters("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]); // Only depend on query changes
@@ -640,216 +690,421 @@ const Jurusan: React.FC = () => {
 
                   {/* Results Table with Sortable Headers - Modern Design */}
                   <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white relative">
-                    <table className="w-full text-left text-sm rtl:text-right text-gray-500">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase">
-                        <tr className="border-b-2 border-gray-200">
-                          <th
-                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                            onClick={() => handleHeaderClick("nama_prodi")}
-                            scope="col"
-                          >
-                            <div className="flex items-center gap-1.5">
-                              Nama Program Studi
-                              {sortBy === "nama_prodi" ? (
-                                sortOrder === "asc" ? (
-                                  <ChevronUp
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                ) : (
-                                  <ChevronDown
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                )
-                              ) : (
-                                <ChevronsUpDown
-                                  size={14}
-                                  className="text-gray-400"
-                                />
-                              )}
-                            </div>
-                          </th>
-                          <th
-                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                            onClick={() => handleHeaderClick("jenjang")}
-                            scope="col"
-                          >
-                            <div className="flex items-center gap-1.5">
-                              Jenjang
-                              {sortBy === "jenjang" ? (
-                                sortOrder === "asc" ? (
-                                  <ChevronUp
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                ) : (
-                                  <ChevronDown
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                )
-                              ) : (
-                                <ChevronsUpDown
-                                  size={14}
-                                  className="text-gray-400"
-                                />
-                              )}
-                            </div>
-                          </th>
-                          <th
-                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                            onClick={() => handleHeaderClick("universitas")}
-                            scope="col"
-                          >
-                            <div className="flex items-center gap-1.5">
-                              Universitas
-                              {sortBy === "universitas" ? (
-                                sortOrder === "asc" ? (
-                                  <ChevronUp
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                ) : (
-                                  <ChevronDown
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                )
-                              ) : (
-                                <ChevronsUpDown
-                                  size={14}
-                                  className="text-gray-400"
-                                />
-                              )}
-                            </div>
-                          </th>
-                          <th
-                            className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
-                            onClick={() => handleHeaderClick("akreditasi")}
-                            scope="col"
-                          >
-                            <div className="flex items-center gap-1.5">
-                              Akreditasi
-                              {sortBy === "akreditasi" ? (
-                                sortOrder === "asc" ? (
-                                  <ChevronUp
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                ) : (
-                                  <ChevronDown
-                                    size={14}
-                                    className="text-primary"
-                                  />
-                                )
-                              ) : (
-                                <ChevronsUpDown
-                                  size={14}
-                                  className="text-gray-400"
-                                />
-                              )}
-                            </div>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {filteredAndSortedResults.length > 0 ? (
-                          filteredAndSortedResults.map((p, index) => (
-                            <tr
-                              key={`${p.prodi_id}-${
-                                p.universitas?.university_id || "no-univ"
-                              }-${index}`}
-                              onClick={() =>
-                                fetchProdiDetail(p.prodi_id, index)
-                              }
-                              className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 ${
-                                selectedRowIndex === index
-                                  ? "bg-secondary-light ring-2 ring-inset ring-secondary"
-                                  : "bg-white"
-                              }`}
+                    <div className="max-h-[600px] overflow-y-auto">
+                      <table className="w-full text-left text-sm rtl:text-right text-gray-500">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase">
+                          <tr className="border-b-2 border-gray-200">
+                            <th
+                              className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                              onClick={() => handleHeaderClick("nama_prodi")}
+                              scope="col"
                             >
-                              <th className="px-6 py-4" scope="row">
-                                <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
-                                  {p.nama_prodi}
-                                </div>
-                                {p.bidang && (
-                                  <div className="text-gray-500 text-xs mt-0.5">
-                                    {p.bidang}
-                                  </div>
-                                )}
-                              </th>
-                              <td className="px-6 py-4">
-                                {p.jenjang ? (
-                                  <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
-                                    {p.jenjang}
-                                  </span>
+                              <div className="flex items-center gap-1.5">
+                                Nama Program Studi
+                                {sortBy === "nama_prodi" ? (
+                                  sortOrder === "asc" ? (
+                                    <ChevronUp
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  ) : (
+                                    <ChevronDown
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  )
                                 ) : (
-                                  <span className="text-gray-400">-</span>
+                                  <ChevronsUpDown
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
                                 )}
-                              </td>
-                              <td className="px-6 py-4">
-                                {p.universitas?.nama ? (
-                                  <div>
-                                    <div className="font-medium text-gray-900 text-sm">
-                                      {p.universitas.nama}
+                              </div>
+                            </th>
+                            <th
+                              className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                              onClick={() => handleHeaderClick("jenjang")}
+                              scope="col"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                Jenjang
+                                {sortBy === "jenjang" ? (
+                                  sortOrder === "asc" ? (
+                                    <ChevronUp
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  ) : (
+                                    <ChevronDown
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  )
+                                ) : (
+                                  <ChevronsUpDown
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
+                                )}
+                              </div>
+                            </th>
+                            <th
+                              className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                              onClick={() => handleHeaderClick("universitas")}
+                              scope="col"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                Universitas
+                                {sortBy === "universitas" ? (
+                                  sortOrder === "asc" ? (
+                                    <ChevronUp
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  ) : (
+                                    <ChevronDown
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  )
+                                ) : (
+                                  <ChevronsUpDown
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
+                                )}
+                              </div>
+                            </th>
+                            <th
+                              className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
+                              onClick={() => handleHeaderClick("akreditasi")}
+                              scope="col"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                Akreditasi
+                                {sortBy === "akreditasi" ? (
+                                  sortOrder === "asc" ? (
+                                    <ChevronUp
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  ) : (
+                                    <ChevronDown
+                                      size={14}
+                                      className="text-primary"
+                                    />
+                                  )
+                                ) : (
+                                  <ChevronsUpDown
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
+                                )}
+                              </div>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {paginatedResults.length > 0 ? (
+                            paginatedResults.map((p, index) => (
+                              <tr
+                                key={`${p.prodi_id}-${
+                                  p.universitas?.university_id || "no-univ"
+                                }-${index}`}
+                                onClick={() =>
+                                  fetchProdiDetail(p.prodi_id, index)
+                                }
+                                className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 ${
+                                  selectedRowIndex === index
+                                    ? "bg-secondary-light ring-2 ring-inset ring-secondary"
+                                    : "bg-white"
+                                }`}
+                              >
+                                <th className="px-6 py-4" scope="row">
+                                  <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
+                                    {p.nama_prodi}
+                                  </div>
+                                  {p.bidang && (
+                                    <div className="text-gray-500 text-xs mt-0.5">
+                                      {p.bidang}
                                     </div>
-                                    {p.universitas.provinsi && (
-                                      <div className="text-gray-500 text-xs mt-0.5">
-                                        {p.universitas.provinsi}
+                                  )}
+                                </th>
+                                <td className="px-6 py-4">
+                                  {p.jenjang ? (
+                                    <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
+                                      {p.jenjang}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4">
+                                  {p.universitas?.nama ? (
+                                    <div>
+                                      <div className="font-medium text-gray-900 text-sm">
+                                        {p.universitas.nama}
                                       </div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4">
-                                {p.akreditasi ? (
-                                  <span
-                                    className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${badgeClass(
-                                      p.akreditasi
-                                    )} ring-1`}
+                                      {p.universitas.provinsi && (
+                                        <div className="text-gray-500 text-xs mt-0.5">
+                                          {p.universitas.provinsi}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4">
+                                  {p.akreditasi ? (
+                                    <span
+                                      className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${badgeClass(
+                                        p.akreditasi
+                                      )} ring-1`}
+                                    >
+                                      {p.akreditasi}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                className="px-6 py-12 text-center"
+                              >
+                                <div className="text-gray-400 text-sm">
+                                  <svg
+                                    className="mx-auto h-12 w-12 text-gray-300 mb-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
                                   >
-                                    {p.akreditasi}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={1.5}
+                                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                    />
+                                  </svg>
+                                  <p className="font-medium text-gray-500">
+                                    Tidak ada program studi yang sesuai dengan
+                                    filter
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Coba ubah filter atau reset pencarian
+                                  </p>
+                                </div>
                               </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={4} className="px-6 py-12 text-center">
-                              <div className="text-gray-400 text-sm">
-                                <svg
-                                  className="mx-auto h-12 w-12 text-gray-300 mb-3"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                                  />
-                                </svg>
-                                <p className="font-medium text-gray-500">
-                                  Tidak ada program studi yang sesuai dengan
-                                  filter
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  Coba ubah filter atau reset pencarian
-                                </p>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
+
+                  {/* Pagination */}
+                  {sortedResults.length > itemsPerPage && (
+                    <div className="bg-white rounded-b-xl px-4 py-4 border-t border-gray-200">
+                      {/* Mobile Pagination */}
+                      <div className="flex items-center justify-between sm:hidden">
+                        <button
+                          onClick={() =>
+                            setCurrentPage(Math.max(1, currentPage - 1))
+                          }
+                          disabled={currentPage === 1}
+                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                          <svg
+                            className="h-5 w-5 mr-1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Prev
+                        </button>
+                        <span className="text-sm text-gray-700">
+                          Hal <span className="font-medium">{currentPage}</span>{" "}
+                          dari <span className="font-medium">{totalPages}</span>
+                        </span>
+                        <button
+                          onClick={() =>
+                            setCurrentPage(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
+                          disabled={currentPage === totalPages}
+                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                          Next
+                          <svg
+                            className="h-5 w-5 ml-1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Desktop Pagination */}
+                      <div className="hidden sm:flex sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm text-gray-700">
+                            Menampilkan{" "}
+                            <span className="font-semibold text-primary-dark">
+                              {(currentPage - 1) * itemsPerPage + 1}
+                            </span>{" "}
+                            -{" "}
+                            <span className="font-semibold text-primary-dark">
+                              {Math.min(
+                                currentPage * itemsPerPage,
+                                sortedResults.length
+                              )}
+                            </span>{" "}
+                            dari{" "}
+                            <span className="font-semibold text-primary-dark">
+                              {sortedResults.length}
+                            </span>{" "}
+                            hasil
+                          </p>
+                        </div>
+                        <nav
+                          className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px"
+                          aria-label="Pagination"
+                        >
+                          {/* Previous Button */}
+                          <button
+                            onClick={() =>
+                              setCurrentPage(Math.max(1, currentPage - 1))
+                            }
+                            disabled={currentPage === 1}
+                            className="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                          >
+                            <span className="sr-only">Sebelumnya</span>
+                            <svg
+                              className="h-5 w-5"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Page Numbers with Ellipsis */}
+                          {(() => {
+                            const pages = [];
+                            const showEllipsis = totalPages > 7;
+
+                            if (!showEllipsis) {
+                              // Show all pages if 7 or less
+                              for (let i = 1; i <= totalPages; i++) {
+                                pages.push(i);
+                              }
+                            } else {
+                              // Smart pagination with ellipsis
+                              if (currentPage <= 3) {
+                                // Near start: 1 2 3 4 ... last
+                                pages.push(1, 2, 3, 4, "...", totalPages);
+                              } else if (currentPage >= totalPages - 2) {
+                                // Near end: 1 ... last-3 last-2 last-1 last
+                                pages.push(
+                                  1,
+                                  "...",
+                                  totalPages - 3,
+                                  totalPages - 2,
+                                  totalPages - 1,
+                                  totalPages
+                                );
+                              } else {
+                                // Middle: 1 ... current-1 current current+1 ... last
+                                pages.push(
+                                  1,
+                                  "...",
+                                  currentPage - 1,
+                                  currentPage,
+                                  currentPage + 1,
+                                  "...",
+                                  totalPages
+                                );
+                              }
+                            }
+
+                            return pages.map((page, idx) => {
+                              if (page === "...") {
+                                return (
+                                  <span
+                                    key={`ellipsis-${idx}`}
+                                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                                  >
+                                    ...
+                                  </span>
+                                );
+                              }
+
+                              return (
+                                <button
+                                  key={page}
+                                  onClick={() => setCurrentPage(page as number)}
+                                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition ${
+                                    page === currentPage
+                                      ? "z-10 bg-primary border-primary text-white shadow-sm"
+                                      : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            });
+                          })()}
+
+                          {/* Next Button */}
+                          <button
+                            onClick={() =>
+                              setCurrentPage(
+                                Math.min(totalPages, currentPage + 1)
+                              )
+                            }
+                            disabled={currentPage === totalPages}
+                            className="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                          >
+                            <span className="sr-only">Selanjutnya</span>
+                            <svg
+                              className="h-5 w-5"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        </nav>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 
