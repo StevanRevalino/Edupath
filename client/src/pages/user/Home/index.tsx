@@ -1,5 +1,5 @@
-import { icons, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
@@ -33,6 +33,44 @@ const Home = () => {
   // Universitas data state
   const [allUniversities, setAllUniversities] = useState<string[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(true);
+
+  // RIASEC Assessment data state
+  const [assessmentStats, setAssessmentStats] = useState<{
+    totalTests: number;
+    lastTestDate: string | null;
+    topRecommendation: {
+      major: string;
+      percentage: number;
+    } | null;
+    latestTestDetails: {
+      scores: {
+        realistic: number;
+        investigative: number;
+        artistic: number;
+        social: number;
+        enterprising: number;
+        conventional: number;
+      } | null;
+      recommendations: Array<{
+        nama_prodi: string;
+        match_score: number;
+        bidang: string | null;
+      }>;
+      completed_at: string | null;
+    } | null;
+    allTests: Array<{
+      assessment_id: string;
+      completed_at: string;
+      dominant_type: string;
+    }>;
+  }>({
+    totalTests: 0,
+    lastTestDate: null,
+    topRecommendation: null,
+    latestTestDetails: null,
+    allTests: [],
+  });
+  const [assessmentLoading, setAssessmentLoading] = useState(true);
 
   // Ambil 1 huruf pertama firstname + lastname (fallback: 2 huruf pertama firstname)
   const getInitials = (u: { firstname: string; lastname: string } | null) => {
@@ -146,6 +184,125 @@ const Home = () => {
     fetchUniversitasData();
   }, [API_URL]);
 
+  // Fetch RIASEC assessment data
+  useEffect(() => {
+    const fetchAssessmentData = async () => {
+      try {
+        if (!TokenManager.isAuthenticated()) {
+          return;
+        }
+
+        const token = TokenManager.getToken();
+
+        // Fetch assessment history
+        const historyResponse = await axios.get(
+          `${API_URL}/api/riasec/history`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const assessments = historyResponse.data.data || [];
+        const totalTests = assessments.length;
+
+        if (totalTests > 0) {
+          // Get the latest assessment (most recent)
+          const latestAssessment = assessments[0]; // Assuming sorted by date desc
+          const lastTestDate = latestAssessment.completed_at
+            ? new Date(latestAssessment.completed_at).toLocaleDateString(
+                "id-ID",
+                {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                }
+              )
+            : null;
+
+          // Fetch detailed result for latest assessment to get recommendations
+          const resultResponse = await axios.get(
+            `${API_URL}/api/riasec/result/${latestAssessment.assessment_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const result = resultResponse.data.data;
+          const recommendations = result.recommendations || [];
+          const scores = result.scores || null;
+
+          // Get top recommendation (first one with highest score)
+          const topRecommendation =
+            recommendations.length > 0
+              ? {
+                  major: recommendations[0].nama_prodi || "Belum ada data",
+                  percentage: Math.round(
+                    (recommendations[0].match_score || 0) * 100
+                  ),
+                }
+              : null;
+
+          setAssessmentStats({
+            totalTests,
+            lastTestDate,
+            topRecommendation,
+            latestTestDetails: {
+              scores,
+              recommendations: recommendations.slice(0, 5), // Top 5 recommendations
+              completed_at: latestAssessment.completed_at,
+            },
+            allTests: assessments.map((a: any) => {
+              // Combine primary and secondary type (e.g., "R + I")
+              const primaryCode = a.primary_type
+                ? a.primary_type.charAt(0).toUpperCase()
+                : "";
+              const secondaryCode = a.secondary_type
+                ? a.secondary_type.charAt(0).toUpperCase()
+                : "";
+              const displayType =
+                primaryCode && secondaryCode
+                  ? `${primaryCode} + ${secondaryCode}`
+                  : a.holland_code || "Belum tersedia";
+
+              return {
+                assessment_id: a.assessment_id,
+                completed_at: a.completed_at,
+                dominant_type: displayType,
+              };
+            }),
+          });
+        } else {
+          setAssessmentStats({
+            totalTests: 0,
+            lastTestDate: null,
+            topRecommendation: null,
+            latestTestDetails: null,
+            allTests: [],
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching assessment data:", error);
+        setAssessmentStats({
+          totalTests: 0,
+          lastTestDate: null,
+          topRecommendation: null,
+          latestTestDetails: null,
+          allTests: [],
+        });
+      } finally {
+        setAssessmentLoading(false);
+      }
+    };
+
+    fetchAssessmentData();
+  }, [API_URL]);
+
   const infoItems = [
     {
       label: "Tentang Kami",
@@ -179,20 +336,31 @@ const Home = () => {
     },
   ];
 
-  const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [universitySearchQuery, setUniversitySearchQuery] = useState("");
 
-  const historyTags = allMajors.slice(0, 8);
-  const displayedTags = showAll ? historyTags : historyTags.slice(0, 5);
-  const hasMore = historyTags.length > 5 && !showAll;
+  // Horizontal scroll ref for test history
+  const testHistoryRef = useRef<HTMLDivElement>(null);
 
-  // placeholder analytics
-  const totalTests = 0;
-  const tesTerakhir = "12/12/2025";
-  const topRecommendationMajor =
-    allMajors.length > 0 ? allMajors[0] : "Belum ada data";
-  const topRecommendationPercentage = 0;
+  // Horizontal scroll functions for test history
+  const scrollTestHistory = (direction: "left" | "right") => {
+    if (testHistoryRef.current) {
+      const scrollAmount = 300;
+      const newPosition =
+        direction === "left"
+          ? testHistoryRef.current.scrollLeft - scrollAmount
+          : testHistoryRef.current.scrollLeft + scrollAmount;
+
+      testHistoryRef.current.scrollTo({
+        left: newPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Use real assessment data
+  const totalTests = assessmentStats.totalTests;
+  const tesTerakhir = assessmentStats.lastTestDate || "Belum ada tes";
 
   // filters
   const filteredExploreMajors = allMajors.filter((m) =>
@@ -264,6 +432,7 @@ const Home = () => {
                   className="mt-5 inline-flex items-center rounded-full bg-primary px-4 py-2
                        text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
                        hover:brightness-95 active:brightness-90 transition"
+                  onClick={() => navigate("/profil")}
                 >
                   Ubah profil
                 </button>
@@ -332,109 +501,198 @@ const Home = () => {
 
         {/* ANALYTICS */}
         <SectionCard title="Analytics" className="mt-8 lg:mt-12 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 lg:gap-6">
-            {/* Total Tes */}
-            <div>
-              <div className="text-2xl lg:text-3xl font-bold mb-2">
-                Total tes diselesaikan
-              </div>
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
-                    {totalTests}
-                  </div>
-                  <div className="text-lg lg:text-xl font-bold">Tes</div>
-                </div>
-                <div className="text-sm lg:text-base">
-                  Kamu telah mengerjakan <br /> tes minat bakat sebanyak <br />
-                  <strong>{totalTests} kali!</strong>
-                </div>
+          {assessmentLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-gray-600">Memuat data analytics...</p>
               </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-4 lg:gap-6">
+              {/* Total Tes */}
+              <div>
+                <div className="text-2xl lg:text-3xl font-bold mb-2">
+                  Total tes diselesaikan
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className="text-[#780000] text-4xl lg:text-6xl font-bold">
+                      {totalTests}
+                    </div>
+                    <div className="text-lg lg:text-xl font-bold">Tes</div>
+                  </div>
+                  <div className="text-sm lg:text-base">
+                    Kamu telah mengerjakan <br /> tes minat bakat sebanyak{" "}
+                    <br />
+                    <strong>{totalTests} kali!</strong>
+                  </div>
+                </div>
 
-            {/* Riwayat Penjurusan + Rekomendasi */}
-            <div>
-              <div className="text-base lg:text-lg font-bold mb-3">
-                Riwayat Penjurusan
+                {/* Tes Terakhir */}
+                <div className="mt-6">
+                  <div className="text-xl lg:text-2xl font-bold mb-2">
+                    Tes terakhir
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="text-xs lg:text-sm">
+                      Terakhir kali kamu mengerjakan tes minat bakat:
+                    </div>
+                    <div className="text-[#180085] text-2xl lg:text-4xl font-bold">
+                      {tesTerakhir}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap justify-start gap-2 lg:gap-3">
-                {majorsLoading ? (
-                  <div className="text-gray-500 text-sm">Memuat data...</div>
-                ) : displayedTags.length > 0 ? (
-                  <>
-                    {displayedTags.map((tag, idx) => (
-                      <UnivAndProdiTag
-                        key={idx}
-                        text={tag}
-                        onClick={() => {}}
-                      />
-                    ))}
-                    {hasMore && (
-                      <>
-                        <span className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500">
-                          ...
-                        </span>
-                        <button
-                          onClick={() => setShowAll(true)}
-                          className="text-white text-xs lg:text-sm px-2 lg:px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer"
-                        >
-                          Lihat lainnya...
-                        </button>
-                      </>
+
+              {/* Recent Test Stats dengan Diagram dan Rekomendasi */}
+              <div>
+                <div className="text-base lg:text-lg font-bold mb-3">
+                  Recent Test Stats
+                </div>
+
+                {assessmentStats.latestTestDetails ? (
+                  <div className="space-y-4">
+                    {/* RIASEC Scores Diagram */}
+                    {assessmentStats.latestTestDetails.scores && (
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <h4 className="font-semibold text-sm mb-3">
+                          RIASEC Scores:
+                        </h4>
+                        <div className="space-y-2">
+                          {Object.entries(
+                            assessmentStats.latestTestDetails.scores
+                          ).map(([key, value]) => (
+                            <div key={key} className="flex items-center gap-3">
+                              <div className="w-24 text-xs font-medium capitalize text-gray-700">
+                                {key.charAt(0).toUpperCase() + key.slice(1)}
+                              </div>
+                              <div className="flex-1 bg-gray-200 rounded-full h-6 relative overflow-hidden">
+                                <div
+                                  className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                                  style={{ width: `${value}%` }}
+                                >
+                                  <span className="text-xs font-bold text-white">
+                                    {value}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                  </>
+
+                    {/* Top Recommendations */}
+                    {assessmentStats.latestTestDetails.recommendations.length >
+                      0 && (
+                      <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                        <h4 className="font-semibold text-sm mb-3 text-green-800">
+                          Top 5 Rekomendasi Jurusan:
+                        </h4>
+                        <div className="space-y-2">
+                          {assessmentStats.latestTestDetails.recommendations.map(
+                            (rec, idx) => (
+                              <div
+                                key={idx}
+                                className="p-2 bg-white rounded-lg hover:shadow-sm transition-shadow"
+                              >
+                                <div className="font-semibold text-sm text-gray-800">
+                                  {idx + 1}. {rec.nama_prodi}
+                                </div>
+                                {rec.bidang && (
+                                  <div className="text-xs text-gray-500 mt-0.5">
+                                    {rec.bidang}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <div className="text-gray-500 text-sm">Belum ada riwayat</div>
+                  <div className="bg-gray-50 rounded-xl p-6 text-center">
+                    <div className="text-gray-500 text-sm">
+                      Belum ada data tes
+                    </div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      Mulai tes pertama Anda untuk melihat statistik di sini
+                    </div>
+                  </div>
                 )}
               </div>
-
-              <div className="text-end mt-4">
-                <div className="text-lg lg:text-2xl font-bold">
-                  ({topRecommendationPercentage}%) Jurusan paling cocok
-                </div>
-                <div className="text-green-700 text-2xl lg:text-4xl font-bold">
-                  {topRecommendationMajor}
-                </div>
-                <div className="text-xs lg:text-sm mt-1">
-                  Rekomendasi tertinggimu saat ini!
-                </div>
-              </div>
             </div>
-
-            {/* Tes Terakhir */}
-            <div>
-              <div className="text-2xl lg:text-3xl font-bold mb-2">
-                Tes terakhir
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="text-sm lg:text-base">
-                  Terakhir kali kamu mengerjakan <br />
-                  tes minat bakat adalah pada:
-                </div>
-                <div className="text-[#180085] text-3xl lg:text-5xl font-bold">
-                  {tesTerakhir}
-                </div>
-              </div>
-            </div>
-
-            {/* Riwayat Tes */}
-            <div>
-              <div className="text-base lg:text-lg font-bold mb-3">
-                Riwayat Tes
-              </div>
-              <div className="flex flex-wrap gap-4 lg:gap-6 w-full">
-                <div className="bg-white rounded-3xl shadow-md p-3 lg:p-4 flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[200px] max-w-[280px] sm:max-w-[300px] lg:max-w-[280px] text-center">
-                  <div className="text-gray-500 text-sm lg:text-base">
-                    Belum ada riwayat tes
-                  </div>
-                  <div className="text-xs lg:text-sm mt-2">
-                    Mulai tes pertama Anda untuk melihat riwayat di sini
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </SectionCard>
+
+        {/* RIWAYAT TES - Scrollable Horizontal */}
+        {!assessmentLoading && assessmentStats.allTests.length > 0 && (
+          <SectionCard title="Riwayat Tes" className="mt-8 lg:mt-12 w-full">
+            <div className="relative">
+              {/* Scroll Buttons */}
+              {assessmentStats.allTests.length > 3 && (
+                <>
+                  <button
+                    onClick={() => scrollTestHistory("left")}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-1 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-gray-700" />
+                  </button>
+                  <button
+                    onClick={() => scrollTestHistory("right")}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-1 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight className="w-6 h-6 text-gray-700" />
+                  </button>
+                </>
+              )}
+
+              {/* Scrollable Container */}
+              <div
+                ref={testHistoryRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide px-8 py-2"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {assessmentStats.allTests.map((test, idx) => (
+                  <div
+                    key={test.assessment_id}
+                    onClick={() => navigate(`/tes/hasil/${test.assessment_id}`)}
+                    className="bg-white rounded-2xl shadow-md p-4 min-w-[280px] flex-shrink-0 border-2 border-gray-100 hover:border-primary hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-bold text-gray-700">
+                        Tes #{assessmentStats.allTests.length - idx}
+                      </div>
+                      <div className="bg-primary-lighter text-primary-dark px-3 py-1 rounded-full text-xs font-semibold">
+                        {test.dominant_type}
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Dikerjakan pada:
+                    </div>
+                    <div className="text-lg font-bold text-primary mt-1">
+                      {new Date(test.completed_at).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {new Date(test.completed_at).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </SectionCard>
+        )}
 
         {/* BOTTOM SECTIONS */}
         <div className="flex flex-col mt-8 lg:mt-12 gap-8 lg:gap-16">
