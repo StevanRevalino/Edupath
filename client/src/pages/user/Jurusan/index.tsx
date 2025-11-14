@@ -61,7 +61,7 @@ const Jurusan: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
 
   // ===== Search Cache =====
   const searchCacheRef = useRef<Map<string, ProdiItem[]>>(new Map());
@@ -689,10 +689,10 @@ const Jurusan: React.FC = () => {
                   />
 
                   {/* Results Table with Sortable Headers - Modern Design */}
-                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white relative">
+                  <div className="rounded-t-xl border border-gray-200 overflow-hidden shadow-sm bg-white relative">
                     <div className="max-h-[600px] overflow-y-auto">
                       <table className="w-full text-left text-sm rtl:text-right text-gray-500">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase sticky top-0 z-1">
                           <tr className="border-b-2 border-gray-200">
                             <th
                               className="px-6 py-3 cursor-pointer hover:bg-gray-200/50 select-none transition-colors font-semibold text-gray-700"
@@ -908,7 +908,7 @@ const Jurusan: React.FC = () => {
 
                   {/* Pagination */}
                   {sortedResults.length > itemsPerPage && (
-                    <div className="bg-white rounded-b-xl px-4 py-4 border-t border-gray-200">
+                    <div className="bg-white rounded-b-xl px-4 py-4 border-b border-l border-r border-gray-200">
                       {/* Mobile Pagination */}
                       <div className="flex items-center justify-between sm:hidden">
                         <button

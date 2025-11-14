@@ -9,16 +9,20 @@ export class UniversitasService {
   // Get all universitas with optional search and pagination
   async getAllUniversitasLocal({
     search = "",
+    akreditasi = "",
+    provinsi = "",
     skip = 0,
     take = 50,
   }: {
     search?: string;
+    akreditasi?: string;
+    provinsi?: string;
     skip?: number;
     take?: number;
   }) {
     try {
+      // If search keyword exists, use search function (limit 15)
       if (search && search.trim().length > 0) {
-        // Use existing search functionality if search term provided
         const searchResults = await this.searchUniversitasLocal(
           search.trim(),
           take
@@ -30,14 +34,45 @@ export class UniversitasService {
       }
 
       // Get all universitas without search
+      const hasFilter =
+        (akreditasi && akreditasi !== "Semua") ||
+        (provinsi && provinsi !== "Semua");
+
+      // When no filter, fetch more data to sort properly by QS rank
+      const fetchLimit = hasFilter ? take : 10000; // Fetch all data when no filter for proper sorting
+
       const allUniversitas = await this.universitasRepository.findMany({
-        limit: 1000, // Get reasonable amount
+        limit: fetchLimit,
       });
 
-      // Apply pagination and transform results
-      const paginatedUniversitas = allUniversitas.slice(skip, skip + take);
+      // Apply filters
+      let filteredUniversitas = [...allUniversitas];
 
-      const transformedResults = paginatedUniversitas.map((univ) => ({
+      if (akreditasi && akreditasi !== "Semua") {
+        filteredUniversitas = filteredUniversitas.filter(
+          (u) => u.akreditasi === akreditasi
+        );
+      }
+
+      if (provinsi && provinsi !== "Semua") {
+        filteredUniversitas = filteredUniversitas.filter(
+          (u) => u.provinsi === provinsi
+        );
+      }
+
+      // Sort by QS rank ascending when no filter (default behavior)
+      if (!hasFilter) {
+        // Default: sort by QS rank ascending (lower number = better rank)
+        filteredUniversitas.sort((a, b) => {
+          const rankA = a.rank_qs ? parseFloat(a.rank_qs) : Infinity;
+          const rankB = b.rank_qs ? parseFloat(b.rank_qs) : Infinity;
+          return rankA - rankB;
+        });
+        // Limit to requested amount after sorting
+        filteredUniversitas = filteredUniversitas.slice(0, take);
+      }
+
+      const transformedResults = filteredUniversitas.map((univ) => ({
         university_id: univ.university_id.toString(),
         nama: univ.nama,
         nama_singkat: univ.nama_singkat,
@@ -63,7 +98,7 @@ export class UniversitasService {
 
       return {
         data: transformedResults,
-        total: allUniversitas.length,
+        total: filteredUniversitas.length,
       };
     } catch (error) {
       console.error("Error getting all universitas locally:", error);

@@ -13,16 +13,41 @@ export class UniversitasController {
   // Get all universitas with optional pagination and search
   async getAllUniversitas(req: Request, res: Response) {
     try {
-      const { page = "1", limit = "50", search = "" } = req.query as any;
-      const take = Math.min(
-        Math.max(parseInt(limit as string, 10) || 50, 1),
-        1000
-      );
+      const {
+        page = "1",
+        limit,
+        search = "",
+        akreditasi = "",
+        provinsi = "",
+      } = req.query as any;
+
+      const hasSearch = search && search.trim().length > 0;
+      const hasFilter =
+        (akreditasi && akreditasi !== "Semua") ||
+        (provinsi && provinsi !== "Semua");
+
+      // Logic:
+      // 1. Search with keyword → limit 15
+      // 2. Filter only (no search) → no limit (get all matching)
+      // 3. No filter, no search → limit 15 sorted by QS rank ascending
+      let take: number;
+      if (hasSearch) {
+        take = 15; // Search always limited to 15 best matches
+      } else if (hasFilter) {
+        take = 10000; // Filter without search gets all data
+      } else {
+        take = limit
+          ? Math.min(Math.max(parseInt(limit as string, 10) || 15, 1), 1000)
+          : 15;
+      }
+
       const pageNum = Math.max(parseInt(page as string, 10) || 1, 1);
       const skip = (pageNum - 1) * take;
 
       const { data, total } = await this.localService.getAllUniversitasLocal({
         search: search as string,
+        akreditasi: akreditasi as string,
+        provinsi: provinsi as string,
         skip,
         take,
       });
