@@ -281,13 +281,16 @@ export class ChatService {
   async getStudentsWithAcceptedConsultations() {
     try {
       const now = new Date();
+      // Calculate time 1 hour ago (consultation should have started within last 1 hour)
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
           status: "ACCEPTED",
           is_active: true, // ✨ Hanya konsultasi yang masih aktif
           consultation_date: {
-            lte: now, // ✨ Hanya konsultasi yang sudah dimulai (tanggal <= sekarang)
+            gte: oneHourAgo, // ✨ Konsultasi dimulai tidak lebih dari 1 jam yang lalu
+            lte: now, // ✨ Konsultasi sudah dimulai (tidak di masa depan)
           },
         },
         include: {

@@ -14,6 +14,7 @@ import zoomRoutes from "./routes/zoomRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
+import { startConsultationScheduler } from "./services/consultationScheduler";
 
 dotenv.config();
 const app = express();
@@ -65,4 +66,7 @@ app.listen(PORT, "localhost", async () => {
   console.log(`Access URL: http://localhost:${PORT}`);
   await seedDefaultAdmins();
   await seedLocalData();
+
+  // Start consultation auto-complete scheduler
+  startConsultationScheduler();
 });

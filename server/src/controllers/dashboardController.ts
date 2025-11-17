@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { autoCompleteExpiredConsultations } from "../services/consultationScheduler";
 
 const prisma = new PrismaClient();
 
@@ -339,6 +340,76 @@ export const getRecentChats = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "Gagal mengambil chat terbaru",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Get Weekly Consultations
+export const getWeeklyConsultations = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "startDate dan endDate harus disertakan",
+      });
+    }
+
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+
+    const consultations = await prisma.consultation.findMany({
+      where: {
+        consultation_date: {
+          gte: start,
+          lte: end,
+        },
+      },
+      select: {
+        consultation_date: true,
+      },
+    });
+
+    // Group by day of week (0 = Sunday, 6 = Saturday)
+    const weeklyData = Array(7).fill(0);
+
+    consultations.forEach((consultation) => {
+      const date = new Date(consultation.consultation_date);
+      const dayIndex = date.getDay();
+      weeklyData[dayIndex]++;
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: weeklyData,
+    });
+  } catch (error) {
+    console.error("Error fetching weekly consultations:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengambil data konsultasi mingguan",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Manual trigger to auto-complete expired consultations
+export const triggerAutoComplete = async (req: Request, res: Response) => {
+  try {
+    const result = await autoCompleteExpiredConsultations();
+
+    return res.status(200).json({
+      success: true,
+      message: `Auto-completed ${result.count} expired consultations`,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error triggering auto-complete:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal melakukan auto-complete konsultasi",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

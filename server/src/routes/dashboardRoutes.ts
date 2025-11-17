@@ -3,6 +3,8 @@ import {
   getDashboardStats,
   getUpcomingConsultations,
   getRecentChats,
+  getWeeklyConsultations,
+  triggerAutoComplete,
 } from "../controllers/dashboardController";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
@@ -19,5 +21,11 @@ router.get("/upcoming-consultations", getUpcomingConsultations);
 
 // Get recent chats
 router.get("/recent-chats", getRecentChats);
+
+// Get weekly consultations
+router.get("/weekly-consultations", getWeeklyConsultations);
+
+// Manual trigger auto-complete (for testing/admin purposes)
+router.post("/auto-complete", triggerAutoComplete);
 
 export default router;
