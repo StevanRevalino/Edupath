@@ -159,6 +159,13 @@ const KelolaLiveChat = () => {
     };
 
     fetchChatUsers();
+
+    // Auto-refresh chat users every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchChatUsers();
+    }, 30000);
+
+    return () => clearInterval(refreshInterval);
   }, [API_URL]);
 
   // Fetch chat messages for selected user
@@ -591,6 +598,17 @@ const KelolaLiveChat = () => {
     });
   };
 
+  const formatDate = (timestamp: string) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    if (!isValidDate(date)) return "";
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   const formatLastMessageTime = (timestamp?: string) => {
     if (!timestamp) return "";
     const messageDate = new Date(timestamp);
@@ -777,7 +795,7 @@ const KelolaLiveChat = () => {
                   ))}
                 </div>
               ) : (
-                chatMessages.map((message) => {
+                chatMessages.map((message, index) => {
                   // Robust alignment logic: prioritize isFromAdmin flag for better reliability
                   const isMine =
                     message.isFromAdmin || message.senderId === currentUserId;
@@ -792,12 +810,25 @@ const KelolaLiveChat = () => {
                     "🎥 Zoom Meeting Dibuat"
                   );
 
+                  // Check if we need to show date divider
+                  const showDateDivider =
+                    index === 0 ||
+                    formatDate(message.timestamp) !==
+                      formatDate(chatMessages[index - 1].timestamp);
+
                   return (
+                    <div key={message.id}>
+                      {showDateDivider && (
+                        <div className="flex items-center justify-center my-4">
+                          <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                            {formatDate(message.timestamp)}
+                          </span>
+                        </div>
+                      )}
                     <div
-                      key={message.id}
                       className={`flex ${
                         isMine ? "justify-end" : "justify-start"
-                      }`}
+                      } mb-4`}
                     >
                       <div
                         className={`${
@@ -949,6 +980,7 @@ const KelolaLiveChat = () => {
                           {formatTime(message.timestamp)}
                         </div>
                       </div>
+                    </div>
                     </div>
                   );
                 })

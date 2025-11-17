@@ -280,10 +280,15 @@ export class ChatService {
   // Get students with accepted AND ACTIVE consultations (for live chat user list)
   async getStudentsWithAcceptedConsultations() {
     try {
+      const now = new Date();
+      
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
           status: "ACCEPTED",
           is_active: true, // ✨ Hanya konsultasi yang masih aktif
+          consultation_date: {
+            lte: now, // ✨ Hanya konsultasi yang sudah dimulai (tanggal <= sekarang)
+          },
         },
         include: {
           murid: {
