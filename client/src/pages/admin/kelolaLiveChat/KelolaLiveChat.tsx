@@ -100,6 +100,8 @@ const KelolaLiveChat = () => {
               if (
                 JSON.stringify(prevMessages) !== JSON.stringify(newMessages)
               ) {
+                // Scroll to bottom when new messages arrive
+                setTimeout(() => scrollToBottom(), 100);
                 return newMessages;
               }
               return prevMessages;
@@ -159,13 +161,6 @@ const KelolaLiveChat = () => {
     };
 
     fetchChatUsers();
-
-    // Auto-refresh chat users every 30 seconds
-    const refreshInterval = setInterval(() => {
-      fetchChatUsers();
-    }, 30000);
-
-    return () => clearInterval(refreshInterval);
   }, [API_URL]);
 
   // Fetch chat messages for selected user
