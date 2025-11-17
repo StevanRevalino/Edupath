@@ -29,7 +29,9 @@ export class ZoomController {
       if (
         !consultationId ||
         !userId ||
-        !topic 
+        !topic ||
+        !scheduledDate ||
+        !scheduledTime
       ) {
         return res.status(400).json({
           success: false,

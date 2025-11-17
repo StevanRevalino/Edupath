@@ -1,16 +1,5 @@
 import { useState } from "react";
 import { X, Video, FileText } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import { CalendarIcon, Clock } from "lucide-react";
 
 interface ZoomRequestModalProps {
   isOpen: boolean;
@@ -23,8 +12,6 @@ interface ZoomRequestModalProps {
 
 export interface ZoomRequestData {
   topic: string;
-  scheduledDate: string;
-  scheduledTime: string;
   description: string;
 }
 
@@ -37,15 +24,8 @@ const ZoomRequestModal = ({
 }: ZoomRequestModalProps) => {
   const [formData, setFormData] = useState<ZoomRequestData>({
     topic: "Konseling Akademik",
-    scheduledDate: "",
-    scheduledTime: "",
     description: "",
   });
-  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(
-    undefined
-  );
-  const [dateOpen, setDateOpen] = useState(false);
-  const [timeOpen, setTimeOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -58,11 +38,8 @@ const ZoomRequestModal = ({
       // Reset form
       setFormData({
         topic: "Konseling Akademik",
-        scheduledDate: "",
-        scheduledTime: "",
         description: "",
       });
-      setRescheduleDate(undefined);
       onClose();
     } catch (error) {
       console.error("Error submitting zoom request:", error);
@@ -126,108 +103,12 @@ const ZoomRequestModal = ({
               />
             </div>
 
-            {/* Date and Time */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Pilih Tanggal <span className="text-red-500">*</span>
-              </label>
-              <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-11",
-                      !rescheduleDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {rescheduleDate ? (
-                      format(rescheduleDate, "PPP", { locale: id })
-                    ) : (
-                      <span>Pilih tanggal</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={rescheduleDate}
-                    onSelect={(date) => {
-                      setRescheduleDate(date);
-                      if (date) {
-                        setFormData({
-                          ...formData,
-                          scheduledDate: format(date, "yyyy-MM-dd"),
-                        });
-                      }
-                      setDateOpen(false);
-                    }}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Time Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Pilih Waktu <span className="text-red-500">*</span>
-              </label>
-              <Popover open={timeOpen} onOpenChange={setTimeOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-11",
-                      !formData.scheduledTime && "text-muted-foreground"
-                    )}
-                  >
-                    <Clock className="mr-2 h-4 w-4" />
-                    {formData.scheduledTime ? (
-                      formData.scheduledTime
-                    ) : (
-                      <span>Pilih waktu</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-2" align="start">
-                  <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
-                    {Array.from({ length: 10 }, (_, i) => {
-                      const hour = 8 + i;
-                      return [
-                        `${hour.toString().padStart(2, "0")}:00`,
-                        `${hour.toString().padStart(2, "0")}:30`,
-                      ];
-                    })
-                      .flat()
-                      .filter((_, i, arr) => i < arr.length - 1)
-                      .map((timeSlot) => (
-                        <Button
-                          key={timeSlot}
-                          variant={
-                            formData.scheduledTime === timeSlot
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => {
-                            setFormData({
-                              ...formData,
-                              scheduledTime: timeSlot,
-                            });
-                            setTimeOpen(false);
-                          }}
-                          className="h-9"
-                        >
-                          {timeSlot}
-                        </Button>
-                      ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+            {/* Meeting Time Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>⏰ Waktu Meeting:</strong> Meeting akan dibuat dengan
+                waktu sekarang (langsung dimulai).
+              </p>
             </div>
 
             {/* Description */}

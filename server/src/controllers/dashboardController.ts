@@ -226,14 +226,27 @@ export const getUpcomingConsultations = async (req: Request, res: Response) => {
       now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
     );
 
+    // Get consultations that are:
+    // 1. Future consultations (PENDING or ACCEPTED)
+    // 2. Active consultations (ACCEPTED and is_active = true, even if started)
     const upcomingConsultations = await prisma.consultation.findMany({
       where: {
-        consultation_date: {
-          gte: indonesiaTime,
-        },
-        status: {
-          in: ["PENDING", "ACCEPTED"],
-        },
+        OR: [
+          // Future consultations
+          {
+            consultation_date: {
+              gte: indonesiaTime,
+            },
+            status: {
+              in: ["PENDING", "ACCEPTED"],
+            },
+          },
+          // Active consultations (even if already started)
+          {
+            status: "ACCEPTED",
+            is_active: true,
+          },
+        ],
       },
       include: {
         murid: {

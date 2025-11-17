@@ -518,14 +518,20 @@ const KelolaLiveChat = () => {
 
     try {
       const token = TokenManager.getToken();
+      
+      // Generate current date and time
+      const now = new Date();
+      const scheduledDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const scheduledTime = now.toTimeString().slice(0, 5); // HH:MM
+      
       const response = await axios.post(
         `${API_URL}/api/zoom/create-meeting`,
         {
           consultationId: selectedUser.consultation_id,
           userId: selectedUser.user_id,
           topic: data.topic,
-          scheduledDate: data.scheduledDate,
-          scheduledTime: data.scheduledTime,
+          scheduledDate: scheduledDate,
+          scheduledTime: scheduledTime,
           description: data.description,
         },
         {
@@ -542,7 +548,7 @@ const KelolaLiveChat = () => {
         // Optionally send a message to chat with zoom link
         if (selectedUser.room_id && response.data.data.joinUrl) {
           const zoomData = response.data.data;
-          const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n📅 ${data.scheduledDate} | ${data.scheduledTime}\n\n🔗 ${zoomData.joinUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
+          const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n🔗 ${zoomData.joinUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
           await axios.post(
             `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
             { message: zoomMessage },
