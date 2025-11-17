@@ -281,7 +281,7 @@ export class ChatService {
   async getStudentsWithAcceptedConsultations() {
     try {
       const now = new Date();
-      
+
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
           status: "ACCEPTED",
