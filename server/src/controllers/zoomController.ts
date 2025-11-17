@@ -86,8 +86,6 @@ export class ZoomController {
       // Try to create real Zoom meeting if configured
       if (zoomService.isConfigured()) {
         try {
-          console.log("🎥 Creating real Zoom meeting via API...");
-
           const zoomMeeting = await zoomService.createMeeting({
             topic: topic,
             start_time: scheduledDateTime.toISOString(),
@@ -104,8 +102,6 @@ export class ZoomController {
           joinUrl = zoomMeeting.join_url;
           startUrl = zoomMeeting.start_url;
           zoomMeetingId = zoomMeeting.id;
-
-          console.log("✅ Real Zoom meeting created:", meetingId);
         } catch (zoomError: any) {
           console.error(
             "❌ Failed to create Zoom meeting, falling back to placeholder:",
@@ -128,8 +124,6 @@ export class ZoomController {
           startUrl = `https://zoom.us/s/${meetingId}?pwd=${meetingPassword}`;
         }
       } else {
-        console.log("⚠️ Zoom API not configured, using placeholder...");
-
         // Generate placeholder Zoom-like meeting ID
         const generateZoomMeetingId = () => {
           const part1 = Math.floor(100 + Math.random() * 900);
@@ -156,6 +150,8 @@ export class ZoomController {
           scheduled_time: scheduledDateTime,
           description: description || null,
           meeting_password: meetingPassword,
+          join_url: joinUrl,
+          start_url: startUrl,
           status: "scheduled",
         },
       });
@@ -202,6 +198,7 @@ export class ZoomController {
     try {
       const { consultationId } = req.params;
       const userId = req.user?.user_id;
+      const userRole = req.user?.role;
 
       if (!userId) {
         return res.status(401).json({
@@ -229,10 +226,23 @@ export class ZoomController {
         },
       });
 
+      // Format response based on user role
+      const formattedMeetings = meetings.map((meeting) => {
+        // Admin/Host gets start_url (to be host), Student gets join_url
+        const isHost = userRole === "ADMIN" || userId === meeting.host_id;
+        const meetingUrl = isHost ? meeting.start_url : meeting.join_url;
+
+        return {
+          ...meeting,
+          meetingUrl, // URL yang tepat berdasarkan role
+          isHost, // Flag untuk frontend
+        };
+      });
+
       return res.status(200).json({
         success: true,
         message: "Berhasil mengambil data Zoom meetings",
-        data: meetings,
+        data: formattedMeetings,
       });
     } catch (error: any) {
       console.error("Error getting Zoom meetings:", error);

@@ -172,6 +172,8 @@ model ZoomMeeting {
   scheduled_time   DateTime
   description      String?
   meeting_password String
+  join_url         String       
+  start_url        String       
   status           ZoomStatus   @default(scheduled)
   created_at       DateTime     @default(now())
   updated_at       DateTime     @updatedAt

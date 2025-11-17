@@ -548,7 +548,8 @@ const KelolaLiveChat = () => {
         // Optionally send a message to chat with zoom link
         if (selectedUser.room_id && response.data.data.joinUrl) {
           const zoomData = response.data.data;
-          const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n🔗 ${zoomData.joinUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
+          // Send joinUrl to student, but include startUrl in hidden format for admin
+          const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n🔗 ${zoomData.joinUrl}\n🔗HOST ${zoomData.startUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
           await axios.post(
             `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
             { message: zoomMessage },
@@ -896,35 +897,45 @@ const KelolaLiveChat = () => {
 
                                       // Join URL - make it a button
                                       if (line.startsWith("🔗")) {
-                                        const url = line
-                                          .replace("🔗 ", "")
-                                          .trim();
-                                        return (
-                                          <a
-                                            key={idx}
-                                            href={url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block mb-2"
-                                          >
-                                            <button className="w-full bg-primary hover:bg-primary-light text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
-                                              <svg
-                                                className="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                              >
-                                                <path
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
-                                                  strokeWidth={2}
-                                                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                                />
-                                              </svg>
-                                              Join Zoom Meeting
-                                            </button>
-                                          </a>
-                                        );
+                                        // Check if this is HOST URL (for admin) or regular join URL
+                                        const isHostUrl =
+                                          line.startsWith("🔗HOST");
+
+                                        if (isHostUrl) {
+                                          // This is the host URL (start_url) for admin only
+                                          const url = line
+                                            .replace("🔗HOST ", "")
+                                            .trim();
+                                          return (
+                                            <a
+                                              key={idx}
+                                              href={url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="block mb-2"
+                                            >
+                                              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  stroke="currentColor"
+                                                  viewBox="0 0 24 24"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                                  />
+                                                </svg>
+                                                Start Meeting (Host)
+                                              </button>
+                                            </a>
+                                          );
+                                        } else {
+                                          // Regular join URL - hide this for admin in chat
+                                          return null;
+                                        }
                                       }
 
                                       // Meeting ID and Password

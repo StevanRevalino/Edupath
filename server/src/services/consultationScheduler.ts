@@ -54,7 +54,6 @@ export async function autoCompleteExpiredConsultations() {
         })),
       };
     } else {
-      console.log("[Scheduler] No expired consultations found");
       return { success: true, count: 0, consultations: [] };
     }
   } catch (error) {
@@ -79,10 +78,6 @@ export function startConsultationScheduler() {
       console.error("[Scheduler] Scheduled run failed:", error);
     });
   }, 5 * 60 * 1000); // 5 minutes
-
-  console.log(
-    "[Scheduler] Consultation auto-complete scheduler started (runs every 5 minutes)"
-  );
 
   // Return cleanup function
   return () => {

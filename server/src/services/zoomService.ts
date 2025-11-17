@@ -70,7 +70,6 @@ class ZoomService {
       // Set expiry to 5 minutes before actual expiry for safety
       this.tokenExpiry = Date.now() + (response.data.expires_in - 300) * 1000;
 
-      console.log("✅ Zoom access token obtained successfully");
       return this.accessToken!;
     } catch (error: any) {
       console.error(
@@ -123,8 +122,6 @@ class ZoomService {
           },
         }
       );
-
-      console.log("✅ Zoom meeting created:", response.data.id);
 
       return {
         id: response.data.id,
@@ -187,8 +184,6 @@ class ZoomService {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("✅ Zoom meeting deleted:", meetingId);
     } catch (error: any) {
       console.error(
         "❌ Error deleting Zoom meeting:",
@@ -218,8 +213,6 @@ class ZoomService {
           },
         }
       );
-
-      console.log("✅ Zoom meeting updated:", meetingId);
     } catch (error: any) {
       console.error(
         "❌ Error updating Zoom meeting:",

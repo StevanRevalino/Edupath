@@ -327,6 +327,12 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
                                 // Join URL - make it a button
                                 if (line.startsWith("🔗")) {
+                                  // Skip HOST URL (only for admin)
+                                  if (line.startsWith("🔗HOST")) {
+                                    return null;
+                                  }
+
+                                  // Regular join URL for student
                                   const url = line.replace("🔗 ", "").trim();
                                   return (
                                     <a
