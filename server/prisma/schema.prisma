@@ -109,7 +109,6 @@ model ChatRoom {
   consultation_id String        @unique
   murid_id        String
   admin_id        String
-  is_active       Boolean       @default(true)
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
   messages        ChatMessage[]
@@ -119,7 +118,6 @@ model ChatRoom {
 
   @@index([murid_id])
   @@index([admin_id])
-  @@index([is_active])
 }
 
 model ChatMessage {

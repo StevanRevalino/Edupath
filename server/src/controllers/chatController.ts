@@ -245,7 +245,6 @@ export class ChatController {
       const chatRooms = await prisma.chatRoom.findMany({
         where: {
           admin_id: userId,
-          is_active: true,
         },
         include: {
           messages: {

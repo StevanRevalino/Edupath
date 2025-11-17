@@ -82,7 +82,6 @@ export class ChatService {
       const chatRooms = await prisma.chatRoom.findMany({
         where: {
           admin_id: adminId,
-          is_active: true,
         },
         include: {
           murid: {
