@@ -518,12 +518,12 @@ const KelolaLiveChat = () => {
 
     try {
       const token = TokenManager.getToken();
-      
+
       // Generate current date and time
       const now = new Date();
-      const scheduledDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const scheduledDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
       const scheduledTime = now.toTimeString().slice(0, 5); // HH:MM
-      
+
       const response = await axios.post(
         `${API_URL}/api/zoom/create-meeting`,
         {
