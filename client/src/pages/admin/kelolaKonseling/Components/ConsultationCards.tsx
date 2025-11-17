@@ -29,6 +29,7 @@ interface ConsultationCardsProps {
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
   onOpenLiveChat?: () => void;
+  onViewChatHistory?: (consultation: Consultation) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
 }
@@ -41,6 +42,7 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
   onReschedule,
   onCancel,
   onOpenLiveChat,
+  onViewChatHistory,
   getStatusColor,
   getStatusText,
 }) => {
@@ -166,6 +168,19 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
                   className="flex-1 px-4 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
                 >
                   Batalkan
+                </button>
+              </div>
+            )}
+
+            {/* Completed Status */}
+            {consultation.status === "COMPLETED" && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onViewChatHistory?.(consultation)}
+                  className="flex-1 px-4 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  View Chat
                 </button>
               </div>
             )}

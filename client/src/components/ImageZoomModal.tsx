@@ -22,7 +22,7 @@ const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60] p-4 ${className}`}
+      className={`fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[60] p-4 ${className}`}
       onClick={onClose}
     >
       {/* Close Button */}

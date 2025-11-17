@@ -29,6 +29,7 @@ interface ConsultationTableProps {
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
   onOpenLiveChat?: () => void;
+  onViewChatHistory?: (consultation: Consultation) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
 }
@@ -41,6 +42,7 @@ const ConsultationTable = ({
   onReschedule,
   onCancel,
   onOpenLiveChat,
+  onViewChatHistory,
   getStatusColor,
   getStatusText,
 }: ConsultationTableProps) => {
@@ -187,6 +189,18 @@ const ConsultationTable = ({
                     Batalkan
                   </button>
                 </>
+              )}
+              {consultation.status === "COMPLETED" && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewChatHistory?.(consultation);
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+                >
+                  <MessageCircle size={14} />
+                  Lihat riwayat chat
+                </button>
               )}
             </div>
           ),

@@ -12,6 +12,7 @@ import ConsultationDetailModal from "./Components/ConsultationDetailModal";
 import RescheduleModal from "./Components/RescheduleModal";
 import ConsultationTable from "./Components/ConsultationTable";
 import ConsultationCards from "./Components/ConsultationCards";
+import ChatHistoryModal from "./Components/ChatHistoryModal";
 
 // Generate time slots (8:00 - 17:00)
 const generateTimeSlots = () => {
@@ -64,6 +65,7 @@ const KelolaDataKonseling = ({
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isChatHistoryModalOpen, setIsChatHistoryModalOpen] = useState(false);
   const [showPendingBadge, setShowPendingBadge] = useState(true);
   const [lastPendingCount, setLastPendingCount] = useState(0);
   const API_URL = import.meta.env.VITE_API_URL;
@@ -71,6 +73,17 @@ const KelolaDataKonseling = ({
   // Handler to open live chat tab
   const handleOpenLiveChat = () => {
     setParentActiveTab("kelola-live-chat");
+  };
+
+  // Handler to view chat history
+  const handleViewChatHistory = (consultation: Consultation) => {
+    setSelectedConsultation(consultation);
+    setIsChatHistoryModalOpen(true);
+  };
+
+  const handleCloseChatHistoryModal = () => {
+    setIsChatHistoryModalOpen(false);
+    setSelectedConsultation(null);
   };
 
   // Auto-complete expired consultations
@@ -539,6 +552,7 @@ const KelolaDataKonseling = ({
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
                 onOpenLiveChat={handleOpenLiveChat}
+                onViewChatHistory={handleViewChatHistory as any}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />
@@ -572,6 +586,7 @@ const KelolaDataKonseling = ({
                 onReschedule={handleReschedule as any}
                 onCancel={handleCancelConsultation}
                 onOpenLiveChat={handleOpenLiveChat}
+                onViewChatHistory={handleViewChatHistory as any}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />
@@ -598,6 +613,19 @@ const KelolaDataKonseling = ({
         onClose={handleCloseRescheduleModal}
         onSubmit={handleSubmitReschedule}
         timeSlots={timeSlots}
+      />
+
+      {/* Chat History Modal Component */}
+      <ChatHistoryModal
+        isOpen={isChatHistoryModalOpen}
+        onClose={handleCloseChatHistoryModal}
+        consultationId={selectedConsultation?.consultation_id || ""}
+        studentName={
+          selectedConsultation
+            ? `${selectedConsultation.murid.firstname} ${selectedConsultation.murid.lastname}`
+            : ""
+        }
+        topic={selectedConsultation?.topic || ""}
       />
     </div>
   );
