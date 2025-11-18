@@ -265,7 +265,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard Admin</h1>

@@ -303,7 +303,7 @@ const KelolaDataBeasiswa = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
       <PageHeader
         title="Kelola Data Beasiswa"
         description="Kelola informasi beasiswa dan bantuan pendidikan"

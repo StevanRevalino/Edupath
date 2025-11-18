@@ -526,7 +526,7 @@ const KelolaDataKonseling = ({
       <DataTableContainer loading={loading}>
         <div className="flex flex-col overflow-hidden">
           {/* Desktop Table View - Hidden on Mobile */}
-          <div className="hidden lg:block overflow-hidden">
+          <div className="hidden lg:block">
             {filteredConsultations.length === 0 ? (
               <div className="flex items-center justify-center h-32">
                 <div className="text-center text-gray-500">

@@ -13,7 +13,7 @@ const DataTableContainer = ({
 }: DataTableContainerProps) => {
   return (
     <div
-      className={`bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-20rem)] sm:max-h-[calc(100vh-24rem)] flex flex-col ${className}`}
+      className={`bg-white rounded-lg shadow overflow-hidden max-h-[calc(100vh-24rem)] sm:max-h-[calc(100vh-28rem)] flex flex-col ${className}`}
     >
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
@@ -23,7 +23,7 @@ const DataTableContainer = ({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col overflow-hidden">{children}</div>
+        <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
       )}
     </div>
   );
