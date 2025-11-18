@@ -40,7 +40,6 @@ model Universitas {
   kota          String?
   provinsi      String?
   akreditasi    String?
-  status        String?
   rank_qs       String?
   rank_country  String?
   created_at    DateTime  @default(now())

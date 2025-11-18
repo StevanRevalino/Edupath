@@ -91,7 +91,6 @@ export class UniversitasService {
         website: null,
         tanggal_berdiri: null,
         akreditasi: univ.akreditasi,
-        status_akreditasi: univ.status,
         rank_qs: univ.rank_qs ? parseFloat(univ.rank_qs) : null,
         rank_country: univ.rank_country ? parseFloat(univ.rank_country) : null,
       }));
@@ -138,7 +137,6 @@ export class UniversitasService {
         website: null, // Not available in local database
         tanggal_berdiri: null, // Not available in local database
         akreditasi: universitas.akreditasi,
-        status_akreditasi: universitas.status,
         rank_qs: universitas.rank_qs ? parseFloat(universitas.rank_qs) : null,
         rank_country: universitas.rank_country
           ? parseFloat(universitas.rank_country)
@@ -341,7 +339,6 @@ export class UniversitasService {
       kota: univ.kota,
       provinsi: univ.provinsi,
       akreditasi: univ.akreditasi,
-      status: univ.status,
       rank_qs: univ.rank_qs,
       rank_country: univ.rank_country,
       jumlah_prodi: univ._count?.prodi_pt || 0,
@@ -373,7 +370,6 @@ export class UniversitasService {
         kota: result.kota,
         provinsi: result.provinsi,
         akreditasi: result.akreditasi,
-        status: result.status,
         rank_qs: result.rank_qs,
         rank_country: result.rank_country,
         prodi: result.prodi_pt.map((pt: any) => ({

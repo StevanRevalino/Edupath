@@ -18,7 +18,6 @@ interface UniversitasCSV {
   kota?: string;
   provinsi?: string;
   akreditasi?: string;
-  "Status "?: string;
   rank_qs?: string;
   rank_country?: string;
 }
@@ -100,7 +99,6 @@ async function seedLocalData(force: boolean = false) {
         kota: row.kota || null,
         provinsi: row.provinsi || null,
         akreditasi: row.akreditasi || null,
-        status: row["Status "]?.trim() || null,
         rank_qs: row.rank_qs || null,
         rank_country: row.rank_country || null,
       }));
