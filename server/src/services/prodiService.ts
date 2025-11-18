@@ -49,22 +49,7 @@ export class ProdiService {
             prodi_id: detailed.prodi_id.toString(),
             nama_prodi: detailed.nama_prodi,
             jenjang: detailed.jenjang,
-            kode_prodi: null,
-            bidang: null,
-            akreditasi:
-              detailed.prodi_pt[0]?.akreditasi_prodi ||
-              detailed.prodi_pt[0]?.universitas?.akreditasi ||
-              null,
-            status_akreditasi:
-              detailed.prodi_pt[0]?.akreditasi_prodi ||
-              detailed.prodi_pt[0]?.universitas?.akreditasi ||
-              null,
-            tanggal_berdiri: null,
-            tanggal_tutup: null,
-            status: "Aktif",
-            gelar: null,
-            singkatan_gelar: null,
-            deskripsi: null,
+            akreditasi: detailed.prodi_pt[0]?.universitas?.akreditasi || null,
             universitas: detailed.prodi_pt[0]?.universitas
               ? {
                   university_id: detailed.prodi_pt[0].universitas.university_id,
@@ -116,22 +101,7 @@ export class ProdiService {
         prodi_id: result.prodi_id.toString(),
         nama_prodi: result.nama_prodi,
         jenjang: result.jenjang,
-        kode_prodi: null,
-        bidang: null,
-        akreditasi:
-          result.prodi_pt[0]?.akreditasi_prodi ||
-          result.prodi_pt[0]?.universitas?.akreditasi ||
-          null,
-        status_akreditasi:
-          result.prodi_pt[0]?.akreditasi_prodi ||
-          result.prodi_pt[0]?.universitas?.akreditasi ||
-          null,
-        tanggal_berdiri: null,
-        tanggal_tutup: null,
-        status: "Aktif",
-        gelar: null,
-        singkatan_gelar: null,
-        deskripsi: null,
+        akreditasi: result.prodi_pt[0]?.universitas?.akreditasi || null,
       };
 
       return transformedResult;
@@ -415,12 +385,7 @@ export class ProdiService {
       prodi_id: item.prodi.prodi_id.toString(),
       nama_prodi: item.prodi.nama_prodi,
       jenjang: item.prodi.jenjang ?? null,
-      kode_prodi: null,
-      bidang: null,
-      akreditasi:
-        item.pt.akreditasi_prodi || item.pt.universitas?.akreditasi || null,
-      status: "Aktif",
-      gelar: null,
+      akreditasi: item.pt.universitas?.akreditasi || null,
       universitas: item.pt.universitas
         ? {
             university_id: item.pt.universitas.university_id.toString(),

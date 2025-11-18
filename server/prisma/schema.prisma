@@ -65,16 +65,12 @@ model Prodi {
 }
 
 model ProdiPT {
-  id               Int         @id @default(autoincrement())
-  prodi_id         Int
-  university_id    Int
-  akreditasi_prodi String?
-  ukt_min          String?
-  ukt_max          String?
-  link_prodi       String?
-  created_at       DateTime    @default(now())
-  prodi            Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
-  universitas      Universitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
+  id            Int         @id @default(autoincrement())
+  prodi_id      Int
+  university_id Int
+  created_at    DateTime    @default(now())
+  prodi         Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  universitas   Universitas @relation(fields: [university_id], references: [university_id], onDelete: Cascade)
 
   @@unique([prodi_id, university_id])
   @@index([prodi_id])
@@ -172,8 +168,8 @@ model ZoomMeeting {
   scheduled_time   DateTime
   description      String?
   meeting_password String
-  join_url         String       
-  start_url        String       
+  join_url         String
+  start_url        String
   status           ZoomStatus   @default(scheduled)
   created_at       DateTime     @default(now())
   updated_at       DateTime     @updatedAt

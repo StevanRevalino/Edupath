@@ -380,7 +380,6 @@ export class UniversitasService {
           prodi_id: pt.prodi.prodi_id.toString(),
           nama_prodi: pt.prodi.nama_prodi,
           jenjang: pt.prodi.jenjang,
-          akreditasi: pt.akreditasi_prodi,
         })),
       };
 

@@ -9,10 +9,6 @@ interface CreateProdiDTO {
 interface CreateProdiPTDTO {
   prodi_id: number;
   university_id: number;
-  akreditasi_prodi?: string;
-  ukt_min?: string;
-  ukt_max?: string;
-  link_prodi?: string;
 }
 
 interface ProdiFilters {
@@ -25,7 +21,6 @@ interface ProdiFilters {
 interface ProdiPTFilters {
   prodi_id?: number;
   university_id?: number;
-  akreditasi_prodi?: string;
   limit?: number;
   offset?: number;
 }
@@ -207,10 +202,6 @@ export class ProdiRepository {
       where.university_id = filters.university_id;
     }
 
-    if (filters.akreditasi_prodi) {
-      where.akreditasi_prodi = filters.akreditasi_prodi;
-    }
-
     return this.prisma.prodiPT.findMany({
       where,
       include: {
@@ -290,10 +281,6 @@ export class ProdiRepository {
 
     if (filters.university_id) {
       where.university_id = filters.university_id;
-    }
-
-    if (filters.akreditasi_prodi) {
-      where.akreditasi_prodi = filters.akreditasi_prodi;
     }
 
     return this.prisma.prodiPT.count({ where });

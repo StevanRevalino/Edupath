@@ -33,10 +33,6 @@ interface ProdiPTCSV {
   id: string;
   prodi_id: string;
   university_id: string;
-  akreditasi_prodi?: string;
-  ukt_min?: string;
-  ukt_max?: string;
-  link_prodi?: string;
 }
 
 async function seedLocalData(force: boolean = false) {
@@ -173,10 +169,6 @@ async function seedLocalData(force: boolean = false) {
       .map((row) => ({
         prodi_id: parseInt(parseFloat(row.prodi_id).toString()),
         university_id: parseInt(row.university_id),
-        akreditasi_prodi: row.akreditasi_prodi || null,
-        ukt_min: row.ukt_min || null,
-        ukt_max: row.ukt_max || null,
-        link_prodi: row.link_prodi || null,
       }));
 
     // Insert in batches to avoid memory issues
