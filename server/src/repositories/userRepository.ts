@@ -95,6 +95,17 @@ export class UserRepository {
       where: { user_id: userId },
     });
   }
+
+  async findLastUserWithPrefix(prefix: string) {
+    return this.prisma.user.findFirst({
+      orderBy: { user_id: "desc" },
+      where: {
+        user_id: {
+          startsWith: prefix,
+        },
+      },
+    });
+  }
 }
 
 // Create and export instance

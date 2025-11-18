@@ -1,27 +1,17 @@
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/userRepository";
 import axios from "axios";
-import { PrismaClient } from "@prisma/client";
 import jwt, { SignOptions } from "jsonwebtoken";
 
 export class AuthService {
   private userRepository: UserRepository;
-  private prisma: PrismaClient;
 
   constructor() {
     this.userRepository = new UserRepository();
-    this.prisma = new PrismaClient();
   }
 
   private async generateCustomUserId(): Promise<string> {
-    const lastUser = await this.prisma.user.findFirst({
-      orderBy: { user_id: "desc" },
-      where: {
-        user_id: {
-          startsWith: "US",
-        },
-      },
-    });
+    const lastUser = await this.userRepository.findLastUserWithPrefix("US");
 
     let lastNumber = 0;
 

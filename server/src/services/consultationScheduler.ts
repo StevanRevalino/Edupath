@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { ConsultationRepository } from "../repositories/consultationRepository";
 
-const prisma = new PrismaClient();
+const consultationRepository = new ConsultationRepository();
 
 /**
  * Auto-complete consultations that have passed 1 hour from start time
@@ -13,33 +13,23 @@ export async function autoCompleteExpiredConsultations() {
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
     // Find all active consultations that started more than 1 hour ago
-    const expiredConsultations = await prisma.consultation.findMany({
-      where: {
-        status: "ACCEPTED",
-        is_active: true,
-        consultation_date: {
-          lt: oneHourAgo, // Started more than 1 hour ago
-        },
-      },
-    });
+    const expiredConsultations =
+      await consultationRepository.findExpiredConsultations(oneHourAgo);
 
     if (expiredConsultations.length > 0) {
       console.log(
         `[Scheduler] Found ${expiredConsultations.length} expired consultations to auto-complete`
       );
 
-      // Update all expired consultations to inactive
-      const result = await prisma.consultation.updateMany({
-        where: {
-          consultation_id: {
-            in: expiredConsultations.map((c) => c.consultation_id),
-          },
-        },
-        data: {
-          is_active: false,
-          status: "COMPLETED",
-        },
-      });
+      // Update all expired consultations to inactive and completed
+      const consultationIds = expiredConsultations.map(
+        (c) => c.consultation_id
+      );
+      const result = await consultationRepository.bulkUpdateStatus(
+        consultationIds,
+        "COMPLETED",
+        false // is_active = false
+      );
 
       console.log(
         `[Scheduler] Auto-completed ${result.count} consultations that exceeded 1 hour`

@@ -348,4 +348,122 @@ export class ConsultationRepository {
       },
     });
   }
+
+  // Find active accepted consultations within timeframe
+  async findActiveAcceptedConsultations(startTime: Date, endTime: Date) {
+    return this.prisma.consultation.findMany({
+      where: {
+        status: "ACCEPTED",
+        is_active: true,
+        consultation_date: {
+          gte: startTime,
+          lte: endTime,
+        },
+      },
+      include: {
+        murid: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            kelas: true,
+          },
+        },
+        chatRoom: {
+          include: {
+            messages: {
+              orderBy: { created_at: "desc" },
+              take: 1,
+            },
+            _count: {
+              select: {
+                messages: {
+                  where: {
+                    is_read: false,
+                    sender: { role: "STUDENT" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { consultation_date: "desc" },
+    });
+  }
+
+  // Find inactive consultations with chat rooms
+  async findInactiveConsultationsWithChat() {
+    return this.prisma.consultation.findMany({
+      where: {
+        is_active: false,
+        chatRoom: {
+          isNot: null,
+        },
+      },
+      include: {
+        murid: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            kelas: true,
+          },
+        },
+        admin: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+          },
+        },
+        chatRoom: {
+          include: {
+            messages: {
+              orderBy: { created_at: "desc" },
+              take: 1,
+            },
+            _count: {
+              select: {
+                messages: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { created_at: "desc" },
+    });
+  }
+
+  // Find expired consultations (for scheduler)
+  async findExpiredConsultations(oneHourAgo: Date) {
+    return this.prisma.consultation.findMany({
+      where: {
+        status: "ACCEPTED",
+        is_active: true,
+        consultation_date: {
+          lt: oneHourAgo,
+        },
+      },
+    });
+  }
+
+  // Bulk update consultation status (for scheduler)
+  async bulkUpdateStatus(
+    consultationIds: string[],
+    status: ConsultationStatus,
+    isActive: boolean
+  ) {
+    return this.prisma.consultation.updateMany({
+      where: {
+        consultation_id: {
+          in: consultationIds,
+        },
+      },
+      data: {
+        is_active: isActive,
+        status: status,
+      },
+    });
+  }
 }

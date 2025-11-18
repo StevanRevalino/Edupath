@@ -3,7 +3,7 @@
  * Implements Fuzzy Logic for Holland's RIASEC theory
  */
 
-import prisma from "../configs/prisma";
+import { RiasecRepository } from "../repositories/riasecRepository";
 import { fuzzyLogicService } from "./fuzzyLogic";
 
 // Types for RIASEC assessment
@@ -50,17 +50,17 @@ interface RecommendationResult {
 }
 
 class RiasecService {
+  private riasecRepository: RiasecRepository;
+
+  constructor() {
+    this.riasecRepository = new RiasecRepository();
+  }
+
   /**
    * Get all RIASEC questions for assessment
    */
   async getQuestions() {
-    const questions = await prisma.riasecQuestion.findMany({
-      orderBy: {
-        question_id: "asc",
-      },
-    });
-
-    return questions;
+    return this.riasecRepository.findAllQuestions();
   }
 
   /**
@@ -158,19 +158,7 @@ class RiasecService {
     scores: RiasecScores
   ): Promise<RecommendationResult[]> {
     // Get all prodi mappings
-    const mappings = await prisma.riasecProdiMapping.findMany({
-      include: {
-        prodi: {
-          include: {
-            prodi_pt: {
-              select: {
-                university_id: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const mappings = await this.riasecRepository.findAllProdiMappings();
 
     // If no mappings found, return empty array
     if (mappings.length === 0) {
@@ -240,40 +228,12 @@ class RiasecService {
     const recommendations = await this.getRecommendations(scores);
 
     // Save assessment to database
-    const assessment = await prisma.riasecAssessment.create({
-      data: {
-        user_id: userId,
-        realistic_score: scores.realistic,
-        investigative_score: scores.investigative,
-        artistic_score: scores.artistic,
-        social_score: scores.social,
-        enterprising_score: scores.enterprising,
-        conventional_score: scores.conventional,
-        primary_type: primary,
-        secondary_type: secondary,
-        holland_code: code,
-        responses: {
-          create: responses.map((r) => ({
-            question_id: r.question_id,
-            answer_value: r.answer_value,
-          })),
-        },
-        recommendations: {
-          create: recommendations.map((r) => ({
-            prodi_id: r.prodi_id,
-            match_percentage: r.match_percentage,
-            rank: r.rank,
-          })),
-        },
-      },
-      include: {
-        responses: true,
-        recommendations: {
-          include: {
-            prodi: true,
-          },
-        },
-      },
+    const assessment = await this.riasecRepository.createAssessment({
+      user_id: userId,
+      scores,
+      primary_type: primary,
+      secondary_type: secondary,
+      tertiary_type: code,
     });
 
     return {
@@ -291,61 +251,29 @@ class RiasecService {
    * Get assessment history for a user
    */
   async getUserAssessments(userId: string) {
-    const assessments = await prisma.riasecAssessment.findMany({
-      where: {
-        user_id: userId,
-      },
-      orderBy: {
-        completed_at: "desc",
-      },
-      select: {
-        assessment_id: true,
-        primary_type: true,
-        secondary_type: true,
-        holland_code: true,
-        completed_at: true,
-      },
-    });
+    const assessments = await this.riasecRepository.findAssessmentsByUserId(
+      userId,
+      100
+    );
 
-    return assessments;
+    return assessments.map((assessment) => ({
+      assessment_id: assessment.assessment_id,
+      primary_type: assessment.primary_type,
+      secondary_type: assessment.secondary_type,
+      holland_code: assessment.holland_code,
+      completed_at: assessment.completed_at,
+    }));
   }
 
   /**
    * Get detailed assessment result by ID
    */
   async getAssessmentById(assessmentId: string, userId: string) {
-    const assessment = await prisma.riasecAssessment.findFirst({
-      where: {
-        assessment_id: assessmentId,
-        user_id: userId,
-      },
-      include: {
-        recommendations: {
-          include: {
-            prodi: {
-              include: {
-                prodi_pt: {
-                  select: {
-                    university_id: true,
-                  },
-                },
-                riasecMappings: {
-                  select: {
-                    primary_type: true,
-                    secondary_type: true,
-                  },
-                },
-              },
-            },
-          },
-          orderBy: {
-            rank: "asc",
-          },
-        },
-      },
-    });
+    const assessment = await this.riasecRepository.findLatestAssessmentByUserId(
+      userId
+    );
 
-    if (!assessment) {
+    if (!assessment || assessment.assessment_id !== assessmentId) {
       throw new Error("Assessment not found");
     }
 
@@ -360,6 +288,9 @@ class RiasecService {
 
     const { tertiary } = this.getHollandCode(scores);
 
+    // Get recommendations from mappings
+    const recommendations = await this.getRecommendations(scores);
+
     return {
       assessment_id: assessment.assessment_id,
       scores,
@@ -368,20 +299,7 @@ class RiasecService {
       tertiary_type: tertiary,
       holland_code: assessment.holland_code,
       completed_at: assessment.completed_at,
-      recommendations: assessment.recommendations.map((rec: any) => {
-        // Get the first mapping (should be the most relevant)
-        const mapping = rec.prodi.riasecMappings?.[0];
-
-        return {
-          prodi_id: rec.prodi.prodi_id,
-          nama_prodi: rec.prodi.nama_prodi,
-          jenjang: rec.prodi.jenjang,
-          match_percentage: rec.match_percentage,
-          rank: rec.rank,
-          primary_type: mapping?.primary_type || assessment.primary_type,
-          secondary_type: mapping?.secondary_type || assessment.secondary_type,
-        };
-      }),
+      recommendations: recommendations.slice(0, 10), // Return top 10
     };
   }
 }

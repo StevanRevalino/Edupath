@@ -1,71 +1,38 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ChatRepository } from "../repositories/chatRepository";
+import { ConsultationRepository } from "../repositories/consultationRepository";
 
 export class ChatService {
+  private chatRepository: ChatRepository;
+  private consultationRepository: ConsultationRepository;
+
+  constructor() {
+    this.chatRepository = new ChatRepository();
+    this.consultationRepository = new ConsultationRepository();
+  }
+
   // Get or create chat room for a consultation
   async getOrCreateChatRoom(consultationId: string) {
     try {
       // First, get the consultation details
-      const consultation = await prisma.consultation.findUnique({
-        where: { consultation_id: consultationId },
-        include: {
-          murid: true,
-          admin: true,
-        },
-      });
+      const consultation = await this.consultationRepository.findById(
+        consultationId
+      );
 
       if (!consultation) {
         throw new Error("Consultation not found");
       }
 
       // Check if chat room already exists
-      let chatRoom = await prisma.chatRoom.findUnique({
-        where: { consultation_id: consultationId },
-        include: {
-          murid: true,
-          admin: true,
-          messages: {
-            orderBy: { created_at: "asc" },
-            include: {
-              sender: {
-                select: {
-                  user_id: true,
-                  firstname: true,
-                  lastname: true,
-                  role: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      let chatRoom = await this.chatRepository.findChatRoomByConsultationId(
+        consultationId
+      );
 
       // If chat room doesn't exist, create it
       if (!chatRoom) {
-        chatRoom = await prisma.chatRoom.create({
-          data: {
-            consultation_id: consultationId,
-            murid_id: consultation.murid_id,
-            admin_id: consultation.admin_id,
-          },
-          include: {
-            murid: true,
-            admin: true,
-            messages: {
-              orderBy: { created_at: "asc" },
-              include: {
-                sender: {
-                  select: {
-                    user_id: true,
-                    firstname: true,
-                    lastname: true,
-                    role: true,
-                  },
-                },
-              },
-            },
-          },
+        chatRoom = await this.chatRepository.createChatRoom({
+          consultation_id: consultationId,
+          murid_id: consultation.murid_id,
+          admin_id: consultation.admin_id,
         });
       }
 
@@ -79,66 +46,34 @@ export class ChatService {
   // Get all active chat rooms for an admin
   async getChatRoomsForAdmin(adminId: string) {
     try {
-      const chatRooms = await prisma.chatRoom.findMany({
-        where: {
-          admin_id: adminId,
-        },
-        include: {
-          murid: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-              kelas: true,
-            },
-          },
-          consultation: {
-            select: {
-              topic: true,
-              consultation_date: true,
-              status: true,
-            },
-          },
-          messages: {
-            orderBy: { created_at: "desc" },
-            take: 1,
-            include: {
-              sender: {
-                select: {
-                  firstname: true,
-                  lastname: true,
-                  role: true,
-                },
-              },
-            },
-          },
-          _count: {
-            select: {
-              messages: {
-                where: {
-                  is_read: false,
-                  sender_id: { not: adminId },
-                },
-              },
-            },
-          },
-        },
-        orderBy: { updated_at: "desc" },
-      });
+      const chatRooms = await this.chatRepository.findChatRoomsByAdminId(
+        adminId
+      );
 
-      return chatRooms.map((room) => ({
-        room_id: room.room_id,
-        user_id: room.murid.user_id,
-        firstname: room.murid.firstname,
-        lastname: room.murid.lastname,
-        kelas: room.murid.kelas,
-        lastMessage: room.messages[0]?.message || room.consultation.topic,
-        lastMessageTime: room.messages[0]
-          ? room.messages[0].created_at.toISOString()
-          : room.created_at.toISOString(),
-        unreadCount: room._count.messages,
-        consultation: room.consultation,
-      }));
+      const roomsWithUnreadCounts = await Promise.all(
+        chatRooms.map(async (room: any) => {
+          const unreadCount = await this.chatRepository.countUnreadMessages(
+            room.room_id,
+            adminId
+          );
+
+          return {
+            room_id: room.room_id,
+            user_id: room.murid.user_id,
+            firstname: room.murid.firstname,
+            lastname: room.murid.lastname,
+            kelas: room.murid.kelas,
+            lastMessage: room.messages[0]?.message || room.consultation.topic,
+            lastMessageTime: room.messages[0]
+              ? room.messages[0].created_at.toISOString()
+              : room.created_at.toISOString(),
+            unreadCount: room._count.messages,
+            consultation: room.consultation,
+          };
+        })
+      );
+
+      return roomsWithUnreadCounts;
     } catch (error) {
       console.error("Error in getChatRoomsForAdmin:", error);
       throw error;
@@ -149,43 +84,21 @@ export class ChatService {
   async getChatMessages(roomId: string, userId: string) {
     try {
       // Verify user has access to this chat room
-      const chatRoom = await prisma.chatRoom.findFirst({
-        where: {
-          room_id: roomId,
-          OR: [{ murid_id: userId }, { admin_id: userId }],
-        },
-      });
+      const chatRoom = await this.chatRepository.findChatRoomByIdAndUserId(
+        roomId,
+        userId
+      );
 
       if (!chatRoom) {
         throw new Error("Access denied or chat room not found");
       }
 
-      const messages = await prisma.chatMessage.findMany({
-        where: { room_id: roomId },
-        include: {
-          sender: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-              role: true,
-            },
-          },
-        },
-        orderBy: { created_at: "asc" },
-      });
+      const messages = await this.chatRepository.findMessagesByRoomId(roomId);
 
       // Mark messages as read for the current user
-      await prisma.chatMessage.updateMany({
-        where: {
-          room_id: roomId,
-          sender_id: { not: userId },
-          is_read: false,
-        },
-        data: { is_read: true },
-      });
+      await this.chatRepository.markMessagesAsRead(roomId, userId);
 
-      return messages.map((msg) => ({
+      return messages.map((msg: any) => ({
         id: msg.message_id,
         message: msg.message,
         senderId: msg.sender_id,
@@ -204,40 +117,23 @@ export class ChatService {
   async sendMessage(roomId: string, senderId: string, message: string) {
     try {
       // Verify user has access to this chat room
-      const chatRoom = await prisma.chatRoom.findFirst({
-        where: {
-          room_id: roomId,
-          OR: [{ murid_id: senderId }, { admin_id: senderId }],
-        },
-      });
+      const chatRoom = await this.chatRepository.findChatRoomByIdAndUserId(
+        roomId,
+        senderId
+      );
 
       if (!chatRoom) {
         throw new Error("Access denied or chat room not found");
       }
 
-      const newMessage = await prisma.chatMessage.create({
-        data: {
-          room_id: roomId,
-          sender_id: senderId,
-          message: message.trim(),
-        },
-        include: {
-          sender: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-              role: true,
-            },
-          },
-        },
+      const newMessage = await this.chatRepository.createMessage({
+        room_id: roomId,
+        sender_id: senderId,
+        message: message.trim(),
       });
 
       // Update chat room's updated_at timestamp
-      await prisma.chatRoom.update({
-        where: { room_id: roomId },
-        data: { updated_at: new Date() },
-      });
+      await this.chatRepository.updateChatRoomTimestamp(roomId);
 
       // ✨ Create notification if message is from admin to student
       if (newMessage.sender.role === "ADMIN") {
@@ -247,17 +143,14 @@ export class ChatService {
         const isZoomMessage = message.includes("🎥 Zoom Meeting Dibuat");
 
         if (!isZoomMessage) {
-          await prisma.notification.create({
-            data: {
-              user_id: receiverId,
-              type: "CHAT_MESSAGE",
-              title: "Pesan Baru dari Admin",
-              message: `${newMessage.sender.firstname} ${
-                newMessage.sender.lastname
-              }: ${message.slice(0, 50)}${message.length > 50 ? "..." : ""}`,
-              related_id: chatRoom.consultation_id,
-              is_read: false,
-            },
+          await this.chatRepository.createNotification({
+            user_id: receiverId,
+            type: "CHAT_MESSAGE",
+            title: "Pesan Baru dari Admin",
+            message: `${newMessage.sender.firstname} ${
+              newMessage.sender.lastname
+            }: ${message.slice(0, 50)}${message.length > 50 ? "..." : ""}`,
+            related_id: chatRoom.consultation_id,
           });
         }
       }
@@ -284,48 +177,13 @@ export class ChatService {
       // Calculate time 1 hour ago (consultation should have started within last 1 hour)
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
-      const acceptedConsultations = await prisma.consultation.findMany({
-        where: {
-          status: "ACCEPTED",
-          is_active: true, // ✨ Hanya konsultasi yang masih aktif
-          consultation_date: {
-            gte: oneHourAgo, // ✨ Konsultasi dimulai tidak lebih dari 1 jam yang lalu
-            lte: now, // ✨ Konsultasi sudah dimulai (tidak di masa depan)
-          },
-        },
-        include: {
-          murid: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-              kelas: true,
-            },
-          },
-          chatRoom: {
-            include: {
-              messages: {
-                orderBy: { created_at: "desc" },
-                take: 1,
-              },
-              _count: {
-                select: {
-                  messages: {
-                    where: {
-                      is_read: false,
-                      // unread kalau dikirim murid (bukan admin)
-                      sender: { role: "STUDENT" },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        orderBy: { consultation_date: "desc" },
-      });
+      const acceptedConsultations =
+        await this.consultationRepository.findActiveAcceptedConsultations(
+          oneHourAgo,
+          now
+        );
 
-      return acceptedConsultations.map((consultation) => {
+      return acceptedConsultations.map((consultation: any) => {
         return {
           user_id: consultation.murid.user_id,
           firstname: consultation.murid.firstname,
@@ -352,47 +210,10 @@ export class ChatService {
   // ✨ NEW: Get chat history (inactive consultations)
   async getChatHistory() {
     try {
-      const inactiveConsultations = await prisma.consultation.findMany({
-        where: {
-          is_active: false, // Konsultasi yang sudah selesai
-          chatRoom: {
-            isNot: null, // Hanya yang punya chat room
-          },
-        },
-        include: {
-          murid: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-              kelas: true,
-            },
-          },
-          admin: {
-            select: {
-              user_id: true,
-              firstname: true,
-              lastname: true,
-            },
-          },
-          chatRoom: {
-            include: {
-              messages: {
-                orderBy: { created_at: "desc" },
-                take: 1,
-              },
-              _count: {
-                select: {
-                  messages: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: { created_at: "desc" },
-      });
+      const inactiveConsultations =
+        await this.consultationRepository.findInactiveConsultationsWithChat();
 
-      return inactiveConsultations.map((consultation) => ({
+      return inactiveConsultations.map((consultation: any) => ({
         consultation_id: consultation.consultation_id,
         user_id: consultation.murid.user_id,
         firstname: consultation.murid.firstname,
