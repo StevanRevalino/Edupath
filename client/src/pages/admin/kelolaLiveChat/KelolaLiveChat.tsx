@@ -3,12 +3,12 @@ import {
   Search,
   Send,
   MessageCircle,
-  Video,
   MoreVertical,
   Image as ImageIcon,
   X,
   Loader,
 } from "lucide-react";
+import ZoomIcon from "../../../assets/icons/zoom-icon.png";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
@@ -770,13 +770,11 @@ const KelolaLiveChat = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setIsZoomModalOpen(true)}
-                    className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-primary bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors font-medium"
                     title="Buat Zoom Meeting"
                   >
-                    <Video size={20} />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors">
-                    <MoreVertical size={20} />
+                    <img src={ZoomIcon} alt="Zoom Icon" className="w-5 h-5" />
+                    <span className="text-sm">Buat Zoom Meeting</span>
                   </button>
                 </div>
               </div>
