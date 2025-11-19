@@ -152,7 +152,6 @@ export class ZoomController {
           meeting_password: meetingPassword,
           join_url: joinUrl,
           start_url: startUrl,
-          status: "scheduled",
         },
       });
 
