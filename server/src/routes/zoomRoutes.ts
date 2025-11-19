@@ -19,14 +19,7 @@ router.get(
   zoomController.getZoomMeetings.bind(zoomController)
 );
 
-// Update Zoom meeting status
-router.patch(
-  "/meeting/:meetingId/status",
-  authenticateToken,
-  zoomController.updateZoomMeetingStatus.bind(zoomController)
-);
-
-// Delete/Cancel Zoom meeting
+// Delete Zoom meeting
 router.delete(
   "/meeting/:meetingId",
   authenticateToken,

@@ -253,52 +253,6 @@ export class ZoomController {
     }
   }
 
-  // Update Zoom meeting status
-  async updateZoomMeetingStatus(req: Request, res: Response) {
-    try {
-      const { meetingId } = req.params;
-      const { status } = req.body;
-      const userId = req.user?.user_id;
-
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized",
-        });
-      }
-
-      // Validate status
-      if (!["scheduled", "started", "ended", "cancelled"].includes(status)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid status",
-        });
-      }
-
-      // Update meeting
-      const updatedMeeting = await prisma.zoomMeeting.update({
-        where: {
-          zoom_meeting_id: meetingId,
-        },
-        data: {
-          status: status,
-        },
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Status Zoom meeting berhasil diupdate",
-        data: updatedMeeting,
-      });
-    } catch (error: any) {
-      console.error("Error updating Zoom meeting status:", error);
-      return res.status(500).json({
-        success: false,
-        message: error.message || "Gagal mengupdate status Zoom meeting",
-      });
-    }
-  }
-
   // Delete/Cancel Zoom meeting
   async deleteZoomMeeting(req: Request, res: Response) {
     try {
@@ -327,19 +281,16 @@ export class ZoomController {
         });
       }
 
-      // Update status to cancelled instead of deleting
-      await prisma.zoomMeeting.update({
+      // Delete the meeting
+      await prisma.zoomMeeting.delete({
         where: {
           zoom_meeting_id: meetingId,
-        },
-        data: {
-          status: "cancelled",
         },
       });
 
       return res.status(200).json({
         success: true,
-        message: "Zoom meeting berhasil dibatalkan",
+        message: "Zoom meeting berhasil dihapus",
       });
     } catch (error: any) {
       console.error("Error deleting Zoom meeting:", error);

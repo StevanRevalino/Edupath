@@ -169,7 +169,6 @@ model ZoomMeeting {
   meeting_password String
   join_url         String
   start_url        String
-  status           ZoomStatus   @default(scheduled)
   created_at       DateTime     @default(now())
   updated_at       DateTime     @updatedAt
   consultation     Consultation @relation(fields: [consultation_id], references: [consultation_id], onDelete: Cascade)
@@ -178,7 +177,6 @@ model ZoomMeeting {
   @@index([consultation_id])
   @@index([host_id])
   @@index([scheduled_time])
-  @@index([status])
 }
 
 enum Role {
@@ -191,13 +189,6 @@ enum ConsultationStatus {
   ACCEPTED
   DECLINED
   COMPLETED
-}
-
-enum ZoomStatus {
-  scheduled
-  started
-  ended
-  cancelled
 }
 
 // RIASEC Assessment models
