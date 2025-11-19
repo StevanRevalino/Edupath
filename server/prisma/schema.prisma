@@ -64,7 +64,7 @@ model Prodi {
 }
 
 model ProdiPT {
-  id            Int         @id @default(autoincrement())
+  prodi_pt_id   Int         @id @default(autoincrement())
   prodi_id      Int
   university_id Int
   created_at    DateTime    @default(now())
