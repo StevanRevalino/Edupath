@@ -228,9 +228,9 @@ export class ProdiRepository {
   }
 
   // Find ProdiPT by ID
-  async findProdiPTById(id: number) {
+  async findProdiPTById(prodi_pt_id: number) {
     return this.prisma.prodiPT.findUnique({
-      where: { id },
+      where: { prodi_pt_id },
       include: {
         prodi: true,
         universitas: true,
@@ -239,9 +239,9 @@ export class ProdiRepository {
   }
 
   // Update ProdiPT
-  async updateProdiPT(id: number, data: Partial<CreateProdiPTDTO>) {
+  async updateProdiPT(prodi_pt_id: number, data: Partial<CreateProdiPTDTO>) {
     return this.prisma.prodiPT.update({
-      where: { id },
+      where: { prodi_pt_id },
       data,
       include: {
         prodi: true,
@@ -251,9 +251,9 @@ export class ProdiRepository {
   }
 
   // Delete ProdiPT
-  async deleteProdiPT(id: number) {
+  async deleteProdiPT(prodi_pt_id: number) {
     return this.prisma.prodiPT.delete({
-      where: { id },
+      where: { prodi_pt_id },
     });
   }
 
