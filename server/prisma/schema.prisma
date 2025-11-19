@@ -248,13 +248,12 @@ model RiasecResponse {
 }
 
 model RiasecProdiMapping {
-  mapping_id          Int         @id @default(autoincrement())
-  prodi_id            Int
-  primary_type        RiasecType
-  secondary_type      RiasecType?
-  compatibility_score Int         @default(100)
-  created_at          DateTime    @default(now())
-  prodi               Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  mapping_id     Int         @id @default(autoincrement())
+  prodi_id       Int
+  primary_type   RiasecType
+  secondary_type RiasecType?
+  created_at     DateTime    @default(now())
+  prodi          Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
 
   @@index([primary_type])
   @@index([secondary_type])
