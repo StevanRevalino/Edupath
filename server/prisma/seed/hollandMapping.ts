@@ -1,14 +1,13 @@
 /**
- * RIASEC to Prodi (Program Studi) Mapping
- * Based on Holland's RIASEC Environmental Typology
+ * Holland to Prodi (Program Studi) Mapping
+ * Based on Holland's Career Environmental Typology
  * Reference: Table 4.1 Summary of Holland Types Related to Major Fields
  *
  * This mapping connects personality types with compatible academic programs
  * Each mapping includes:
  * - keywords: Array of possible prodi names (for fuzzy matching)
- * - primary_type: Main RIASEC type
- * - secondary_type: Secondary RIASEC type (optional)
- * - compatibility_score: Base compatibility (80-100)
+ * - primary_type: Main Holland type
+ * - secondary_type: Secondary Holland type (optional)
  *
  * MATCHING STRATEGY:
  * Seed script will try to match using keywords with LIKE %keyword%
@@ -19,10 +18,10 @@ interface ProdiMapping {
   keywords: string[]; // Multiple possible names
   primary_type: string;
   secondary_type: string | null;
-  compatibility_score: number;
+  compatibility_score?: number; // Optional, not used in current implementation
 }
 
-export const riasecProdiMapping: ProdiMapping[] = [
+export const hollandProdiMapping: ProdiMapping[] = [
   // ========================================
   // REALISTIC (R) Programs
   // Ref: "mechanical and athletic abilities, likes to work outdoors and with tools"

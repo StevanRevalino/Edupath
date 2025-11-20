@@ -1,19 +1,19 @@
 /**
- * RIASEC Assessment Controller
- * Handles HTTP requests for RIASEC career assessment
+ * Holland Assessment Controller
+ * Handles HTTP requests for Holland career assessment
  */
 
 import { Request, Response } from "express";
-import riasecService from "../services/riasecService";
+import hollandService from "../services/hollandService";
 
-class RiasecController {
+class HollandController {
   /**
-   * GET /api/riasec/questions
+   * GET /api/holland/questions
    * Get all assessment questions
    */
   async getQuestions(req: Request, res: Response) {
     try {
-      const questions = await riasecService.getQuestions();
+      const questions = await hollandService.getQuestions();
 
       res.status(200).json({
         success: true,
@@ -30,7 +30,7 @@ class RiasecController {
   }
 
   /**
-   * POST /api/riasec/submit
+   * POST /api/holland/submit
    * Submit assessment responses and get recommendations
    */
   async submitAssessment(req: Request, res: Response) {
@@ -48,11 +48,11 @@ class RiasecController {
       if (!responses || !Array.isArray(responses)) {
         return res.status(400).json({
           success: false,
-          message: "Invalid request: responses array is required",
+          message: "Responses must be an array",
         });
       }
 
-      const result = await riasecService.submitAssessment(userId, responses);
+      const result = await hollandService.submitAssessment(userId, responses);
 
       res.status(201).json({
         success: true,
@@ -61,7 +61,7 @@ class RiasecController {
       });
     } catch (error: any) {
       console.error("Error submitting assessment:", error);
-      res.status(500).json({
+      res.status(400).json({
         success: false,
         message: error.message || "Failed to submit assessment",
       });
@@ -69,7 +69,7 @@ class RiasecController {
   }
 
   /**
-   * GET /api/riasec/history
+   * GET /api/holland/history
    * Get user's assessment history
    */
   async getAssessmentHistory(req: Request, res: Response) {
@@ -83,7 +83,7 @@ class RiasecController {
         });
       }
 
-      const assessments = await riasecService.getUserAssessments(userId);
+      const assessments = await hollandService.getUserAssessments(userId);
 
       res.status(200).json({
         success: true,
@@ -100,8 +100,8 @@ class RiasecController {
   }
 
   /**
-   * GET /api/riasec/result/:assessmentId
-   * Get detailed assessment result by ID
+   * GET /api/holland/result/:assessmentId
+   * Get detailed assessment result
    */
   async getAssessmentResult(req: Request, res: Response) {
     try {
@@ -122,7 +122,7 @@ class RiasecController {
         });
       }
 
-      const result = await riasecService.getAssessmentById(
+      const result = await hollandService.getAssessmentById(
         assessmentId,
         userId
       );
@@ -134,14 +134,12 @@ class RiasecController {
       });
     } catch (error: any) {
       console.error("Error fetching assessment result:", error);
-
       if (error.message === "Assessment not found") {
         return res.status(404).json({
           success: false,
           message: "Assessment not found",
         });
       }
-
       res.status(500).json({
         success: false,
         message: error.message || "Failed to retrieve assessment result",
@@ -150,4 +148,4 @@ class RiasecController {
   }
 }
 
-export default new RiasecController();
+export default new HollandController();

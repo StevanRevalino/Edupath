@@ -1,6 +1,6 @@
-import { PrismaClient, RiasecType } from "@prisma/client";
+import { PrismaClient, HollandType } from "@prisma/client";
 
-interface CreateRiasecAssessmentDTO {
+interface CreateHollandAssessmentDTO {
   user_id: string;
   scores: {
     realistic: number;
@@ -10,28 +10,28 @@ interface CreateRiasecAssessmentDTO {
     enterprising: number;
     conventional: number;
   };
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
   tertiary_type: string;
 }
 
-export class RiasecRepository {
+export class HollandRepository {
   private prisma: PrismaClient;
 
   constructor() {
     this.prisma = new PrismaClient();
   }
 
-  // Get all RIASEC questions
+  // Get all Holland questions
   async findAllQuestions() {
-    return this.prisma.riasecQuestion.findMany({
+    return this.prisma.hollandQuestion.findMany({
       orderBy: { question_id: "asc" },
     });
   }
 
-  // Get all prodi-RIASEC mappings
+  // Get all prodi-Holland mappings
   async findAllProdiMappings() {
-    return this.prisma.riasecProdiMapping.findMany({
+    return this.prisma.hollandProdiMapping.findMany({
       include: {
         prodi: {
           select: {
@@ -44,9 +44,9 @@ export class RiasecRepository {
     });
   }
 
-  // Create new RIASEC assessment
-  async createAssessment(data: CreateRiasecAssessmentDTO) {
-    return this.prisma.riasecAssessment.create({
+  // Create new Holland assessment
+  async createAssessment(data: CreateHollandAssessmentDTO) {
+    return this.prisma.hollandAssessment.create({
       data: {
         user_id: data.user_id,
         realistic_score: data.scores.realistic,
@@ -74,7 +74,7 @@ export class RiasecRepository {
 
   // Get user's assessment history
   async findAssessmentsByUserId(userId: string, limit: number = 5) {
-    return this.prisma.riasecAssessment.findMany({
+    return this.prisma.hollandAssessment.findMany({
       where: { user_id: userId },
       orderBy: { completed_at: "desc" },
       take: limit,
@@ -92,7 +92,7 @@ export class RiasecRepository {
 
   // Get user's latest assessment
   async findLatestAssessmentByUserId(userId: string) {
-    return this.prisma.riasecAssessment.findFirst({
+    return this.prisma.hollandAssessment.findFirst({
       where: { user_id: userId },
       orderBy: { completed_at: "desc" },
       include: {

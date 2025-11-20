@@ -1,46 +1,46 @@
 /**
- * Seed Script for RIASEC Assessment System
+ * Seed Script for Holland Assessment System
  * This script populates the database with:
- * 1. RIASEC Questions (60 questions)
- * 2. RIASEC-Prodi Mappings
+ * 1. Holland Questions (60 questions)
+ * 2. Holland-Prodi Mappings
  */
 
-import { PrismaClient, RiasecType } from "@prisma/client";
-import { riasecQuestions } from "./riasecQuestions";
-import { riasecProdiMapping } from "./riasecMapping";
+import { PrismaClient, HollandType } from "@prisma/client";
+import { hollandQuestions } from "./hollandQuestions";
+import { hollandProdiMapping } from "./hollandMapping";
 
 const prisma = new PrismaClient();
 
-async function seedRiasecQuestions() {
-  console.log("🌱 Seeding RIASEC Questions...");
+async function seedHollandQuestions() {
+  console.log("🌱 Seeding Holland Questions...");
 
   // Clear existing questions first
-  await prisma.riasecQuestion.deleteMany();
+  await prisma.hollandQuestion.deleteMany();
 
   let count = 0;
-  for (const question of riasecQuestions) {
-    await prisma.riasecQuestion.create({
+  for (const question of hollandQuestions) {
+    await prisma.hollandQuestion.create({
       data: {
         question_text: question.question_text,
-        riasec_type: question.riasec_type as RiasecType,
+        holland_type: question.holland_type as HollandType,
       },
     });
     count++;
   }
 
-  console.log(`✅ Seeded ${count} RIASEC questions`);
+  console.log(`✅ Seeded ${count} Holland questions`);
 }
 
-async function seedRiasecProdiMapping() {
-  console.log("🌱 Seeding RIASEC-Prodi Mappings...");
+async function seedHollandProdiMapping() {
+  console.log("🌱 Seeding Holland-Prodi Mappings...");
 
   // Clear existing mappings first
-  await prisma.riasecProdiMapping.deleteMany();
+  await prisma.hollandProdiMapping.deleteMany();
 
   let successCount = 0;
   let skippedCount = 0;
 
-  for (const mapping of riasecProdiMapping) {
+  for (const mapping of hollandProdiMapping) {
     // Try to find prodi using any of the keywords
     let prodi = null;
     let matchedKeyword = "";
@@ -63,25 +63,24 @@ async function seedRiasecProdiMapping() {
 
     if (prodi) {
       // Check if mapping already exists
-      const existingMapping = await prisma.riasecProdiMapping.findFirst({
+      const existingMapping = await prisma.hollandProdiMapping.findFirst({
         where: {
           prodi_id: prodi.prodi_id,
-          primary_type: mapping.primary_type as RiasecType,
+          primary_type: mapping.primary_type as HollandType,
           secondary_type: mapping.secondary_type
-            ? (mapping.secondary_type as RiasecType)
+            ? (mapping.secondary_type as HollandType)
             : null,
         },
       });
 
       if (!existingMapping) {
-        await prisma.riasecProdiMapping.create({
+        await prisma.hollandProdiMapping.create({
           data: {
             prodi_id: prodi.prodi_id,
-            primary_type: mapping.primary_type as RiasecType,
+            primary_type: mapping.primary_type as HollandType,
             secondary_type: mapping.secondary_type
-              ? (mapping.secondary_type as RiasecType)
+              ? (mapping.secondary_type as HollandType)
               : null,
-            compatibility_score: mapping.compatibility_score,
           },
         });
         console.log(
@@ -102,18 +101,18 @@ async function seedRiasecProdiMapping() {
   }
 
   console.log(
-    `✅ Seeded ${successCount} RIASEC-Prodi mappings (${skippedCount} skipped)`
+    `✅ Seeded ${successCount} Holland-Prodi mappings (${skippedCount} skipped)`
   );
 }
 
 async function main() {
   try {
-    console.log("🚀 Starting RIASEC seed...\n");
+    console.log("🚀 Starting Holland seed...\n");
 
-    await seedRiasecQuestions();
-    await seedRiasecProdiMapping();
+    await seedHollandQuestions();
+    await seedHollandProdiMapping();
 
-    console.log("\n✨ RIASEC seed completed successfully!");
+    console.log("\n✨ Holland seed completed successfully!");
   } catch (error) {
     console.error("❌ Error seeding database:", error);
     throw error;

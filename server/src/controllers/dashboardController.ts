@@ -143,7 +143,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     // Get active students count per month (students who took RIASEC test)
     const monthlyActiveStudents = Array(6).fill(0);
 
-    const assessments = await prisma.riasecAssessment.findMany({
+    const assessments = await prisma.hollandAssessment.findMany({
       where: {
         completed_at: {
           gte: sixMonthsAgo,

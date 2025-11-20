@@ -34,7 +34,7 @@ const Home = () => {
   const [allUniversities, setAllUniversities] = useState<string[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(true);
 
-  // RIASEC Assessment data state
+  // Holland Assessment data state
   const [assessmentStats, setAssessmentStats] = useState<{
     totalTests: number;
     lastTestDate: string | null;
@@ -184,7 +184,7 @@ const Home = () => {
     fetchUniversitasData();
   }, [API_URL]);
 
-  // Fetch RIASEC assessment data
+  // Fetch Holland assessment data
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
@@ -196,7 +196,7 @@ const Home = () => {
 
         // Fetch assessment history
         const historyResponse = await axios.get(
-          `${API_URL}/api/riasec/history`,
+          `${API_URL}/api/holland/history`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -224,7 +224,7 @@ const Home = () => {
 
           // Fetch detailed result for latest assessment to get recommendations
           const resultResponse = await axios.get(
-            `${API_URL}/api/riasec/result/${latestAssessment.assessment_id}`,
+            `${API_URL}/api/holland/result/${latestAssessment.assessment_id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -553,11 +553,11 @@ const Home = () => {
 
                 {assessmentStats.latestTestDetails ? (
                   <div className="space-y-4">
-                    {/* RIASEC Scores Diagram */}
+                    {/* Holland Scores Diagram */}
                     {assessmentStats.latestTestDetails.scores && (
                       <div className="bg-gray-50 rounded-xl p-4">
                         <h4 className="font-semibold text-sm mb-3">
-                          RIASEC Scores:
+                          Holland Scores:
                         </h4>
                         <div className="space-y-2">
                           {Object.entries(

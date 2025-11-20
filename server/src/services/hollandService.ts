@@ -1,13 +1,13 @@
 /**
- * RIASEC Assessment Service
- * Implements Fuzzy Logic for Holland's RIASEC theory
+ * Holland Assessment Service
+ * Implements Fuzzy Logic for Holland's Career Theory
  */
 
-import { RiasecRepository } from "../repositories/riasecRepository";
+import { HollandRepository } from "../repositories/hollandRepository";
 import { fuzzyLogicService } from "./fuzzyLogic";
 
-// Types for RIASEC assessment
-type RiasecType =
+// Types for Holland assessment
+type HollandType =
   | "REALISTIC"
   | "INVESTIGATIVE"
   | "ARTISTIC"
@@ -15,7 +15,7 @@ type RiasecType =
   | "ENTERPRISING"
   | "CONVENTIONAL";
 
-interface RiasecScores {
+interface HollandScores {
   realistic: number;
   investigative: number;
   artistic: number;
@@ -31,10 +31,10 @@ interface AssessmentResponse {
 
 interface AssessmentResult {
   assessment_id: string;
-  scores: RiasecScores;
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
-  tertiary_type: RiasecType | null;
+  scores: HollandScores;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
+  tertiary_type: HollandType | null;
   holland_code: string;
   recommendations: RecommendationResult[];
 }
@@ -45,32 +45,32 @@ interface RecommendationResult {
   jenjang: string | null;
   match_percentage: number;
   rank: number;
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
 }
 
-class RiasecService {
-  private riasecRepository: RiasecRepository;
+class HollandService {
+  private hollandRepository: HollandRepository;
 
   constructor() {
-    this.riasecRepository = new RiasecRepository();
+    this.hollandRepository = new HollandRepository();
   }
 
   /**
-   * Get all RIASEC questions for assessment
+   * Get all Holland questions for assessment
    */
   async getQuestions() {
-    return this.riasecRepository.findAllQuestions();
+    return this.hollandRepository.findAllQuestions();
   }
 
   /**
-   * Calculate RIASEC scores from user responses
+   * Calculate Holland scores from user responses
    */
   private calculateScores(
     responses: AssessmentResponse[],
     questions: any[]
-  ): RiasecScores {
-    const scores: RiasecScores = {
+  ): HollandScores {
+    const scores: HollandScores = {
       realistic: 0,
       investigative: 0,
       artistic: 0,
@@ -87,9 +87,9 @@ class RiasecService {
       const question = questionMap.get(response.question_id);
       if (!question) continue;
 
-      const type = question.riasec_type.toLowerCase();
+      const type = question.holland_type.toLowerCase();
       if (type in scores) {
-        scores[type as keyof RiasecScores] += response.answer_value;
+        scores[type as keyof HollandScores] += response.answer_value;
       }
     }
 
@@ -99,13 +99,13 @@ class RiasecService {
   /**
    * Get Holland Code (3-letter code representing top 3 types)
    */
-  private getHollandCode(scores: RiasecScores): {
+  private getHollandCode(scores: HollandScores): {
     code: string;
-    primary: RiasecType;
-    secondary: RiasecType | null;
-    tertiary: RiasecType | null;
+    primary: HollandType;
+    secondary: HollandType | null;
+    tertiary: HollandType | null;
   } {
-    const typeMapping: { [key: string]: RiasecType } = {
+    const typeMapping: { [key: string]: HollandType } = {
       realistic: "REALISTIC",
       investigative: "INVESTIGATIVE",
       artistic: "ARTISTIC",
@@ -128,11 +128,11 @@ class RiasecService {
     };
   }
   private calculateMatchPercentage(
-    prodiPrimary: RiasecType,
-    prodiSecondary: RiasecType | null,
-    scores: RiasecScores
+    prodiPrimary: HollandType,
+    prodiSecondary: HollandType | null,
+    scores: HollandScores
   ): number {
-    // Convert RiasecScores to UserRiasecScores format
+    // Convert HollandScores to UserHollandScores format
     const userScores = {
       R: scores.realistic,
       I: scores.investigative,
@@ -151,14 +151,14 @@ class RiasecService {
   }
 
   /**
-   * Get program study recommendations based on RIASEC scores
+   * Get program study recommendations based on Holland scores
    * Uses Fuzzy Logic for match calculation
    */
   private async getRecommendations(
-    scores: RiasecScores
+    scores: HollandScores
   ): Promise<RecommendationResult[]> {
     // Get all prodi mappings
-    const mappings = await this.riasecRepository.findAllProdiMappings();
+    const mappings = await this.hollandRepository.findAllProdiMappings();
 
     // If no mappings found, return empty array
     if (mappings.length === 0) {
@@ -228,7 +228,7 @@ class RiasecService {
     const recommendations = await this.getRecommendations(scores);
 
     // Save assessment to database
-    const assessment = await this.riasecRepository.createAssessment({
+    const assessment = await this.hollandRepository.createAssessment({
       user_id: userId,
       scores,
       primary_type: primary,
@@ -251,12 +251,12 @@ class RiasecService {
    * Get assessment history for a user
    */
   async getUserAssessments(userId: string) {
-    const assessments = await this.riasecRepository.findAssessmentsByUserId(
+    const assessments = await this.hollandRepository.findAssessmentsByUserId(
       userId,
       100
     );
 
-    return assessments.map((assessment) => ({
+    return assessments.map((assessment : any) => ({
       assessment_id: assessment.assessment_id,
       primary_type: assessment.primary_type,
       secondary_type: assessment.secondary_type,
@@ -269,15 +269,14 @@ class RiasecService {
    * Get detailed assessment result by ID
    */
   async getAssessmentById(assessmentId: string, userId: string) {
-    const assessment = await this.riasecRepository.findLatestAssessmentByUserId(
-      userId
-    );
+    const assessment =
+      await this.hollandRepository.findLatestAssessmentByUserId(userId);
 
     if (!assessment || assessment.assessment_id !== assessmentId) {
       throw new Error("Assessment not found");
     }
 
-    const scores: RiasecScores = {
+    const scores: HollandScores = {
       realistic: assessment.realistic_score,
       investigative: assessment.investigative_score,
       artistic: assessment.artistic_score,
@@ -304,4 +303,4 @@ class RiasecService {
   }
 }
 
-export default new RiasecService();
+export default new HollandService();

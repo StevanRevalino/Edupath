@@ -10,8 +10,8 @@ import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentHistory } from "../../../services/riasecService";
-import type { AssessmentHistory } from "../../../types/riasec";
+import { getAssessmentHistory } from "../../../services/hollandService";
+import type { AssessmentHistory } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
 // Helper function to map AssessmentHistory to TesSession

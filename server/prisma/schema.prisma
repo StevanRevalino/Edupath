@@ -9,22 +9,22 @@ datasource db {
 }
 
 model User {
-  user_id              String             @id
+  user_id              String              @id
   firstname            String
   lastname             String
-  email                String             @unique
+  email                String              @unique
   password             String
-  role                 Role               @default(STUDENT)
+  role                 Role                @default(STUDENT)
   kelas                Int?
-  created_at           DateTime           @default(now())
-  sentMessages         ChatMessage[]      @relation("ChatMessageSender")
-  chatRoomsAsAdmin     ChatRoom[]         @relation("ChatRoomAdmin")
-  chatRoomsAsMurid     ChatRoom[]         @relation("ChatRoomMurid")
-  consultationsAsAdmin Consultation[]     @relation("ConsultationAdmin")
-  consultationsAsMurid Consultation[]     @relation("ConsultationMurid")
-  riasecAssessments    RiasecAssessment[]
+  created_at           DateTime            @default(now())
+  sentMessages         ChatMessage[]       @relation("ChatMessageSender")
+  chatRoomsAsAdmin     ChatRoom[]          @relation("ChatRoomAdmin")
+  chatRoomsAsMurid     ChatRoom[]          @relation("ChatRoomMurid")
+  consultationsAsAdmin Consultation[]      @relation("ConsultationAdmin")
+  consultationsAsMurid Consultation[]      @relation("ConsultationMurid")
+  hollandAssessments   HollandAssessment[]
   notifications        Notification[]
-  zoomMeetingsAsHost   ZoomMeeting[]      @relation("ZoomMeetingHost")
+  zoomMeetingsAsHost   ZoomMeeting[]       @relation("ZoomMeetingHost")
 }
 
 model Universitas {
@@ -51,13 +51,13 @@ model Universitas {
 }
 
 model Prodi {
-  prodi_id              Int                    @id
-  nama_prodi            String
-  jenjang               String?
-  created_at            DateTime               @default(now())
-  prodi_pt              ProdiPT[]
-  riasecMappings        RiasecProdiMapping[]
-  riasecRecommendations RiasecRecommendation[]
+  prodi_id               Int                     @id
+  nama_prodi             String
+  jenjang                String?
+  created_at             DateTime                @default(now())
+  prodi_pt               ProdiPT[]
+  hollandMappings        HollandProdiMapping[]
+  hollandRecommendations HollandRecommendation[]
 
   @@index([nama_prodi])
   @@index([jenjang])
@@ -191,8 +191,8 @@ enum ConsultationStatus {
   COMPLETED
 }
 
-// RIASEC Assessment models
-enum RiasecType {
+// Holland Assessment models
+enum HollandType {
   REALISTIC
   INVESTIGATIVE
   ARTISTIC
@@ -201,74 +201,74 @@ enum RiasecType {
   CONVENTIONAL
 }
 
-model RiasecQuestion {
-  question_id   Int              @id @default(autoincrement())
+model HollandQuestion {
+  question_id   Int               @id @default(autoincrement())
   question_text String
-  riasec_type   RiasecType
-  created_at    DateTime         @default(now())
-  responses     RiasecResponse[]
+  holland_type  HollandType
+  created_at    DateTime          @default(now())
+  responses     HollandResponse[]
 
-  @@index([riasec_type])
+  @@index([holland_type])
 }
 
-model RiasecAssessment {
-  assessment_id       String                 @id @default(cuid())
+model HollandAssessment {
+  assessment_id       String                  @id @default(cuid())
   user_id             String
-  realistic_score     Int                    @default(0)
-  investigative_score Int                    @default(0)
-  artistic_score      Int                    @default(0)
-  social_score        Int                    @default(0)
-  enterprising_score  Int                    @default(0)
-  conventional_score  Int                    @default(0)
-  primary_type        RiasecType
-  secondary_type      RiasecType?
+  realistic_score     Int                     @default(0)
+  investigative_score Int                     @default(0)
+  artistic_score      Int                     @default(0)
+  social_score        Int                     @default(0)
+  enterprising_score  Int                     @default(0)
+  conventional_score  Int                     @default(0)
+  primary_type        HollandType
+  secondary_type      HollandType?
   holland_code        String
-  completed_at        DateTime               @default(now())
-  user                User                   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  responses           RiasecResponse[]
-  recommendations     RiasecRecommendation[]
+  completed_at        DateTime                @default(now())
+  user                User                    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  responses           HollandResponse[]
+  recommendations     HollandRecommendation[]
 
   @@index([user_id])
   @@index([primary_type])
   @@index([completed_at])
 }
 
-model RiasecResponse {
-  response_id   String           @id @default(cuid())
+model HollandResponse {
+  response_id   String            @id @default(cuid())
   assessment_id String
   question_id   Int
   answer_value  Int
-  created_at    DateTime         @default(now())
-  assessment    RiasecAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
-  question      RiasecQuestion   @relation(fields: [question_id], references: [question_id], onDelete: Cascade)
+  created_at    DateTime          @default(now())
+  assessment    HollandAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
+  question      HollandQuestion   @relation(fields: [question_id], references: [question_id], onDelete: Cascade)
 
   @@unique([assessment_id, question_id])
   @@index([assessment_id])
   @@index([question_id])
 }
 
-model RiasecProdiMapping {
-  mapping_id     Int         @id @default(autoincrement())
+model HollandProdiMapping {
+  mapping_id     Int          @id @default(autoincrement())
   prodi_id       Int
-  primary_type   RiasecType
-  secondary_type RiasecType?
-  created_at     DateTime    @default(now())
-  prodi          Prodi       @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  primary_type   HollandType
+  secondary_type HollandType?
+  created_at     DateTime     @default(now())
+  prodi          Prodi        @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
 
   @@index([primary_type])
   @@index([secondary_type])
   @@index([prodi_id])
 }
 
-model RiasecRecommendation {
-  recommendation_id String           @id @default(cuid())
+model HollandRecommendation {
+  recommendation_id String            @id @default(cuid())
   assessment_id     String
   prodi_id          Int
   match_percentage  Float
   rank              Int
-  created_at        DateTime         @default(now())
-  assessment        RiasecAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
-  prodi             Prodi            @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
+  created_at        DateTime          @default(now())
+  assessment        HollandAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
+  prodi             Prodi             @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
 
   @@index([assessment_id])
   @@index([prodi_id])

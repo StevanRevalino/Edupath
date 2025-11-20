@@ -1,8 +1,8 @@
 /**
- * RIASEC Assessment Types
+ * Holland Assessment Types
  */
 
-export type RiasecType =
+export type HollandType =
   | "REALISTIC"
   | "INVESTIGATIVE"
   | "ARTISTIC"
@@ -10,18 +10,18 @@ export type RiasecType =
   | "ENTERPRISING"
   | "CONVENTIONAL";
 
-export interface RiasecQuestion {
+export interface HollandQuestion {
   question_id: number;
   question_text: string;
-  riasec_type: RiasecType;
+  holland_type: HollandType;
 }
 
-export interface RiasecResponse {
+export interface HollandResponse {
   question_id: number;
   answer_value: number; // 1-5 Likert scale
 }
 
-export interface RiasecScores {
+export interface HollandScores {
   realistic: number;
   investigative: number;
   artistic: number;
@@ -36,24 +36,24 @@ export interface ProdiRecommendation {
   jenjang: string | null;
   match_percentage: number;
   rank: number;
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
 }
 
 export interface AssessmentResult {
   assessment_id: string;
-  scores: RiasecScores;
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
-  tertiary_type: RiasecType | null;
+  scores: HollandScores;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
+  tertiary_type: HollandType | null;
   holland_code: string;
   recommendations: ProdiRecommendation[];
 }
 
 export interface AssessmentHistory {
   assessment_id: string;
-  primary_type: RiasecType;
-  secondary_type: RiasecType | null;
+  primary_type: HollandType;
+  secondary_type: HollandType | null;
   holland_code: string;
   completed_at: string;
 }

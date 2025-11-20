@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../../services/riasecService";
-import type { AssessmentResult, RiasecType } from "../../../../types/riasec";
+import { getAssessmentResult } from "../../../../services/hollandService";
+import type { AssessmentResult, HollandType } from "../../../../types/holland";
 import LoadingSpinner from "../../../../components/LoadingSpinner";
 
 // Define the Test interface similar to Consultation
@@ -49,8 +49,8 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
     }
   };
 
-  const getRiasecTypeName = (type: RiasecType): string => {
-    const names: Record<RiasecType, string> = {
+  const getHollandTypeName = (type: HollandType): string => {
+    const names: Record<HollandType, string> = {
       REALISTIC: "Realistis",
       INVESTIGATIVE: "Investigatif",
       ARTISTIC: "Artistik",
@@ -61,8 +61,8 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
     return names[type];
   };
 
-  const getRiasecTypeColor = (type: RiasecType): string => {
-    const colors: Record<RiasecType, string> = {
+  const getHollandTypeColor = (type: HollandType): string => {
+    const colors: Record<HollandType, string> = {
       REALISTIC: "bg-primary",
       INVESTIGATIVE: "bg-purple-500",
       ARTISTIC: "bg-pink-500",
@@ -180,28 +180,28 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
                 {assessmentDetail.holland_code}
               </div>
               <p className="text-sm text-white/90">
-                {getRiasecTypeName(assessmentDetail.primary_type)}
+                {getHollandTypeName(assessmentDetail.primary_type)}
                 {assessmentDetail.secondary_type &&
-                  ` • ${getRiasecTypeName(assessmentDetail.secondary_type)}`}
+                  ` • ${getHollandTypeName(assessmentDetail.secondary_type)}`}
               </p>
             </div>
 
-            {/* RIASEC Scores Preview */}
+            {/* Holland Scores Preview */}
             <div className="border-b pb-4">
               <label className="text-base font-semibold text-gray-600 block mb-3">
-                Skor RIASEC:
+                Skor Holland:
               </label>
               <div className="space-y-2">
                 {Object.entries(assessmentDetail.scores).map(
                   ([type, score]) => {
-                    const riasecType = type.toUpperCase() as RiasecType;
+                    const hollandType = type.toUpperCase() as HollandType;
                     const percentage = (score / 50) * 100;
 
                     return (
                       <div key={type}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-medium text-gray-700">
-                            {getRiasecTypeName(riasecType)} (
+                            {getHollandTypeName(hollandType)} (
                             {type[0].toUpperCase()})
                           </span>
                           <span className="text-xs font-bold text-gray-900">
@@ -210,8 +210,8 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${getRiasecTypeColor(
-                              riasecType
+                            className={`h-2 rounded-full ${getHollandTypeColor(
+                              hollandType
                             )}`}
                             style={{ width: `${percentage}%` }}
                           />

@@ -1,11 +1,11 @@
 /**
- * RIASEC Info Component
- * Displays information about Holland's RIASEC theory and the hexagon model
+ * Holland Info Component
+ * Displays information about Holland's career theory and the hexagon model
  */
 
 import React from "react";
 
-const RiasecInfo: React.FC = () => {
+const HollandInfo: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-8">
       <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
@@ -15,15 +15,15 @@ const RiasecInfo: React.FC = () => {
       <div className="space-y-6 text-gray-700">
         <p className="text-lg leading-relaxed text-center max-w-3xl mx-auto">
           Tes ini menggunakan{" "}
-          <span className="font-bold text-primary">Model RIASEC Holland</span>{" "}
+          <span className="font-bold text-primary">Model Holland (RIASEC)</span>{" "}
           untuk mengidentifikasi 6 tipe kepribadian kariermu dan memberikan
           rekomendasi program studi yang sesuai.
         </p>
 
-        {/* 6 Tipe RIASEC */}
+        {/* 6 Tipe Holland */}
         <div>
           <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            🔷 6 Tipe Kepribadian RIASEC
+            🔷 6 Tipe Kepribadian Holland
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             {/* Realistic */}
@@ -199,4 +199,4 @@ const RiasecInfo: React.FC = () => {
   );
 };
 
-export default RiasecInfo;
+export default HollandInfo;

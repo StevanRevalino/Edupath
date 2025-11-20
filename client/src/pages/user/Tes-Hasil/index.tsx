@@ -5,8 +5,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../services/riasecService";
-import type { AssessmentResult, RiasecType } from "../../../types/riasec";
+import { getAssessmentResult } from "../../../services/hollandService";
+import type { AssessmentResult, HollandType } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-hot-toast";
 import {
@@ -63,8 +63,8 @@ const HasilTes: React.FC = () => {
     }
   };
 
-  const getRiasecTypeColor = (type: RiasecType): string => {
-    const colors: Record<RiasecType, string> = {
+  const getHollandTypeColor = (type: HollandType): string => {
+    const colors: Record<HollandType, string> = {
       REALISTIC: "bg-primary",
       INVESTIGATIVE: "bg-purple-500",
       ARTISTIC: "bg-pink-500",
@@ -75,8 +75,8 @@ const HasilTes: React.FC = () => {
     return colors[type];
   };
 
-  const getRiasecTypeName = (type: RiasecType): string => {
-    const names: Record<RiasecType, string> = {
+  const getHollandTypeName = (type: HollandType): string => {
+    const names: Record<HollandType, string> = {
       REALISTIC: "Realistis",
       INVESTIGATIVE: "Investigatif",
       ARTISTIC: "Artistik",
@@ -87,8 +87,8 @@ const HasilTes: React.FC = () => {
     return names[type];
   };
 
-  const getRiasecTypeDescription = (type: RiasecType): string => {
-    const descriptions: Record<RiasecType, string> = {
+  const getHollandTypeDescription = (type: HollandType): string => {
+    const descriptions: Record<HollandType, string> = {
       REALISTIC:
         "Kamu adalah orang yang praktis dan suka bekerja dengan alat, mesin, atau hal-hal teknis. Kamu lebih nyaman dengan pekerjaan yang melibatkan aktivitas fisik dan hasil yang nyata.",
       INVESTIGATIVE:
@@ -138,7 +138,7 @@ const HasilTes: React.FC = () => {
       labels,
       datasets: [
         {
-          label: "Skor RIASEC",
+          label: "Skor Holland",
           data,
           backgroundColor: "rgba(59, 130, 246, 0.2)",
           borderColor: "rgb(59, 130, 246)",
@@ -244,30 +244,30 @@ const HasilTes: React.FC = () => {
             {result.holland_code}
           </div>
           <p className="text-white/90 text-lg">
-            Tipe Utama: {getRiasecTypeName(result.primary_type)}
+            Tipe Utama: {getHollandTypeName(result.primary_type)}
             {result.secondary_type &&
-              ` • Tipe Sekunder: ${getRiasecTypeName(result.secondary_type)}`}
+              ` • Tipe Sekunder: ${getHollandTypeName(result.secondary_type)}`}
           </p>
         </div>
 
         {/* Primary Type Description */}
         <div
-          className={`${getRiasecTypeColor(
+          className={`${getHollandTypeColor(
             result.primary_type
           )} rounded-lg shadow-md p-6 mb-6 text-white`}
         >
           <h2 className="text-2xl font-bold mb-3">
-            Kepribadian Utama: {getRiasecTypeName(result.primary_type)}
+            Kepribadian Utama: {getHollandTypeName(result.primary_type)}
           </h2>
           <p className="text-lg text-white/95">
-            {getRiasecTypeDescription(result.primary_type)}
+            {getHollandTypeDescription(result.primary_type)}
           </p>
         </div>
 
         {/* Scores Chart */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Skor RIASEC Kamu
+            Skor Holland Kamu
           </h2>
           <p className="text-gray-600 mb-6">
             Grafik ini menunjukkan profil kepribadian kariermu berdasarkan
@@ -288,7 +288,7 @@ const HasilTes: React.FC = () => {
                 Detail Skor (Rentang 10-50)
               </h3>
               {Object.entries(result.scores).map(([type, score]) => {
-                const riasecType = type.toUpperCase() as RiasecType;
+                const hollandType = type.toUpperCase() as HollandType;
                 const percentage = ((score - 10) / 40) * 100; // Normalized to 10-50 range
 
                 return (
@@ -296,12 +296,12 @@ const HasilTes: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div
-                          className={`w-3 h-3 rounded-full ${getRiasecTypeColor(
-                            riasecType
+                          className={`w-3 h-3 rounded-full ${getHollandTypeColor(
+                            hollandType
                           )}`}
                         />
                         <span className="text-sm font-medium text-gray-700">
-                          {getRiasecTypeName(riasecType)}
+                          {getHollandTypeName(hollandType)}
                         </span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">
@@ -310,8 +310,8 @@ const HasilTes: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className={`h-3 rounded-full ${getRiasecTypeColor(
-                          riasecType
+                        className={`h-3 rounded-full ${getHollandTypeColor(
+                          hollandType
                         )} transition-all duration-500`}
                         style={{ width: `${percentage}%` }}
                       />
@@ -322,10 +322,10 @@ const HasilTes: React.FC = () => {
             </div>
           </div>
 
-          {/* RIASEC Type Descriptions */}
+          {/* Holland Type Descriptions */}
           <div className="mt-6 p-4 bg-secondary-light border border-secondary rounded-lg">
             <h4 className="font-semibold text-2xl text-primary-dark mb-3">
-              Pengertian Tipe RIASEC
+              Pengertian Tipe Holland (RIASEC)
             </h4>
             <div className="space-y-2 text-sm text-primary-dark">
               <p>
@@ -414,19 +414,19 @@ const HasilTes: React.FC = () => {
 
                   <div className="mt-3 flex items-center gap-2 flex-wrap">
                     <span
-                      className={`text-xs px-2 py-1 rounded text-white ${getRiasecTypeColor(
+                      className={`text-xs px-2 py-1 rounded text-white ${getHollandTypeColor(
                         rec.primary_type
                       )}`}
                     >
-                      {getRiasecTypeName(rec.primary_type)}
+                      {getHollandTypeName(rec.primary_type)}
                     </span>
                     {rec.secondary_type && (
                       <span
-                        className={`text-xs px-2 py-1 rounded text-white ${getRiasecTypeColor(
+                        className={`text-xs px-2 py-1 rounded text-white ${getHollandTypeColor(
                           rec.secondary_type
                         )}`}
                       >
-                        {getRiasecTypeName(rec.secondary_type)}
+                        {getHollandTypeName(rec.secondary_type)}
                       </span>
                     )}
                   </div>

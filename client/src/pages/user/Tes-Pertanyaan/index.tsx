@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import {
   getQuestions,
   submitAssessment,
-} from "../../../services/riasecService";
-import type { RiasecQuestion, RiasecResponse } from "../../../types/riasec";
+} from "../../../services/hollandService";
+import type { HollandQuestion, HollandResponse } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
 // Likert scale options (1-5)
@@ -23,7 +23,7 @@ const QUESTIONS_PER_PAGE = 10;
 const TesPertanyaan = () => {
   const navigate = useNavigate();
   const topRef = useRef<HTMLDivElement>(null);
-  const [questions, setQuestions] = useState<RiasecQuestion[]>([]);
+  const [questions, setQuestions] = useState<HollandQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -96,7 +96,7 @@ const TesPertanyaan = () => {
       setSubmitting(true);
 
       // Convert Map to array of responses
-      const responses: RiasecResponse[] = Array.from(answers.entries()).map(
+      const responses: HollandResponse[] = Array.from(answers.entries()).map(
         ([question_id, answer_value]) => ({
           question_id,
           answer_value,
