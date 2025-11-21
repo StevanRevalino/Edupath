@@ -61,13 +61,16 @@ const TesPertanyaan = () => {
       const savedSession = localStorage.getItem(SESSION_KEY);
       if (savedSession) {
         const session: TestSession = JSON.parse(savedSession);
-        
+
         // Check if session is still valid (within 24 hours)
-        const hoursSinceStart = (Date.now() - session.timestamp) / (1000 * 60 * 60);
+        const hoursSinceStart =
+          (Date.now() - session.timestamp) / (1000 * 60 * 60);
         if (hoursSinceStart < 24) {
           setQuestions(session.questions);
           setCurrentPage(session.currentPage);
-          const answersMap = new Map(Object.entries(session.answers).map(([k, v]) => [Number(k), v]));
+          const answersMap = new Map(
+            Object.entries(session.answers).map(([k, v]) => [Number(k), v])
+          );
           setAnswers(answersMap);
           setSessionRestored(true);
           setLoading(false);
@@ -81,7 +84,7 @@ const TesPertanyaan = () => {
       console.error("Failed to restore session:", err);
       localStorage.removeItem(SESSION_KEY);
     }
-    
+
     // No valid session, load fresh questions
     loadQuestions();
   };
@@ -177,18 +180,18 @@ const TesPertanyaan = () => {
   const handleBack = async () => {
     if (answers.size > 0) {
       const result = await Swal.fire({
-        title: 'Progress Tersimpan',
+        title: "Progress Tersimpan",
         html: `
           <p class="text-gray-600 mb-2">Progress tes Anda sudah tersimpan secara otomatis.</p>
           <p class="text-gray-600">Anda dapat melanjutkan kapan saja dari halaman terakhir.</p>
         `,
-        icon: 'info',
+        icon: "info",
         showCancelButton: true,
-        confirmButtonColor: '#3B82F6',
-        cancelButtonColor: '#6B7280',
-        confirmButtonText: 'Ya, Keluar',
-        cancelButtonText: 'Lanjut Tes',
-        reverseButtons: true
+        confirmButtonColor: "#3B82F6",
+        cancelButtonColor: "#6B7280",
+        confirmButtonText: "Ya, Keluar",
+        cancelButtonText: "Lanjut Tes",
+        reverseButtons: true,
       });
 
       if (result.isConfirmed) {
@@ -260,12 +263,14 @@ const TesPertanyaan = () => {
             {startIndex + 1}-{Math.min(endIndex, questions.length)} dari{" "}
             {questions.length}
           </p>
-          
+
           {/* Session restored notification */}
           {sessionRestored && answers.size > 0 && (
             <div className="mt-4 bg-green-50 border border-green-300 rounded-lg p-4">
               <p className="text-sm text-green-800">
-                ✓ <strong>Sesi sebelumnya dipulihkan!</strong> Anda dapat melanjutkan dari halaman {currentPage} dengan {answers.size} jawaban tersimpan.
+                ✓ <strong>Sesi sebelumnya dipulihkan!</strong> Anda dapat
+                melanjutkan dari halaman {currentPage} dengan {answers.size}{" "}
+                jawaban tersimpan.
               </p>
             </div>
           )}

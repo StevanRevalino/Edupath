@@ -101,8 +101,9 @@ const Tes = () => {
       const savedData = localStorage.getItem(SESSION_KEY);
       if (savedData) {
         const session: TestSession = JSON.parse(savedData);
-        const hoursSinceStart = (Date.now() - session.timestamp) / (1000 * 60 * 60);
-        
+        const hoursSinceStart =
+          (Date.now() - session.timestamp) / (1000 * 60 * 60);
+
         if (hoursSinceStart < 24) {
           setSavedSession(session);
         } else {
@@ -182,13 +183,15 @@ const Tes = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-8">
               {/* Jadwalkan Tes */}
-              <ScheduleTes onSchedule={() => {
-                if (savedSession) {
-                  setShowSessionModal(true);
-                } else {
-                  navigate("tutorial");
-                }
-              }} />
+              <ScheduleTes
+                onSchedule={() => {
+                  if (savedSession) {
+                    setShowSessionModal(true);
+                  } else {
+                    navigate("tutorial");
+                  }
+                }}
+              />
 
               {/* Riwayat Tes */}
               <div className="bg-white rounded-xl shadow-md p-6">
@@ -239,27 +242,47 @@ const Tes = () => {
           <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Sesi Tes Ditemukan</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Sesi Tes Ditemukan
+              </h3>
               <p className="text-gray-600 text-sm">
-                Anda memiliki sesi tes yang belum selesai dengan {Object.keys(savedSession.answers).length} jawaban tersimpan.
+                Anda memiliki sesi tes yang belum selesai dengan{" "}
+                {Object.keys(savedSession.answers).length} jawaban tersimpan.
               </p>
             </div>
-            
+
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Progress:</span>
                 <span className="font-semibold text-gray-800">
-                  {Object.keys(savedSession.answers).length} / {savedSession.questions.length} pertanyaan
+                  {Object.keys(savedSession.answers).length} /{" "}
+                  {savedSession.questions.length} pertanyaan
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${(Object.keys(savedSession.answers).length / savedSession.questions.length) * 100}%` }}
+                  style={{
+                    width: `${
+                      (Object.keys(savedSession.answers).length /
+                        savedSession.questions.length) *
+                      100
+                    }%`,
+                  }}
                 ></div>
               </div>
             </div>
