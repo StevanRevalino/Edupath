@@ -8,6 +8,7 @@ import {
 } from "../../../services/hollandService";
 import type { HollandQuestion, HollandResponse } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import Swal from "sweetalert2";
 
 // Likert scale options (1-5)
 const LIKERT_OPTIONS = [
@@ -19,6 +20,14 @@ const LIKERT_OPTIONS = [
 ];
 
 const QUESTIONS_PER_PAGE = 10;
+const SESSION_KEY = "holland_test_session";
+
+interface TestSession {
+  questions: HollandQuestion[];
+  answers: Record<number, number>;
+  currentPage: number;
+  timestamp: number;
+}
 
 const TesPertanyaan = () => {
   const navigate = useNavigate();
@@ -29,10 +38,11 @@ const TesPertanyaan = () => {
   const [error, setError] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [answers, setAnswers] = useState<Map<number, number>>(new Map());
+  const [sessionRestored, setSessionRestored] = useState(false);
 
-  // Load questions on mount
+  // Load questions on mount and restore session if exists
   useEffect(() => {
-    loadQuestions();
+    restoreSession();
   }, []);
 
   // Fisher-Yates shuffle algorithm
@@ -43,6 +53,37 @@ const TesPertanyaan = () => {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  };
+
+  // Restore session from localStorage
+  const restoreSession = () => {
+    try {
+      const savedSession = localStorage.getItem(SESSION_KEY);
+      if (savedSession) {
+        const session: TestSession = JSON.parse(savedSession);
+        
+        // Check if session is still valid (within 24 hours)
+        const hoursSinceStart = (Date.now() - session.timestamp) / (1000 * 60 * 60);
+        if (hoursSinceStart < 24) {
+          setQuestions(session.questions);
+          setCurrentPage(session.currentPage);
+          const answersMap = new Map(Object.entries(session.answers).map(([k, v]) => [Number(k), v]));
+          setAnswers(answersMap);
+          setSessionRestored(true);
+          setLoading(false);
+          return;
+        } else {
+          // Session expired, clear it
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to restore session:", err);
+      localStorage.removeItem(SESSION_KEY);
+    }
+    
+    // No valid session, load fresh questions
+    loadQuestions();
   };
 
   const loadQuestions = async () => {
@@ -59,6 +100,19 @@ const TesPertanyaan = () => {
       setLoading(false);
     }
   };
+
+  // Save session to localStorage whenever answers or page changes
+  useEffect(() => {
+    if (questions.length > 0 && !loading) {
+      const session: TestSession = {
+        questions,
+        answers: Object.fromEntries(answers),
+        currentPage,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+  }, [answers, currentPage, questions, loading]);
 
   const handleAnswerChange = (questionId: number, answerValue: string) => {
     const newAnswers = new Map(answers);
@@ -106,6 +160,9 @@ const TesPertanyaan = () => {
       // Submit to backend
       const result = await submitAssessment(responses);
 
+      // Clear session after successful submission
+      localStorage.removeItem(SESSION_KEY);
+
       // Navigate to hasil page with assessment_id
       navigate(`/tes/hasil/${result.assessment_id}`, { state: { result } });
     } catch (err: any) {
@@ -113,6 +170,32 @@ const TesPertanyaan = () => {
       alert(err.message || "Gagal submit assessment");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Handle back navigation with confirmation
+  const handleBack = async () => {
+    if (answers.size > 0) {
+      const result = await Swal.fire({
+        title: 'Progress Tersimpan',
+        html: `
+          <p class="text-gray-600 mb-2">Progress tes Anda sudah tersimpan secara otomatis.</p>
+          <p class="text-gray-600">Anda dapat melanjutkan kapan saja dari halaman terakhir.</p>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3B82F6',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, Keluar',
+        cancelButtonText: 'Lanjut Tes',
+        reverseButtons: true
+      });
+
+      if (result.isConfirmed) {
+        navigate("/tes");
+      }
+    } else {
+      navigate("/tes");
     }
   };
 
@@ -158,7 +241,7 @@ const TesPertanyaan = () => {
       {/* Back button */}
       <div className="top-6 left-6 z-0 pl-5 pt-5">
         <button
-          onClick={() => navigate("/tes")}
+          onClick={handleBack}
           className="flex items-center space-x-2 text-gray-700 hover:text-black transition-colors"
         >
           <span className="text-lg font-medium">&lt;&lt;</span>
@@ -177,6 +260,16 @@ const TesPertanyaan = () => {
             {startIndex + 1}-{Math.min(endIndex, questions.length)} dari{" "}
             {questions.length}
           </p>
+          
+          {/* Session restored notification */}
+          {sessionRestored && answers.size > 0 && (
+            <div className="mt-4 bg-green-50 border border-green-300 rounded-lg p-4">
+              <p className="text-sm text-green-800">
+                ✓ <strong>Sesi sebelumnya dipulihkan!</strong> Anda dapat melanjutkan dari halaman {currentPage} dengan {answers.size} jawaban tersimpan.
+              </p>
+            </div>
+          )}
+
           <div className="mt-4 bg-secondary-light border border-secondary rounded-lg p-4">
             <p className="text-sm text-primary-dark">
               <strong>Petunjuk:</strong> Jawab setiap pertanyaan dengan jujur
@@ -190,6 +283,9 @@ const TesPertanyaan = () => {
               <li>4 = Setuju</li>
               <li>5 = Sangat Setuju</li>
             </ul>
+            <p className="text-xs text-primary-dark mt-3 italic">
+              💡 Progress Anda otomatis tersimpan setiap kali menjawab
+            </p>
           </div>
         </div>
 

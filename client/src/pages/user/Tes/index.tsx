@@ -14,6 +14,15 @@ import { getAssessmentHistory } from "../../../services/hollandService";
 import type { AssessmentHistory } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
+const SESSION_KEY = "holland_test_session";
+
+interface TestSession {
+  questions: any[];
+  answers: Record<number, number>;
+  currentPage: number;
+  timestamp: number;
+}
+
 // Helper function to map AssessmentHistory to TesSession
 const mapAssessmentToTesSession = (
   assessment: AssessmentHistory
@@ -52,6 +61,8 @@ const items = [
 const Tes = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [savedSession, setSavedSession] = useState<TestSession | null>(null);
   const [tesSessions, setTesSessions] = useState<TesSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +91,51 @@ const Tes = () => {
 
   const tesSessionRef = useRef<HTMLElement>(null);
 
+  // Check for saved session on mount
+  useEffect(() => {
+    checkForSavedSession();
+  }, []);
+
+  const checkForSavedSession = () => {
+    try {
+      const savedData = localStorage.getItem(SESSION_KEY);
+      if (savedData) {
+        const session: TestSession = JSON.parse(savedData);
+        const hoursSinceStart = (Date.now() - session.timestamp) / (1000 * 60 * 60);
+        
+        if (hoursSinceStart < 24) {
+          setSavedSession(session);
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+    } catch (err) {
+      console.error("Error checking saved session:", err);
+      localStorage.removeItem(SESSION_KEY);
+    }
+  };
+
   const handleLakukanTes = () => {
+    // Check if there's a saved session
+    if (savedSession) {
+      setShowSessionModal(true);
+    } else {
+      tesSessionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  const handleContinueSession = () => {
+    setShowSessionModal(false);
+    navigate("/tes/pertanyaan");
+  };
+
+  const handleStartFresh = () => {
+    localStorage.removeItem(SESSION_KEY);
+    setSavedSession(null);
+    setShowSessionModal(false);
     tesSessionRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -127,7 +182,13 @@ const Tes = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-8">
               {/* Jadwalkan Tes */}
-              <ScheduleTes onSchedule={() => navigate("tutorial")} />
+              <ScheduleTes onSchedule={() => {
+                if (savedSession) {
+                  setShowSessionModal(true);
+                } else {
+                  navigate("tutorial");
+                }
+              }} />
 
               {/* Riwayat Tes */}
               <div className="bg-white rounded-xl shadow-md p-6">
@@ -171,6 +232,61 @@ const Tes = () => {
           </div>
         </div>
       </section>
+
+      {/* Session Resume Modal */}
+      {showSessionModal && savedSession && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Sesi Tes Ditemukan</h3>
+              <p className="text-gray-600 text-sm">
+                Anda memiliki sesi tes yang belum selesai dengan {Object.keys(savedSession.answers).length} jawaban tersimpan.
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Progress:</span>
+                <span className="font-semibold text-gray-800">
+                  {Object.keys(savedSession.answers).length} / {savedSession.questions.length} pertanyaan
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all"
+                  style={{ width: `${(Object.keys(savedSession.answers).length / savedSession.questions.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleContinueSession}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md"
+              >
+                Lanjutkan Tes
+              </button>
+              <button
+                onClick={handleStartFresh}
+                className="w-full bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 transition"
+              >
+                Mulai Tes Baru
+              </button>
+              <button
+                onClick={() => setShowSessionModal(false)}
+                className="w-full text-gray-500 text-sm hover:text-gray-700 transition"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Placeholder for Modal - you can implement actual modal later */}
       {showModal && (
