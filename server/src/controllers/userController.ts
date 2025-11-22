@@ -6,6 +6,13 @@ export class UserController {
 
   constructor() {
     this.userService = new UserService();
+
+    // Bind methods to preserve 'this' context
+    this.getAllUsers = this.getAllUsers.bind(this);
+    this.getAllAdmins = this.getAllAdmins.bind(this);
+    this.getUserById = this.getUserById.bind(this);
+    this.updateUser = this.updateUser.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
   }
 
   // Get all users

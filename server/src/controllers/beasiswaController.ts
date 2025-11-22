@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
-import * as beasiswaRepository from "../repositories/beasiswaRepository";
+import { BeasiswaService } from "../services/beasiswaService";
+
+const beasiswaService = new BeasiswaService();
 
 // Get all beasiswa
 export const getAllBeasiswa = async (req: Request, res: Response) => {
   try {
-    const beasiswa = await beasiswaRepository.getAllBeasiswa();
+    const beasiswa = await beasiswaService.getAllBeasiswa();
     res.status(200).json({
       success: true,
       data: beasiswa,
@@ -23,14 +25,7 @@ export const getAllBeasiswa = async (req: Request, res: Response) => {
 export const getBeasiswaById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const beasiswa = await beasiswaRepository.getBeasiswaById(id);
-
-    if (!beasiswa) {
-      return res.status(404).json({
-        success: false,
-        message: "Beasiswa not found",
-      });
-    }
+    const beasiswa = await beasiswaService.getBeasiswaById(id);
 
     res.status(200).json({
       success: true,
@@ -38,6 +33,14 @@ export const getBeasiswaById = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error fetching beasiswa:", error);
+
+    if (error.message === "Beasiswa not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch beasiswa",
@@ -51,15 +54,7 @@ export const createBeasiswa = async (req: Request, res: Response) => {
   try {
     const { title, image_url, link } = req.body;
 
-    // Validate required fields
-    if (!title || !image_url || !link) {
-      return res.status(400).json({
-        success: false,
-        message: "Title, image URL, and link are required",
-      });
-    }
-
-    const newBeasiswa = await beasiswaRepository.createBeasiswa({
+    const newBeasiswa = await beasiswaService.createBeasiswa({
       title,
       image_url,
       link,
@@ -72,6 +67,14 @@ export const createBeasiswa = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error creating beasiswa:", error);
+
+    if (error.message === "Title, image URL, and link are required") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to create beasiswa",
@@ -86,18 +89,11 @@ export const updateBeasiswa = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, image_url, link } = req.body;
 
-    const updatedBeasiswa = await beasiswaRepository.updateBeasiswa(id, {
+    const updatedBeasiswa = await beasiswaService.updateBeasiswa(id, {
       title,
       image_url,
       link,
     });
-
-    if (!updatedBeasiswa) {
-      return res.status(404).json({
-        success: false,
-        message: "Beasiswa not found",
-      });
-    }
 
     res.status(200).json({
       success: true,
@@ -106,6 +102,14 @@ export const updateBeasiswa = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error updating beasiswa:", error);
+
+    if (error.message === "Beasiswa not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to update beasiswa",
@@ -119,14 +123,7 @@ export const deleteBeasiswa = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const deletedBeasiswa = await beasiswaRepository.deleteBeasiswa(id);
-
-    if (!deletedBeasiswa) {
-      return res.status(404).json({
-        success: false,
-        message: "Beasiswa not found",
-      });
-    }
+    const deletedBeasiswa = await beasiswaService.deleteBeasiswa(id);
 
     res.status(200).json({
       success: true,
@@ -135,6 +132,14 @@ export const deleteBeasiswa = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error deleting beasiswa:", error);
+
+    if (error.message === "Beasiswa not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to delete beasiswa",

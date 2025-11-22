@@ -9,6 +9,11 @@ export class ProdiController {
   constructor() {
     this.pddiktiService = new ProdiPddiktiService();
     this.localService = new ProdiService();
+
+    // Bind methods to preserve 'this' context
+    this.getAllProdi = this.getAllProdi.bind(this);
+    this.getProdiById = this.getProdiById.bind(this);
+    this.searchProdiByName = this.searchProdiByName.bind(this);
   }
   // Get all prodi with optional pagination and search
   async getAllProdi(req: Request, res: Response) {

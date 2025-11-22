@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 interface CreateUserDTO {
   user_id: string;
@@ -10,23 +10,21 @@ interface CreateUserDTO {
 }
 
 export class UserRepository {
-  private prisma: PrismaClient;
-
   constructor() {
-    this.prisma = new PrismaClient();
+    // Using singleton prisma instance
   }
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
   }
 
   async create(data: CreateUserDTO) {
-    return this.prisma.user.create({ data });
+    return prisma.user.create({ data });
   }
 
   async updatePassword(email: string, hashedPassword: string) {
-    return this.prisma.user.update({
+    return prisma.user.update({
       where: { email },
       data: { password: hashedPassword },
     });
@@ -36,14 +34,14 @@ export class UserRepository {
     userId: string,
     data: { firstname?: string; lastname?: string; kelas?: number | null }
   ) {
-    return this.prisma.user.update({
+    return prisma.user.update({
       where: { user_id: userId },
       data: data,
     });
   }
 
   async findById(userId: string) {
-    return this.prisma.user.findUnique({ where: { user_id: userId } });
+    return prisma.user.findUnique({ where: { user_id: userId } });
   }
 
   async findByName(firstname: string, lastname?: string) {
@@ -62,7 +60,7 @@ export class UserRepository {
       };
     }
 
-    return this.prisma.user.findMany({
+    return prisma.user.findMany({
       where,
       select: {
         user_id: true,
@@ -76,7 +74,7 @@ export class UserRepository {
 
   // New methods for user management
   async findAllUsers() {
-    return this.prisma.user.findMany({
+    return prisma.user.findMany({
       orderBy: {
         created_at: "desc",
       },
@@ -84,20 +82,20 @@ export class UserRepository {
   }
 
   async updateUser(userId: string, data: Partial<CreateUserDTO>) {
-    return this.prisma.user.update({
+    return prisma.user.update({
       where: { user_id: userId },
       data: data,
     });
   }
 
   async deleteUser(userId: string) {
-    return this.prisma.user.delete({
+    return prisma.user.delete({
       where: { user_id: userId },
     });
   }
 
   async findLastUserWithPrefix(prefix: string) {
-    return this.prisma.user.findFirst({
+    return prisma.user.findFirst({
       orderBy: { user_id: "desc" },
       where: {
         user_id: {

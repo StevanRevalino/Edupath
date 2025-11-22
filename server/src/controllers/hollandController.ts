@@ -7,6 +7,14 @@ import { Request, Response } from "express";
 import hollandService from "../services/hollandService";
 
 class HollandController {
+  constructor() {
+    // Bind methods to preserve 'this' context
+    this.getQuestions = this.getQuestions.bind(this);
+    this.submitAssessment = this.submitAssessment.bind(this);
+    this.getAssessmentHistory = this.getAssessmentHistory.bind(this);
+    this.getAssessmentResult = this.getAssessmentResult.bind(this);
+  }
+
   /**
    * GET /api/holland/questions
    * Get all assessment questions

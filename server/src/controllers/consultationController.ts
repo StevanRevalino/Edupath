@@ -7,6 +7,28 @@ export class ConsultationController {
 
   constructor() {
     this.consultationService = new ConsultationService();
+
+    // Bind methods to preserve 'this' context
+    this.createConsultation = this.createConsultation.bind(this);
+    this.getAllConsultations = this.getAllConsultations.bind(this);
+    this.getStudentsWithAcceptedConsultations =
+      this.getStudentsWithAcceptedConsultations.bind(this);
+    this.getConsultationById = this.getConsultationById.bind(this);
+    this.updateConsultationStatus = this.updateConsultationStatus.bind(this);
+    this.cancelConsultation = this.cancelConsultation.bind(this);
+    this.rescheduleConsultation = this.rescheduleConsultation.bind(this);
+    this.getConsultationsByStatus = this.getConsultationsByStatus.bind(this);
+    this.getConsultationsForStudent =
+      this.getConsultationsForStudent.bind(this);
+    this.getConsultationsForAdmin = this.getConsultationsForAdmin.bind(this);
+    this.getConsultationsForStudentByName =
+      this.getConsultationsForStudentByName.bind(this);
+    this.deleteConsultation = this.deleteConsultation.bind(this);
+    this.getConsultationStats = this.getConsultationStats.bind(this);
+    this.endConsultation = this.endConsultation.bind(this);
+    this.getBookedSlotsForDate = this.getBookedSlotsForDate.bind(this);
+    this.autoCompleteExpiredConsultations =
+      this.autoCompleteExpiredConsultations.bind(this);
   }
   // Create a new consultation
   async createConsultation(req: Request, res: Response) {

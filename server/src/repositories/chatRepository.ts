@@ -1,14 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 export class ChatRepository {
-  private prisma: PrismaClient;
-
   constructor() {
-    this.prisma = new PrismaClient();
+    // Using singleton prisma instance
   }
 
   async findChatRoomByConsultationId(consultationId: string) {
-    return this.prisma.chatRoom.findUnique({
+    return prisma.chatRoom.findUnique({
       where: { consultation_id: consultationId },
       include: {
         murid: true,
@@ -35,7 +33,7 @@ export class ChatRepository {
     murid_id: string;
     admin_id: string;
   }) {
-    return this.prisma.chatRoom.create({
+    return prisma.chatRoom.create({
       data,
       include: {
         murid: true,
@@ -58,7 +56,7 @@ export class ChatRepository {
   }
 
   async findChatRoomsByAdminId(adminId: string) {
-    return this.prisma.chatRoom.findMany({
+    return prisma.chatRoom.findMany({
       where: {
         admin_id: adminId,
       },
@@ -102,7 +100,7 @@ export class ChatRepository {
   }
 
   async findChatRoomByIdAndUserId(roomId: string, userId: string) {
-    return this.prisma.chatRoom.findFirst({
+    return prisma.chatRoom.findFirst({
       where: {
         room_id: roomId,
         OR: [{ murid_id: userId }, { admin_id: userId }],
@@ -111,7 +109,7 @@ export class ChatRepository {
   }
 
   async findMessagesByRoomId(roomId: string) {
-    return this.prisma.chatMessage.findMany({
+    return prisma.chatMessage.findMany({
       where: { room_id: roomId },
       orderBy: { created_at: "asc" },
       include: {
@@ -128,7 +126,7 @@ export class ChatRepository {
   }
 
   async markMessagesAsRead(roomId: string, userId: string) {
-    return this.prisma.chatMessage.updateMany({
+    return prisma.chatMessage.updateMany({
       where: {
         room_id: roomId,
         sender_id: { not: userId },
@@ -143,7 +141,7 @@ export class ChatRepository {
     sender_id: string;
     message: string;
   }) {
-    return this.prisma.chatMessage.create({
+    return prisma.chatMessage.create({
       data,
       include: {
         sender: {
@@ -159,7 +157,7 @@ export class ChatRepository {
   }
 
   async updateChatRoomTimestamp(roomId: string) {
-    return this.prisma.chatRoom.update({
+    return prisma.chatRoom.update({
       where: { room_id: roomId },
       data: { updated_at: new Date() },
     });
@@ -173,17 +171,35 @@ export class ChatRepository {
     related_id?: string;
     link?: string;
   }) {
-    return this.prisma.notification.create({
+    return prisma.notification.create({
       data,
     });
   }
 
   async countUnreadMessages(roomId: string, excludeUserId: string) {
-    return this.prisma.chatMessage.count({
+    return prisma.chatMessage.count({
       where: {
         room_id: roomId,
         is_read: false,
         sender_id: { not: excludeUserId },
+      },
+    });
+  }
+
+  async findChatRoomsWithUnreadForAdmin(adminId: string) {
+    return prisma.chatRoom.findMany({
+      where: {
+        admin_id: adminId,
+      },
+      include: {
+        messages: {
+          where: {
+            sender_id: {
+              not: adminId, // Messages not from admin
+            },
+            is_read: false,
+          },
+        },
       },
     });
   }

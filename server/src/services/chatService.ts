@@ -11,7 +11,7 @@ export class ChatService {
   }
 
   // Get or create chat room for a consultation
-  async getOrCreateChatRoom(consultationId: string) {
+  async getOrCreateChatRoom(consultationId: string, userId: string) {
     try {
       // First, get the consultation details
       const consultation = await this.consultationRepository.findById(
@@ -20,6 +20,14 @@ export class ChatService {
 
       if (!consultation) {
         throw new Error("Consultation not found");
+      }
+
+      // Check if user has access to this consultation
+      if (
+        consultation.murid_id !== userId &&
+        consultation.admin_id !== userId
+      ) {
+        throw new Error("You don't have access to this consultation");
       }
 
       // Check if chat room already exists
@@ -232,6 +240,33 @@ export class ChatService {
       }));
     } catch (error) {
       console.error("Error in getChatHistory:", error);
+      throw error;
+    }
+  }
+
+  // Get unread messages count for admin
+  async getUnreadCountForAdmin(adminId: string) {
+    try {
+      const chatRooms =
+        await this.chatRepository.findChatRoomsWithUnreadForAdmin(adminId);
+
+      // Count total unread messages
+      const unreadCount = chatRooms.reduce(
+        (total: number, room: any) => total + room.messages.length,
+        0
+      );
+
+      return {
+        unreadCount,
+        roomsWithUnread: chatRooms
+          .filter((room: any) => room.messages.length > 0)
+          .map((room: any) => ({
+            room_id: room.room_id,
+            unreadCount: room.messages.length,
+          })),
+      };
+    } catch (error) {
+      console.error("Error in getUnreadCountForAdmin:", error);
       throw error;
     }
   }

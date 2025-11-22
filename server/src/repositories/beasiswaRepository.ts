@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../configs/prisma";
 
 interface BeasiswaData {
   title: string;
@@ -8,57 +6,62 @@ interface BeasiswaData {
   link: string;
 }
 
-// Get all beasiswa
-export const getAllBeasiswa = async () => {
-  return await prisma.beasiswa.findMany({
-    orderBy: {
-      created_at: "desc",
-    },
-  });
-};
+export class BeasiswaRepository {
+  constructor() {
+    // Using singleton prisma instance
+  }
 
-// Get beasiswa by ID
-export const getBeasiswaById = async (id: string) => {
-  return await prisma.beasiswa.findUnique({
-    where: {
-      beasiswa_id: id,
-    },
-  });
-};
+  // Get all beasiswa
+  async getAllBeasiswa() {
+    return prisma.beasiswa.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+  }
 
-// Create new beasiswa
-export const createBeasiswa = async (data: BeasiswaData) => {
-  return await prisma.beasiswa.create({
-    data: {
-      title: data.title,
-      image_url: data.image_url,
-      link: data.link,
-    },
-  });
-};
+  // Get beasiswa by ID
+  async getBeasiswaById(id: string) {
+    return prisma.beasiswa.findUnique({
+      where: {
+        beasiswa_id: id,
+      },
+    });
+  }
 
-// Update beasiswa
-export const updateBeasiswa = async (
-  id: string,
-  data: Partial<BeasiswaData>
-) => {
-  return await prisma.beasiswa.update({
-    where: {
-      beasiswa_id: id,
-    },
-    data: {
-      ...(data.title && { title: data.title }),
-      ...(data.image_url && { image_url: data.image_url }),
-      ...(data.link && { link: data.link }),
-    },
-  });
-};
+  // Create new beasiswa
+  async createBeasiswa(data: BeasiswaData) {
+    return prisma.beasiswa.create({
+      data: {
+        title: data.title,
+        image_url: data.image_url,
+        link: data.link,
+      },
+    });
+  }
 
-// Delete beasiswa
-export const deleteBeasiswa = async (id: string) => {
-  return await prisma.beasiswa.delete({
-    where: {
-      beasiswa_id: id,
-    },
-  });
-};
+  // Update beasiswa
+  async updateBeasiswa(id: string, data: Partial<BeasiswaData>) {
+    return prisma.beasiswa.update({
+      where: {
+        beasiswa_id: id,
+      },
+      data: {
+        ...(data.title && { title: data.title }),
+        ...(data.image_url && { image_url: data.image_url }),
+        ...(data.link && { link: data.link }),
+      },
+    });
+  }
+
+  // Delete beasiswa
+  async deleteBeasiswa(id: string) {
+    return prisma.beasiswa.delete({
+      where: {
+        beasiswa_id: id,
+      },
+    });
+  }
+}
+
+export const beasiswaRepository = new BeasiswaRepository();

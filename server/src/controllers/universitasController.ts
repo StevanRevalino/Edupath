@@ -9,6 +9,11 @@ export class UniversitasController {
   constructor() {
     this.universitasService = new UniversitasPddiktiService();
     this.localService = new UniversitasService();
+
+    // Bind methods to preserve 'this' context
+    this.getAllUniversitas = this.getAllUniversitas.bind(this);
+    this.getUniversitasById = this.getUniversitasById.bind(this);
+    this.searchUniversitas = this.searchUniversitas.bind(this);
   }
   // Get all universitas with optional pagination and search
   async getAllUniversitas(req: Request, res: Response) {

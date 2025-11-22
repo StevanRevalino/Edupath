@@ -10,6 +10,14 @@ export class AuthController {
 
   constructor() {
     this.authService = new AuthService();
+
+    // Bind methods to preserve 'this' context
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
+    this.updateProfile = this.updateProfile.bind(this);
+    this.sendOtp = this.sendOtp.bind(this);
+    this.sendVerificationOtp = this.sendVerificationOtp.bind(this);
   }
   async register(req: Request, res: Response): Promise<void> {
     try {

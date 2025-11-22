@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 interface CreateUniversitasDTO {
   university_id: number;
@@ -28,19 +28,17 @@ interface UniversitasFilters {
 }
 
 export class UniversitasRepository {
-  private prisma: PrismaClient;
-
   constructor() {
-    this.prisma = new PrismaClient();
+    // Using singleton prisma instance
   }
   // Create universitas
   async create(data: CreateUniversitasDTO) {
-    return this.prisma.universitas.create({ data });
+    return prisma.universitas.create({ data });
   }
 
   // Create many universitas
   async createMany(data: CreateUniversitasDTO[]) {
-    return this.prisma.universitas.createMany({
+    return prisma.universitas.createMany({
       data,
       skipDuplicates: true,
     });
@@ -48,7 +46,7 @@ export class UniversitasRepository {
 
   // Find by ID
   async findById(university_id: number) {
-    return this.prisma.universitas.findUnique({
+    return prisma.universitas.findUnique({
       where: { university_id },
       include: {
         prodi_pt: {
@@ -89,7 +87,7 @@ export class UniversitasRepository {
       where.akreditasi = filters.akreditasi;
     }
 
-    return this.prisma.universitas.findMany({
+    return prisma.universitas.findMany({
       where,
       include: {
         _count: {
@@ -108,7 +106,7 @@ export class UniversitasRepository {
 
   // Search by nama
   async searchByNama(query: string, limit: number = 10) {
-    return this.prisma.universitas.findMany({
+    return prisma.universitas.findMany({
       where: {
         nama: {
           contains: query,
@@ -134,7 +132,7 @@ export class UniversitasRepository {
 
   // Update universitas
   async update(university_id: number, data: Partial<CreateUniversitasDTO>) {
-    return this.prisma.universitas.update({
+    return prisma.universitas.update({
       where: { university_id },
       data,
     });
@@ -142,7 +140,7 @@ export class UniversitasRepository {
 
   // Delete universitas
   async delete(university_id: number) {
-    return this.prisma.universitas.delete({
+    return prisma.universitas.delete({
       where: { university_id },
     });
   }
@@ -172,12 +170,12 @@ export class UniversitasRepository {
       };
     }
 
-    return this.prisma.universitas.count({ where });
+    return prisma.universitas.count({ where });
   }
 
   // Get all provinces
   async getAllProvinces() {
-    const result = await this.prisma.universitas.findMany({
+    const result = await prisma.universitas.findMany({
       select: { provinsi: true },
       where: {
         provinsi: { not: null },
@@ -194,7 +192,7 @@ export class UniversitasRepository {
 
   // Get cities by province
   async getCitiesByProvince(provinsi: string) {
-    const result = await this.prisma.universitas.findMany({
+    const result = await prisma.universitas.findMany({
       select: { kota: true },
       where: {
         provinsi: provinsi,
@@ -212,7 +210,7 @@ export class UniversitasRepository {
 
   // Check if exists by ID
   async exists(university_id: number): Promise<boolean> {
-    const count = await this.prisma.universitas.count({
+    const count = await prisma.universitas.count({
       where: { university_id },
     });
     return count > 0;

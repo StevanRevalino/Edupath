@@ -1,9 +1,20 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { NotificationService } from "../services/notificationService";
 
 export class NotificationController {
+  private notificationService: NotificationService;
+
+  constructor() {
+    this.notificationService = new NotificationService();
+
+    // Bind methods to preserve 'this' context
+    this.getNotifications = this.getNotifications.bind(this);
+    this.markAsRead = this.markAsRead.bind(this);
+    this.markAllAsRead = this.markAllAsRead.bind(this);
+    this.deleteNotification = this.deleteNotification.bind(this);
+    this.getUnreadCount = this.getUnreadCount.bind(this);
+  }
+
   // Get all notifications for current user
   async getNotifications(req: Request, res: Response) {
     try {
@@ -16,15 +27,8 @@ export class NotificationController {
         });
       }
 
-      // Fetch notifications
-      const notifications = await prisma.notification.findMany({
-        where: {
-          user_id: userId,
-        },
-        orderBy: {
-          created_at: "desc",
-        },
-      });
+      const { notifications, stats } =
+        await this.notificationService.getNotifications(userId);
 
       // Map to match frontend interface
       const mappedNotifications = notifications.map((n) => ({
@@ -37,21 +41,6 @@ export class NotificationController {
         created_at: n.created_at.toISOString(),
         metadata: {},
       }));
-
-      // Calculate stats
-      const stats = {
-        total: mappedNotifications.length,
-        unread: mappedNotifications.filter((n) => !n.is_read).length,
-        consultation_new: mappedNotifications.filter(
-          (n) => n.type === "CONSULTATION_ACCEPTED"
-        ).length,
-        consultation_cancel: mappedNotifications.filter(
-          (n) => n.type === "CONSULTATION_REJECTED"
-        ).length,
-        chat_message: mappedNotifications.filter(
-          (n) => n.type === "CHAT_MESSAGE"
-        ).length,
-      };
 
       return res.status(200).json({
         success: true,
@@ -80,40 +69,17 @@ export class NotificationController {
         });
       }
 
-      // Verify notification belongs to user
-      const notification = await prisma.notification.findFirst({
-        where: {
-          notification_id: notificationId,
-          user_id: userId,
-        },
-      });
-
-      if (!notification) {
-        return res.status(404).json({
-          success: false,
-          message: "Notification not found",
-        });
-      }
-
-      // Mark as read
-      await prisma.notification.update({
-        where: {
-          notification_id: notificationId,
-        },
-        data: {
-          is_read: true,
-        },
-      });
+      await this.notificationService.markAsRead(notificationId, userId);
 
       return res.status(200).json({
         success: true,
         message: "Notification marked as read",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error marking notification as read:", error);
       return res.status(500).json({
         success: false,
-        message: "Failed to mark notification as read",
+        message: error.message || "Failed to mark notification as read",
       });
     }
   }
@@ -130,15 +96,7 @@ export class NotificationController {
         });
       }
 
-      await prisma.notification.updateMany({
-        where: {
-          user_id: userId,
-          is_read: false,
-        },
-        data: {
-          is_read: true,
-        },
-      });
+      await this.notificationService.markAllAsRead(userId);
 
       return res.status(200).json({
         success: true,
@@ -166,37 +124,17 @@ export class NotificationController {
         });
       }
 
-      // Verify notification belongs to user
-      const notification = await prisma.notification.findFirst({
-        where: {
-          notification_id: notificationId,
-          user_id: userId,
-        },
-      });
-
-      if (!notification) {
-        return res.status(404).json({
-          success: false,
-          message: "Notification not found",
-        });
-      }
-
-      // Delete notification
-      await prisma.notification.delete({
-        where: {
-          notification_id: notificationId,
-        },
-      });
+      await this.notificationService.deleteNotification(notificationId, userId);
 
       return res.status(200).json({
         success: true,
         message: "Notification deleted",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting notification:", error);
       return res.status(500).json({
         success: false,
-        message: "Failed to delete notification",
+        message: error.message || "Failed to delete notification",
       });
     }
   }
@@ -213,12 +151,7 @@ export class NotificationController {
         });
       }
 
-      const count = await prisma.notification.count({
-        where: {
-          user_id: userId,
-          is_read: false,
-        },
-      });
+      const count = await this.notificationService.getUnreadCount(userId);
 
       return res.status(200).json({
         success: true,

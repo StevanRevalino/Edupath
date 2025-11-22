@@ -1,14 +1,20 @@
 import { Request, Response } from "express";
 import { ChatService } from "../services/chatService";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 export class ChatController {
   private chatService: ChatService;
 
   constructor() {
     this.chatService = new ChatService();
+
+    // Bind methods to preserve 'this' context
+    this.getChatUsers = this.getChatUsers.bind(this);
+    this.getChatRoom = this.getChatRoom.bind(this);
+    this.getChatMessages = this.getChatMessages.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.getAdminChatRooms = this.getAdminChatRooms.bind(this);
+    this.getChatHistory = this.getChatHistory.bind(this);
+    this.getUnreadCount = this.getUnreadCount.bind(this);
   }
 
   // Get chat users for admin (students with accepted consultations)
@@ -53,31 +59,9 @@ export class ChatController {
         });
       }
 
-      // Get consultation first to validate access
-      const consultation = await prisma.consultation.findUnique({
-        where: { consultation_id: consultationId },
-      });
-
-      if (!consultation) {
-        return res.status(404).json({
-          success: false,
-          message: "Consultation not found",
-        });
-      }
-
-      // Check if user has access to this consultation
-      if (
-        consultation.murid_id !== userId &&
-        consultation.admin_id !== userId
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "You don't have access to this consultation",
-        });
-      }
-
       const chatRoom = await this.chatService.getOrCreateChatRoom(
-        consultationId
+        consultationId,
+        userId
       );
 
       return res.status(200).json({
@@ -87,6 +71,21 @@ export class ChatController {
       });
     } catch (error: any) {
       console.error("Error in getChatRoom:", error);
+
+      if (error.message === "Consultation not found") {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      if (error.message === "You don't have access to this consultation") {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: error.message || "Terjadi kesalahan saat mengambil chat room",
@@ -241,41 +240,12 @@ export class ChatController {
         });
       }
 
-      // Get all active chat rooms for this admin
-      const chatRooms = await prisma.chatRoom.findMany({
-        where: {
-          admin_id: userId,
-        },
-        include: {
-          messages: {
-            where: {
-              sender_id: {
-                not: userId, // Messages not from admin
-              },
-              is_read: false,
-            },
-          },
-        },
-      });
-
-      // Count total unread messages
-      const unreadCount = chatRooms.reduce(
-        (total, room) => total + room.messages.length,
-        0
-      );
+      const data = await this.chatService.getUnreadCountForAdmin(userId);
 
       return res.status(200).json({
         success: true,
         message: "Berhasil mengambil unread count",
-        data: {
-          unreadCount,
-          roomsWithUnread: chatRooms
-            .filter((room) => room.messages.length > 0)
-            .map((room) => ({
-              room_id: room.room_id,
-              unreadCount: room.messages.length,
-            })),
-        },
+        data,
       });
     } catch (error: any) {
       console.error("Error in getUnreadCount:", error);

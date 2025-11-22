@@ -1,4 +1,5 @@
-import { PrismaClient, ConsultationStatus } from "@prisma/client";
+import { ConsultationStatus } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 interface CreateConsultationDTO {
   consultation_id: string;
@@ -31,14 +32,12 @@ interface ConsultationFilters {
 }
 
 export class ConsultationRepository {
-  private prisma: PrismaClient;
-
   constructor() {
-    this.prisma = new PrismaClient();
+    // Using singleton prisma instance
   }
   // Create consultation
   async create(data: CreateConsultationDTO) {
-    return this.prisma.consultation.create({
+    return prisma.consultation.create({
       data,
       include: {
         murid: {
@@ -64,7 +63,7 @@ export class ConsultationRepository {
 
   // Find by ID
   async findById(consultation_id: string) {
-    return this.prisma.consultation.findUnique({
+    return prisma.consultation.findUnique({
       where: { consultation_id },
       include: {
         murid: {
@@ -104,7 +103,7 @@ export class ConsultationRepository {
       where.admin_id = filters.admin_id;
     }
 
-    return this.prisma.consultation.findMany({
+    return prisma.consultation.findMany({
       where,
       include: {
         murid: {
@@ -150,7 +149,7 @@ export class ConsultationRepository {
 
   // Update status
   async updateStatus(data: UpdateConsultationStatusDTO) {
-    const updatedConsultation = await this.prisma.consultation.update({
+    const updatedConsultation = await prisma.consultation.update({
       where: { consultation_id: data.consultation_id },
       data: {
         status: data.status,
@@ -186,7 +185,7 @@ export class ConsultationRepository {
 
     // ✨ Create notification for student
     if (data.status === ConsultationStatus.ACCEPTED) {
-      await this.prisma.notification.create({
+      await prisma.notification.create({
         data: {
           user_id: updatedConsultation.murid_id,
           type: "CONSULTATION_ACCEPTED",
@@ -197,7 +196,7 @@ export class ConsultationRepository {
         },
       });
     } else if (data.status === ConsultationStatus.DECLINED) {
-      await this.prisma.notification.create({
+      await prisma.notification.create({
         data: {
           user_id: updatedConsultation.murid_id,
           type: "CONSULTATION_REJECTED",
@@ -216,7 +215,7 @@ export class ConsultationRepository {
 
   // Reschedule consultation
   async reschedule(data: RescheduleConsultationDTO) {
-    return this.prisma.consultation.update({
+    return prisma.consultation.update({
       where: { consultation_id: data.consultation_id },
       data: {
         consultation_date: data.newDate,
@@ -246,7 +245,7 @@ export class ConsultationRepository {
 
   // Delete consultation
   async delete(consultation_id: string) {
-    return this.prisma.consultation.delete({
+    return prisma.consultation.delete({
       where: { consultation_id },
     });
   }
@@ -254,14 +253,14 @@ export class ConsultationRepository {
   // Get statistics
   async getStats() {
     const [total, pending, accepted, declined] = await Promise.all([
-      this.prisma.consultation.count(),
-      this.prisma.consultation.count({
+      prisma.consultation.count(),
+      prisma.consultation.count({
         where: { status: ConsultationStatus.PENDING },
       }),
-      this.prisma.consultation.count({
+      prisma.consultation.count({
         where: { status: ConsultationStatus.ACCEPTED },
       }),
-      this.prisma.consultation.count({
+      prisma.consultation.count({
         where: { status: ConsultationStatus.DECLINED },
       }),
     ]);
@@ -276,7 +275,7 @@ export class ConsultationRepository {
 
   // Find last consultation for generating ID
   async findLastConsultation() {
-    return this.prisma.consultation.findFirst({
+    return prisma.consultation.findFirst({
       orderBy: { consultation_id: "desc" },
       where: {
         consultation_id: {
@@ -289,7 +288,7 @@ export class ConsultationRepository {
 
   // Find active consultation by student ID
   async findActiveByMuridId(murid_id: string) {
-    return this.prisma.consultation.findFirst({
+    return prisma.consultation.findFirst({
       where: {
         murid_id,
         is_active: true,
@@ -321,7 +320,7 @@ export class ConsultationRepository {
 
   // Set consultation as inactive
   async setInactive(consultation_id: string) {
-    return this.prisma.consultation.update({
+    return prisma.consultation.update({
       where: { consultation_id },
       data: {
         is_active: false,
@@ -351,7 +350,7 @@ export class ConsultationRepository {
 
   // Find active accepted consultations within timeframe
   async findActiveAcceptedConsultations(startTime: Date, endTime: Date) {
-    return this.prisma.consultation.findMany({
+    return prisma.consultation.findMany({
       where: {
         status: "ACCEPTED",
         is_active: true,
@@ -394,7 +393,7 @@ export class ConsultationRepository {
 
   // Find inactive consultations with chat rooms
   async findInactiveConsultationsWithChat() {
-    return this.prisma.consultation.findMany({
+    return prisma.consultation.findMany({
       where: {
         is_active: false,
         chatRoom: {
@@ -437,7 +436,7 @@ export class ConsultationRepository {
 
   // Find expired consultations (for scheduler)
   async findExpiredConsultations(oneHourAgo: Date) {
-    return this.prisma.consultation.findMany({
+    return prisma.consultation.findMany({
       where: {
         status: "ACCEPTED",
         is_active: true,
@@ -454,7 +453,7 @@ export class ConsultationRepository {
     status: ConsultationStatus,
     isActive: boolean
   ) {
-    return this.prisma.consultation.updateMany({
+    return prisma.consultation.updateMany({
       where: {
         consultation_id: {
           in: consultationIds,

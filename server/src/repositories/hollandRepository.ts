@@ -1,4 +1,5 @@
-import { PrismaClient, HollandType } from "@prisma/client";
+import { HollandType } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 interface CreateHollandAssessmentDTO {
   user_id: string;
@@ -16,22 +17,20 @@ interface CreateHollandAssessmentDTO {
 }
 
 export class HollandRepository {
-  private prisma: PrismaClient;
-
   constructor() {
-    this.prisma = new PrismaClient();
+    // Using singleton prisma instance
   }
 
   // Get all Holland questions
   async findAllQuestions() {
-    return this.prisma.hollandQuestion.findMany({
+    return prisma.hollandQuestion.findMany({
       orderBy: { question_id: "asc" },
     });
   }
 
   // Get all prodi-Holland mappings
   async findAllProdiMappings() {
-    return this.prisma.hollandProdiMapping.findMany({
+    return prisma.hollandProdiMapping.findMany({
       include: {
         prodi: {
           select: {
@@ -46,7 +45,7 @@ export class HollandRepository {
 
   // Create new Holland assessment
   async createAssessment(data: CreateHollandAssessmentDTO) {
-    return this.prisma.hollandAssessment.create({
+    return prisma.hollandAssessment.create({
       data: {
         user_id: data.user_id,
         realistic_score: data.scores.realistic,
@@ -74,7 +73,7 @@ export class HollandRepository {
 
   // Get user's assessment history
   async findAssessmentsByUserId(userId: string, limit: number = 5) {
-    return this.prisma.hollandAssessment.findMany({
+    return prisma.hollandAssessment.findMany({
       where: { user_id: userId },
       orderBy: { completed_at: "desc" },
       take: limit,
@@ -92,7 +91,7 @@ export class HollandRepository {
 
   // Get user's latest assessment
   async findLatestAssessmentByUserId(userId: string) {
-    return this.prisma.hollandAssessment.findFirst({
+    return prisma.hollandAssessment.findFirst({
       where: { user_id: userId },
       orderBy: { completed_at: "desc" },
       include: {
