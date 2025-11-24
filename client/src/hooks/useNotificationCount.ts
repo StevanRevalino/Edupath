@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import TokenManager from "../utils/tokenManager";
+import { consultationService } from "../services/consultationService";
+import { notificationService } from "../services/notificationService";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
 
 interface NotificationCount {
@@ -17,24 +17,13 @@ export const useNotificationCount = () => {
 
   const fetchCounts = async () => {
     try {
-      const token = TokenManager.getToken();
-      const API_URL = import.meta.env.VITE_API_URL;
+      // Fetch pending consultations count using consultationService
+      const consultationsResponse =
+        await consultationService.getConsultations();
 
-      // Fetch pending consultations count
-      const consultationsResponse = await axios.get(
-        `${API_URL}/api/consultations`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (consultationsResponse.data.success) {
-        const consultations = consultationsResponse.data.data || [];
-        const pendingCount = consultations.filter(
-          (c: any) => c.status === "PENDING"
+      if (consultationsResponse.success && consultationsResponse.data) {
+        const pendingCount = consultationsResponse.data.filter(
+          (c) => c.status === "PENDING"
         ).length;
 
         setCounts((prev) => ({
@@ -43,27 +32,24 @@ export const useNotificationCount = () => {
         }));
       }
 
-      // Fetch unread chats count
+      // Fetch notifications for unread chats count using notificationService
       try {
-        const chatsResponse = await axios.get(
-          `${API_URL}/api/chat/unread-count`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const notificationsResponse =
+          await notificationService.getNotifications();
 
-        if (chatsResponse.data.success) {
+        if (notificationsResponse.success) {
+          const unreadChatNotifications = notificationsResponse.data.filter(
+            (n) => n.type === "CHAT_MESSAGE" && !n.is_read
+          ).length;
+
           setCounts((prev) => ({
             ...prev,
-            unreadChats: chatsResponse.data.data.unreadCount || 0,
+            unreadChats: unreadChatNotifications,
           }));
         }
       } catch (chatError) {
-        // If chat endpoint not ready, set to 0
-        console.log("Chat unread count not available yet");
+        // If notifications not available, set to 0
+        console.log("Chat notifications not available yet");
         setCounts((prev) => ({
           ...prev,
           unreadChats: 0,
@@ -117,7 +103,7 @@ export const useNotificationCount = () => {
       NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
       handleConsultationUpdate
     );
-    
+
     // Add chat update listener if available
     if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
       window.addEventListener(

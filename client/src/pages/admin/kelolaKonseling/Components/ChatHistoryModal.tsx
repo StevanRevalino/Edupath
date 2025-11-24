@@ -1,18 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { X, MessageCircle } from "lucide-react";
-import axios from "axios";
-import TokenManager from "../../../../utils/tokenManager";
 import toast from "react-hot-toast";
+import TokenManager from "../../../../utils/tokenManager";
 import { parseMessageWithImage } from "../../../../utils/cloudinary";
-
-interface ChatMessage {
-  id: string;
-  message: string;
-  senderId: string;
-  senderName: string;
-  timestamp: string;
-  isFromAdmin: boolean;
-}
+import {
+  consultationService,
+  type ChatMessage,
+} from "../../../../services/consultationService";
 
 interface ChatHistoryModalProps {
   isOpen: boolean;
@@ -32,7 +26,6 @@ const ChatHistoryModal = ({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const API_URL = import.meta.env.VITE_API_URL;
   const currentUserId = TokenManager.getUserData().userId || "";
 
   useEffect(() => {
@@ -55,36 +48,21 @@ const ChatHistoryModal = ({
   const fetchChatMessages = async () => {
     try {
       setLoading(true);
-      const token = TokenManager.getToken();
 
       // Get chat room first
-      const roomResponse = await axios.get(
-        `${API_URL}/api/chat/room/${consultationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const roomResponse = await consultationService.getChatRoom(
+        consultationId
       );
-
-      const roomId = roomResponse.data.data.room_id;
+      const roomId = roomResponse.data!.room_id;
 
       // Fetch messages
-      const messagesResponse = await axios.get(
-        `${API_URL}/api/chat/messages/${roomId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const messagesResponse = await consultationService.getChatMessages(
+        roomId
       );
-
-      setMessages(messagesResponse.data.data);
-    } catch (error) {
+      setMessages(messagesResponse.data || []);
+    } catch (error: any) {
       console.error("Error fetching chat messages:", error);
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
+      if (error.response?.status === 404) {
         toast.error("Chat room tidak ditemukan");
       } else {
         toast.error("Gagal mengambil riwayat chat");

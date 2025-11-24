@@ -9,8 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
+import { dashboardService } from "../../../services/dashboardService";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -86,8 +85,6 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const [selectedWeek, setSelectedWeek] = useState(0); // 0 = current week, -1 = last week, 1 = next week
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   // Get week range for display
   const getWeekRange = () => {
     const start = new Date(weekStartDate);
@@ -121,29 +118,18 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   // Fetch weekly consultation data
   const fetchWeeklyData = async () => {
     try {
-      const token = TokenManager.getToken();
-      if (!token) return;
-
       const start = new Date(weekStartDate);
       const end = new Date(weekStartDate);
       end.setDate(start.getDate() + 6);
       end.setHours(23, 59, 59, 999);
 
-      const response = await axios.get(
-        `${API_URL}/api/admin/dashboard/weekly-consultations`,
-        {
-          params: {
-            startDate: start.toISOString(),
-            endDate: end.toISOString(),
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await dashboardService.getWeeklyConsultations({
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      });
 
-      if (response.data.success && response.data.data) {
-        setWeeklyData(response.data.data);
+      if (response.success && response.data) {
+        setWeeklyData(response.data);
       }
     } catch (error) {
       console.error("Error fetching weekly data:", error);
@@ -161,34 +147,19 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const token = TokenManager.getToken();
 
       // Fetch dashboard statistics
-      const statsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/stats`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const statsResponse = await dashboardService.getStats();
 
       // Fetch upcoming consultations
-      const consultationsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/upcoming-consultations`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const consultationsResponse =
+        await dashboardService.getUpcomingConsultations();
 
       // Fetch recent chats
-      const chatsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/recent-chats`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const chatsResponse = await dashboardService.getRecentChats();
 
-      if (statsResponse.data.success) {
-        const dashboardData = statsResponse.data.data;
+      if (statsResponse.success) {
+        const dashboardData = statsResponse.data;
         setStats(dashboardData.stats);
 
         // Set chart data
@@ -196,11 +167,11 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           setWeeklyData(dashboardData.weeklyConsultations.data);
         }
       }
-      if (consultationsResponse.data.success) {
-        setUpcomingConsultations(consultationsResponse.data.data);
+      if (consultationsResponse.success) {
+        setUpcomingConsultations(consultationsResponse.data);
       }
-      if (chatsResponse.data.success) {
-        setRecentChats(chatsResponse.data.data);
+      if (chatsResponse.success) {
+        setRecentChats(chatsResponse.data);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -265,7 +236,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   }
 
   return (
-    <div className="max-h-[calc(100vh-64px)] p-4 sm:p-6 flex flex-col overflow-hidden">
+    <div className="min-h-screen p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard Admin</h1>

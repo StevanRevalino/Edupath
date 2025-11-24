@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
+import { consultationService } from "../../../services/consultationService";
 import ConsultationFilters from "./Components/ConsultationFilters";
 import ConsultationDetailModal from "./Components/ConsultationDetailModal";
 import RescheduleModal from "./Components/RescheduleModal";
@@ -68,7 +67,6 @@ const KelolaDataKonseling = ({
   const [isChatHistoryModalOpen, setIsChatHistoryModalOpen] = useState(false);
   const [showPendingBadge, setShowPendingBadge] = useState(true);
   const [lastPendingCount, setLastPendingCount] = useState(0);
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // Handler to open live chat tab
   const handleOpenLiveChat = () => {
@@ -89,17 +87,7 @@ const KelolaDataKonseling = ({
   // Auto-complete expired consultations
   const autoCompleteExpiredConsultations = async () => {
     try {
-      const token = TokenManager.getToken();
-      await axios.post(
-        `${API_URL}/api/consultations/auto-complete`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await consultationService.autoCompleteExpired();
     } catch (error) {
       console.error("Error auto-completing consultations:", error);
     }
@@ -110,35 +98,15 @@ const KelolaDataKonseling = ({
     const fetchConsultations = async () => {
       try {
         setLoading(true);
-        const token = TokenManager.getToken();
 
         // First, auto-complete any expired consultations
         await autoCompleteExpiredConsultations();
 
-        const response = await axios.get(`${API_URL}/api/consultations`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setConsultations(response.data.data || []);
+        const response = await consultationService.getConsultations();
+        setConsultations((response.data || []) as Consultation[]);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            toast.error("Session expired. Silakan login ulang.");
-            TokenManager.logout();
-            window.location.href = "/login";
-          } else {
-            toast.error("Gagal mengambil data konseling");
-          }
-        } else {
-          console.error("Error fetching consultations:", error);
-          toast.error("Gagal mengambil data konseling");
-        }
+        console.error("Error fetching consultations:", error);
+        toast.error("Gagal mengambil data konseling");
       } finally {
         setLoading(false);
       }
@@ -265,17 +233,10 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed && result.value) {
-          const token = TokenManager.getToken();
-
-          await axios.patch(
-            `${API_URL}/api/consultations/${consultationId}/status`,
-            { status: newStatus, admin_notes: result.value },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
+          await consultationService.updateStatus(
+            consultationId,
+            newStatus,
+            result.value
           );
 
           setConsultations(
@@ -312,18 +273,7 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed) {
-          const token = TokenManager.getToken();
-
-          await axios.patch(
-            `${API_URL}/api/consultations/${consultationId}/status`,
-            { status: newStatus },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          await consultationService.updateStatus(consultationId, newStatus);
 
           setConsultations(
             consultations.map((consultation) =>
@@ -340,19 +290,11 @@ const KelolaDataKonseling = ({
           triggerNotificationRefresh();
         }
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error("Gagal memperbarui status konseling");
-        }
-      } else {
-        console.error("Error updating consultation:", error);
-        toast.error("Gagal memperbarui status konseling");
-      }
+    } catch (error: any) {
+      console.error("Error updating consultation:", error);
+      toast.error(
+        error.response?.data?.message || "Gagal memperbarui status konseling"
+      );
     }
   };
 
@@ -385,29 +327,19 @@ const KelolaDataKonseling = ({
     if (!selectedConsultation) return;
 
     try {
-      const token = TokenManager.getToken();
-
       // Combine date and time
       const [hours, minutes] = data.time.split(":");
       const newDateTime = new Date(data.date);
       newDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const response = await axios.patch(
-        `${API_URL}/api/consultations/${selectedConsultation.consultation_id}/reschedule`,
-        {
-          newDate: newDateTime.toISOString(),
-          rescheduleReason: data.reason,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const response = await consultationService.reschedule(
+        selectedConsultation.consultation_id,
+        newDateTime.toISOString(),
+        data.reason
       );
 
       // Update local state
-      const updatedConsultation = response.data.data;
+      const updatedConsultation = response.data as Consultation;
       setConsultations(
         consultations.map((c) =>
           c.consultation_id === selectedConsultation.consultation_id
@@ -420,20 +352,10 @@ const KelolaDataKonseling = ({
       triggerNotificationRefresh();
       handleCloseRescheduleModal();
     } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error(
-            error.response?.data?.message || "Gagal reschedule konseling"
-          );
-        }
-      } else {
-        console.error("Error rescheduling consultation:", error);
-        toast.error("Gagal reschedule konseling");
-      }
+      console.error("Error rescheduling consultation:", error);
+      toast.error(
+        error.response?.data?.message || "Gagal reschedule konseling"
+      );
     }
   };
 
@@ -453,17 +375,10 @@ const KelolaDataKonseling = ({
 
     if (result.isConfirmed) {
       try {
-        const token = TokenManager.getToken();
-
-        await axios.patch(
-          `${API_URL}/api/consultations/${consultationId}/status`,
-          { status: "DECLINED", admin_notes: "Dibatalkan oleh admin" },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        await consultationService.updateStatus(
+          consultationId,
+          "DECLINED",
+          "Dibatalkan oleh admin"
         );
 
         setConsultations(
@@ -481,18 +396,8 @@ const KelolaDataKonseling = ({
         toast.success("Konseling berhasil dibatalkan");
         triggerNotificationRefresh();
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            toast.error("Session expired. Silakan login ulang.");
-            TokenManager.logout();
-            window.location.href = "/login";
-          } else {
-            toast.error("Gagal membatalkan konseling");
-          }
-        }
+        console.error("Error canceling consultation:", error);
+        toast.error("Gagal membatalkan konseling");
       }
     }
   };

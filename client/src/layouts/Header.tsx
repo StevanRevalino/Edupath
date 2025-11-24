@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
-import axios from "axios";
+import { userService } from "../services/userService";
 import NotificationPanel from "../pages/user/components/NotificationPanel";
 
 const Header = () => {
@@ -12,7 +12,6 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // User data state
   const [user, setUser] = useState<{
@@ -48,26 +47,13 @@ const Header = () => {
           return;
         }
 
-        const token = TokenManager.getToken();
         const { userId } = TokenManager.getUserData();
+        if (!userId) return;
 
-        const response = await axios.get(`${API_URL}/api/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setUser(response.data.data);
+        const userData = await userService.getUserById(userId);
+        setUser(userData);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        if (
-          axios.isAxiosError(error) &&
-          (error.response?.status === 401 || error.response?.status === 403)
-        ) {
-          TokenManager.logout();
-          navigate("/login");
-        }
       }
     };
 
@@ -83,7 +69,7 @@ const Header = () => {
     return () => {
       window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
-  }, [navigate, API_URL]);
+  }, [navigate]);
 
   // Handle click outside
   useEffect(() => {

@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../../../assets/warning-logo.png";
-import axios from "axios";
+import { authService } from "../../../services/authService";
 
 interface Props {
   isOpen: boolean;
@@ -50,12 +50,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({});
 
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
-        email,
-      });
+      const response = await authService.sendOtp(email);
 
       // Set OTP from server response (in production, OTP should not be returned)
       setServerOtp(response.data.otp);
@@ -69,12 +64,10 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
           if (e.path === "email") emailErr.email = e.message;
         });
         setErrors((prev) => ({ ...prev, ...emailErr }));
-      } else if (axios.isAxiosError(err)) {
+      } else {
         const errorMessage =
           err.response?.data?.message || "Gagal mengirim OTP";
         toast.error(errorMessage);
-      } else {
-        toast.error("Terjadi kesalahan saat mengirim OTP");
       }
     }
   };
@@ -127,10 +120,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       setErrors({});
 
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      await axios.post(`${API_URL}/api/auth/forgot-password`, {
+      await authService.resetPassword({
         email,
         otp: serverOtp,
         newPassword,
@@ -159,13 +149,11 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
           if (e.path) newErrors[e.path] = e.message;
         });
         setErrors(newErrors);
-      } else if (axios.isAxiosError(err)) {
+      } else {
         const errorMessage =
           err.response?.data?.message ||
           "Terjadi kesalahan saat reset password";
         toast.error(errorMessage);
-      } else {
-        toast.error("Terjadi kesalahan saat reset password");
       }
     }
   };

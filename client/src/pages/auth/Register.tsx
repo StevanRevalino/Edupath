@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import OtpModal from "./components/ModalVerifyOtp";
 import DropdownList from "../../components/DropDownList";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
+import { authService } from "../../services/authService";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthEmailInput from "./components/AuthEmailInput";
@@ -94,9 +94,7 @@ export default function Register() {
     }
 
     try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      await axios.post(`${API_URL}/api/auth/register`, {
+      await authService.register({
         firstname: firstName,
         lastname: lastName,
         kelas: Number(kelas?.value),
@@ -119,15 +117,7 @@ export default function Register() {
       // validasi pakai yup
       await emailSchema.validate({ email });
 
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      const response = await axios.post(
-        `${API_URL}/api/auth/send-verification-otp`,
-        {
-          email,
-        }
-      );
+      const response = await authService.sendVerificationOtp(email);
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -147,12 +137,10 @@ export default function Register() {
           ...prev,
           email: err.message,
         }));
-      } else if (axios.isAxiosError(err)) {
+      } else {
         const errorMessage =
           err.response?.data?.message || "Gagal mengirim OTP";
         toast.error(errorMessage);
-      } else {
-        toast.error("Gagal mengirim OTP");
       }
     }
   };
@@ -161,28 +149,16 @@ export default function Register() {
     if (timer > 0) return;
 
     try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      const response = await axios.post(
-        `${API_URL}/api/auth/send-verification-otp`,
-        {
-          email,
-        }
-      );
+      const response = await authService.sendVerificationOtp(email);
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);
 
       toast.success("OTP berhasil dikirim ulang!");
     } catch (err: any) {
-      if (axios.isAxiosError(err)) {
-        const errorMessage =
-          err.response?.data?.message || "Gagal mengirim ulang OTP";
-        toast.error(errorMessage);
-      } else {
-        toast.error("Gagal mengirim ulang OTP");
-      }
+      const errorMessage =
+        err.response?.data?.message || "Gagal mengirim ulang OTP";
+      toast.error(errorMessage);
     }
   };
 

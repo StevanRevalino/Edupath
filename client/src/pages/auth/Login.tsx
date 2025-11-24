@@ -4,8 +4,8 @@ import { loginSchema } from "../../schema/LoginSchema";
 import { ValidationError } from "yup";
 import ModalResetPassword from "./components/ModalResetPassword";
 import toast from "react-hot-toast";
-import axios from "axios";
 import TokenManager from "../../utils/tokenManager";
+import { authService } from "../../services/authService";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthPasswordInput from "./components/AuthPasswordInput";
@@ -30,15 +30,9 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      const res = await axios.post(`${API_URL}/api/auth/login`, {
-        email,
-        password,
-      });
+      const res = await authService.login(email, password);
       console.log("Login Response:", res);
-      const result = res.data.data;
+      const result = res.data;
 
       // Clear data auth lama terlebih dahulu untuk menghindari konflik
       TokenManager.clearAllAuthData();
@@ -63,13 +57,10 @@ export default function Login() {
         });
         setErrors(newErrors);
         return;
-      } else if (axios.isAxiosError(err)) {
+      } else {
         const errorMessage =
           err.response?.data?.message || "Email atau password salah";
         setServerError(errorMessage);
-      } else {
-        console.error("Login Error:", err);
-        setServerError("Terjadi kesalahan saat login");
       }
     }
   };

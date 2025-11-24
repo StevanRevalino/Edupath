@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
-import { X, Trash2 } from "lucide-react";
-import TokenManager from "../../../utils/tokenManager";
 import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
+import EditStudentModal from "./components/EditStudentModal";
+import { userManagementService } from "../../../services/userManagementService";
 
 interface Student {
   user_id: string;
@@ -34,39 +33,17 @@ const KelolaDataMurid = () => {
     lastname: "",
     kelas: null as number | null,
   });
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const token = TokenManager.getToken();
-
-        const response = await axios.get(`${API_URL}/api/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setStudents(response.data.data);
+        const response = await userManagementService.getAllStudents();
+        setStudents(response.data);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            toast.error("Session expired. Silakan login ulang.");
-            TokenManager.logout();
-            window.location.href = "/login";
-          } else {
-            toast.error("Gagal mengambil data murid");
-          }
-        } else {
-          console.error("Error fetching users:", error);
-          toast.error("Gagal mengambil data murid");
-        }
+        console.error("Error fetching users:", error);
+        toast.error("Gagal mengambil data murid");
       } finally {
         setLoading(false);
       }
@@ -108,6 +85,13 @@ const KelolaDataMurid = () => {
     });
   };
 
+  const handleEditFormChange = (
+    field: string,
+    value: string | number | null
+  ) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleUpdateStudent = async () => {
     if (!selectedStudent) return;
 
@@ -128,8 +112,6 @@ const KelolaDataMurid = () => {
     }
 
     try {
-      const token = TokenManager.getToken();
-
       Swal.fire({
         title: "Apakah anda ingin menyimpan perubahan?",
         showDenyButton: true,
@@ -145,18 +127,12 @@ const KelolaDataMurid = () => {
           const updatePayload = {
             firstname: editForm.firstname,
             lastname: editForm.lastname,
-            kelas: editForm.kelas,
+            kelas: editForm.kelas!,
           };
 
-          await axios.put(
-            `${API_URL}/api/users/${selectedStudent.user_id}`,
-            updatePayload,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
+          await userManagementService.updateStudent(
+            selectedStudent.user_id,
+            updatePayload
           );
 
           // Update state lokal
@@ -181,18 +157,8 @@ const KelolaDataMurid = () => {
         }
       });
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error("Gagal memperbarui data murid");
-        }
-      } else {
-        console.error("Error updating user:", error);
-        toast.error("Gagal memperbarui data murid");
-      }
+      console.error("Error updating user:", error);
+      toast.error("Gagal memperbarui data murid");
     }
   };
 
@@ -210,14 +176,7 @@ const KelolaDataMurid = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const token = TokenManager.getToken();
-
-          await axios.delete(`${API_URL}/api/users/${studentId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
+          await userManagementService.deleteStudent(studentId);
 
           setStudents(
             students.filter((student) => student.user_id !== studentId)
@@ -229,21 +188,8 @@ const KelolaDataMurid = () => {
             handleCloseModal();
           }
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (
-              error.response?.status === 401 ||
-              error.response?.status === 403
-            ) {
-              toast.error("Session expired. Silakan login ulang.");
-              TokenManager.logout();
-              window.location.href = "/login";
-            } else {
-              toast.error("Gagal menghapus data murid");
-            }
-          } else {
-            console.error("Error deleting user:", error);
-            toast.error("Gagal menghapus data murid");
-          }
+          console.error("Error deleting user:", error);
+          toast.error("Gagal menghapus data murid");
         }
       }
     });
@@ -578,109 +524,17 @@ const KelolaDataMurid = () => {
       </div>
 
       {/* Modal Edit Student - Responsive */}
-      {isModalOpen && selectedStudent && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Edit Data Murid</h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Depan <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={editForm.firstname}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, firstname: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
-                  placeholder="Masukkan nama depan"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Belakang <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={editForm.lastname}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, lastname: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
-                  placeholder="Masukkan nama belakang"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kelas <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={editForm.kelas || ""}
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      kelas: e.target.value ? Number(e.target.value) : null,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-0"
-                >
-                  <option value="" disabled>
-                    Pilih Kelas
-                  </option>
-                  <option value={10}>10</option>
-                  <option value={11}>11</option>
-                  <option value={12}>12</option>
-                </select>
-              </div>
-
-              <div className="text-sm text-gray-500 break-words">
-                <strong>Email:</strong> {selectedStudent?.email}
-              </div>
-            </div>
-
-            {/* Responsive Button Layout */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 pt-4 border-t gap-3">
-              <button
-                onClick={() =>
-                  selectedStudent && handleDelete(selectedStudent.user_id)
-                }
-                className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors order-2 sm:order-1 cursor-pointer"
-              >
-                <Trash2 size={16} />
-                <span>Hapus</span>
-              </button>
-
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 order-1 sm:order-2">
-                <button
-                  onClick={handleUpdateStudent}
-                  disabled={
-                    !editForm.firstname || !editForm.lastname || !editForm.kelas
-                  }
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    !editForm.firstname || !editForm.lastname || !editForm.kelas
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-primary text-white hover:bg-primary-light cursor-pointer"
-                  }`}
-                >
-                  Simpan
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditStudentModal
+        isOpen={isModalOpen}
+        selectedStudent={selectedStudent}
+        editForm={editForm}
+        onClose={handleCloseModal}
+        onInputChange={handleEditFormChange}
+        onUpdate={handleUpdateStudent}
+        onDelete={() =>
+          selectedStudent && handleDelete(selectedStudent.user_id)
+        }
+      />
     </>
   );
 };

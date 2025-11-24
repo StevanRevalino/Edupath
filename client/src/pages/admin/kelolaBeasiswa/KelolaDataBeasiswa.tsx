@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
-import { X, Plus, Upload, ExternalLink, Trash2 } from "lucide-react";
-import TokenManager from "../../../utils/tokenManager";
+import { Plus, ExternalLink, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import warningIcon from "../../../assets/warning-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
+import BeasiswaFormModal from "./components/BeasiswaFormModal";
+import { beasiswaService } from "../../../services/beasiswaService";
 import {
   beasiswaSchema,
   type BeasiswaFormData,
@@ -42,8 +42,6 @@ const KelolaDataBeasiswa = () => {
     Partial<Record<keyof BeasiswaFormData, string>>
   >({});
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   // Fetch beasiswa data
   useEffect(() => {
     fetchBeasiswa();
@@ -52,8 +50,8 @@ const KelolaDataBeasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/beasiswa`);
-      setBeasiswaList(response.data.data);
+      const response = await beasiswaService.getAllBeasiswa();
+      setBeasiswaList(response.data);
     } catch (error) {
       console.error("Error fetching beasiswa:", error);
       toast.error("Gagal mengambil data beasiswa");
@@ -204,7 +202,6 @@ const KelolaDataBeasiswa = () => {
         }
       }
 
-      const token = TokenManager.getToken();
       const payload = {
         title: formData.title.trim(),
         link: formData.link.trim(),
@@ -213,25 +210,14 @@ const KelolaDataBeasiswa = () => {
 
       if (selectedBeasiswa) {
         // Update existing
-        await axios.put(
-          `${API_URL}/api/beasiswa/${selectedBeasiswa.beasiswa_id}`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        await beasiswaService.updateBeasiswa(
+          selectedBeasiswa.beasiswa_id,
+          payload
         );
         toast.success("Beasiswa berhasil diperbarui");
       } else {
         // Create new
-        await axios.post(`${API_URL}/api/beasiswa`, payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        await beasiswaService.createBeasiswa(payload);
         toast.success("Beasiswa berhasil ditambahkan");
       }
 
@@ -239,19 +225,7 @@ const KelolaDataBeasiswa = () => {
       handleCloseModal();
     } catch (error: any) {
       console.error("Error saving beasiswa:", error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error(
-            error.response?.data?.message || "Gagal menyimpan beasiswa"
-          );
-        }
-      } else {
-        toast.error("Gagal menyimpan beasiswa");
-      }
+      toast.error(error.response?.data?.message || "Gagal menyimpan beasiswa");
     } finally {
       setIsUploading(false);
     }
@@ -273,30 +247,14 @@ const KelolaDataBeasiswa = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const token = TokenManager.getToken();
-          await axios.delete(`${API_URL}/api/beasiswa/${beasiswaId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          await beasiswaService.deleteBeasiswa(beasiswaId);
 
           setBeasiswaList(
             beasiswaList.filter((b) => b.beasiswa_id !== beasiswaId)
           );
           toast.success("Beasiswa berhasil dihapus");
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (
-              error.response?.status === 401 ||
-              error.response?.status === 403
-            ) {
-              toast.error("Session expired. Silakan login ulang.");
-              TokenManager.logout();
-              window.location.href = "/login";
-            } else {
-              toast.error("Gagal menghapus beasiswa");
-            }
-          }
+          toast.error("Gagal menghapus beasiswa");
         }
       }
     });
@@ -396,147 +354,18 @@ const KelolaDataBeasiswa = () => {
       </DataTableContainer>
 
       {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 backdrop-blur-md bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">
-                  {selectedBeasiswa ? "Edit Beasiswa" : "Tambah Beasiswa"}
-                </h2>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-500 hover:text-gray-700"
-                  disabled={isUploading}
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Judul Beasiswa <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.title ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="Contoh: Beasiswa LPDP 2025"
-                    disabled={isUploading}
-                  />
-                  {errors.title && (
-                    <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-                  )}
-                </div>
-
-                {/* Link */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Link Website/Media Sosial{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.link}
-                    onChange={(e) => handleInputChange("link", e.target.value)}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.link ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="https://..."
-                    disabled={isUploading}
-                  />
-                  {errors.link && (
-                    <p className="text-red-500 text-sm mt-1">{errors.link}</p>
-                  )}
-                </div>
-
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Poster/Gambar <span className="text-red-500">*</span>
-                  </label>
-                  <div
-                    className={`border-2 border-dashed rounded-lg p-4 ${
-                      errors.image_url ? "border-red-500" : "border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="image-upload"
-                      disabled={isUploading}
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className="flex flex-col items-center cursor-pointer"
-                    >
-                      {imagePreview ? (
-                        <div className="relative">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="max-w-full max-h-64 rounded"
-                          />
-                          <div className="mt-2 text-sm text-gray-600 text-center">
-                            Klik untuk mengubah gambar
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <Upload
-                            size={48}
-                            className="mx-auto text-gray-400 mb-2"
-                          />
-                          <p className="text-gray-600">
-                            Klik untuk upload gambar
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            Max 5MB (PNG, JPG, JPEG)
-                          </p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                  {errors.image_url && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.image_url}
-                    </p>
-                  )}
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-3 justify-end mt-6">
-                  <button
-                    onClick={handleCloseModal}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    disabled={isUploading}
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    disabled={isUploading}
-                  >
-                    {isUploading
-                      ? "Mengupload..."
-                      : selectedBeasiswa
-                      ? "Update"
-                      : "Simpan"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <BeasiswaFormModal
+        isOpen={isModalOpen}
+        selectedBeasiswa={selectedBeasiswa}
+        formData={formData}
+        imagePreview={imagePreview}
+        isUploading={isUploading}
+        errors={errors}
+        onClose={handleCloseModal}
+        onImageChange={handleImageChange}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

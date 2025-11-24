@@ -1,29 +1,7 @@
 import axios from "axios";
 import TokenManager from "../utils/tokenManager";
 
-const API_BASE_URL = "http://localhost:5000/api"; // Adjust based on your server configuration
-
-// Create axios instance
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Add request interceptor to include token
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = TokenManager.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface CreateConsultationRequest {
   murid_id: string;
@@ -39,12 +17,20 @@ export interface Consultation {
   admin_id: string;
   topic: string;
   consultation_date: string;
+  consultation_time: string;
   status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
   is_active: boolean;
   description?: string; // Catatan dari murid
   admin_notes?: string; // Catatan dari admin (reschedule/decline)
+  notes?: string;
   created_at: string;
   updated_at: string;
+  murid?: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    kelas: number | null;
+  };
 }
 
 export interface ApiResponse<T> {
@@ -53,28 +39,203 @@ export interface ApiResponse<T> {
   data?: T;
 }
 
+export interface ChatMessage {
+  id: string;
+  message: string;
+  senderId: string;
+  senderName: string;
+  timestamp: string;
+  isFromAdmin: boolean;
+}
+
+export interface ChatRoom {
+  room_id: string;
+  consultation_id: string;
+}
+
 class ConsultationService {
-  async createConsultation(
-    consultationData: CreateConsultationRequest
-  ): Promise<ApiResponse<Consultation>> {
+  private handleAuthError(status: number) {
+    if (status === 401 || status === 403) {
+      TokenManager.logout();
+      window.location.href = "/login";
+    }
+  }
+
+  async autoCompleteExpired(): Promise<{ success: boolean }> {
     try {
-      const response = await axiosInstance.post(
-        "/consultations",
-        consultationData
+      const token = TokenManager.getToken();
+      await axios.post(
+        `${API_URL}/api/consultations/auto-complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
-      return response.data;
+      return { success: true };
     } catch (error) {
-      console.error("Error creating consultation:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
       throw error;
     }
   }
 
   async getConsultations(): Promise<ApiResponse<Consultation[]>> {
     try {
-      const response = await axiosInstance.get("/consultations");
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/consultations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
-      console.error("Error fetching consultations:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  async updateStatus(
+    consultationId: string,
+    status: string,
+    adminNotes?: string
+  ): Promise<ApiResponse<Consultation>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.patch(
+        `${API_URL}/api/consultations/${consultationId}/status`,
+        { status, admin_notes: adminNotes },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  async reschedule(
+    consultationId: string,
+    newDate: string,
+    rescheduleReason: string
+  ): Promise<ApiResponse<Consultation>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.patch(
+        `${API_URL}/api/consultations/${consultationId}/reschedule`,
+        { newDate, rescheduleReason },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  async cancelConsultation(
+    consultationId: string
+  ): Promise<{ success: boolean }> {
+    try {
+      const token = TokenManager.getToken();
+      await axios.delete(`${API_URL}/api/consultations/${consultationId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return { success: true };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  async getChatRoom(consultationId: string): Promise<ApiResponse<ChatRoom>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/chat/room/${consultationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  async getChatMessages(roomId: string): Promise<ApiResponse<ChatMessage[]>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
+  // Legacy methods for backward compatibility
+  async createConsultation(
+    consultationData: CreateConsultationRequest
+  ): Promise<ApiResponse<Consultation>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.post(
+        `${API_URL}/api/consultations`,
+        consultationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
       throw error;
     }
   }
@@ -83,12 +244,21 @@ class ConsultationService {
     status: string
   ): Promise<ApiResponse<Consultation[]>> {
     try {
-      const response = await axiosInstance.get(
-        `/consultations/status/${status}`
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/consultations/status/${status}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching consultations by status:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
       throw error;
     }
   }
@@ -97,12 +267,22 @@ class ConsultationService {
     consultation_id: string
   ): Promise<ApiResponse<Consultation>> {
     try {
-      const response = await axiosInstance.patch(
-        `/consultations/${consultation_id}/end`
+      const token = TokenManager.getToken();
+      const response = await axios.patch(
+        `${API_URL}/api/consultations/${consultation_id}/end`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     } catch (error) {
-      console.error("Error ending consultation:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
       throw error;
     }
   }
@@ -124,13 +304,22 @@ class ConsultationService {
     date: Date
   ): Promise<ApiResponse<Array<{ startTime: string; endTime: string }>>> {
     try {
+      const token = TokenManager.getToken();
       const dateString = date.toISOString();
-      const response = await axiosInstance.get(
-        `/consultations/booked-slots?date=${dateString}`
+      const response = await axios.get(
+        `${API_URL}/api/consultations/booked-slots?date=${dateString}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching booked slots:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
       throw error;
     }
   }
