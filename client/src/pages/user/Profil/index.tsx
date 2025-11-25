@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
+import { userService, type User } from "../../../services/userService";
 import TokenManager from "../../../utils/tokenManager";
 import ProfilePageLayout from "./components/ProfilePageLayout";
 import ModalEditProfile from "./components/ModalEditProfile";
 
-interface UserProfile {
-  user_id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: string;
-  kelas?: number;
-}
+type UserProfile = User;
 
 const Profil = () => {
   const navigate = useNavigate();
@@ -33,40 +26,15 @@ const Profil = () => {
         return;
       }
 
-      const { userId } = TokenManager.getUserData();
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-      const response = await axios.get(`${API_URL}/api/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Response dari /api/users/{id} menggunakan structure { data: { user data } }
-      setUserProfile(response.data.data);
-      console.log("Profile data loaded:", response.data.data);
+      const userData = await userService.getUserById();
+      setUserProfile(userData);
+      console.log("Profile data loaded:", userData);
     } catch (error: any) {
       console.error("Error fetching profile:", error);
-
-      // Handle specific axios error responses
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        toast.error("Token expired. Silakan login kembali.");
-        handleLogout();
-        return;
-      }
-
       toast.error("Gagal mengambil data profil");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    TokenManager.logout();
-    toast.success("Berhasil logout");
-    navigate("/login");
   };
 
   const handleModalSuccess = () => {

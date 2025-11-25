@@ -6,8 +6,10 @@ import React, {
   useEffect,
 } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
+import {
+  universitasService,
+  type Universitas,
+} from "../../../services/universitasService";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
@@ -20,7 +22,7 @@ import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
-type UniversitasItem = {
+type UniversitasItem = Universitas & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
@@ -33,7 +35,7 @@ type UniversitasItem = {
   rank_country?: number | null;
 };
 
-type UniversitasDetailType = {
+type UniversitasDetailType = Universitas & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
@@ -123,25 +125,15 @@ const Universitas: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const API_URL =
-        (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-      const url = `${API_URL}/api/universitas/${universityId}`;
-      const token = TokenManager.getToken();
-      const res = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await universitasService.getUniversitasById(
+        universityId
+      );
 
       if (currentId !== detailRequestIdRef.current) return; // abaikan response lama
 
-      const data = res.data?.data as UniversitasDetailType;
-      setSelectedUniversitas(data);
+      setSelectedUniversitas(response.data as UniversitasDetailType);
     } catch (e: any) {
       if (currentId !== detailRequestIdRef.current) return;
-      if (e?.response?.status === 401 || e?.response?.status === 403) {
-        TokenManager.logout();
-        window.location.href = "/login";
-        return;
-      }
       const msg =
         e?.response?.data?.message ||
         e?.message ||
@@ -174,59 +166,23 @@ const Universitas: React.FC = () => {
       setError("");
 
       try {
-        const API_URL =
-          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-        const token = TokenManager.getToken();
-
-        const hasSearch = searchKeyword.trim().length > 0;
         const hasFilter =
           selectedProvinsi !== "Semua" || selectedAkreditasi !== "Semua";
 
-        let url: string;
-        let params: any = {};
-
-        if (hasSearch) {
-          // Search with keyword -> use search endpoint (limit 15)
-          url = `${API_URL}/api/universitas/search?nama=${encodeURIComponent(
-            searchKeyword.trim()
-          )}`;
-        } else {
-          // No search -> use main endpoint
-          url = `${API_URL}/api/universitas`;
-
-          // Send filters to backend
-          if (selectedProvinsi !== "Semua") {
-            params.provinsi = selectedProvinsi;
-          }
-          if (selectedAkreditasi !== "Semua") {
-            params.akreditasi = selectedAkreditasi;
-          }
-
-          // If no filter and no search, limit to 15
-          if (!hasFilter) {
-            params.limit = 15;
-          }
-          // If filter active, backend will return all matching data
-        }
-
-        const res = await axios.get(url, {
-          params,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        const response = await universitasService.getUniversitasWithFilters({
+          searchKeyword: searchKeyword || undefined,
+          provinsi: selectedProvinsi !== "Semua" ? selectedProvinsi : undefined,
+          akreditasi:
+            selectedAkreditasi !== "Semua" ? selectedAkreditasi : undefined,
+          limit: !searchKeyword && !hasFilter ? 15 : undefined,
         });
 
-        if (currentId !== searchRequestIdRef.current) return;
+        if (currentId !== searchRequestIdRef.current) return; // abaikan response lama
 
-        const data = (res.data?.data || []) as UniversitasItem[];
-
-        setResults(data);
+        setResults(response.data as UniversitasItem[]);
         setHasSearched(true);
       } catch (e: any) {
         if (currentId !== searchRequestIdRef.current) return;
-        if (e?.response?.status === 401 || e?.response?.status === 403) {
-          TokenManager.logout();
-          window.location.href = "/login";
-          return;
-        }
         const msg =
           e?.response?.data?.message || e?.message || "Terjadi kesalahan";
         setError(msg);
@@ -273,19 +229,14 @@ const Universitas: React.FC = () => {
       setError("");
 
       try {
-        const API_URL =
-          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-        const url = `${API_URL}/api/universitas/search`;
-        const token = TokenManager.getToken();
-        const res = await axios.get(url, {
-          params: { nama: q.trim() },
-          signal: ctrl.signal,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const response = await universitasService.searchUniversitasByName(
+          q.trim(),
+          ctrl.signal
+        );
 
         if (currentId !== searchRequestIdRef.current) return; // abaikan response lama
 
-        const data = (res.data?.data || []) as UniversitasItem[];
+        const data = response.data as UniversitasItem[];
 
         // Cache the results
         searchCacheRef.current.set(searchKey, data);
@@ -301,12 +252,7 @@ const Universitas: React.FC = () => {
           }
         }
       } catch (e: any) {
-        if (axios.isCancel(e)) return;
-        if (e?.response?.status === 401 || e?.response?.status === 403) {
-          TokenManager.logout();
-          window.location.href = "/login";
-          return;
-        }
+        if ((e as any).code === "ERR_CANCELED") return;
         if (currentId === searchRequestIdRef.current) {
           const msg =
             e?.response?.data?.message || e?.message || "Terjadi kesalahan";

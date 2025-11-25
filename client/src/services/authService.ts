@@ -33,6 +33,12 @@ interface ResetPasswordData {
   newPassword: string;
 }
 
+interface UpdateProfileData {
+  firstname: string;
+  lastname: string;
+  kelas: number;
+}
+
 class AuthService {
   async login(
     email: string,
@@ -114,6 +120,31 @@ class AuthService {
       throw error;
     }
   }
+
+  async updateProfile(
+    data: UpdateProfileData,
+    token: string
+  ): Promise<{ success: boolean }> {
+    try {
+      await axios.put(`${API_URL}/api/auth/update-profile`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return { success: true };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401 || status === 403) {
+          // Let the caller handle auth errors
+          throw new Error("AUTH_ERROR");
+        }
+      }
+      throw error;
+    }
+  }
 }
 
 export const authService = new AuthService();
+export type { UpdateProfileData };

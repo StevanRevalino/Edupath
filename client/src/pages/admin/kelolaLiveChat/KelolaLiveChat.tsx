@@ -3,13 +3,11 @@ import {
   Search,
   Send,
   MessageCircle,
-  MoreVertical,
   Image as ImageIcon,
   X,
   Loader,
 } from "lucide-react";
 import ZoomIcon from "../../../assets/icons/zoom-icon.png";
-import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import { triggerChatRefresh } from "../../../utils/notificationEvents";
@@ -19,19 +17,7 @@ import {
 } from "../../../utils/cloudinary";
 import ZoomRequestModal from "./components/ZoomRequestModal";
 import type { ZoomRequestData } from "./components/ZoomRequestModal";
-
-interface ChatUser {
-  user_id: string;
-  firstname: string;
-  lastname: string;
-  kelas: number | null;
-  lastMessage?: string;
-  lastMessageTime?: string;
-  room_id?: string;
-  consultation_id?: string;
-  consultation_date?: string;
-  unreadCount?: number;
-}
+import { chatService, type ChatUser } from "../../../services/chatService";
 
 interface ChatMessage {
   id: string;
@@ -58,7 +44,6 @@ const KelolaLiveChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const API_URL = import.meta.env.VITE_API_URL;
   const currentUserId = TokenManager.getUserData().userId || "";
 
   // Auto scroll to bottom when new messages arrive
@@ -79,39 +64,26 @@ const KelolaLiveChat = () => {
   // Polling for message updates when a user is selected
   useEffect(() => {
     if (selectedUser && selectedUser.room_id) {
-      // Start polling for new messages every 3 seconds (reduced for better responsiveness)
+      // Start polling for new messages every 3 seconds
       pollingIntervalRef.current = setInterval(async () => {
         try {
-          const token = TokenManager.getToken();
-          const messagesResponse = await axios.get(
-            `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
+          const newMessages = await chatService.loadMessages(
+            selectedUser.room_id!
           );
-
-          if (messagesResponse.data.success) {
-            const newMessages = messagesResponse.data.data;
-            // Only update if messages are different
-            setChatMessages((prevMessages) => {
-              if (
-                JSON.stringify(prevMessages) !== JSON.stringify(newMessages)
-              ) {
-                // Scroll to bottom when new messages arrive
-                setTimeout(() => scrollToBottom(), 100);
-                return newMessages;
-              }
-              return prevMessages;
-            });
-          }
+          // Only update if messages are different
+          setChatMessages((prevMessages) => {
+            if (JSON.stringify(prevMessages) !== JSON.stringify(newMessages)) {
+              // Scroll to bottom when new messages arrive
+              setTimeout(() => scrollToBottom(), 100);
+              return newMessages as unknown as ChatMessage[];
+            }
+            return prevMessages;
+          });
         } catch (error) {
           console.error("Error polling messages:", error);
           // Don't show toast for polling errors to avoid spam
         }
-      }, 3000); // Poll every 3 seconds instead of 5
+      }, 3000);
     }
 
     // Cleanup function
@@ -121,53 +93,30 @@ const KelolaLiveChat = () => {
         pollingIntervalRef.current = null;
       }
     };
-  }, [selectedUser, API_URL]);
+  }, [selectedUser]);
 
   // Fetch chat users (students who have accepted AND ACTIVE consultations)
   useEffect(() => {
     const fetchChatUsers = async () => {
       try {
         setLoading(true);
-        const token = TokenManager.getToken();
-
-        // Fetch live chat users (active consultations)
-        const response = await axios.get(`${API_URL}/api/chat/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setChatUsers(response.data.data);
+        const users = await chatService.getChatUsers();
+        setChatUsers(users);
       } catch (error) {
         console.error("Error fetching chat users:", error);
-        if (axios.isAxiosError(error)) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            toast.error("Session expired. Silakan login ulang.");
-            TokenManager.logout();
-            window.location.href = "/login";
-          } else {
-            toast.error("Gagal mengambil data chat");
-          }
-        } else {
-          toast.error("Gagal mengambil data chat");
-        }
+        toast.error("Gagal mengambil data chat");
       } finally {
         setLoading(false);
       }
     };
 
     fetchChatUsers();
-  }, [API_URL]);
+  }, []);
 
   // Fetch chat messages for selected user
   const fetchChatMessages = async (userId: string) => {
     try {
       setMessagesLoading(true);
-      const token = TokenManager.getToken();
 
       // First, find the user's consultation to get consultation_id
       const selectedUserData = chatUsers.find(
@@ -179,36 +128,15 @@ const KelolaLiveChat = () => {
 
       if (selectedUserData && selectedUserData.consultation_id) {
         // Get or create chat room first
-        const roomResponse = await axios.get(
-          `${API_URL}/api/chat/room/${selectedUserData.consultation_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const roomId = await chatService.getOrCreateRoom(
+          selectedUserData.consultation_id
         );
 
-        if (roomResponse.data.success) {
-          const chatRoom = roomResponse.data.data;
-          const roomId = chatRoom.room_id;
-
+        if (roomId) {
           // Now fetch messages from the chat room
-          const messagesResponse = await axios.get(
-            `${API_URL}/api/chat/messages/${roomId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          const messages = await chatService.loadMessages(roomId);
+          setChatMessages(messages as unknown as ChatMessage[]);
 
-          if (messagesResponse.data.success) {
-            setChatMessages(messagesResponse.data.data);
-          } else {
-            setChatMessages([]);
-          }
           setChatUsers((prev) =>
             prev.map((u) =>
               u.user_id === selectedUserData.user_id
@@ -315,8 +243,6 @@ const KelolaLiveChat = () => {
     let messageText = newMessage.trim();
 
     try {
-      const token = TokenManager.getToken();
-
       // If there's an image, upload it first
       if (selectedImage) {
         setUploadingImage(true);
@@ -341,18 +267,11 @@ const KelolaLiveChat = () => {
       // Make sure we have room_id in selectedUser
       if (!selectedUser.room_id && selectedUser.consultation_id) {
         // Try to get/create chat room first
-        const roomResponse = await axios.get(
-          `${API_URL}/api/chat/room/${selectedUser.consultation_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const roomId = await chatService.getOrCreateRoom(
+          selectedUser.consultation_id
         );
 
-        if (roomResponse.data.success) {
-          const roomId = roomResponse.data.data.room_id;
+        if (roomId) {
           setSelectedUser((prev) =>
             prev ? { ...prev, room_id: roomId } : null
           );
@@ -378,24 +297,18 @@ const KelolaLiveChat = () => {
         setNewMessage("");
 
         // Send message via API
-        const response = await axios.post(
-          `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
-          {
-            message: messageText,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const sentMessage = await chatService.sendMessage(
+          selectedUser.room_id,
+          messageText
         );
 
-        if (response.data.success) {
+        if (sentMessage) {
           // Replace optimistic message with real message from server
           setChatMessages((prev) =>
             prev.map((msg) =>
-              msg.id === optimisticMessage.id ? response.data.data : msg
+              msg.id === optimisticMessage.id
+                ? (sentMessage as unknown as ChatMessage)
+                : msg
             )
           );
 
@@ -440,18 +353,7 @@ const KelolaLiveChat = () => {
         prev.filter((msg) => !msg.id.startsWith("temp-"))
       );
       setNewMessage(messageText);
-
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          toast.error("Session expired. Silakan login ulang.");
-          TokenManager.logout();
-          window.location.href = "/login";
-        } else {
-          toast.error(error.response?.data?.message || "Gagal mengirim pesan");
-        }
-      } else {
-        toast.error("Gagal mengirim pesan");
-      }
+      toast.error("Gagal mengirim pesan");
     } finally {
       setSendingMessage(false);
     }
@@ -512,49 +414,28 @@ const KelolaLiveChat = () => {
     if (!selectedUser) return;
 
     try {
-      const token = TokenManager.getToken();
-
       // Generate current date and time
       const now = new Date();
       const scheduledDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
       const scheduledTime = now.toTimeString().slice(0, 5); // HH:MM
 
-      const response = await axios.post(
-        `${API_URL}/api/zoom/create-meeting`,
-        {
-          consultationId: selectedUser.consultation_id,
-          userId: selectedUser.user_id,
-          topic: data.topic,
-          scheduledDate: scheduledDate,
-          scheduledTime: scheduledTime,
-          description: data.description,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const zoomData = await chatService.createZoomMeeting({
+        consultationId: selectedUser.consultation_id!,
+        userId: selectedUser.user_id,
+        topic: data.topic,
+        scheduledDate: scheduledDate,
+        scheduledTime: scheduledTime,
+        description: data.description,
+      });
 
-      if (response.data.success) {
+      if (zoomData) {
         toast.success("Zoom meeting berhasil dibuat!");
 
         // Optionally send a message to chat with zoom link
-        if (selectedUser.room_id && response.data.data.joinUrl) {
-          const zoomData = response.data.data;
+        if (selectedUser.room_id && zoomData.joinUrl) {
           // Send joinUrl to student, but include startUrl in hidden format for admin
           const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n🔗 ${zoomData.joinUrl}\n🔗HOST ${zoomData.startUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
-          await axios.post(
-            `${API_URL}/api/chat/messages/${selectedUser.room_id}`,
-            { message: zoomMessage },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          await chatService.sendMessage(selectedUser.room_id, zoomMessage);
 
           // Refresh messages
           fetchChatMessages(selectedUser.user_id);
@@ -562,13 +443,7 @@ const KelolaLiveChat = () => {
       }
     } catch (error) {
       console.error("Error creating zoom meeting:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(
-          error.response?.data?.message || "Gagal membuat Zoom meeting"
-        );
-      } else {
-        toast.error("Gagal membuat Zoom meeting");
-      }
+      toast.error("Gagal membuat Zoom meeting");
     }
   };
 

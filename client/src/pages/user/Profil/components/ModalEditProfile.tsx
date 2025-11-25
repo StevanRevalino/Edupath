@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { CircleAlert, X } from "lucide-react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import {
+  authService,
+  type UpdateProfileData,
+} from "../../../../services/authService";
 import TokenManager from "../../../../utils/tokenManager";
 import { useNavigate } from "react-router-dom";
 import WarningLogo from "../../../../assets/warning-logo.png";
@@ -118,25 +121,13 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
             return;
           }
 
-          const API_URL =
-            (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-
-          const updateData = {
+          const updateData: UpdateProfileData = {
             firstname: formData.firstname,
             lastname: formData.lastname,
             kelas: formData.kelas,
           };
 
-          await axios.put(
-            `${API_URL}/api/auth/update-profile`,
-            updateData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          await authService.updateProfile(updateData, token);
 
           // Trigger custom event to refresh Header
           window.dispatchEvent(new Event("profileUpdated"));
@@ -145,11 +136,7 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
           onSuccess();
           handleClose();
         } catch (error: any) {
-
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
+          if (error.message === "AUTH_ERROR") {
             toast.error("Token expired. Silakan login kembali.");
             TokenManager.logout();
             navigate("/login");

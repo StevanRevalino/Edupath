@@ -154,16 +154,34 @@ class ConsultationService {
   }
 
   async cancelConsultation(
-    consultationId: string
+    consultationId: string,
+    cancelReason?: string
   ): Promise<{ success: boolean }> {
     try {
       const token = TokenManager.getToken();
-      await axios.delete(`${API_URL}/api/consultations/${consultationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+
+      if (cancelReason) {
+        // PATCH with reason (for ACCEPTED consultations)
+        await axios.patch(
+          `${API_URL}/api/consultations/${consultationId}/cancel`,
+          { cancelReason },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        // DELETE (for PENDING consultations or old behavior)
+        await axios.delete(`${API_URL}/api/consultations/${consultationId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+      }
+
       return { success: true };
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -301,20 +319,24 @@ class ConsultationService {
   }
 
   async getBookedSlotsForDate(
-    date: Date
+    date: string | Date,
+    adminId?: string
   ): Promise<ApiResponse<Array<{ startTime: string; endTime: string }>>> {
     try {
       const token = TokenManager.getToken();
-      const dateString = date.toISOString();
-      const response = await axios.get(
-        `${API_URL}/api/consultations/booked-slots?date=${dateString}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const dateString = typeof date === "string" ? date : date.toISOString();
+
+      let url = `${API_URL}/api/consultations/booked-slots?date=${dateString}`;
+      if (adminId) {
+        url += `&adminId=${adminId}`;
+      }
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

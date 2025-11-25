@@ -13,6 +13,14 @@ interface Student {
   created_at: string;
 }
 
+interface Admin {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+}
+
 interface UpdateStudentData {
   firstname: string;
   lastname: string;
@@ -91,6 +99,28 @@ class UserManagementService {
       throw error;
     }
   }
+
+  async getAdmins(): Promise<{ success: boolean; data: Admin[] }> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/users/admins`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return {
+        success: true,
+        data: response.data.data,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
 }
 
 export const userManagementService = new UserManagementService();
+export type { Student, Admin, UpdateStudentData };

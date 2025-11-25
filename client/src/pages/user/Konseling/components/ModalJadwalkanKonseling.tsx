@@ -12,9 +12,12 @@ import {
 import { cn } from "@/lib/utils";
 import clockLogo from "../../../../assets/icons/clock-icon.png";
 import { consultationService } from "../../../../services/consultationService";
+import {
+  userManagementService,
+  type Admin,
+} from "../../../../services/userManagementService";
 import TokenManager from "../../../../utils/tokenManager";
 import toast from "react-hot-toast";
-import axios from "axios";
 import {
   konselingSchema,
   type KonselingFormData,
@@ -33,12 +36,6 @@ const generateTimeSlots = () => {
 };
 
 const timeSlots = generateTimeSlots();
-
-interface Admin {
-  user_id: string;
-  firstname: string;
-  lastname: string;
-}
 
 interface ModalJadwalkanKonselingProps {
   isOpen: boolean;
@@ -131,25 +128,16 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
 
   const fetchAdmins = async () => {
     try {
-      const token = TokenManager.getToken();
-      const response = await axios.get(
-        "http://localhost:5000/api/users/admins",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await userManagementService.getAdmins();
 
-      if (response.data.success && response.data.data) {
-        setAdmins(response.data.data);
+      if (response.success && response.data) {
+        setAdmins(response.data);
 
         // Set default expert to first admin if available
-        if (response.data.data.length > 0) {
+        if (response.data.length > 0) {
           setFormData((prev) => ({
             ...prev,
-            expertName: response.data.data[0].user_id,
+            expertName: response.data[0].user_id,
           }));
         }
       }
@@ -160,28 +148,22 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
 
   const fetchBookedSlots = async (date: Date, adminId: string) => {
     try {
-      const token = TokenManager.getToken();
       // Format date as YYYY-MM-DD in LOCAL timezone (not UTC)
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
-      const response = await axios.get(
-        `http://localhost:5000/api/consultations/booked-slots?date=${dateStr}&adminId=${adminId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await consultationService.getBookedSlotsForDate(
+        dateStr,
+        adminId
       );
 
-      if (response.data.success && response.data.data) {
+      if (response.success && response.data) {
         // Extract ALL time slots that are occupied (start time and slots within the period, but NOT including end time)
         const bookedTimes: string[] = [];
 
-        response.data.data.forEach((slot: any) => {
+        response.data.forEach((slot: any) => {
           const startTime = slot.startTime; // e.g., "08:00"
           const endTime = slot.endTime; // e.g., "09:00"
 

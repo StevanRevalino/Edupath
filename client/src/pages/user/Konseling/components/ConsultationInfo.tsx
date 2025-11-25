@@ -1,10 +1,11 @@
 import { MessageCircle } from "lucide-react";
-import { type Consultation } from "../../../../services/consultationService";
+import {
+  type Consultation,
+  consultationService,
+} from "../../../../services/consultationService";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
-import axios from "axios";
-import TokenManager from "../../../../utils/tokenManager";
 
 interface ConsultationInfoProps {
   consultation: Consultation | null;
@@ -18,7 +19,6 @@ const ConsultationInfo = ({
   onCancelSuccess,
 }: ConsultationInfoProps) => {
   const [canceling, setCanceling] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // Check if chat is available (only check status and active state)
   const isChatAvailable = () => {
@@ -93,17 +93,10 @@ const ConsultationInfo = ({
 
       try {
         setCanceling(true);
-        const token = TokenManager.getToken();
 
-        await axios.patch(
-          `${API_URL}/api/consultations/${consultation.consultation_id}/cancel`,
-          { cancelReason: result.value },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        await consultationService.cancelConsultation(
+          consultation.consultation_id,
+          result.value
         );
 
         toast.success("Konseling berhasil dibatalkan");
@@ -125,17 +118,10 @@ const ConsultationInfo = ({
     // Handle PENDING cancellation (no reason needed)
     try {
       setCanceling(true);
-      const token = TokenManager.getToken();
 
-      await axios.patch(
-        `${API_URL}/api/consultations/${consultation.consultation_id}/cancel`,
-        { cancelReason: "Dibatalkan oleh murid" }, // Dummy reason, will be deleted anyway
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      await consultationService.cancelConsultation(
+        consultation.consultation_id,
+        "Dibatalkan oleh murid"
       );
 
       toast.success("Konseling berhasil dibatalkan");

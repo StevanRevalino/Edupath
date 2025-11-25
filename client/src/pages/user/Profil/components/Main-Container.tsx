@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { User } from "lucide-react";
 
 interface MainContainerProps {
   children: React.ReactNode;
@@ -9,7 +8,6 @@ interface MainContainerProps {
 
 export default function MainContainer({
   children,
-  isProfilePage,
   onHeightChange,
 }: MainContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
