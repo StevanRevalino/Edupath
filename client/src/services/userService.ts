@@ -28,10 +28,12 @@ class UserService {
   /**
    * Get user by ID
    */
-  async getUserById(userId: string): Promise<User> {
+  async getUserById(userId?: string): Promise<User> {
     try {
+      const finalUserId = userId || TokenManager.getUserData().userId;
+
       const response = await axios.get(
-        `${API_URL}/api/users/${userId}`,
+        `${API_URL}/api/users/${finalUserId}`,
         this.getAuthHeader()
       );
       return response.data.data;

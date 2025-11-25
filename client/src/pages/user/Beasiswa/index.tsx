@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Search, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { beasiswaService } from "../../../services/beasiswaService";
 
 import HeroSection from "../../../components/HeroSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";
@@ -31,7 +31,6 @@ const Beasiswa = () => {
     null
   );
   const [isImageZoomed, setIsImageZoomed] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch beasiswa data
   useEffect(() => {
@@ -53,9 +52,9 @@ const Beasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/beasiswa`);
-      setBeasiswaList(response.data.data);
-      setFilteredList(response.data.data);
+      const response = await beasiswaService.getAllBeasiswa();
+      setBeasiswaList(response.data);
+      setFilteredList(response.data);
     } catch (error) {
       console.error("Error fetching beasiswa:", error);
       toast.error("Gagal mengambil data beasiswa");

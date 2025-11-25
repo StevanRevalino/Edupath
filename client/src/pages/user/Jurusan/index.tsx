@@ -6,8 +6,11 @@ import React, {
   useEffect,
 } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
+import {
+  prodiService,
+  type ProdiWithUniversity,
+  type ProdiDetail,
+} from "../../../services/prodiService";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
 
@@ -19,25 +22,7 @@ import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
-type ProdiItem = {
-  prodi_id: string;
-  nama_prodi: string;
-  jenjang?: string | null;
-  bidang?: string | null;
-  akreditasi?: string | null;
-  universitas?: {
-    university_id: string | null;
-    nama: string | null;
-    provinsi: string | null;
-  };
-};
-
-type ProdiDetailType = {
-  prodi_id: string;
-  nama_prodi: string;
-  jenjang?: string | null;
-  status?: string;
-};
+type ProdiItem = ProdiWithUniversity;
 
 const Jurusan: React.FC = () => {
   const location = useLocation();
@@ -46,9 +31,7 @@ const Jurusan: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<ProdiItem[]>([]);
-  const [selectedProdi, setSelectedProdi] = useState<ProdiDetailType | null>(
-    null
-  );
+  const [selectedProdi, setSelectedProdi] = useState<ProdiDetail | null>(null);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
@@ -125,23 +108,11 @@ const Jurusan: React.FC = () => {
         setSelectedRowIndex(rowIndex);
       }
       try {
-        const API_URL =
-          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-        const url = `${API_URL}/api/prodi/detail/${prodiId}`;
-        const token = TokenManager.getToken();
-        const res = await axios.get(url, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
+        const detail = await prodiService.getProdiDetail(prodiId);
         if (currentId !== detailRequestIdRef.current) return;
-        setSelectedProdi(res.data?.data as ProdiDetailType);
+        setSelectedProdi(detail);
       } catch (e: any) {
         if (currentId !== detailRequestIdRef.current) return;
-        if (e?.response?.status === 401 || e?.response?.status === 403) {
-          TokenManager.logout();
-          window.location.href = "/login";
-          return;
-        }
         setDetailError(
           e?.response?.data?.message ||
             e?.message ||
@@ -165,60 +136,25 @@ const Jurusan: React.FC = () => {
       setError("");
 
       try {
-        const API_URL =
-          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-        const token = TokenManager.getToken();
-
-        const hasSearch = searchKeyword.trim().length > 0;
         const hasFilter =
           selectedJenjang !== "Semua" || selectedAkreditasi !== "Semua";
 
-        let url: string;
-        let params: any = {};
-
-        if (hasSearch) {
-          // Search with keyword -> use search endpoint (limit 15)
-          url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
-            searchKeyword.trim()
-          )}`;
-        } else {
-          // No search -> use main endpoint
-          url = `${API_URL}/api/prodi`;
-
-          // Send filters to backend
-          if (selectedJenjang !== "Semua") {
-            params.jenjang = selectedJenjang;
-          }
-          if (selectedAkreditasi !== "Semua") {
-            params.akreditasi = selectedAkreditasi;
-          }
-
-          // If no filter and no search, limit to 15
-          if (!hasFilter) {
-            params.limit = 15;
-          }
-          // If filter active, backend will return all matching data
-        }
-
-        const res = await axios.get(url, {
-          params,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        const response = await prodiService.getProdiWithFilters({
+          searchKeyword: searchKeyword || undefined,
+          jenjang: selectedJenjang !== "Semua" ? selectedJenjang : undefined,
+          akreditasi:
+            selectedAkreditasi !== "Semua" ? selectedAkreditasi : undefined,
+          limit: !searchKeyword && !hasFilter ? 15 : undefined,
         });
 
         if (currentId !== searchRequestIdRef.current) return;
 
-        const data = (res.data?.data || []) as ProdiItem[];
-        const filtered = data.filter((p) => p.universitas?.nama);
+        const filtered = response.data.filter((p) => p.universitas?.nama);
 
         setResults(filtered);
         setHasSearched(true);
       } catch (e: any) {
         if (currentId !== searchRequestIdRef.current) return;
-        if (e?.response?.status === 401 || e?.response?.status === 403) {
-          TokenManager.logout();
-          window.location.href = "/login";
-          return;
-        }
         const msg =
           e?.response?.data?.message || e?.message || "Terjadi kesalahan";
         setError(msg);
@@ -254,22 +190,15 @@ const Jurusan: React.FC = () => {
       setError("");
 
       try {
-        const API_URL =
-          (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
-        const url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
-          q.trim()
-        )}`;
-        const token = TokenManager.getToken();
-        const res = await axios.get(url, {
-          signal: ctrl.signal,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const response = await prodiService.searchProdiByName(
+          q.trim(),
+          ctrl.signal
+        );
 
         if (currentId !== searchRequestIdRef.current) return;
-        const data = (res.data?.data || []) as ProdiItem[];
 
         // Filter: Only show prodi with universitas.nama
-        const filtered = data.filter((p) => p.universitas?.nama);
+        const filtered = response.data.filter((p) => p.universitas?.nama);
 
         // Cache the filtered results
         searchCacheRef.current.set(cacheKey, filtered);
@@ -287,12 +216,7 @@ const Jurusan: React.FC = () => {
           }
         }
       } catch (e: any) {
-        if (axios.isCancel(e)) return;
-        if (e?.response?.status === 401 || e?.response?.status === 403) {
-          TokenManager.logout();
-          window.location.href = "/login";
-          return;
-        }
+        if ((e as any).code === "ERR_CANCELED") return;
         if (currentId === searchRequestIdRef.current) {
           setError(
             e?.response?.data?.message || e?.message || "Terjadi kesalahan"

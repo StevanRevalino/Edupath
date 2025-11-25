@@ -1,8 +1,13 @@
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import TokenManager from "../../../utils/tokenManager";
+import { userService, type User } from "../../../services/userService";
+import { prodiService } from "../../../services/prodiService";
+import { universitasService } from "../../../services/universitasService";
+import {
+  getAssessmentHistory,
+  getAssessmentResult,
+} from "../../../services/hollandService";
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 import HeroSectionBG from "../../../assets/hero-section.png";
@@ -17,14 +22,9 @@ import infoHome6 from "../../../assets/icons/info-home-6.png";
 
 const Home = () => {
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // User data state
-  const [user, setUser] = useState<{
-    firstname: string;
-    lastname: string;
-    kelas: number | null;
-  } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // Prodi/Jurusan data state
   const [allMajors, setAllMajors] = useState<string[]>([]);
@@ -53,8 +53,8 @@ const Home = () => {
       } | null;
       recommendations: Array<{
         nama_prodi: string;
-        match_score: number;
-        bidang: string | null;
+        match_percentage: number;
+        jenjang: string | null;
       }>;
       completed_at: string | null;
     } | null;
@@ -73,7 +73,7 @@ const Home = () => {
   const [assessmentLoading, setAssessmentLoading] = useState(true);
 
   // Ambil 1 huruf pertama firstname + lastname (fallback: 2 huruf pertama firstname)
-  const getInitials = (u: { firstname: string; lastname: string } | null) => {
+  const getInitials = (u: User | null) => {
     const f = (u?.firstname || "").trim();
     const l = (u?.lastname || "").trim();
     const a = f ? f[0] : "";
@@ -86,58 +86,25 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        if (!TokenManager.isAuthenticated()) {
-          navigate("/login");
-          return;
-        }
-
-        const token = TokenManager.getToken();
-        const { userId } = TokenManager.getUserData();
-
-        const response = await axios.get(`${API_URL}/api/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setUser(response.data.data);
+        const userData = await userService.getUserById();
+        setUser(userData);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        if (
-          axios.isAxiosError(error) &&
-          (error.response?.status === 401 || error.response?.status === 403)
-        ) {
-          TokenManager.logout();
-          navigate("/login");
-        }
       }
     };
 
     fetchUserData();
-  }, [navigate, API_URL]);
+  }, [navigate]);
 
   // Fetch prodi data
   useEffect(() => {
     const fetchProdiData = async () => {
       try {
-        if (!TokenManager.isAuthenticated()) {
-          return;
+        const response = await prodiService.getAllProdi(679);
+        if (response.success) {
+          const prodiNames = response.data.map((prodi) => prodi.nama_prodi);
+          setAllMajors(prodiNames);
         }
-
-        const token = TokenManager.getToken();
-
-        const response = await axios.get(`${API_URL}/api/prodi?limit=679`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const prodiNames = response.data.data.map(
-          (prodi: any) => prodi.nama_prodi
-        );
-        setAllMajors(prodiNames);
       } catch (error) {
         console.error("Error fetching prodi data:", error);
         setAllMajors([]);
@@ -147,32 +114,17 @@ const Home = () => {
     };
 
     fetchProdiData();
-  }, [API_URL]);
+  }, []);
 
   // Fetch universitas data
   useEffect(() => {
     const fetchUniversitasData = async () => {
       try {
-        if (!TokenManager.isAuthenticated()) {
-          return;
+        const response = await universitasService.getAllUniversitas(645);
+        if (response.success) {
+          const universitasNames = response.data.map((univ) => univ.nama);
+          setAllUniversities(universitasNames);
         }
-
-        const token = TokenManager.getToken();
-
-        const response = await axios.get(
-          `${API_URL}/api/universitas?limit=645`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const universitasNames = response.data.data.map(
-          (univ: any) => univ.nama
-        );
-        setAllUniversities(universitasNames);
       } catch (error) {
         console.error("Error fetching universitas data:", error);
         setAllUniversities([]);
@@ -182,30 +134,15 @@ const Home = () => {
     };
 
     fetchUniversitasData();
-  }, [API_URL]);
+  }, []);
 
   // Fetch Holland assessment data
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
-        if (!TokenManager.isAuthenticated()) {
-          return;
-        }
-
-        const token = TokenManager.getToken();
-
         // Fetch assessment history
-        const historyResponse = await axios.get(
-          `${API_URL}/api/holland/history`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const assessments = historyResponse.data.data || [];
+        const assessments = await getAssessmentHistory();
+        const assessmentsArray = assessments || [];
         const totalTests = assessments.length;
 
         if (totalTests > 0) {
@@ -223,17 +160,10 @@ const Home = () => {
             : null;
 
           // Fetch detailed result for latest assessment to get recommendations
-          const resultResponse = await axios.get(
-            `${API_URL}/api/holland/result/${latestAssessment.assessment_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
+          const result = await getAssessmentResult(
+            latestAssessment.assessment_id
           );
 
-          const result = resultResponse.data.data;
           const recommendations = result.recommendations || [];
           const scores = result.scores || null;
 
@@ -242,9 +172,7 @@ const Home = () => {
             recommendations.length > 0
               ? {
                   major: recommendations[0].nama_prodi || "Belum ada data",
-                  percentage: Math.round(
-                    (recommendations[0].match_score || 0) * 100
-                  ),
+                  percentage: Math.round(recommendations[0].match_percentage),
                 }
               : null;
 
@@ -257,7 +185,7 @@ const Home = () => {
               recommendations: recommendations.slice(0, 5), // Top 5 recommendations
               completed_at: latestAssessment.completed_at,
             },
-            allTests: assessments.map((a: any) => {
+            allTests: assessmentsArray.map((a: any) => {
               // Combine primary and secondary type (e.g., "R + I")
               const primaryCode = a.primary_type
                 ? a.primary_type.charAt(0).toUpperCase()
@@ -301,7 +229,7 @@ const Home = () => {
     };
 
     fetchAssessmentData();
-  }, [API_URL]);
+  }, []);
 
   const infoItems = [
     {
@@ -375,7 +303,7 @@ const Home = () => {
   const displayedUniversities = filteredUniversities.slice(0, 8);
   const hasMoreUniversities = filteredUniversities.length > 8;
 
-  const getKelasText = (kelas: number | null) => `${kelas}`;
+  const getKelasText = (kelas: number | null | undefined) => `${kelas || "-"}`;
   const handleUniversityClick = (name: string) =>
     navigate("/universitas", { state: { selectedUniversity: name } });
   const handleMajorClick = (name: string) =>
@@ -600,11 +528,14 @@ const Home = () => {
                                 <div className="font-semibold text-sm text-gray-800">
                                   {idx + 1}. {rec.nama_prodi}
                                 </div>
-                                {rec.bidang && (
+                                {rec.jenjang && (
                                   <div className="text-xs text-gray-500 mt-0.5">
-                                    {rec.bidang}
+                                    {rec.jenjang}
                                   </div>
                                 )}
+                                <div className="text-xs text-primary-dark mt-0.5 font-medium">
+                                  Match: {Math.round(rec.match_percentage)}%
+                                </div>
                               </div>
                             )
                           )}

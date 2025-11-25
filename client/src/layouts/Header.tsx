@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
 import { userService } from "../services/userService";
-import NotificationPanel from "../pages/user/components/NotificationPanel";
+import NotificationPanel from "../pages/user/notification";
 
 const Header = () => {
   const navigate = useNavigate();
