@@ -17,7 +17,7 @@ import AboutUs from "./pages/user/AboutUs";
 import ContactUs from "./pages/user/ContactUs";
 import ScrollToTop from "./components/ScrollToTop";
 import TutorialTes from "./pages/user/Tutorial Tes";
-import PertanyaanTes from "./pages/user/Tes-Pertanyaan";  
+import PertanyaanTes from "./pages/user/Tes-Pertanyaan";
 import HasilTes from "./pages/user/Tes-Hasil";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {

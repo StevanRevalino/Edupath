@@ -8,7 +8,7 @@ import React, {
 import { useLocation } from "react-router-dom";
 import {
   universitasService,
-  type Universitas,
+  type Universitas as UniversitasType,
 } from "../../../services/universitasService";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
@@ -22,7 +22,7 @@ import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
-type UniversitasItem = Universitas & {
+type UniversitasItem = UniversitasType & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
@@ -35,7 +35,7 @@ type UniversitasItem = Universitas & {
   rank_country?: number | null;
 };
 
-type UniversitasDetailType = Universitas & {
+type UniversitasDetailType = UniversitasType & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
