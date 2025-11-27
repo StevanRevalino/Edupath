@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import {
   type Consultation,
-  consultationService,
+  consultationHandler,
 } from "../../../../handler/consultationHandler";
 import { useState } from "react";
 import Swal from "sweetalert2";
@@ -94,7 +94,7 @@ const ConsultationInfo = ({
       try {
         setCanceling(true);
 
-        await consultationService.cancelConsultation(
+        await consultationHandler.cancelConsultation(
           consultation.consultation_id,
           result.value
         );
@@ -119,7 +119,7 @@ const ConsultationInfo = ({
     try {
       setCanceling(true);
 
-      await consultationService.cancelConsultation(
+      await consultationHandler.cancelConsultation(
         consultation.consultation_id,
         "Dibatalkan oleh murid"
       );

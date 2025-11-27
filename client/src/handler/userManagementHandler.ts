@@ -27,7 +27,7 @@ interface UpdateStudentData {
   kelas: number;
 }
 
-class UserManagementService {
+class UserManagementHandler {
   private handleAuthError(status: number) {
     if (status === 401 || status === 403) {
       TokenManager.logout();
@@ -122,5 +122,5 @@ class UserManagementService {
   }
 }
 
-export const userManagementService = new UserManagementService();
+export const userManagementHandler = new UserManagementHandler();
 export type { Student, Admin, UpdateStudentData };

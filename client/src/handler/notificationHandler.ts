@@ -26,7 +26,7 @@ export interface NotificationStats {
   chat_message: number;
 }
 
-class NotificationService {
+class NotificationHandler {
   private getAuthHeader() {
     const token = TokenManager.getToken();
     return {
@@ -120,4 +120,4 @@ class NotificationService {
   }
 }
 
-export const notificationService = new NotificationService();
+export const notificationHandler = new NotificationHandler();

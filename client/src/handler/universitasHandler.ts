@@ -29,7 +29,7 @@ interface UniversitasResponse {
   };
 }
 
-class UniversitasService {
+class UniversitasHandler {
   private handleAuthError(status: number) {
     if (status === 401 || status === 403) {
       TokenManager.logout();
@@ -206,5 +206,5 @@ class UniversitasService {
   }
 }
 
-export const universitasService = new UniversitasService();
+export const universitasHandler = new UniversitasHandler();
 export type { Universitas, UniversitasResponse };

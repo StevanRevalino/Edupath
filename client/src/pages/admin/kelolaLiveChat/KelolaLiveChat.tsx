@@ -17,7 +17,7 @@ import {
 } from "../../../utils/cloudinary";
 import ZoomRequestModal from "./components/ZoomRequestModal";
 import type { ZoomRequestData } from "./components/ZoomRequestModal";
-import { chatService, type ChatUser } from "../../../handler/chatHandler";
+import { chatHandler, type ChatUser } from "../../../handler/chatHandler";
 
 interface ChatMessage {
   id: string;
@@ -67,7 +67,7 @@ const KelolaLiveChat = () => {
       // Start polling for new messages every 3 seconds
       pollingIntervalRef.current = setInterval(async () => {
         try {
-          const newMessages = await chatService.loadMessages(
+          const newMessages = await chatHandler.loadMessages(
             selectedUser.room_id!
           );
           // Only update if messages are different
@@ -100,7 +100,7 @@ const KelolaLiveChat = () => {
     const fetchChatUsers = async () => {
       try {
         setLoading(true);
-        const users = await chatService.getChatUsers();
+        const users = await chatHandler.getChatUsers();
         setChatUsers(users);
       } catch (error) {
         console.error("Error fetching chat users:", error);
@@ -128,13 +128,13 @@ const KelolaLiveChat = () => {
 
       if (selectedUserData && selectedUserData.consultation_id) {
         // Get or create chat room first
-        const roomId = await chatService.getOrCreateRoom(
+        const roomId = await chatHandler.getOrCreateRoom(
           selectedUserData.consultation_id
         );
 
         if (roomId) {
           // Now fetch messages from the chat room
-          const messages = await chatService.loadMessages(roomId);
+          const messages = await chatHandler.loadMessages(roomId);
           setChatMessages(messages as unknown as ChatMessage[]);
 
           setChatUsers((prev) =>
@@ -267,7 +267,7 @@ const KelolaLiveChat = () => {
       // Make sure we have room_id in selectedUser
       if (!selectedUser.room_id && selectedUser.consultation_id) {
         // Try to get/create chat room first
-        const roomId = await chatService.getOrCreateRoom(
+        const roomId = await chatHandler.getOrCreateRoom(
           selectedUser.consultation_id
         );
 
@@ -297,7 +297,7 @@ const KelolaLiveChat = () => {
         setNewMessage("");
 
         // Send message via API
-        const sentMessage = await chatService.sendMessage(
+        const sentMessage = await chatHandler.sendMessage(
           selectedUser.room_id,
           messageText
         );
@@ -419,7 +419,7 @@ const KelolaLiveChat = () => {
       const scheduledDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
       const scheduledTime = now.toTimeString().slice(0, 5); // HH:MM
 
-      const zoomData = await chatService.createZoomMeeting({
+      const zoomData = await chatHandler.createZoomMeeting({
         consultationId: selectedUser.consultation_id!,
         userId: selectedUser.user_id,
         topic: data.topic,
@@ -435,7 +435,7 @@ const KelolaLiveChat = () => {
         if (selectedUser.room_id && zoomData.joinUrl) {
           // Send joinUrl to student, but include startUrl in hidden format for admin
           const zoomMessage = `🎥 Zoom Meeting Dibuat\n━━━━━━━━━━━━━━━━━━━\n📋 ${data.topic}\n🔗 ${zoomData.joinUrl}\n🔗HOST ${zoomData.startUrl}\n🔑 ID: ${zoomData.zoomMeetingId}\n🔐 Pass: ${zoomData.password}`;
-          await chatService.sendMessage(selectedUser.room_id, zoomMessage);
+          await chatHandler.sendMessage(selectedUser.room_id, zoomMessage);
 
           // Refresh messages
           fetchChatMessages(selectedUser.user_id);

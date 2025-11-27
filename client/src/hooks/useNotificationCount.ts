@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { consultationService } from "../handler/consultationHandler";
-import { notificationService } from "../handler/notificationHandler";
+import { consultationHandler } from "../handler/consultationHandler";
+import { notificationHandler } from "../handler/notificationHandler";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
 
 interface NotificationCount {
@@ -17,9 +17,9 @@ export const useNotificationCount = () => {
 
   const fetchCounts = async () => {
     try {
-      // Fetch pending consultations count using consultationService
+      // Fetch pending consultations count using consultationHandler
       const consultationsResponse =
-        await consultationService.getConsultations();
+        await consultationHandler.getConsultations();
 
       if (consultationsResponse.success && consultationsResponse.data) {
         const pendingCount = consultationsResponse.data.filter(
@@ -32,10 +32,10 @@ export const useNotificationCount = () => {
         }));
       }
 
-      // Fetch notifications for unread chats count using notificationService
+      // Fetch notifications for unread chats count using notificationHandler
       try {
         const notificationsResponse =
-          await notificationService.getNotifications();
+          await notificationHandler.getNotifications();
 
         if (notificationsResponse.success) {
           const unreadChatNotifications = notificationsResponse.data.filter(

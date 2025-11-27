@@ -10,7 +10,7 @@ import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentHistory } from "../../../handler/hollandHandler";
+import { hollandHandler } from "../../../handler/hollandHandler";
 import type { AssessmentHistory } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
@@ -75,7 +75,7 @@ const Tes = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const assessments = await getAssessmentHistory();
+        const assessments = await hollandHandler.getAssessmentHistory();
         const mappedSessions = assessments.map(mapAssessmentToTesSession);
         setTesSessions(mappedSessions);
       } catch (err: any) {

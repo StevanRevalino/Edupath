@@ -2,10 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import FormatPertanyaan from "./Components/FormatPertanyaan";
 import Pagination from "./Components/Pagination";
 import { useNavigate } from "react-router-dom";
-import {
-  getQuestions,
-  submitAssessment,
-} from "../../../handler/hollandHandler";
+import { hollandHandler } from "../../../handler/hollandHandler";
 import type { HollandQuestion, HollandResponse } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import Swal from "sweetalert2";
@@ -93,7 +90,7 @@ const TesPertanyaan = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await getQuestions();
+      const data = await hollandHandler.getQuestions();
       // Acak urutan pertanyaan
       const shuffledData = shuffleArray(data);
       setQuestions(shuffledData);
@@ -161,7 +158,7 @@ const TesPertanyaan = () => {
       );
 
       // Submit to backend
-      const result = await submitAssessment(responses);
+      const result = await hollandHandler.submitAssessment(responses);
 
       // Clear session after successful submission
       localStorage.removeItem(SESSION_KEY);

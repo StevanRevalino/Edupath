@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import TokenManager from "../../../../utils/tokenManager";
 import { parseMessageWithImage } from "../../../../utils/cloudinary";
 import {
-  consultationService,
+  consultationHandler,
   type ChatMessage,
 } from "../../../../handler/consultationHandler";
 
@@ -50,13 +50,13 @@ const ChatHistoryModal = ({
       setLoading(true);
 
       // Get chat room first
-      const roomResponse = await consultationService.getChatRoom(
+      const roomResponse = await consultationHandler.getChatRoom(
         consultationId
       );
       const roomId = roomResponse.data!.room_id;
 
       // Fetch messages
-      const messagesResponse = await consultationService.getChatMessages(
+      const messagesResponse = await consultationHandler.getChatMessages(
         roomId
       );
       setMessages(messagesResponse.data || []);

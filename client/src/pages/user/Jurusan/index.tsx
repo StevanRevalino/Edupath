@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  prodiService,
+  prodiHandler,
   type ProdiWithUniversity,
   type ProdiDetail,
 } from "../../../handler/prodiHandler";
@@ -108,7 +108,7 @@ const Jurusan: React.FC = () => {
         setSelectedRowIndex(rowIndex);
       }
       try {
-        const detail = await prodiService.getProdiDetail(prodiId);
+        const detail = await prodiHandler.getProdiDetail(prodiId);
         if (currentId !== detailRequestIdRef.current) return;
         setSelectedProdi(detail);
       } catch (e: any) {
@@ -139,7 +139,7 @@ const Jurusan: React.FC = () => {
         const hasFilter =
           selectedJenjang !== "Semua" || selectedAkreditasi !== "Semua";
 
-        const response = await prodiService.getProdiWithFilters({
+        const response = await prodiHandler.getProdiWithFilters({
           searchKeyword: searchKeyword || undefined,
           jenjang: selectedJenjang !== "Semua" ? selectedJenjang : undefined,
           akreditasi:
@@ -190,7 +190,7 @@ const Jurusan: React.FC = () => {
       setError("");
 
       try {
-        const response = await prodiService.searchProdiByName(
+        const response = await prodiHandler.searchProdiByName(
           q.trim(),
           ctrl.signal
         );

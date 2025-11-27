@@ -5,7 +5,7 @@ import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
-import { consultationService } from "../../../handler/consultationHandler";
+import { consultationHandler } from "../../../handler/consultationHandler";
 import ConsultationFilters from "./Components/ConsultationFilters";
 import ConsultationDetailModal from "./Components/ConsultationDetailModal";
 import RescheduleModal from "./Components/RescheduleModal";
@@ -87,7 +87,7 @@ const KelolaDataKonseling = ({
   // Auto-complete expired consultations
   const autoCompleteExpiredConsultations = async () => {
     try {
-      await consultationService.autoCompleteExpired();
+      await consultationHandler.autoCompleteExpired();
     } catch (error) {
       console.error("Error auto-completing consultations:", error);
     }
@@ -102,7 +102,7 @@ const KelolaDataKonseling = ({
         // First, auto-complete any expired consultations
         await autoCompleteExpiredConsultations();
 
-        const response = await consultationService.getConsultations();
+        const response = await consultationHandler.getConsultations();
         setConsultations((response.data || []) as Consultation[]);
       } catch (error) {
         console.error("Error fetching consultations:", error);
@@ -233,7 +233,7 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed && result.value) {
-          await consultationService.updateStatus(
+          await consultationHandler.updateStatus(
             consultationId,
             newStatus,
             result.value
@@ -273,7 +273,7 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed) {
-          await consultationService.updateStatus(consultationId, newStatus);
+          await consultationHandler.updateStatus(consultationId, newStatus);
 
           setConsultations(
             consultations.map((consultation) =>
@@ -332,7 +332,7 @@ const KelolaDataKonseling = ({
       const newDateTime = new Date(data.date);
       newDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const response = await consultationService.reschedule(
+      const response = await consultationHandler.reschedule(
         selectedConsultation.consultation_id,
         newDateTime.toISOString(),
         data.reason
@@ -375,7 +375,7 @@ const KelolaDataKonseling = ({
 
     if (result.isConfirmed) {
       try {
-        await consultationService.updateStatus(
+        await consultationHandler.updateStatus(
           consultationId,
           "DECLINED",
           "Dibatalkan oleh admin"

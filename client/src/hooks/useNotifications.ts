@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  notificationService,
+  notificationHandler,
   type Notification,
   type NotificationStats,
 } from "../handler/notificationHandler";
@@ -26,7 +26,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await notificationService.getNotifications();
+      const response = await notificationHandler.getNotifications();
       if (response.success) {
         setNotifications(response.data);
         setStats(response.stats);
@@ -39,7 +39,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   }, []);
 
   const markAsRead = async (notificationId: string) => {
-    const success = await notificationService.markAsRead(notificationId);
+    const success = await notificationHandler.markAsRead(notificationId);
     if (success) {
       await fetchNotifications();
     }
@@ -47,7 +47,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   };
 
   const markAllAsRead = async () => {
-    const success = await notificationService.markAllAsRead();
+    const success = await notificationHandler.markAllAsRead();
     if (success) {
       await fetchNotifications();
     }
@@ -55,7 +55,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   };
 
   const deleteNotification = async (notificationId: string) => {
-    const success = await notificationService.deleteNotification(
+    const success = await notificationHandler.deleteNotification(
       notificationId
     );
     if (success) {

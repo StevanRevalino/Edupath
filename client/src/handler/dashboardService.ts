@@ -35,7 +35,7 @@ interface WeeklyConsultationsParams {
   endDate: string;
 }
 
-class DashboardService {
+class DashboardHandler {
   private getAuthHeader() {
     const token = TokenManager.getToken();
     return {
@@ -162,4 +162,4 @@ class DashboardService {
   }
 }
 
-export const dashboardService = new DashboardService();
+export const dashboardHandler = new DashboardHandler();

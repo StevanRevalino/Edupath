@@ -1,13 +1,10 @@
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { userService, type User } from "../../../handler/userHandler";
-import { prodiService } from "../../../handler/prodiHandler";
-import { universitasService } from "../../../handler/universitasHandler";
-import {
-  getAssessmentHistory,
-  getAssessmentResult,
-} from "../../../handler/hollandHandler";
+import { userHanndler, type User } from "../../../handler/userHandler";
+import { prodiHandler } from "../../../handler/prodiHandler";
+import { universitasHandler } from "../../../handler/universitasHandler";
+import { hollandHandler } from "../../../handler/hollandHandler";
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 import HeroSectionBG from "../../../assets/hero-section.png";
@@ -86,7 +83,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await userService.getUserById();
+        const userData = await userHanndler.getUserById();
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -100,7 +97,7 @@ const Home = () => {
   useEffect(() => {
     const fetchProdiData = async () => {
       try {
-        const response = await prodiService.getAllProdi(679);
+        const response = await prodiHandler.getAllProdi(679);
         if (response.success) {
           const prodiNames = response.data.map((prodi) => prodi.nama_prodi);
           setAllMajors(prodiNames);
@@ -120,7 +117,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUniversitasData = async () => {
       try {
-        const response = await universitasService.getAllUniversitas(645);
+        const response = await universitasHandler.getAllUniversitas(645);
         if (response.success) {
           const universitasNames = response.data.map((univ) => univ.nama);
           setAllUniversities(universitasNames);
@@ -141,7 +138,7 @@ const Home = () => {
     const fetchAssessmentData = async () => {
       try {
         // Fetch assessment history
-        const assessments = await getAssessmentHistory();
+        const assessments = await hollandHandler.getAssessmentHistory();
         const assessmentsArray = assessments || [];
         const totalTests = assessments.length;
 
@@ -160,7 +157,7 @@ const Home = () => {
             : null;
 
           // Fetch detailed result for latest assessment to get recommendations
-          const result = await getAssessmentResult(
+          const result = await hollandHandler.getAssessmentResult(
             latestAssessment.assessment_id
           );
 

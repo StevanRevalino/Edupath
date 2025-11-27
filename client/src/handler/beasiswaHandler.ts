@@ -24,7 +24,7 @@ interface UpdateBeasiswaData {
   image_url: string;
 }
 
-class BeasiswaService {
+class BeasiswaHandler {
   private handleAuthError(status: number) {
     if (status === 401 || status === 403) {
       TokenManager.logout();
@@ -114,4 +114,4 @@ class BeasiswaService {
   }
 }
 
-export const beasiswaService = new BeasiswaService();
+export const beasiswaHandler = new BeasiswaHandler();

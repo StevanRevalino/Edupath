@@ -51,7 +51,7 @@ interface ProdiSearchResponse {
   data: ProdiWithUniversity[];
 }
 
-class ProdiService {
+class ProdiHandler {
   private handleAuthError(status: number) {
     if (status === 401 || status === 403) {
       TokenManager.logout();
@@ -252,7 +252,7 @@ class ProdiService {
   }
 }
 
-export const prodiService = new ProdiService();
+export const prodiHandler = new ProdiHandler();
 export type {
   Prodi,
   ProdiResponse,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { beasiswaService } from "../../../handler/beasiswaHandler";
+import { beasiswaHandler } from "../../../handler/beasiswaHandler";
 
 import HeroSection from "../../../components/HeroSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";
@@ -52,7 +52,7 @@ const Beasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await beasiswaService.getAllBeasiswa();
+      const response = await beasiswaHandler.getAllBeasiswa();
       setBeasiswaList(response.data);
       setFilteredList(response.data);
     } catch (error) {

@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import clockLogo from "../../../../assets/icons/clock-icon.png";
-import { consultationService } from "../../../../handler/consultationHandler";
+import { consultationHandler } from "../../../../handler/consultationHandler";
 import {
-  userManagementService,
+  userManagementHandler,
   type Admin,
 } from "../../../../handler/userManagementHandler";
 import TokenManager from "../../../../utils/tokenManager";
@@ -128,7 +128,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
 
   const fetchAdmins = async () => {
     try {
-      const response = await userManagementService.getAdmins();
+      const response = await userManagementHandler.getAdmins();
 
       if (response.success && response.data) {
         setAdmins(response.data);
@@ -154,7 +154,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       const day = String(date.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
-      const response = await consultationService.getBookedSlotsForDate(
+      const response = await consultationHandler.getBookedSlotsForDate(
         dateStr,
         adminId
       );
@@ -275,7 +275,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         description: formData.description,
       };
 
-      const response = await consultationService.createConsultation(
+      const response = await consultationHandler.createConsultation(
         consultationData
       );
 

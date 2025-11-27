@@ -7,7 +7,7 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import BeasiswaFormModal from "./components/BeasiswaFormModal";
-import { beasiswaService } from "../../../handler/beasiswaHandler";
+import { beasiswaHandler } from "../../../handler/beasiswaHandler";
 import {
   beasiswaSchema,
   type BeasiswaFormData,
@@ -50,7 +50,7 @@ const KelolaDataBeasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await beasiswaService.getAllBeasiswa();
+      const response = await beasiswaHandler.getAllBeasiswa();
       setBeasiswaList(response.data);
     } catch (error) {
       console.error("Error fetching beasiswa:", error);
@@ -210,14 +210,14 @@ const KelolaDataBeasiswa = () => {
 
       if (selectedBeasiswa) {
         // Update existing
-        await beasiswaService.updateBeasiswa(
+        await beasiswaHandler.updateBeasiswa(
           selectedBeasiswa.beasiswa_id,
           payload
         );
         toast.success("Beasiswa berhasil diperbarui");
       } else {
         // Create new
-        await beasiswaService.createBeasiswa(payload);
+        await beasiswaHandler.createBeasiswa(payload);
         toast.success("Beasiswa berhasil ditambahkan");
       }
 
@@ -247,7 +247,7 @@ const KelolaDataBeasiswa = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await beasiswaService.deleteBeasiswa(beasiswaId);
+          await beasiswaHandler.deleteBeasiswa(beasiswaId);
 
           setBeasiswaList(
             beasiswaList.filter((b) => b.beasiswa_id !== beasiswaId)

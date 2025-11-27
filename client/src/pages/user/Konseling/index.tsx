@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import {
-  consultationService,
+  consultationHandler,
   type Consultation,
 } from "../../../handler/consultationHandler";
 import ModalJadwalkanKonseling from "./components/ModalJadwalkanKonseling";
@@ -83,7 +83,7 @@ const Konseling = () => {
   const fetchConsultations = async () => {
     try {
       setLoading(true);
-      const response = await consultationService.getConsultations();
+      const response = await consultationHandler.getConsultations();
       if (response.success && response.data) {
         setConsultations(response.data);
       }

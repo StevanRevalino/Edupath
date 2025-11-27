@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { chatService } from "../handler/chatHandler";
+import { chatHandler } from "../handler/chatHandler";
 
 interface Message {
   message_id: string;
@@ -46,16 +46,16 @@ export const useChat = ({
 
       try {
         // Get or create room
-        const currentRoomId = await chatService.getOrCreateRoom(consultationId);
+        const currentRoomId = await chatHandler.getOrCreateRoom(consultationId);
         if (currentRoomId) {
           setRoomId(currentRoomId);
 
           // Load initial messages
-          const initialMessages = await chatService.loadMessages(currentRoomId);
+          const initialMessages = await chatHandler.loadMessages(currentRoomId);
           setMessages(initialMessages);
 
           // Start polling for new messages
-          chatService.startPolling(currentRoomId, 5000);
+          chatHandler.startPolling(currentRoomId, 5000);
         }
       } catch (err) {
         console.error("Error initializing chat:", err);
@@ -97,14 +97,14 @@ export const useChat = ({
       setError(errorMessage);
     };
 
-    chatService.onMessages(handleMessages);
-    chatService.onError(handleError);
+    chatHandler.onMessages(handleMessages);
+    chatHandler.onError(handleError);
 
     // Cleanup on unmount
     return () => {
-      chatService.removeMessageHandler(handleMessages);
-      chatService.removeErrorHandler(handleError);
-      chatService.stopPolling();
+      chatHandler.removeMessageHandler(handleMessages);
+      chatHandler.removeErrorHandler(handleError);
+      chatHandler.stopPolling();
     };
   }, [consultationId, enabled]);
 
@@ -130,7 +130,7 @@ export const useChat = ({
       setMessages((prev) => [...prev, optimisticMessage]);
 
       // Send to server
-      const newMessage = await chatService.sendMessage(roomId, messageText);
+      const newMessage = await chatHandler.sendMessage(roomId, messageText);
 
       if (newMessage) {
         // Replace optimistic message with real message from server

@@ -14,7 +14,7 @@ export interface User {
   updated_at?: string;
 }
 
-class UserService {
+class UserHandler {
   private getAuthHeader() {
     const token = TokenManager.getToken();
     return {
@@ -52,4 +52,4 @@ class UserService {
   }
 }
 
-export const userService = new UserService();
+export const userHanndler = new UserHandler();

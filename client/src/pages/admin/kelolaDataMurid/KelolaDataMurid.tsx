@@ -7,7 +7,7 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import EditStudentModal from "./components/EditStudentModal";
-import { userManagementService } from "../../../handler/userManagementHandler";
+import { userManagementHandler } from "../../../handler/userManagementHandler";
 
 interface Student {
   user_id: string;
@@ -39,7 +39,7 @@ const KelolaDataMurid = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await userManagementService.getAllStudents();
+        const response = await userManagementHandler.getAllStudents();
         setStudents(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -130,7 +130,7 @@ const KelolaDataMurid = () => {
             kelas: editForm.kelas!,
           };
 
-          await userManagementService.updateStudent(
+          await userManagementHandler.updateStudent(
             selectedStudent.user_id,
             updatePayload
           );
@@ -176,7 +176,7 @@ const KelolaDataMurid = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await userManagementService.deleteStudent(studentId);
+          await userManagementHandler.deleteStudent(studentId);
 
           setStudents(
             students.filter((student) => student.user_id !== studentId)

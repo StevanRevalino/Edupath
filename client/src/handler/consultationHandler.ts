@@ -53,7 +53,7 @@ export interface ChatRoom {
   consultation_id: string;
 }
 
-class ConsultationService {
+class ConsultationHandler {
   private handleAuthError(status: number) {
     if (status === 401 || status === 403) {
       TokenManager.logout();
@@ -347,4 +347,4 @@ class ConsultationService {
   }
 }
 
-export const consultationService = new ConsultationService();
+export const consultationHandler = new ConsultationHandler();

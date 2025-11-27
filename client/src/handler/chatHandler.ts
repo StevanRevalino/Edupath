@@ -26,7 +26,7 @@ export interface ChatUser {
 }
 
 // Chat service for real-time chat functionality
-class ChatService {
+class ChatHandler {
   private pollingInterval: NodeJS.Timeout | null = null;
   private messageHandlers: ((messages: Message[]) => void)[] = [];
   private errorHandlers: ((error: string) => void)[] = [];
@@ -321,5 +321,5 @@ class ChatService {
   }
 }
 
-export const chatService = new ChatService();
-export default ChatService;
+export const chatHandler = new ChatHandler();
+export default ChatHandler;

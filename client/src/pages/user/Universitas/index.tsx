@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  universitasService,
+  universitasHandler,
   type Universitas as UniversitasType,
 } from "../../../handler/universitasHandler";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
@@ -125,7 +125,7 @@ const Universitas: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const response = await universitasService.getUniversitasById(
+      const response = await universitasHandler.getUniversitasById(
         universityId
       );
 
@@ -169,7 +169,7 @@ const Universitas: React.FC = () => {
         const hasFilter =
           selectedProvinsi !== "Semua" || selectedAkreditasi !== "Semua";
 
-        const response = await universitasService.getUniversitasWithFilters({
+        const response = await universitasHandler.getUniversitasWithFilters({
           searchKeyword: searchKeyword || undefined,
           provinsi: selectedProvinsi !== "Semua" ? selectedProvinsi : undefined,
           akreditasi:
@@ -229,7 +229,7 @@ const Universitas: React.FC = () => {
       setError("");
 
       try {
-        const response = await universitasService.searchUniversitasByName(
+        const response = await universitasHandler.searchUniversitasByName(
           q.trim(),
           ctrl.signal
         );

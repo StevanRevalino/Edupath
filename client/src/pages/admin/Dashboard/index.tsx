@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { dashboardService } from "../../../handler/dashboardService";
+import { dashboardHandler } from "../../../handler/dashboardHandler";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -123,7 +123,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       end.setDate(start.getDate() + 6);
       end.setHours(23, 59, 59, 999);
 
-      const response = await dashboardService.getWeeklyConsultations({
+      const response = await dashboardHandler.getWeeklyConsultations({
         startDate: start.toISOString(),
         endDate: end.toISOString(),
       });
@@ -149,14 +149,14 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       setLoading(true);
 
       // Fetch dashboard statistics
-      const statsResponse = await dashboardService.getStats();
+      const statsResponse = await dashboardHandler.getStats();
 
       // Fetch upcoming consultations
       const consultationsResponse =
-        await dashboardService.getUpcomingConsultations();
+        await dashboardHandler.getUpcomingConsultations();
 
       // Fetch recent chats
-      const chatsResponse = await dashboardService.getRecentChats();
+      const chatsResponse = await dashboardHandler.getRecentChats();
 
       if (statsResponse.success) {
         const dashboardData = statsResponse.data;

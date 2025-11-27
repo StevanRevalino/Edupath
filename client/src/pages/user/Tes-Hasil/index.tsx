@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../handler/hollandHandler";
+import { hollandHandler } from "../../../handler/hollandHandler";
 import type { AssessmentResult, HollandType } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-hot-toast";
@@ -52,7 +52,7 @@ const HasilTes: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await getAssessmentResult(assessmentId);
+      const data = await hollandHandler.getAssessmentResult(assessmentId);
       setResult(data);
     } catch (err: any) {
       console.error("Error fetching result:", err);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../../handler/hollandHandler";
+import { hollandHandler } from "../../../../handler/hollandHandler";
 import type { AssessmentResult, HollandType } from "../../../../types/holland";
 import LoadingSpinner from "../../../../components/LoadingSpinner";
 
@@ -39,7 +39,9 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
 
     try {
       setLoadingDetail(true);
-      const result = await getAssessmentResult(tesSession.test_id);
+      const result = await hollandHandler.getAssessmentResult(
+        tesSession.test_id
+      );
       setAssessmentDetail(result);
     } catch (error) {
       console.error("Error fetching assessment detail:", error);

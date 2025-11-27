@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { CalendarIcon, Clock, X, Minus } from "lucide-react";
-import { consultationService } from "../../../../handler/consultationHandler";
+import { consultationHandler } from "../../../../handler/consultationHandler";
 
 interface Consultation {
   consultation_id: string;
@@ -66,7 +66,7 @@ const RescheduleModal: FC<RescheduleModalProps> = ({
   // Fetch booked slots for selected date
   const fetchBookedSlots = async (date: Date) => {
     try {
-      const response = await consultationService.getBookedSlotsForDate(date);
+      const response = await consultationHandler.getBookedSlotsForDate(date);
       // Extract startTime from booked slots
       const slots = response.data?.map((slot) => slot.startTime) || [];
       setBookedSlots(slots);
