@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { dashboardService } from "../../../services/dashboardService";
+import { dashboardService } from "../../../handler/dashboardService";
 import {
   Chart as ChartJS,
   CategoryScale,

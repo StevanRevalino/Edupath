@@ -7,7 +7,7 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import EditStudentModal from "./components/EditStudentModal";
-import { userManagementService } from "../../../services/userManagementService";
+import { userManagementService } from "../../../handler/userManagementHandler";
 
 interface Student {
   user_id: string;

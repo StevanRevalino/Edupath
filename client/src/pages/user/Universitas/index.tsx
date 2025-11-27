@@ -9,7 +9,7 @@ import { useLocation } from "react-router-dom";
 import {
   universitasService,
   type Universitas as UniversitasType,
-} from "../../../services/universitasService";
+} from "../../../handler/universitasHandler";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { userService, type User } from "../../../services/userService";
+import { userService, type User } from "../../../handler/userHandler";
 import TokenManager from "../../../utils/tokenManager";
 import ProfilePageLayout from "./components/ProfilePageLayout";
 import ModalEditProfile from "./components/ModalEditProfile";

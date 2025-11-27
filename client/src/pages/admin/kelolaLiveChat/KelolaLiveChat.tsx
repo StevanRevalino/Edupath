@@ -17,7 +17,7 @@ import {
 } from "../../../utils/cloudinary";
 import ZoomRequestModal from "./components/ZoomRequestModal";
 import type { ZoomRequestData } from "./components/ZoomRequestModal";
-import { chatService, type ChatUser } from "../../../services/chatService";
+import { chatService, type ChatUser } from "../../../handler/chatHandler";
 
 interface ChatMessage {
   id: string;

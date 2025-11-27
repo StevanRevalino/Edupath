@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { consultationService } from "../services/consultationService";
-import { notificationService } from "../services/notificationService";
+import { consultationService } from "../handler/consultationHandler";
+import { notificationService } from "../handler/notificationHandler";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
 
 interface NotificationCount {

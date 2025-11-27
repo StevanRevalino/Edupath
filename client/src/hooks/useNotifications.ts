@@ -3,7 +3,7 @@ import {
   notificationService,
   type Notification,
   type NotificationStats,
-} from "../services/notificationService";
+} from "../handler/notificationHandler";
 
 interface UseNotificationsOptions {
   autoRefresh?: boolean;

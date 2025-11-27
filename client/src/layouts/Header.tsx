@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
-import { userService } from "../services/userService";
+import { userService } from "../handler/userHandler";
 import NotificationPanel from "../pages/user/notification";
 
 const Header = () => {

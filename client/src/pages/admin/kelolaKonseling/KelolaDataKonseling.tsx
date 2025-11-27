@@ -5,7 +5,7 @@ import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
-import { consultationService } from "../../../services/consultationService";
+import { consultationService } from "../../../handler/consultationHandler";
 import ConsultationFilters from "./Components/ConsultationFilters";
 import ConsultationDetailModal from "./Components/ConsultationDetailModal";
 import RescheduleModal from "./Components/RescheduleModal";

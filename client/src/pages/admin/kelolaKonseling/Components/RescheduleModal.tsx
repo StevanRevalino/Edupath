@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { CalendarIcon, Clock, X, Minus } from "lucide-react";
-import { consultationService } from "../../../../services/consultationService";
+import { consultationService } from "../../../../handler/consultationHandler";
 
 interface Consultation {
   consultation_id: string;

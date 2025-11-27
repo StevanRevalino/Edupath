@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { chatService } from "../services/chatService";
+import { chatService } from "../handler/chatHandler";
 
 interface Message {
   message_id: string;

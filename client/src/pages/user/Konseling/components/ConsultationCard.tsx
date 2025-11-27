@@ -1,4 +1,4 @@
-import { type Consultation } from "../../../../services/consultationService";
+import { type Consultation } from "../../../../handler/consultationHandler";
 
 interface ConsultationCardProps {
   consultation: Consultation;

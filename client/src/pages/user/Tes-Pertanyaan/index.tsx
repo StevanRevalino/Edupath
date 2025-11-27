@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getQuestions,
   submitAssessment,
-} from "../../../services/hollandService";
+} from "../../../handler/hollandHandler";
 import type { HollandQuestion, HollandResponse } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import Swal from "sweetalert2";

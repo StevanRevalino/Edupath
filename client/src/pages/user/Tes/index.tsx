@@ -10,7 +10,7 @@ import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentHistory } from "../../../services/hollandService";
+import { getAssessmentHistory } from "../../../handler/hollandHandler";
 import type { AssessmentHistory } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 

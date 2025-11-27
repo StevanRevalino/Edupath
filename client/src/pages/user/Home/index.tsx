@@ -1,13 +1,13 @@
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { userService, type User } from "../../../services/userService";
-import { prodiService } from "../../../services/prodiService";
-import { universitasService } from "../../../services/universitasService";
+import { userService, type User } from "../../../handler/userHandler";
+import { prodiService } from "../../../handler/prodiHandler";
+import { universitasService } from "../../../handler/universitasHandler";
 import {
   getAssessmentHistory,
   getAssessmentResult,
-} from "../../../services/hollandService";
+} from "../../../handler/hollandHandler";
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 import HeroSectionBG from "../../../assets/hero-section.png";

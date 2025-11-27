@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
-import { authService } from "../../services/authService";
+import { authHandler } from "../../handler/authHandler";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthEmailInput from "./components/AuthEmailInput";
@@ -94,7 +94,7 @@ export default function Register() {
     }
 
     try {
-      await authService.register({
+      await authHandler.register({
         firstname: firstName,
         lastname: lastName,
         kelas: Number(kelas?.value),
@@ -117,7 +117,7 @@ export default function Register() {
       // validasi pakai yup
       await emailSchema.validate({ email });
 
-      const response = await authService.sendVerificationOtp(email);
+      const response = await authHandler.sendVerificationOtp(email);
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -149,7 +149,7 @@ export default function Register() {
     if (timer > 0) return;
 
     try {
-      const response = await authService.sendVerificationOtp(email);
+      const response = await authHandler.sendVerificationOtp(email);
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);

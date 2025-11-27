@@ -8,7 +8,7 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import { type Consultation } from "../../../../services/consultationService";
+import { type Consultation } from "../../../../handler/consultationHandler";
 import { useChat } from "../../../../hooks/useChat";
 import toast from "react-hot-toast";
 import {

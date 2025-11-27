@@ -5,7 +5,7 @@ import { ValidationError } from "yup";
 import ModalResetPassword from "./components/ModalResetPassword";
 import toast from "react-hot-toast";
 import TokenManager from "../../utils/tokenManager";
-import { authService } from "../../services/authService";
+import { authHandler } from "../../handler/authHandler";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthPasswordInput from "./components/AuthPasswordInput";
@@ -30,7 +30,7 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      const res = await authService.login(email, password);
+      const res = await authHandler.login(email, password);
       console.log("Login Response:", res);
       const result = res.data;
 

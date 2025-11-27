@@ -7,7 +7,7 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import BeasiswaFormModal from "./components/BeasiswaFormModal";
-import { beasiswaService } from "../../../services/beasiswaService";
+import { beasiswaService } from "../../../handler/beasiswaHandler";
 import {
   beasiswaSchema,
   type BeasiswaFormData,

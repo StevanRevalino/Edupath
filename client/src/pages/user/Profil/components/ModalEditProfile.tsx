@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { CircleAlert, X } from "lucide-react";
 import toast from "react-hot-toast";
 import {
-  authService,
+  authHandler,
   type UpdateProfileData,
-} from "../../../../services/authService";
+} from "../../../../handler/authHandler";
 import TokenManager from "../../../../utils/tokenManager";
 import { useNavigate } from "react-router-dom";
 import WarningLogo from "../../../../assets/warning-logo.png";
@@ -127,7 +127,7 @@ const ModalEditProfile: React.FC<ModalEditProfileProps> = ({
             kelas: formData.kelas,
           };
 
-          await authService.updateProfile(updateData, token);
+          await authHandler.updateProfile(updateData, token);
 
           // Trigger custom event to refresh Header
           window.dispatchEvent(new Event("profileUpdated"));

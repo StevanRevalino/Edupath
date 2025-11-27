@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import clockLogo from "../../../../assets/icons/clock-icon.png";
-import { consultationService } from "../../../../services/consultationService";
+import { consultationService } from "../../../../handler/consultationHandler";
 import {
   userManagementService,
   type Admin,
-} from "../../../../services/userManagementService";
+} from "../../../../handler/userManagementHandler";
 import TokenManager from "../../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import {

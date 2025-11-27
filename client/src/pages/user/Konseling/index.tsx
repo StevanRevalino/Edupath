@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import {
   consultationService,
   type Consultation,
-} from "../../../services/consultationService";
+} from "../../../handler/consultationHandler";
 import ModalJadwalkanKonseling from "./components/ModalJadwalkanKonseling";
 import ConsultationCard from "./components/ConsultationCard";
 import ConsultationInfo from "./components/ConsultationInfo";

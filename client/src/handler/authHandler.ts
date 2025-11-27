@@ -39,7 +39,7 @@ interface UpdateProfileData {
   kelas: number;
 }
 
-class AuthService {
+class AuthHandler {
   async login(
     email: string,
     password: string
@@ -146,5 +146,5 @@ class AuthService {
   }
 }
 
-export const authService = new AuthService();
+export const authHandler = new AuthHandler();
 export type { UpdateProfileData };

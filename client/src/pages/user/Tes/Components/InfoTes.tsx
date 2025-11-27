@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../../services/hollandService";
+import { getAssessmentResult } from "../../../../handler/hollandHandler";
 import type { AssessmentResult, HollandType } from "../../../../types/holland";
 import LoadingSpinner from "../../../../components/LoadingSpinner";
 

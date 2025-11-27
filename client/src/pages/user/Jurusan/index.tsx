@@ -10,7 +10,7 @@ import {
   prodiService,
   type ProdiWithUniversity,
   type ProdiDetail,
-} from "../../../services/prodiService";
+} from "../../../handler/prodiHandler";
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
 

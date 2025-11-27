@@ -6,7 +6,7 @@ import { parseMessageWithImage } from "../../../../utils/cloudinary";
 import {
   consultationService,
   type ChatMessage,
-} from "../../../../services/consultationService";
+} from "../../../../handler/consultationHandler";
 
 interface ChatHistoryModalProps {
   isOpen: boolean;

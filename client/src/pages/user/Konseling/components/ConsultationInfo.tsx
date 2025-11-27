@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 import {
   type Consultation,
   consultationService,
-} from "../../../../services/consultationService";
+} from "../../../../handler/consultationHandler";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { beasiswaService } from "../../../services/beasiswaService";
+import { beasiswaService } from "../../../handler/beasiswaHandler";
 
 import HeroSection from "../../../components/HeroSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";

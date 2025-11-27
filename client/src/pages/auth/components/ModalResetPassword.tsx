@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../../../assets/warning-logo.png";
-import { authService } from "../../../services/authService";
+import { authHandler } from "../../../handler/authHandler";
 
 interface Props {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({});
 
-      const response = await authService.sendOtp(email);
+      const response = await authHandler.sendOtp(email);
 
       // Set OTP from server response (in production, OTP should not be returned)
       setServerOtp(response.data.otp);
@@ -120,7 +120,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       setErrors({});
 
-      await authService.resetPassword({
+      await authHandler.resetPassword({
         email,
         otp: serverOtp,
         newPassword,

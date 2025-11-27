@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { getAssessmentResult } from "../../../services/hollandService";
+import { getAssessmentResult } from "../../../handler/hollandHandler";
 import type { AssessmentResult, HollandType } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-hot-toast";
