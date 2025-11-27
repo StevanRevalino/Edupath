@@ -39,7 +39,51 @@ interface UpdateProfileData {
   kelas: number;
 }
 
+type OtpType = "verification" | "reset";
+
 class AuthHandler {
+  /**
+   * Unified method untuk mengirim OTP
+   * @param email - Email tujuan
+   * @param type - Jenis OTP: 'verification' untuk registrasi, 'reset' untuk reset password
+   */
+  async sendOtp(
+    email: string,
+    type: OtpType = "reset"
+  ): Promise<{ success: boolean; data: SendOtpResponse }> {
+    try {
+      const endpoint =
+        type === "verification"
+          ? `${API_URL}/api/auth/send-verification-otp`
+          : `${API_URL}/api/auth/send-otp`;
+
+      const response = await axios.post(endpoint, { email });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @deprecated Use sendOtp(email, 'verification') instead
+   */
+  async sendVerificationOtp(
+    email: string
+  ): Promise<{ success: boolean; data: SendOtpResponse }> {
+    return this.sendOtp(email, "verification");
+  }
+
+  /**
+   * @deprecated Use sendOtp(email, 'reset') instead
+   */
+  async sendResetOtp(
+    email: string
+  ): Promise<{ success: boolean; data: SendOtpResponse }> {
+    return this.sendOtp(email, "reset");
+  }
   async login(
     email: string,
     password: string
@@ -68,41 +112,6 @@ class AuthHandler {
         password: data.password,
       });
       return { success: true };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async sendOtp(
-    email: string
-  ): Promise<{ success: boolean; data: SendOtpResponse }> {
-    try {
-      const response = await axios.post(`${API_URL}/api/auth/send-otp`, {
-        email,
-      });
-      return {
-        success: true,
-        data: response.data,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async sendVerificationOtp(
-    email: string
-  ): Promise<{ success: boolean; data: SendOtpResponse }> {
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/send-verification-otp`,
-        {
-          email,
-        }
-      );
-      return {
-        success: true,
-        data: response.data,
-      };
     } catch (error) {
       throw error;
     }

@@ -50,7 +50,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({});
 
-      const response = await authHandler.sendOtp(email);
+      const response = await authHandler.sendOtp(email, "reset");
 
       // Set OTP from server response (in production, OTP should not be returned)
       setServerOtp(response.data.otp);

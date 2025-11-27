@@ -117,7 +117,7 @@ export default function Register() {
       // validasi pakai yup
       await emailSchema.validate({ email });
 
-      const response = await authHandler.sendVerificationOtp(email);
+      const response = await authHandler.sendOtp(email, "verification");
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -149,7 +149,7 @@ export default function Register() {
     if (timer > 0) return;
 
     try {
-      const response = await authHandler.sendVerificationOtp(email);
+      const response = await authHandler.sendOtp(email, "verification");
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);
