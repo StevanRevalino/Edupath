@@ -106,4 +106,21 @@ export class HollandRepository {
       },
     });
   }
+
+  // Get assessment by ID
+  async findAssessmentById(assessmentId: string) {
+    return prisma.hollandAssessment.findUnique({
+      where: { assessment_id: assessmentId },
+      include: {
+        user: {
+          select: {
+            user_id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }

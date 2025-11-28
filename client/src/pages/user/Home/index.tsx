@@ -470,10 +470,10 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Recent Test Stats dengan Diagram dan Rekomendasi */}
+              {/* Hasil Tes terakhir dengan Diagram dan Rekomendasi */}
               <div>
                 <div className="text-base lg:text-lg font-bold mb-3">
-                  Recent Test Stats
+                  Hasil tes terakhir
                 </div>
 
                 {assessmentStats.latestTestDetails ? (
@@ -530,9 +530,6 @@ const Home = () => {
                                     {rec.jenjang}
                                   </div>
                                 )}
-                                <div className="text-xs text-primary-dark mt-0.5 font-medium">
-                                  Match: {Math.round(rec.match_percentage)}%
-                                </div>
                               </div>
                             )
                           )}

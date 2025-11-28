@@ -256,7 +256,7 @@ class HollandService {
       100
     );
 
-    return assessments.map((assessment : any) => ({
+    return assessments.map((assessment: any) => ({
       assessment_id: assessment.assessment_id,
       primary_type: assessment.primary_type,
       secondary_type: assessment.secondary_type,
@@ -269,10 +269,11 @@ class HollandService {
    * Get detailed assessment result by ID
    */
   async getAssessmentById(assessmentId: string, userId: string) {
-    const assessment =
-      await this.hollandRepository.findLatestAssessmentByUserId(userId);
+    const assessment = await this.hollandRepository.findAssessmentById(
+      assessmentId
+    );
 
-    if (!assessment || assessment.assessment_id !== assessmentId) {
+    if (!assessment || assessment.user_id !== userId) {
       throw new Error("Assessment not found");
     }
 
