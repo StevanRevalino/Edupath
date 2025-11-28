@@ -116,7 +116,7 @@ const Tes = () => {
     }
   };
 
-  const handleLakukanTes = () => {
+  const handleContinue = () => {
     // Check if there's a saved session
     if (savedSession) {
       setShowSessionModal(true);
@@ -133,7 +133,7 @@ const Tes = () => {
     navigate("/tes/pertanyaan");
   };
 
-  const handleStartFresh = () => {
+  const handleStartNewTest = () => {
     localStorage.removeItem(SESSION_KEY);
     setSavedSession(null);
     setShowSessionModal(false);
@@ -158,7 +158,7 @@ const Tes = () => {
         icon={TesIcon}
       >
         <button
-          onClick={handleLakukanTes}
+          onClick={handleContinue}
           className="inline-flex items-center rounded-full bg-primary px-4 py-2
              text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
              hover:brightness-95 active:brightness-90 transition"
@@ -295,7 +295,7 @@ const Tes = () => {
                 Lanjutkan Tes
               </button>
               <button
-                onClick={handleStartFresh}
+                onClick={handleStartNewTest}
                 className="w-full bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 transition"
               >
                 Mulai Tes Baru

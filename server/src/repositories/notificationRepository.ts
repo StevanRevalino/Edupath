@@ -85,6 +85,15 @@ export class NotificationRepository {
     });
   }
 
+  // Delete all notifications for user
+  async deleteAll(userId: string) {
+    return prisma.notification.deleteMany({
+      where: {
+        user_id: userId,
+      },
+    });
+  }
+
   // Count unread notifications
   async countUnread(userId: string) {
     return prisma.notification.count({

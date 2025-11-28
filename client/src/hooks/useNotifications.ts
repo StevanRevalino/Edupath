@@ -19,6 +19,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     unread: 0,
     consultation_new: 0,
     consultation_cancel: 0,
+    consultation_starting: 0,
     chat_message: 0,
   });
   const [loading, setLoading] = useState(false);
@@ -64,6 +65,14 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     return success;
   };
 
+  const deleteAllNotifications = async () => {
+    const success = await notificationHandler.deleteAllNotifications();
+    if (success) {
+      await fetchNotifications();
+    }
+    return success;
+  };
+
   // Initial fetch
   useEffect(() => {
     fetchNotifications();
@@ -88,5 +97,6 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllNotifications,
   };
 };

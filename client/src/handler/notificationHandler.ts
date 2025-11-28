@@ -5,7 +5,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export interface Notification {
   notification_id: string;
-  type: "CONSULTATION_NEW" | "CONSULTATION_CANCEL" | "CHAT_MESSAGE";
+  type:
+    | "CONSULTATION_NEW"
+    | "CONSULTATION_CANCEL"
+    | "CONSULTATION_STARTING"
+    | "CHAT_MESSAGE";
   title: string;
   message: string;
   reference_id: string; // consultation_id or chat_id
@@ -23,6 +27,7 @@ export interface NotificationStats {
   unread: number;
   consultation_new: number;
   consultation_cancel: number;
+  consultation_starting: number;
   chat_message: number;
 }
 
@@ -56,6 +61,7 @@ class NotificationHandler {
           unread: 0,
           consultation_new: 0,
           consultation_cancel: 0,
+          consultation_starting: 0,
           chat_message: 0,
         },
       };
@@ -69,6 +75,7 @@ class NotificationHandler {
           unread: 0,
           consultation_new: 0,
           consultation_cancel: 0,
+          consultation_starting: 0,
           chat_message: 0,
         },
       };
@@ -115,6 +122,17 @@ class NotificationHandler {
       return true;
     } catch (error) {
       console.error("Error deleting notification:", error);
+      return false;
+    }
+  }
+
+  // Delete all notifications
+  async deleteAllNotifications(): Promise<boolean> {
+    try {
+      await axios.delete(`${API_URL}/api/notifications`, this.getAuthHeader());
+      return true;
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
       return false;
     }
   }

@@ -51,6 +51,11 @@ export class NotificationService {
     return this.notificationRepository.delete(notificationId);
   }
 
+  // Delete all notifications
+  async deleteAllNotifications(userId: string) {
+    return this.notificationRepository.deleteAll(userId);
+  }
+
   // Get unread count
   async getUnreadCount(userId: string) {
     return this.notificationRepository.countUnread(userId);

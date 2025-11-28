@@ -26,6 +26,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllNotifications,
   } = useNotifications({
     autoRefresh: true, // Auto-refresh untuk student
     refreshInterval: 10000, // 10 detik
@@ -37,6 +38,8 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
         return <Calendar className="w-5 h-5 text-green-500" />;
       case "CONSULTATION_REJECTED":
         return <AlertCircle className="w-5 h-5 text-red-500" />;
+      case "CONSULTATION_STARTING":
+        return <Bell className="w-5 h-5 text-orange-500 animate-pulse" />;
       case "CHAT_MESSAGE":
         return <MessageCircle className="w-5 h-5 text-primary" />;
       case "ZOOM_MEETING":
@@ -54,6 +57,8 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
         return "bg-green-50";
       case "CONSULTATION_REJECTED":
         return "bg-red-50";
+      case "CONSULTATION_STARTING":
+        return "bg-orange-50";
       case "CHAT_MESSAGE":
         return "bg-secondary-lighter";
       case "ZOOM_MEETING":
@@ -87,6 +92,18 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
   const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
     e.stopPropagation();
     await deleteNotification(notificationId);
+  };
+
+  const handleDeleteAll = async () => {
+    if (notifications.length === 0) return;
+
+    const confirmed = window.confirm(
+      `Apakah Anda yakin ingin menghapus semua ${notifications.length} notifikasi?`
+    );
+
+    if (confirmed) {
+      await deleteAllNotifications();
+    }
   };
 
   return (
@@ -149,6 +166,17 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
                 >
                   <CheckCheck className="w-4 h-4" />
                   Tandai Semua Dibaca
+                </button>
+              )}
+
+              {/* Delete All Button */}
+              {stats.total > 0 && (
+                <button
+                  onClick={handleDeleteAll}
+                  className="mt-2 w-full px-3 py-2 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Hapus Semua Notifikasi
                 </button>
               )}
             </div>

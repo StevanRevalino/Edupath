@@ -140,9 +140,12 @@ const Header = () => {
               // Handle notification click - navigate based on type
               if (
                 type === "CONSULTATION_ACCEPTED" ||
-                type === "CONSULTATION_REJECTED"
+                type === "CONSULTATION_REJECTED" ||
+                type === "CONSULTATION_STARTING"
               ) {
-                navigate("/konseling");
+                navigate("/konseling", {
+                  state: { openChatForConsultation: _referenceId },
+                });
               } else if (type === "CHAT_MESSAGE") {
                 // Navigate to konseling page and trigger chat open
                 navigate("/konseling", {

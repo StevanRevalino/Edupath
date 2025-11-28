@@ -12,6 +12,7 @@ export class NotificationController {
     this.markAsRead = this.markAsRead.bind(this);
     this.markAllAsRead = this.markAllAsRead.bind(this);
     this.deleteNotification = this.deleteNotification.bind(this);
+    this.deleteAllNotifications = this.deleteAllNotifications.bind(this);
     this.getUnreadCount = this.getUnreadCount.bind(this);
   }
 
@@ -135,6 +136,33 @@ export class NotificationController {
       return res.status(500).json({
         success: false,
         message: error.message || "Failed to delete notification",
+      });
+    }
+  }
+
+  // Delete all notifications
+  async deleteAllNotifications(req: Request, res: Response) {
+    try {
+      const userId = req.user?.user_id;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+
+      await this.notificationService.deleteAllNotifications(userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "All notifications deleted",
+      });
+    } catch (error: any) {
+      console.error("Error deleting all notifications:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Failed to delete all notifications",
       });
     }
   }
