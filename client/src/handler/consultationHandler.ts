@@ -101,6 +101,29 @@ class ConsultationHandler {
     }
   }
 
+  async getConsultationDetail(
+    consultationId: string
+  ): Promise<ApiResponse<Consultation>> {
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/consultations/${consultationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.handleAuthError(error.response.status);
+      }
+      throw error;
+    }
+  }
+
   async updateStatus(
     consultationId: string,
     status: string,

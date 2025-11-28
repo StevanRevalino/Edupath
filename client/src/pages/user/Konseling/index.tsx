@@ -26,6 +26,7 @@ const Konseling = () => {
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Chat state
   const [showChat, setShowChat] = useState(false);
@@ -93,6 +94,25 @@ const Konseling = () => {
       // toast.error("Gagal memuat data konsultasi");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchKonselingDetail = async (consultationId: string) => {
+    try {
+      setLoadingDetail(true);
+      const response = await consultationHandler.getConsultationDetail(
+        consultationId
+      );
+      if (response.success && response.data) {
+        setSelectedConsultation(response.data);
+      } else {
+        toast.error("Gagal memuat detail konsultasi");
+      }
+    } catch (error) {
+      console.error("Error fetching consultation detail:", error);
+      toast.error("Gagal memuat detail konsultasi");
+    } finally {
+      setLoadingDetail(false);
     }
   };
 
@@ -194,7 +214,14 @@ const Konseling = () => {
                           selectedConsultation?.consultation_id ===
                           consultation.consultation_id
                         }
-                        onClick={setSelectedConsultation}
+                        onClick={(consultation) => {
+                          if (
+                            selectedConsultation?.consultation_id !==
+                            consultation.consultation_id
+                          ) {
+                            fetchKonselingDetail(consultation.consultation_id);
+                          }
+                        }}
                       />
                     ))
                   ) : (
@@ -219,6 +246,7 @@ const Konseling = () => {
                     consultation={selectedConsultation}
                     onOpenChat={openChat}
                     onCancelSuccess={handleCancelSuccess}
+                    loading={loadingDetail}
                   />
                 </>
               ) : selectedConsultation ? (

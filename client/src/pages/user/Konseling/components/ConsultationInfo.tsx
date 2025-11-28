@@ -11,12 +11,14 @@ interface ConsultationInfoProps {
   consultation: Consultation | null;
   onOpenChat: (consultation: Consultation) => void;
   onCancelSuccess?: () => void;
+  loading?: boolean;
 }
 
 const ConsultationInfo = ({
   consultation,
   onOpenChat,
   onCancelSuccess,
+  loading = false,
 }: ConsultationInfoProps) => {
   const [canceling, setCanceling] = useState(false);
 
@@ -138,6 +140,15 @@ const ConsultationInfo = ({
       setCanceling(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p className="text-gray-600">Memuat detail konseling...</p>
+      </div>
+    );
+  }
 
   if (!consultation) {
     return (
