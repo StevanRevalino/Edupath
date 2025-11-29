@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
-import { NotificationService } from "../services/notificationService";
+import prisma from "../configs/prisma";
 
 export class NotificationController {
-  private notificationService: NotificationService;
-
   constructor() {
-    this.notificationService = new NotificationService();
-
     // Bind methods to preserve 'this' context
     this.getNotifications = this.getNotifications.bind(this);
     this.markAsRead = this.markAsRead.bind(this);
@@ -28,8 +24,34 @@ export class NotificationController {
         });
       }
 
-      const { notifications, stats } =
-        await this.notificationService.getNotifications(userId);
+      const notifications = await prisma.notification.findMany({
+        where: {
+          user_id: userId,
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+      });
+
+      const total = notifications.length;
+      const unread = notifications.filter((n) => !n.is_read).length;
+      const consultation_new = notifications.filter(
+        (n) => n.type === "CONSULTATION_NEW"
+      ).length;
+      const consultation_cancel = notifications.filter(
+        (n) => n.type === "CONSULTATION_CANCEL"
+      ).length;
+      const chat_message = notifications.filter(
+        (n) => n.type === "CHAT_MESSAGE"
+      ).length;
+
+      const stats = {
+        total,
+        unread,
+        consultation_new,
+        consultation_cancel,
+        chat_message,
+      };
 
       // Map to match frontend interface
       const mappedNotifications = notifications.map((n) => ({
@@ -70,7 +92,28 @@ export class NotificationController {
         });
       }
 
-      await this.notificationService.markAsRead(notificationId, userId);
+      const notification = await prisma.notification.findFirst({
+        where: {
+          notification_id: notificationId,
+          user_id: userId,
+        },
+      });
+
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found",
+        });
+      }
+
+      await prisma.notification.update({
+        where: {
+          notification_id: notificationId,
+        },
+        data: {
+          is_read: true,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -97,7 +140,15 @@ export class NotificationController {
         });
       }
 
-      await this.notificationService.markAllAsRead(userId);
+      await prisma.notification.updateMany({
+        where: {
+          user_id: userId,
+          is_read: false,
+        },
+        data: {
+          is_read: true,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -125,7 +176,25 @@ export class NotificationController {
         });
       }
 
-      await this.notificationService.deleteNotification(notificationId, userId);
+      const notification = await prisma.notification.findFirst({
+        where: {
+          notification_id: notificationId,
+          user_id: userId,
+        },
+      });
+
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found",
+        });
+      }
+
+      await prisma.notification.delete({
+        where: {
+          notification_id: notificationId,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -152,7 +221,11 @@ export class NotificationController {
         });
       }
 
-      await this.notificationService.deleteAllNotifications(userId);
+      await prisma.notification.deleteMany({
+        where: {
+          user_id: userId,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -179,7 +252,12 @@ export class NotificationController {
         });
       }
 
-      const count = await this.notificationService.getUnreadCount(userId);
+      const count = await prisma.notification.count({
+        where: {
+          user_id: userId,
+          is_read: false,
+        },
+      });
 
       return res.status(200).json({
         success: true,

@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
-import { UserService } from "../services/userService";
+import prisma from "../configs/prisma";
 
 export class UserController {
-  private userService: UserService;
-
   constructor() {
-    this.userService = new UserService();
-
     // Bind methods to preserve 'this' context
     this.getAllUsers = this.getAllUsers.bind(this);
     this.getAllAdmins = this.getAllAdmins.bind(this);
@@ -18,11 +14,27 @@ export class UserController {
   // Get all users
   async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await this.userService.getAllUsers();
+      const users = await prisma.user.findMany({
+        orderBy: {
+          created_at: "desc",
+        },
+      });
+
+      const transformedUsers = users
+        .filter((user) => user.role === "STUDENT")
+        .map((user) => ({
+          user_id: user.user_id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          role: user.role,
+          kelas: user.kelas,
+          created_at: user.created_at,
+        }));
 
       res.status(200).json({
         success: true,
-        data: users,
+        data: transformedUsers,
         message: "Users retrieved successfully",
       });
     } catch (error) {
@@ -37,7 +49,22 @@ export class UserController {
   // Get all admin users
   async getAllAdmins(req: Request, res: Response): Promise<void> {
     try {
-      const admins = await this.userService.getAllAdmins();
+      const users = await prisma.user.findMany({
+        orderBy: {
+          created_at: "desc",
+        },
+      });
+
+      const admins = users
+        .filter((user) => user.role === "ADMIN")
+        .map((user) => ({
+          user_id: user.user_id,
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          role: user.role,
+          created_at: user.created_at,
+        }));
 
       res.status(200).json({
         success: true,
@@ -57,15 +84,26 @@ export class UserController {
   async getUserById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const user = await this.userService.getUserById(id);
+      const foundUser = await prisma.user.findUnique({
+        where: { user_id: id },
+      });
 
-      if (!user) {
+      if (!foundUser) {
         res.status(404).json({
           success: false,
           message: "User not found",
         });
         return;
       }
+
+      const user = {
+        user_id: foundUser.user_id,
+        firstname: foundUser.firstname,
+        lastname: foundUser.lastname,
+        email: foundUser.email,
+        role: foundUser.role,
+        kelas: foundUser.kelas,
+      };
 
       res.status(200).json({
         success: true,
@@ -88,8 +126,10 @@ export class UserController {
       const { id } = req.params;
       const updateData = req.body;
 
-      // Check if user exists first
-      const existingUser = await this.userService.getUserById(id);
+      const existingUser = await prisma.user.findUnique({
+        where: { user_id: id },
+      });
+
       if (!existingUser) {
         res.status(404).json({
           success: false,
@@ -98,8 +138,19 @@ export class UserController {
         return;
       }
 
-      // Update user using service
-      const updatedUser = await this.userService.updateUser(id, updateData);
+      const updated = await prisma.user.update({
+        where: { user_id: id },
+        data: updateData,
+      });
+
+      const updatedUser = {
+        user_id: updated.user_id,
+        firstname: updated.firstname,
+        lastname: updated.lastname,
+        email: updated.email,
+        role: updated.role,
+        kelas: updated.kelas,
+      };
 
       res.status(200).json({
         success: true,
@@ -120,8 +171,10 @@ export class UserController {
     try {
       const { id } = req.params;
 
-      // Check if user exists first
-      const existingUser = await this.userService.getUserById(id);
+      const existingUser = await prisma.user.findUnique({
+        where: { user_id: id },
+      });
+
       if (!existingUser) {
         res.status(404).json({
           success: false,
@@ -130,7 +183,9 @@ export class UserController {
         return;
       }
 
-      await this.userService.deleteUser(id);
+      await prisma.user.delete({
+        where: { user_id: id },
+      });
 
       res.status(200).json({
         success: true,

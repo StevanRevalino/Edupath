@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
-import { AuthService } from "../services/authService";
 import {
   sendOtpEmail,
   sendVerificationOtpEmail,
 } from "../services/emailService";
+import bcrypt from "bcrypt";
+import jwt, { SignOptions } from "jsonwebtoken";
+import prisma from "../configs/prisma";
 
 export class AuthController {
-  private authService: AuthService;
-
   constructor() {
-    this.authService = new AuthService();
-
     // Bind methods to preserve 'this' context
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
@@ -19,9 +17,57 @@ export class AuthController {
     this.sendOtp = this.sendOtp.bind(this);
     this.sendVerificationOtp = this.sendVerificationOtp.bind(this);
   }
+
+  private async generateCustomUserId(): Promise<string> {
+    const lastUser = await prisma.user.findFirst({
+      orderBy: { user_id: "desc" },
+      where: {
+        user_id: {
+          startsWith: "US",
+        },
+      },
+    });
+
+    let lastNumber = 0;
+
+    if (lastUser) {
+      const numPart = parseInt(lastUser.user_id.replace("US", ""));
+      lastNumber = isNaN(numPart) ? 0 : numPart;
+    }
+
+    const nextNumber = lastNumber + 1;
+    return `US${String(nextNumber).padStart(3, "0")}`;
+  }
+
   async register(req: Request, res: Response): Promise<void> {
     try {
-      const user = await this.authService.register(req.body);
+      const existingUser = await prisma.user.findUnique({
+        where: { email: req.body.email.toLowerCase() },
+      });
+
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: "Email sudah terdaftar",
+        });
+        return;
+      }
+
+      const hashed = await bcrypt.hash(req.body.password, 10);
+      const customId = await this.generateCustomUserId();
+
+      const user = await prisma.user.create({
+        data: {
+          user_id: customId,
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          email: req.body.email,
+          role: "STUDENT" as const,
+          kelas: Number(req.body.kelas),
+          password: hashed,
+        },
+      });
+
       res.status(201).json({
         success: true,
         data: user,
@@ -49,9 +95,11 @@ export class AuthController {
     }
 
     try {
-      const result = await this.authService.login(email, password);
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
 
-      if (!result) {
+      if (!user || !user.password) {
         console.log("Login failed: Invalid credentials");
         res.status(401).json({
           success: false,
@@ -60,10 +108,44 @@ export class AuthController {
         return;
       }
 
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        res.status(401).json({
+          success: false,
+          message: "Email atau password salah",
+        });
+        return;
+      }
+
+      // Create JWT Token
+      const token = jwt.sign(
+        {
+          user_id: user.user_id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          role: user.role,
+          kelas: user.kelas,
+        },
+        process.env.JWT_SECRET as string,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "1d" } as SignOptions
+      );
+
       console.log("Login successful for:", email);
       res.status(200).json({
         success: true,
-        data: result,
+        data: {
+          message: "Login berhasil",
+          token,
+          user: {
+            user_id: user.user_id,
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            role: user.role,
+            kelas: user.kelas,
+          },
+        },
         message: "Login successful",
       });
     } catch (error) {
@@ -87,7 +169,33 @@ export class AuthController {
     }
 
     try {
-      await this.authService.forgotPassword(email, newPassword);
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      const isSame = await bcrypt.compare(newPassword, user.password!);
+      if (isSame) {
+        res.status(400).json({
+          success: false,
+          message: "Password baru tidak boleh sama dengan sebelumnya",
+        });
+        return;
+      }
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { email },
+        data: { password: hashed },
+      });
+
       res.status(200).json({
         success: true,
         message: "Password berhasil direset",
@@ -146,14 +254,17 @@ export class AuthController {
         return;
       }
 
-      const updatedUser = await this.authService.updateProfile(
-        userId,
-        updateData
-      );
+      const updatedUser = await prisma.user.update({
+        where: { user_id: userId },
+        data: updateData,
+      });
+
+      // Remove password from response
+      const { password, ...userWithoutPassword } = updatedUser;
 
       res.status(200).json({
         success: true,
-        data: updatedUser,
+        data: userWithoutPassword,
         message: "Profil berhasil diperbarui",
       });
     } catch (error: any) {

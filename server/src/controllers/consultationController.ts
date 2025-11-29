@@ -1,13 +1,9 @@
 import { Request, Response } from "express";
-import { ConsultationService } from "../services/consultationService";
 import { ConsultationStatus } from "@prisma/client";
+import prisma from "../configs/prisma";
 
 export class ConsultationController {
-  private consultationService: ConsultationService;
-
   constructor() {
-    this.consultationService = new ConsultationService();
-
     // Bind methods to preserve 'this' context
     this.createConsultation = this.createConsultation.bind(this);
     this.getAllConsultations = this.getAllConsultations.bind(this);
@@ -30,6 +26,68 @@ export class ConsultationController {
     this.autoCompleteExpiredConsultations =
       this.autoCompleteExpiredConsultations.bind(this);
   }
+
+  // Helper: Generate custom consultation ID
+  private async generateCustomConsultationId(): Promise<string> {
+    const lastConsultation = await prisma.consultation.findFirst({
+      orderBy: { consultation_id: "desc" },
+      where: { consultation_id: { startsWith: "CS" } },
+      select: { consultation_id: true },
+    });
+
+    let lastNumber = 0;
+    if (lastConsultation) {
+      const numPart = parseInt(
+        lastConsultation.consultation_id.replace("CS", "")
+      );
+      lastNumber = isNaN(numPart) ? 0 : numPart;
+    }
+
+    const nextNumber = lastNumber + 1;
+    return `CS${String(nextNumber).padStart(3, "0")}`;
+  }
+
+  // Helper: Check if there's a scheduling conflict
+  private async checkScheduleConflict(
+    consultationDate: Date,
+    excludeConsultationId?: string
+  ): Promise<boolean> {
+    const startTime = new Date(consultationDate);
+    const endTime = new Date(consultationDate);
+    endTime.setHours(endTime.getHours() + 1);
+
+    const allConsultations = await prisma.consultation.findMany({});
+
+    for (const consultation of allConsultations) {
+      if (
+        excludeConsultationId &&
+        consultation.consultation_id === excludeConsultationId
+      ) {
+        continue;
+      }
+
+      if (consultation.status === ConsultationStatus.DECLINED) {
+        continue;
+      }
+
+      if (
+        consultation.status === ConsultationStatus.COMPLETED &&
+        !consultation.is_active
+      ) {
+        continue;
+      }
+
+      const existingStart = new Date(consultation.consultation_date);
+      const existingEnd = new Date(consultation.consultation_date);
+      existingEnd.setHours(existingEnd.getHours() + 1);
+
+      if (startTime < existingEnd && endTime > existingStart) {
+        return true;
+      }
+    }
+
+    return false;
+  }
   // Create a new consultation
   async createConsultation(req: Request, res: Response) {
     try {
@@ -45,10 +103,57 @@ export class ConsultationController {
         });
       }
 
+      // Verify that murid exists and has STUDENT role
+      const murid = await prisma.user.findUnique({
+        where: { user_id: murid_id },
+      });
+
+      if (!murid) {
+        return res.status(400).json({
+          success: false,
+          message: "Murid tidak ditemukan",
+        });
+      }
+
+      if (murid.role !== "STUDENT") {
+        return res.status(400).json({
+          success: false,
+          message:
+            "User harus berperan sebagai student untuk membuat konseling",
+        });
+      }
+
+      // Verify that admin exists and has ADMIN role
+      const admin = await prisma.user.findUnique({
+        where: { user_id: admin_id },
+      });
+
+      if (!admin) {
+        return res.status(400).json({
+          success: false,
+          message: "Admin tidak ditemukan",
+        });
+      }
+
+      if (admin.role !== "ADMIN") {
+        return res.status(400).json({
+          success: false,
+          message: "User harus berperan sebagai admin untuk menerima konseling",
+        });
+      }
+
       // Check if student has an active consultation
-      const hasActiveConsultation =
-        await this.consultationService.hasActiveConsultation(murid_id);
-      if (hasActiveConsultation) {
+      const activeConsultation = await prisma.consultation.findFirst({
+        where: {
+          murid_id,
+          is_active: true,
+          status: {
+            in: [ConsultationStatus.PENDING, ConsultationStatus.ACCEPTED],
+          },
+        },
+      });
+
+      if (activeConsultation) {
         return res.status(400).json({
           success: false,
           message:
@@ -81,12 +186,46 @@ export class ConsultationController {
         });
       }
 
-      const consultation = await this.consultationService.createConsultation({
-        murid_id,
-        admin_id,
-        topic,
-        consultation_date: consultationDate,
-        description,
+      // Check for scheduling conflicts
+      const hasConflict = await this.checkScheduleConflict(consultationDate);
+      if (hasConflict) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Jadwal konseling bentrok dengan konseling lain. Silakan pilih waktu yang berbeda.",
+        });
+      }
+
+      const customId = await this.generateCustomConsultationId();
+
+      const consultation = await prisma.consultation.create({
+        data: {
+          consultation_id: customId,
+          murid_id,
+          admin_id,
+          topic,
+          consultation_date: consultationDate,
+          description,
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
       });
 
       return res.status(201).json({
@@ -136,17 +275,36 @@ export class ConsultationController {
         filters.status = status as string;
       }
 
-      if (limit) {
-        filters.limit = parseInt(limit as string);
-      }
+      const where: any = {};
+      if (filters.status) where.status = filters.status;
+      if (filters.murid_id) where.murid_id = filters.murid_id;
+      if (filters.admin_id) where.admin_id = filters.admin_id;
 
-      if (offset) {
-        filters.offset = parseInt(offset as string);
-      }
-
-      const consultations = await this.consultationService.getAllConsultations(
-        filters
-      );
+      const consultations = await prisma.consultation.findMany({
+        where,
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+        take: filters.limit || undefined,
+        skip: filters.offset || undefined,
+      });
 
       return res.status(200).json({
         success: true,
@@ -166,14 +324,87 @@ export class ConsultationController {
   // Get students with accepted consultations for live chat
   async getStudentsWithAcceptedConsultations(req: Request, res: Response) {
     try {
-      const students =
-        await this.consultationService.getStudentsWithAcceptedConsultations();
+      // Get current time in Indonesia (WIB - UTC+7)
+      const now = new Date();
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+
+      const acceptedConsultations = await prisma.consultation.findMany({
+        where: { status: ConsultationStatus.ACCEPTED },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+        },
+      });
+
+      // Filter consultations that are currently ongoing (started and not yet ended)
+      const ongoingConsultations = acceptedConsultations.filter(
+        (consultation) => {
+          const consultationStart = new Date(consultation.consultation_date);
+          const consultationEnd = new Date(
+            consultationStart.getTime() + 60 * 60 * 1000
+          ); // +1 hour
+
+          // Check if current time (Indonesia) is between start and end time
+          return (
+            indonesiaTime >= consultationStart &&
+            indonesiaTime < consultationEnd &&
+            consultation.is_active
+          );
+        }
+      );
+
+      // Extract unique murid_ids from ongoing consultations only
+      const uniqueMuridIds = [
+        ...new Set(ongoingConsultations.map((c) => c.murid_id)),
+      ];
+
+      // Get student details for each unique murid
+      const students = await Promise.all(
+        uniqueMuridIds.map(async (muridId) => {
+          const student = await prisma.user.findUnique({
+            where: { user_id: muridId },
+          });
+
+          if (student) {
+            // Get the latest ongoing consultation for this student
+            const latestConsultation = ongoingConsultations
+              .filter((c) => c.murid_id === muridId)
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime()
+              )[0];
+
+            return {
+              user_id: student.user_id,
+              firstname: student.firstname,
+              lastname: student.lastname,
+              kelas: student.kelas,
+              latestConsultationTopic: latestConsultation?.topic,
+              latestConsultationDate: latestConsultation?.consultation_date,
+            };
+          }
+          return null;
+        })
+      );
+
+      // Filter out null values
+      const validStudents = students.filter((student) => student !== null);
 
       return res.status(200).json({
         success: true,
         message: "Berhasil mengambil data murid dengan konseling ter-accept",
-        data: students,
-        count: students.length,
+        data: validStudents,
+        count: validStudents.length,
       });
     } catch (error: any) {
       return res.status(500).json({
@@ -195,9 +426,35 @@ export class ConsultationController {
         });
       }
 
-      const consultation = await this.consultationService.getConsultationById(
-        id
-      );
+      const consultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (!consultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
+        });
+      }
 
       return res.status(200).json({
         success: true,
@@ -242,12 +499,81 @@ export class ConsultationController {
         });
       }
 
-      const updatedConsultation =
-        await this.consultationService.updateConsultationStatus({
-          consultation_id: id,
-          status: status as ConsultationStatus,
-          admin_notes,
+      const existingConsultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+      });
+
+      if (!existingConsultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
         });
+      }
+
+      // Automatically set is_active to false for DECLINED and COMPLETED status
+      let isActive = existingConsultation.is_active;
+      if (
+        status === ConsultationStatus.DECLINED ||
+        status === ConsultationStatus.COMPLETED
+      ) {
+        isActive = false;
+      }
+
+      const updatedConsultation = await prisma.consultation.update({
+        where: { consultation_id: id },
+        data: {
+          status: status as ConsultationStatus,
+          admin_notes:
+            admin_notes || existingConsultation.admin_notes || undefined,
+          is_active: isActive,
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Create notification for student
+      if (status === ConsultationStatus.ACCEPTED) {
+        await prisma.notification.create({
+          data: {
+            user_id: updatedConsultation.murid_id,
+            type: "CONSULTATION_ACCEPTED",
+            title: "Konsultasi Diterima",
+            message: `Konsultasi Anda tentang "${updatedConsultation.topic}" telah diterima oleh ${updatedConsultation.admin.firstname} ${updatedConsultation.admin.lastname}.`,
+            related_id: updatedConsultation.consultation_id,
+            is_read: false,
+          },
+        });
+      } else if (status === ConsultationStatus.DECLINED) {
+        await prisma.notification.create({
+          data: {
+            user_id: updatedConsultation.murid_id,
+            type: "CONSULTATION_REJECTED",
+            title: "Konsultasi Ditolak",
+            message: `Konsultasi Anda tentang "${
+              updatedConsultation.topic
+            }" ditolak. ${admin_notes ? `Alasan: ${admin_notes}` : ""}`,
+            related_id: updatedConsultation.consultation_id,
+            is_read: false,
+          },
+        });
+      }
 
       return res.status(200).json({
         success: true,
@@ -286,9 +612,28 @@ export class ConsultationController {
       }
 
       // Get consultation to verify it belongs to the user
-      const consultation = await this.consultationService.getConsultationById(
-        id
-      );
+      const consultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
 
       if (!consultation) {
         return res.status(404).json({
@@ -318,37 +663,39 @@ export class ConsultationController {
       }
 
       // Update consultation to inactive (is_active = false) instead of deleting
-      // This allows consultation to appear in history
-      if (consultation.status === ConsultationStatus.PENDING) {
-        const updatedConsultation =
-          await this.consultationService.updateConsultationStatus({
-            consultation_id: id,
-            status: ConsultationStatus.DECLINED,
-            admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
-            is_active: false,
-          });
+      const updatedConsultation = await prisma.consultation.update({
+        where: { consultation_id: id },
+        data: {
+          status: ConsultationStatus.DECLINED,
+          admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
+          is_active: false,
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
 
-        return res.status(200).json({
-          success: true,
-          message: "Konseling berhasil dibatalkan",
-          data: updatedConsultation,
-        });
-      } else {
-        // ACCEPTED - update to DECLINED with cancel reason and set inactive
-        const updatedConsultation =
-          await this.consultationService.updateConsultationStatus({
-            consultation_id: id,
-            status: ConsultationStatus.DECLINED,
-            admin_notes: `[DIBATALKAN OLEH MURID] ${cancelReason}`,
-            is_active: false,
-          });
-
-        return res.status(200).json({
-          success: true,
-          message: "Konseling berhasil dibatalkan",
-          data: updatedConsultation,
-        });
-      }
+      return res.status(200).json({
+        success: true,
+        message: "Konseling berhasil dibatalkan",
+        data: updatedConsultation,
+      });
     } catch (error: any) {
       return res.status(500).json({
         success: false,
@@ -411,9 +758,28 @@ export class ConsultationController {
       }
 
       // Get consultation to verify it exists and is ACCEPTED
-      const consultation = await this.consultationService.getConsultationById(
-        id
-      );
+      const consultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
 
       if (!consultation) {
         return res.status(404).json({
@@ -431,13 +797,47 @@ export class ConsultationController {
         });
       }
 
-      // Update consultation with new date and reschedule reason in admin_notes
-      const updatedConsultation =
-        await this.consultationService.rescheduleConsultation({
-          consultation_id: id,
-          newDate: newConsultationDate,
-          rescheduleReason,
+      // Check for scheduling conflict (exclude current consultation)
+      const hasConflict = await this.checkScheduleConflict(
+        newConsultationDate,
+        id
+      );
+
+      if (hasConflict) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Jadwal konseling bentrok dengan konseling lain. Silakan pilih waktu lain.",
         });
+      }
+
+      // Update consultation with new date and reschedule note
+      const updatedConsultation = await prisma.consultation.update({
+        where: { consultation_id: id },
+        data: {
+          consultation_date: newConsultationDate,
+          admin_notes: `[DIJADWALKAN ULANG] ${rescheduleReason}`,
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -472,10 +872,29 @@ export class ConsultationController {
         });
       }
 
-      const consultations =
-        await this.consultationService.getConsultationsByStatus(
-          status.toUpperCase() as ConsultationStatus
-        );
+      const consultations = await prisma.consultation.findMany({
+        where: { status: status.toUpperCase() as ConsultationStatus },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      });
 
       return res.status(200).json({
         success: true,
@@ -504,8 +923,29 @@ export class ConsultationController {
         });
       }
 
-      const consultations =
-        await this.consultationService.getConsultationsForStudent(student_id);
+      const consultations = await prisma.consultation.findMany({
+        where: { murid_id: student_id },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      });
 
       return res.status(200).json({
         success: true,
@@ -534,8 +974,29 @@ export class ConsultationController {
         });
       }
 
-      const consultations =
-        await this.consultationService.getConsultationsForAdmin(admin_id);
+      const consultations = await prisma.consultation.findMany({
+        where: { admin_id: admin_id },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      });
 
       return res.status(200).json({
         success: true,
@@ -565,16 +1026,72 @@ export class ConsultationController {
         });
       }
 
-      const result =
-        await this.consultationService.getConsultationsForStudentByName(
-          firstname,
-          lastname as string
-        );
+      // Find students with matching name
+      const whereClause: any = {
+        firstname: { contains: firstname, mode: "insensitive" },
+        role: "STUDENT",
+      };
+
+      if (lastname) {
+        whereClause.lastname = {
+          contains: lastname as string,
+          mode: "insensitive",
+        };
+      }
+
+      const students = await prisma.user.findMany({
+        where: whereClause,
+      });
+
+      if (students.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Tidak ada siswa ditemukan dengan nama tersebut",
+        });
+      }
+
+      // Get consultations for all matching students
+      const consultationsPromises = students.map((student) =>
+        prisma.consultation.findMany({
+          where: { murid_id: student.user_id },
+          include: {
+            murid: {
+              select: {
+                user_id: true,
+                firstname: true,
+                lastname: true,
+                email: true,
+                kelas: true,
+              },
+            },
+            admin: {
+              select: {
+                user_id: true,
+                firstname: true,
+                lastname: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: { created_at: "desc" },
+        })
+      );
+
+      const allConsultations = await Promise.all(consultationsPromises);
+
+      // Flatten the results and add student info
+      const consultations = allConsultations.flat().map((consultation) => ({
+        ...consultation,
+        student_info: students.find((s) => s.user_id === consultation.murid_id),
+      }));
 
       return res.status(200).json({
         success: true,
         message: "Berhasil mengambil konseling berdasarkan nama siswa",
-        data: result,
+        data: {
+          students: students,
+          consultations: consultations,
+        },
       });
     } catch (error: any) {
       return res.status(500).json({
@@ -597,11 +1114,24 @@ export class ConsultationController {
         });
       }
 
-      const result = await this.consultationService.deleteConsultation(id);
+      const existingConsultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+      });
+
+      if (!existingConsultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
+        });
+      }
+
+      await prisma.consultation.delete({
+        where: { consultation_id: id },
+      });
 
       return res.status(200).json({
         success: true,
-        message: result.message,
+        message: "Konseling berhasil dihapus",
       });
     } catch (error: any) {
       return res.status(500).json({
@@ -614,7 +1144,25 @@ export class ConsultationController {
   // Get consultation statistics
   async getConsultationStats(req: Request, res: Response) {
     try {
-      const stats = await this.consultationService.getConsultationStats();
+      const [total, pending, accepted, declined] = await Promise.all([
+        prisma.consultation.count(),
+        prisma.consultation.count({
+          where: { status: ConsultationStatus.PENDING },
+        }),
+        prisma.consultation.count({
+          where: { status: ConsultationStatus.ACCEPTED },
+        }),
+        prisma.consultation.count({
+          where: { status: ConsultationStatus.DECLINED },
+        }),
+      ]);
+
+      const stats = {
+        total,
+        pending,
+        accepted,
+        declined,
+      };
 
       return res.status(200).json({
         success: true,
@@ -643,8 +1191,50 @@ export class ConsultationController {
         });
       }
 
-      const updatedConsultation =
-        await this.consultationService.endConsultation(id);
+      const existingConsultation = await prisma.consultation.findUnique({
+        where: { consultation_id: id },
+      });
+
+      if (!existingConsultation) {
+        return res.status(404).json({
+          success: false,
+          message: "Konseling tidak ditemukan",
+        });
+      }
+
+      if (!existingConsultation.is_active) {
+        return res.status(400).json({
+          success: false,
+          message: "Konseling sudah tidak aktif",
+        });
+      }
+
+      const updatedConsultation = await prisma.consultation.update({
+        where: { consultation_id: id },
+        data: {
+          is_active: false,
+          status: ConsultationStatus.COMPLETED,
+        },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -686,10 +1276,88 @@ export class ConsultationController {
         });
       }
 
-      const bookedSlots = await this.consultationService.getBookedSlotsForDate(
-        targetDate,
-        adminId as string
-      );
+      // Extract year, month, day from the input date in UTC
+      const targetYear = targetDate.getUTCFullYear();
+      const targetMonth = targetDate.getUTCMonth();
+      const targetDay = targetDate.getUTCDate();
+
+      // Get all consultations for this specific admin
+      const allConsultations = await prisma.consultation.findMany({
+        where: { admin_id: adminId as string },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      });
+
+      // Filter for consultations on this specific date
+      const bookedSlots = allConsultations
+        .filter((consultation) => {
+          // Skip declined consultations
+          if (consultation.status === ConsultationStatus.DECLINED) {
+            return false;
+          }
+
+          // Skip completed and inactive consultations
+          if (
+            consultation.status === ConsultationStatus.COMPLETED &&
+            !consultation.is_active
+          ) {
+            return false;
+          }
+
+          const consultationDate = new Date(consultation.consultation_date);
+
+          // Compare using UTC date components to match input format
+          const consultationYear = consultationDate.getUTCFullYear();
+          const consultationMonth = consultationDate.getUTCMonth();
+          const consultationDay = consultationDate.getUTCDate();
+
+          // Compare year, month, day in UTC
+          return (
+            consultationYear === targetYear &&
+            consultationMonth === targetMonth &&
+            consultationDay === targetDay
+          );
+        })
+        .map((consultation) => {
+          const consultationDate = new Date(consultation.consultation_date);
+
+          // Get hours and minutes in LOCAL timezone for display
+          const startHour = consultationDate.getHours();
+          const startMinute = consultationDate.getMinutes();
+          const startTime = `${startHour
+            .toString()
+            .padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+
+          const endHour = startHour + 1;
+          const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute
+            .toString()
+            .padStart(2, "0")}`;
+
+          return {
+            startTime,
+            endTime,
+            consultation_id: consultation.consultation_id,
+            status: consultation.status,
+          };
+        });
 
       return res.status(200).json({
         success: true,
@@ -709,13 +1377,90 @@ export class ConsultationController {
   // Auto-complete expired consultations
   async autoCompleteExpiredConsultations(req: Request, res: Response) {
     try {
-      const result =
-        await this.consultationService.autoCompleteExpiredConsultations();
+      // Get current time in Indonesia (WIB - UTC+7)
+      const now = new Date();
+      const indonesiaTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+
+      // Get all accepted consultations (they should be active)
+      const activeConsultations = await prisma.consultation.findMany({
+        where: { status: ConsultationStatus.ACCEPTED },
+        include: {
+          murid: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              kelas: true,
+            },
+          },
+          admin: {
+            select: {
+              user_id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Filter only active consultations that have passed their end time
+      const expiredConsultations = activeConsultations.filter(
+        (consultation) => {
+          if (!consultation.is_active) return false;
+
+          const consultationDate = new Date(consultation.consultation_date);
+          const endTime = new Date(consultationDate.getTime() + 60 * 60 * 1000); // +1 hour
+
+          // Check if current time (Indonesia) is past the end time
+          return indonesiaTime >= endTime;
+        }
+      );
+
+      const completedConsultations = [];
+
+      // Update each expired consultation to COMPLETED
+      for (const consultation of expiredConsultations) {
+        const updated = await prisma.consultation.update({
+          where: { consultation_id: consultation.consultation_id },
+          data: {
+            status: ConsultationStatus.COMPLETED,
+            is_active: false,
+          },
+          include: {
+            murid: {
+              select: {
+                user_id: true,
+                firstname: true,
+                lastname: true,
+                email: true,
+                kelas: true,
+              },
+            },
+            admin: {
+              select: {
+                user_id: true,
+                firstname: true,
+                lastname: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        completedConsultations.push(updated);
+      }
 
       return res.status(200).json({
         success: true,
-        message: `${result.count} konseling berhasil diselesaikan otomatis`,
-        data: result,
+        message: `${completedConsultations.length} konseling berhasil diselesaikan otomatis`,
+        data: {
+          count: completedConsultations.length,
+          consultations: completedConsultations,
+        },
       });
     } catch (error: any) {
       return res.status(500).json({

@@ -1,7 +1,4 @@
-import { ConsultationRepository } from "../repositories/consultationRepository";
-import { notificationRepository } from "../repositories/notificationRepository";
-
-const consultationRepository = new ConsultationRepository();
+import prisma from "../configs/prisma";
 
 /**
  * Auto-complete consultations that have passed 1 hour from start time
@@ -14,8 +11,15 @@ export async function autoCompleteExpiredConsultations() {
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
     // Find all active consultations that started more than 1 hour ago
-    const expiredConsultations =
-      await consultationRepository.findExpiredConsultations(oneHourAgo);
+    const expiredConsultations = await prisma.consultation.findMany({
+      where: {
+        status: "ACCEPTED",
+        is_active: true,
+        consultation_date: {
+          lt: oneHourAgo,
+        },
+      },
+    });
 
     if (expiredConsultations.length > 0) {
       console.log(
@@ -26,11 +30,18 @@ export async function autoCompleteExpiredConsultations() {
       const consultationIds = expiredConsultations.map(
         (c) => c.consultation_id
       );
-      const result = await consultationRepository.bulkUpdateStatus(
-        consultationIds,
-        "COMPLETED",
-        false // is_active = false
-      );
+
+      const result = await prisma.consultation.updateMany({
+        where: {
+          consultation_id: {
+            in: consultationIds,
+          },
+        },
+        data: {
+          is_active: false,
+          status: "COMPLETED",
+        },
+      });
 
       console.log(
         `[Scheduler] Auto-completed ${result.count} consultations that exceeded 1 hour`
@@ -64,9 +75,11 @@ export async function notifyUpcomingConsultations() {
     const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
 
     // Find all accepted and active consultations starting soon
-    const upcomingConsultations = await consultationRepository.findMany({
-      status: "ACCEPTED",
-      is_active: true,
+    const upcomingConsultations = await prisma.consultation.findMany({
+      where: {
+        status: "ACCEPTED",
+        is_active: true,
+      },
     });
 
     // Filter consultations that start within the next 5 minutes
@@ -82,9 +95,11 @@ export async function notifyUpcomingConsultations() {
 
       for (const consultation of consultationsToNotify) {
         // Check if notification was already sent (to avoid duplicate notifications)
-        const existingNotification = await notificationRepository.findByUserId(
-          consultation.murid_id
-        );
+        const existingNotification = await prisma.notification.findMany({
+          where: {
+            user_id: consultation.murid_id,
+          },
+        });
 
         const alreadyNotified = existingNotification.some(
           (n) =>
@@ -100,13 +115,15 @@ export async function notifyUpcomingConsultations() {
             (consultationDate.getTime() - now.getTime()) / (60 * 1000)
           );
 
-          await notificationRepository.create({
-            user_id: consultation.murid_id,
-            type: "CONSULTATION_STARTING",
-            title: "Konseling Akan Segera Dimulai! 🔔",
-            message: `Konseling Anda dengan topik "${consultation.topic}" akan dimulai dalam ${minutesUntilStart} menit. Silakan bergabung ke chat konseling.`,
-            related_id: consultation.consultation_id,
-            link: `/konseling`,
+          await prisma.notification.create({
+            data: {
+              user_id: consultation.murid_id,
+              type: "CONSULTATION_STARTING",
+              title: "Konseling Akan Segera Dimulai! 🔔",
+              message: `Konseling Anda dengan topik "${consultation.topic}" akan dimulai dalam ${minutesUntilStart} menit. Silakan bergabung ke chat konseling.`,
+              related_id: consultation.consultation_id,
+              link: `/konseling`,
+            },
           });
 
           console.log(

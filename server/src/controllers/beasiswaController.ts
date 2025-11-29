@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
-import { BeasiswaService } from "../services/beasiswaService";
-
-const beasiswaService = new BeasiswaService();
+import prisma from "../configs/prisma";
 
 // Get all beasiswa
 export const getAllBeasiswa = async (req: Request, res: Response) => {
   try {
-    const beasiswa = await beasiswaService.getAllBeasiswa();
+    const beasiswa = await prisma.beasiswa.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
     res.status(200).json({
       success: true,
       data: beasiswa,
@@ -25,7 +28,18 @@ export const getAllBeasiswa = async (req: Request, res: Response) => {
 export const getBeasiswaById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const beasiswa = await beasiswaService.getBeasiswaById(id);
+    const beasiswa = await prisma.beasiswa.findUnique({
+      where: {
+        beasiswa_id: id,
+      },
+    });
+
+    if (!beasiswa) {
+      return res.status(404).json({
+        success: false,
+        message: "Beasiswa not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -33,14 +47,6 @@ export const getBeasiswaById = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error fetching beasiswa:", error);
-
-    if (error.message === "Beasiswa not found") {
-      return res.status(404).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: "Failed to fetch beasiswa",
@@ -54,10 +60,19 @@ export const createBeasiswa = async (req: Request, res: Response) => {
   try {
     const { title, image_url, link } = req.body;
 
-    const newBeasiswa = await beasiswaService.createBeasiswa({
-      title,
-      image_url,
-      link,
+    if (!title || !image_url || !link) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, image URL, and link are required",
+      });
+    }
+
+    const newBeasiswa = await prisma.beasiswa.create({
+      data: {
+        title,
+        image_url,
+        link,
+      },
     });
 
     res.status(201).json({
@@ -67,14 +82,6 @@ export const createBeasiswa = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error creating beasiswa:", error);
-
-    if (error.message === "Title, image URL, and link are required") {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: "Failed to create beasiswa",
@@ -89,16 +96,28 @@ export const updateBeasiswa = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, image_url, link } = req.body;
 
-    const updatedBeasiswa = await beasiswaService.updateBeasiswa(id, {
-      title,
-      image_url,
-      link,
+    const beasiswa = await prisma.beasiswa.update({
+      where: {
+        beasiswa_id: id,
+      },
+      data: {
+        ...(title && { title }),
+        ...(image_url && { image_url }),
+        ...(link && { link }),
+      },
     });
+
+    if (!beasiswa) {
+      return res.status(404).json({
+        success: false,
+        message: "Beasiswa not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
       message: "Beasiswa updated successfully",
-      data: updatedBeasiswa,
+      data: beasiswa,
     });
   } catch (error: any) {
     console.error("Error updating beasiswa:", error);
@@ -123,12 +142,23 @@ export const deleteBeasiswa = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const deletedBeasiswa = await beasiswaService.deleteBeasiswa(id);
+    const beasiswa = await prisma.beasiswa.delete({
+      where: {
+        beasiswa_id: id,
+      },
+    });
+
+    if (!beasiswa) {
+      return res.status(404).json({
+        success: false,
+        message: "Beasiswa not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
       message: "Beasiswa deleted successfully",
-      data: deletedBeasiswa,
+      data: beasiswa,
     });
   } catch (error: any) {
     console.error("Error deleting beasiswa:", error);
