@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { hollandHandler } from "../../../../handler/hollandHandler";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
 import type { AssessmentResult, HollandType } from "../../../../types/holland";
 import LoadingSpinner from "../../../../components/LoadingSpinner";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Define the Test interface similar to Consultation
 export interface TesSession {
@@ -39,11 +42,22 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
 
     try {
       setLoadingDetail(true);
-      const result = await hollandHandler.getAssessmentResult(
-        tesSession.test_id
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/holland/result/${tesSession.test_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      const result = response.data.data;
       setAssessmentDetail(result);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error fetching assessment detail:", error);
       setAssessmentDetail(null);
     } finally {

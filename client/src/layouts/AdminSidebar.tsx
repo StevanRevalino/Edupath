@@ -1,20 +1,153 @@
-import { useMemo, useState, type FC } from "react";
+import { useMemo, useState, useEffect, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Menu, X, LayoutDashboard } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
-import { useNotificationCount } from "../hooks/useNotificationCount";
+import axios from "axios";
+import TokenManager from "../utils/tokenManager";
+import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface AdminSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
+interface NotificationCount {
+  pendingConsultations: number;
+  unreadChats: number;
+}
+
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { counts, clearBadge } = useNotificationCount();
+  const [counts, setCounts] = useState<NotificationCount>({
+    pendingConsultations: 0,
+    unreadChats: 0,
+  });
+
+  const fetchCounts = async () => {
+    try {
+      // Fetch pending consultations
+      const token = TokenManager.getToken();
+      const consultationsResponse = await axios.get(
+        `${API_URL}/api/consultations`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (
+        consultationsResponse.data.success &&
+        consultationsResponse.data.data
+      ) {
+        const pendingCount = consultationsResponse.data.data.filter(
+          (c: any) => c.status === "PENDING"
+        ).length;
+
+        setCounts((prev) => ({
+          ...prev,
+          pendingConsultations: pendingCount,
+        }));
+      }
+
+      // Fetch unread chat notifications
+      try {
+        const token = TokenManager.getToken();
+        const notificationsResponse = await axios.get(
+          `${API_URL}/api/notifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (notificationsResponse.data) {
+          const unreadChatNotifications = (
+            notificationsResponse.data.data || []
+          ).filter((n: any) => n.type === "CHAT_MESSAGE" && !n.is_read).length;
+
+          setCounts((prev) => ({
+            ...prev,
+            unreadChats: unreadChatNotifications,
+          }));
+        }
+      } catch (chatError) {
+        console.log("Chat notifications not available yet");
+        setCounts((prev) => ({
+          ...prev,
+          unreadChats: 0,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching notification counts:", error);
+    }
+  };
+
+  const clearBadge = (menuId: string) => {
+    if (menuId === "kelola-data-konseling") {
+      setCounts((prev) => ({
+        ...prev,
+        pendingConsultations: 0,
+      }));
+    } else if (menuId === "kelola-live-chat") {
+      setCounts((prev) => ({
+        ...prev,
+        unreadChats: 0,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    fetchCounts();
+
+    // Refresh counts every 15 seconds
+    const interval = setInterval(fetchCounts, 15000);
+
+    // Listen for custom events
+    const handleConsultationUpdate = () => fetchCounts();
+    const handleChatUpdate = () => fetchCounts();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchCounts();
+      }
+    };
+
+    window.addEventListener(
+      NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
+      handleConsultationUpdate
+    );
+    if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
+      window.addEventListener(
+        NOTIFICATION_EVENTS.CHAT_UPDATED,
+        handleChatUpdate
+      );
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", fetchCounts);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
+        handleConsultationUpdate
+      );
+      if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
+        window.removeEventListener(
+          NOTIFICATION_EVENTS.CHAT_UPDATED,
+          handleChatUpdate
+        );
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", fetchCounts);
+    };
+  }, []);
 
   const handleLogout = () => {
     Swal.fire({

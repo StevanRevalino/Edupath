@@ -174,10 +174,6 @@ export function startConsultationScheduler() {
     });
   }, 60 * 1000); // 1 minute
 
-  console.log(
-    "[Scheduler] Consultation scheduler started (auto-complete: 5min, notifications: 1min)"
-  );
-
   // Return cleanup function
   return () => {
     clearInterval(autoCompleteInterval);

@@ -1,11 +1,33 @@
 import { MessageCircle } from "lucide-react";
-import {
-  type Consultation,
-  consultationHandler,
-} from "../../../../handler/consultationHandler";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export interface Consultation {
+  consultation_id: string;
+  murid_id: string;
+  admin_id: string;
+  topic: string;
+  consultation_date: string;
+  consultation_time: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
+  is_active: boolean;
+  description?: string;
+  admin_notes?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  murid?: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    kelas: number | null;
+  };
+}
 
 interface ConsultationInfoProps {
   consultation: Consultation | null;
@@ -100,9 +122,15 @@ const ConsultationInfo = ({
       try {
         setCanceling(true);
 
-        await consultationHandler.cancelConsultation(
-          consultation.consultation_id,
-          result.value
+        const token = TokenManager.getToken();
+        await axios.patch(
+          `${API_URL}/api/consultations/${consultation.consultation_id}/cancel`,
+          { cancelReason: result.value },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         toast.success("Konseling berhasil dibatalkan");
@@ -111,6 +139,10 @@ const ConsultationInfo = ({
           onCancelSuccess();
         }
       } catch (error: any) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+        }
         console.error("Error canceling consultation:", error);
         toast.error(
           error.response?.data?.message || "Gagal membatalkan konseling"
@@ -125,9 +157,14 @@ const ConsultationInfo = ({
     try {
       setCanceling(true);
 
-      await consultationHandler.cancelConsultation(
-        consultation.consultation_id,
-        "Dibatalkan oleh murid"
+      const token = TokenManager.getToken();
+      await axios.delete(
+        `${API_URL}/api/consultations/${consultation.consultation_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       toast.success("Konseling berhasil dibatalkan");
@@ -136,6 +173,10 @@ const ConsultationInfo = ({
         onCancelSuccess();
       }
     } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error canceling consultation:", error);
       toast.error(
         error.response?.data?.message || "Gagal membatalkan konseling"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Bell,
   X,
@@ -8,10 +8,45 @@ import {
   Trash2,
   CheckCheck,
   Video,
+  Award,
 } from "lucide-react";
-import { useNotifications } from "../../../hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
+import { NOTIFICATION_EVENTS } from "../../../utils/notificationEvents";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export interface Notification {
+  notification_id: string;
+  type:
+    | "CONSULTATION_NEW"
+    | "CONSULTATION_CANCEL"
+    | "CONSULTATION_STARTING"
+    | "CHAT_MESSAGE"
+    | "BEASISWA_NEW";
+  title: string;
+  message: string;
+  reference_id: string;
+  is_read: boolean;
+  created_at: string;
+  metadata?: {
+    student_name?: string;
+    topic?: string;
+    status?: string;
+  };
+}
+
+export interface NotificationStats {
+  total: number;
+  unread: number;
+  consultation_new: number;
+  consultation_cancel: number;
+  consultation_starting: number;
+  chat_message: number;
+  beasiswa_new: number;
+}
 
 interface NotificationPanelProps {
   onNotificationClick?: (referenceId: string, type: string) => void;
@@ -19,18 +54,155 @@ interface NotificationPanelProps {
 
 const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    notifications,
-    stats,
-    loading,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    deleteAllNotifications,
-  } = useNotifications({
-    autoRefresh: true, // Auto-refresh untuk student
-    refreshInterval: 10000, // 10 detik
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [stats, setStats] = useState<NotificationStats>({
+    total: 0,
+    unread: 0,
+    consultation_new: 0,
+    consultation_cancel: 0,
+    consultation_starting: 0,
+    chat_message: 0,
+    beasiswa_new: 0,
   });
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data) {
+        setNotifications(response.data.data || []);
+        setStats(
+          response.data.stats || {
+            total: 0,
+            unread: 0,
+            consultation_new: 0,
+            consultation_cancel: 0,
+            consultation_starting: 0,
+            chat_message: 0,
+            beasiswa_new: 0,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const token = TokenManager.getToken();
+      await axios.patch(
+        `${API_URL}/api/notifications/${notificationId}/read`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      return false;
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = TokenManager.getToken();
+      await axios.patch(
+        `${API_URL}/api/notifications/read-all`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      return false;
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const token = TokenManager.getToken();
+      await axios.delete(`${API_URL}/api/notifications/${notificationId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      await fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      return false;
+    }
+  };
+
+  const deleteAllNotifications = async () => {
+    try {
+      const token = TokenManager.getToken();
+      await axios.delete(`${API_URL}/api/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      await fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+      return false;
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Auto-refresh every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 10000);
+
+    // Listen for beasiswa update events
+    const handleBeasiswaUpdate = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener(
+      NOTIFICATION_EVENTS.BEASISWA_UPDATED,
+      handleBeasiswaUpdate
+    );
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        NOTIFICATION_EVENTS.BEASISWA_UPDATED,
+        handleBeasiswaUpdate
+      );
+    };
+  }, [fetchNotifications]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -44,6 +216,8 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
         return <MessageCircle className="w-5 h-5 text-primary" />;
       case "ZOOM_MEETING":
         return <Video className="w-5 h-5 text-purple-500" />;
+      case "BEASISWA_NEW":
+        return <Award className="w-5 h-5 text-yellow-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
@@ -63,6 +237,8 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
         return "bg-secondary-lighter";
       case "ZOOM_MEETING":
         return "bg-purple-50";
+      case "BEASISWA_NEW":
+        return "bg-yellow-50";
       default:
         return "bg-gray-50";
     }

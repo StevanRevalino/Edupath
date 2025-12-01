@@ -5,11 +5,25 @@ import { ValidationError } from "yup";
 import ModalResetPassword from "./components/ModalResetPassword";
 import toast from "react-hot-toast";
 import TokenManager from "../../utils/tokenManager";
-import { authHandler } from "../../handler/authHandler";
+import axios from "axios";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthPasswordInput from "./components/AuthPasswordInput";
 import AuthButton from "./components/AuthButton";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface LoginResponse {
+  token: string;
+  user: {
+    user_id: string;
+    email: string;
+    role: "ADMIN" | "USER";
+    firstname: string;
+    lastname: string;
+    kelas: number | null;
+  };
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,9 +44,12 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      const res = await authHandler.login(email, password);
-      console.log("Login Response:", res);
-      const result = res.data;
+      const response = await axios.post<{ data: LoginResponse }>(
+        `${API_URL}/api/auth/login`,
+        { email, password }
+      );
+      console.log("Login Response:", response.data);
+      const result = response.data.data;
 
       // Clear data auth lama terlebih dahulu untuk menghindari konflik
       TokenManager.clearAllAuthData();

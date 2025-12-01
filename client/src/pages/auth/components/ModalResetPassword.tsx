@@ -9,7 +9,9 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { ValidationError } from "yup";
 import warningLogo from "../../../assets/warning-logo.png";
-import { authHandler } from "../../../handler/authHandler";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Props {
   isOpen: boolean;
@@ -50,7 +52,13 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({});
 
-      const response = await authHandler.sendOtp(email, "reset");
+      const response = await axios.post(
+        `${API_URL}/api/auth/send-verification-otp`,
+        {
+          email,
+          type: "reset",
+        }
+      );
 
       // Set OTP from server response (in production, OTP should not be returned)
       setServerOtp(response.data.otp);
@@ -120,7 +128,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
       setErrors({});
 
-      await authHandler.resetPassword({
+      await axios.post(`${API_URL}/api/auth/reset-password`, {
         email,
         otp: serverOtp,
         newPassword,

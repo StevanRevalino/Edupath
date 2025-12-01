@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { beasiswaHandler } from "../../../handler/beasiswaHandler";
+import axios from "axios";
 
 import HeroSection from "../../../components/HeroSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";
@@ -21,6 +21,8 @@ interface Beasiswa {
   created_at: string;
   updated_at: string;
 }
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Beasiswa = () => {
   const [beasiswaList, setBeasiswaList] = useState<Beasiswa[]>([]);
@@ -52,9 +54,9 @@ const Beasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await beasiswaHandler.getAllBeasiswa();
-      setBeasiswaList(response.data);
-      setFilteredList(response.data);
+      const response = await axios.get(`${API_URL}/api/beasiswa`);
+      setBeasiswaList(response.data.data);
+      setFilteredList(response.data.data);
     } catch (error) {
       console.error("Error fetching beasiswa:", error);
       toast.error("Gagal mengambil data beasiswa");

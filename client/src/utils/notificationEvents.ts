@@ -3,6 +3,7 @@
 export const NOTIFICATION_EVENTS = {
   CONSULTATION_UPDATED: "consultationUpdated",
   CHAT_UPDATED: "chatUpdated",
+  BEASISWA_UPDATED: "beasiswaUpdated",
 } as const;
 
 export const triggerNotificationRefresh = () => {
@@ -13,4 +14,8 @@ export const triggerNotificationRefresh = () => {
 
 export const triggerChatRefresh = () => {
   window.dispatchEvent(new CustomEvent(NOTIFICATION_EVENTS.CHAT_UPDATED));
+};
+
+export const triggerBeasiswaRefresh = () => {
+  window.dispatchEvent(new CustomEvent(NOTIFICATION_EVENTS.BEASISWA_UPDATED));
 };

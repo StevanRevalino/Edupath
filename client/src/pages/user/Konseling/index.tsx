@@ -2,10 +2,32 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import TokenManager from "../../../utils/tokenManager";
 import toast from "react-hot-toast";
-import {
-  consultationHandler,
-  type Consultation,
-} from "../../../handler/consultationHandler";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export interface Consultation {
+  consultation_id: string;
+  murid_id: string;
+  admin_id: string;
+  topic: string;
+  consultation_date: string;
+  consultation_time: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
+  is_active: boolean;
+  description?: string;
+  admin_notes?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  murid?: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    kelas: number | null;
+  };
+}
+
 import ModalJadwalkanKonseling from "./components/ModalJadwalkanKonseling";
 import ConsultationCard from "./components/ConsultationCard";
 import ConsultationInfo from "./components/ConsultationInfo";
@@ -84,14 +106,21 @@ const Konseling = () => {
   const fetchConsultations = async () => {
     try {
       setLoading(true);
-      const response = await consultationHandler.getConsultations();
-      if (response.success && response.data) {
-        setConsultations(response.data);
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/consultations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.success && response.data.data) {
+        setConsultations(response.data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error fetching consultations:", error);
-      // You can add a toast notification here
-      // toast.error("Gagal memuat data konsultasi");
     } finally {
       setLoading(false);
     }
@@ -100,15 +129,25 @@ const Konseling = () => {
   const fetchKonselingDetail = async (consultationId: string) => {
     try {
       setLoadingDetail(true);
-      const response = await consultationHandler.getConsultationDetail(
-        consultationId
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/consultations/${consultationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      if (response.success && response.data) {
-        setSelectedConsultation(response.data);
+      if (response.data.success && response.data.data) {
+        setSelectedConsultation(response.data.data);
       } else {
         toast.error("Gagal memuat detail konsultasi");
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error fetching consultation detail:", error);
       toast.error("Gagal memuat detail konsultasi");
     } finally {

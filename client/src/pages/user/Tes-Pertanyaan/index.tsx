@@ -2,10 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import FormatPertanyaan from "./Components/FormatPertanyaan";
 import Pagination from "./Components/Pagination";
 import { useNavigate } from "react-router-dom";
-import { hollandHandler } from "../../../handler/hollandHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import type { HollandQuestion, HollandResponse } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import Swal from "sweetalert2";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Likert scale options (1-5)
 const LIKERT_OPTIONS = [
@@ -90,7 +93,13 @@ const TesPertanyaan = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await hollandHandler.getQuestions();
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/holland/questions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data.data as HollandQuestion[];
       // Acak urutan pertanyaan
       const shuffledData = shuffleArray(data);
       setQuestions(shuffledData);
@@ -158,7 +167,17 @@ const TesPertanyaan = () => {
       );
 
       // Submit to backend
-      const result = await hollandHandler.submitAssessment(responses);
+      const token = TokenManager.getToken();
+      const response = await axios.post(
+        `${API_URL}/api/holland/submit`,
+        { responses },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const result = response.data.data;
 
       // Clear session after successful submission
       localStorage.removeItem(SESSION_KEY);

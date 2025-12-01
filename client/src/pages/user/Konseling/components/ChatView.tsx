@@ -8,13 +8,166 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import { type Consultation } from "../../../../handler/consultationHandler";
-import { useChat } from "../../../../hooks/useChat";
+import { type Consultation } from "../index";
 import toast from "react-hot-toast";
 import {
   uploadImageToCloudinary,
   parseMessageWithImage,
 } from "../../../../utils/cloudinary";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+interface Message {
+  id: string;
+  message: string;
+  senderId: string;
+  senderName: string;
+  timestamp: string;
+  isFromAdmin: boolean;
+}
+
+// Inline ChatHandler for this component
+class ChatHandler {
+  private pollingInterval: NodeJS.Timeout | null = null;
+  private messageHandlers: ((messages: Message[]) => void)[] = [];
+  private errorHandlers: ((error: string) => void)[] = [];
+  private currentRoomId: string | null = null;
+
+  async getOrCreateRoom(consultationId: string): Promise<string | null> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.get(
+        `${API_URL}/api/chat/room/${consultationId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && response.data.data.room_id) {
+        this.currentRoomId = response.data.data.room_id;
+        return response.data.data.room_id;
+      }
+      throw new Error("Failed to get room ID");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal membuat ruang chat");
+        }
+      }
+      return null;
+    }
+  }
+
+  async loadMessages(roomId: string): Promise<Message[]> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.get(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error("Failed to load messages");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal memuat pesan");
+        }
+      }
+      return [];
+    }
+  }
+
+  async sendMessage(roomId: string, message: string): Promise<Message | null> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.post(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        { message },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal mengirim pesan");
+        }
+      }
+      return null;
+    }
+  }
+
+  startPolling(roomId: string, intervalMs: number = 3000) {
+    this.stopPolling();
+    this.currentRoomId = roomId;
+
+    this.pollingInterval = setInterval(async () => {
+      try {
+        const messages = await this.loadMessages(roomId);
+        this.notifyMessageHandlers(messages);
+      } catch (error) {
+        console.error("Error during polling:", error);
+      }
+    }, intervalMs);
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
+  onMessages(handler: (messages: Message[]) => void) {
+    this.messageHandlers.push(handler);
+  }
+
+  onError(handler: (error: string) => void) {
+    this.errorHandlers.push(handler);
+  }
+
+  removeMessageHandler(handler: (messages: Message[]) => void) {
+    this.messageHandlers = this.messageHandlers.filter((h) => h !== handler);
+  }
+
+  removeErrorHandler(handler: (error: string) => void) {
+    this.errorHandlers = this.errorHandlers.filter((h) => h !== handler);
+  }
+
+  private notifyMessageHandlers(messages: Message[]) {
+    this.messageHandlers.forEach((handler) => handler(messages));
+  }
+
+  private notifyErrorHandlers(error: string) {
+    this.errorHandlers.forEach((handler) => handler(error));
+  }
+}
+
+const chatHandler = new ChatHandler();
 
 interface ChatViewProps {
   consultation: Consultation;
@@ -32,18 +185,12 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
   // State for image zoom modal
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
-  // Use real-time chat hook
-  const {
-    messages,
-    loading,
-    sending: sendingMessage,
-    sendMessage,
-    error,
-  } = useChat({
-    consultationId: consultation.consultation_id,
-    userId: currentUserId,
-    enabled: true,
-  });
+  // Chat states (without hook)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
 
   // Local state for message input
   const [newMessage, setNewMessage] = useState("");
@@ -51,6 +198,61 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Initialize chat and polling
+  useEffect(() => {
+    const initializeChat = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const currentRoomId = await chatHandler.getOrCreateRoom(
+          consultation.consultation_id
+        );
+        if (currentRoomId) {
+          setRoomId(currentRoomId);
+          const initialMessages = await chatHandler.loadMessages(currentRoomId);
+          setMessages(initialMessages);
+          chatHandler.startPolling(currentRoomId, 5000);
+        }
+      } catch (err) {
+        console.error("Error initializing chat:", err);
+        setError("Gagal menginisialisasi chat");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeChat();
+
+    const handleMessages = (newMessages: Message[]) => {
+      setMessages((prev) => {
+        if (prev.length !== newMessages.length) return newMessages;
+        const lastPrev = prev[prev.length - 1];
+        const lastNew = newMessages[newMessages.length - 1];
+        if (!lastPrev || !lastNew || lastPrev.id !== lastNew.id) {
+          return newMessages;
+        }
+        return prev;
+      });
+    };
+
+    const handleError = (errorMessage: string) => {
+      setError(errorMessage);
+    };
+
+    chatHandler.onMessages(handleMessages);
+    chatHandler.onError(handleError);
+
+    return () => {
+      chatHandler.removeMessageHandler(handleMessages);
+      chatHandler.removeErrorHandler(handleError);
+      chatHandler.stopPolling();
+      setMessages([]);
+      setRoomId(null);
+    };
+  }, [consultation.consultation_id]);
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -105,7 +307,11 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
   };
 
   const handleSendMessage = async () => {
-    if ((!newMessage.trim() && !selectedImage) || sendingMessage) return;
+    if ((!newMessage.trim() && !selectedImage) || sendingMessage || !roomId)
+      return;
+
+    setSendingMessage(true);
+    setError(null);
 
     try {
       let messageToSend = newMessage.trim();
@@ -115,7 +321,6 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
         setUploadingImage(true);
         try {
           const imageUrl = await uploadToCloudinary(selectedImage);
-          // Add image URL to message (without [IMAGE] prefix)
           messageToSend = messageToSend
             ? `${messageToSend}\n${imageUrl}`
             : imageUrl;
@@ -123,18 +328,54 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           console.error("Error uploading image:", error);
           toast.error(error.message || "Gagal mengupload gambar");
           setUploadingImage(false);
+          setSendingMessage(false);
           return;
         } finally {
           setUploadingImage(false);
         }
       }
 
-      await sendMessage(messageToSend);
+      // Optimistic update
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        message: messageToSend,
+        senderId: currentUserId,
+        senderName: "You",
+        timestamp: new Date().toISOString(),
+        isFromAdmin: false,
+      };
+
+      setMessages((prev) => [...prev, optimisticMessage]);
+
+      // Send to server
+      const sentMessage = await chatHandler.sendMessage(roomId, messageToSend);
+
+      if (sentMessage) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === optimisticMessage.id ? sentMessage : msg
+          )
+        );
+      } else {
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== optimisticMessage.id)
+        );
+        throw new Error("Failed to send message");
+      }
+
       setNewMessage("");
       handleRemoveImage();
+      
+      // Focus back to textarea so user can continue typing
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Gagal mengirim pesan");
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith("temp-")));
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -264,7 +505,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
               return (
                 <div
-                  key={message.message_id}
+                  key={message.id}
                   className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                 >
                   <div
@@ -435,6 +676,15 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
         {/* Message Input */}
         <div className="pt-4 border-t">
+          {/* Show info message if consultation is completed */}
+          {consultation.status === "COMPLETED" && (
+            <div className="mb-3 p-3 bg-gray-100 rounded-lg text-center">
+              <p className="text-sm text-gray-600">
+                ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan lagi.
+              </p>
+            </div>
+          )}
+
           {/* Image Preview */}
           {imagePreview && (
             <div className="mb-3 relative inline-block">
@@ -463,7 +713,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingImage || sendingMessage}
+              disabled={uploadingImage || sendingMessage || consultation.status === "COMPLETED"}
               className="p-2 bg-secondary-light text-gray-600 hover:text-primary hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               title="Kirim gambar"
             >
@@ -473,14 +723,15 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
             {/* Text Input */}
             <div className="flex-1 flex items-center">
               <textarea
+                ref={textareaRef}
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ketik pesan..."
+                placeholder={consultation.status === "COMPLETED" ? "Konseling telah selesai" : "Ketik pesan..."}
                 rows={1}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 style={{ minHeight: "40px", maxHeight: "120px" }}
-                disabled={uploadingImage || sendingMessage}
+                disabled={uploadingImage || sendingMessage || consultation.status === "COMPLETED"}
               />
             </div>
 
@@ -490,7 +741,8 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
               disabled={
                 (!newMessage.trim() && !selectedImage) ||
                 sendingMessage ||
-                uploadingImage
+                uploadingImage ||
+                consultation.status === "COMPLETED"
               }
               className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px] min-h-[40px]"
             >

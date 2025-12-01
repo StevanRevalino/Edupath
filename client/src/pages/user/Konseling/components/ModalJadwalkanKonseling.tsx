@@ -11,17 +11,23 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import clockLogo from "../../../../assets/icons/clock-icon.png";
-import { consultationHandler } from "../../../../handler/consultationHandler";
-import {
-  userManagementHandler,
-  type Admin,
-} from "../../../../handler/userManagementHandler";
+import axios from "axios";
 import TokenManager from "../../../../utils/tokenManager";
 import toast from "react-hot-toast";
 import {
   konselingSchema,
   type KonselingFormData,
 } from "../../../../schema/KonselingSchema";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface Admin {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+}
 
 // Generate time slots (8:00 - 17:00, since consultation is 1 hour, last slot is 17:00)
 const generateTimeSlots = () => {
@@ -128,16 +134,22 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
 
   const fetchAdmins = async () => {
     try {
-      const response = await userManagementHandler.getAdmins();
+      const token = TokenManager.getToken();
+      const response = await axios.get(`${API_URL}/api/users/admins`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-      if (response.success && response.data) {
-        setAdmins(response.data);
+      if (response.data.success && response.data.data) {
+        setAdmins(response.data.data);
 
         // Set default expert to first admin if available
-        if (response.data.length > 0) {
+        if (response.data.data.length > 0) {
           setFormData((prev) => ({
             ...prev,
-            expertName: response.data[0].user_id,
+            expertName: response.data.data[0].user_id,
           }));
         }
       }
@@ -154,12 +166,19 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       const day = String(date.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
-      const response = await consultationHandler.getBookedSlotsForDate(
-        dateStr,
-        adminId
-      );
+      const token = TokenManager.getToken();
+      let url = `${API_URL}/api/consultations/booked-slots?date=${dateStr}`;
+      if (adminId) {
+        url += `&adminId=${adminId}`;
+      }
 
-      if (response.success && response.data) {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success && response.data.data) {
         // Extract ALL time slots that are occupied (start time and slots within the period, but NOT including end time)
         const bookedTimes: string[] = [];
 
@@ -275,11 +294,18 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         description: formData.description,
       };
 
-      const response = await consultationHandler.createConsultation(
-        consultationData
+      const token = TokenManager.getToken();
+      const response = await axios.post(
+        `${API_URL}/api/consultations`,
+        consultationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      if (response.success) {
+      if (response.data.success) {
         toast.success("Konsultasi berhasil dijadwalkan!");
         // Reset form
         setSelectedDate(new Date());
@@ -294,7 +320,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         onSuccess(); // Call parent callback to refresh data
         onClose(); // Close modal
       } else {
-        toast.error(response.message || "Gagal menjadwalkan konsultasi");
+        toast.error(response.data.message || "Gagal menjadwalkan konsultasi");
       }
     } catch (error: any) {
       console.error("Error creating consultation:", error);

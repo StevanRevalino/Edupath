@@ -5,8 +5,11 @@ import questionIcon from "../../../assets/question-logo.png";
 import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import { triggerNotificationRefresh } from "../../../utils/notificationEvents";
-import { consultationHandler } from "../../../handler/consultationHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import ConsultationFilters from "./Components/ConsultationFilters";
+
+const API_URL = import.meta.env.VITE_API_URL;
 import ConsultationDetailModal from "./Components/ConsultationDetailModal";
 import RescheduleModal from "./Components/RescheduleModal";
 import ConsultationTable from "./Components/ConsultationTable";
@@ -87,8 +90,21 @@ const KelolaDataKonseling = ({
   // Auto-complete expired consultations
   const autoCompleteExpiredConsultations = async () => {
     try {
-      await consultationHandler.autoCompleteExpired();
-    } catch (error) {
+      const token = TokenManager.getToken();
+      await axios.post(
+        `${API_URL}/api/consultations/auto-complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error auto-completing consultations:", error);
     }
   };
@@ -102,8 +118,13 @@ const KelolaDataKonseling = ({
         // First, auto-complete any expired consultations
         await autoCompleteExpiredConsultations();
 
-        const response = await consultationHandler.getConsultations();
-        setConsultations((response.data || []) as Consultation[]);
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/consultations`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setConsultations((response.data.data || []) as Consultation[]);
       } catch (error) {
         console.error("Error fetching consultations:", error);
         toast.error("Gagal mengambil data konseling");
@@ -233,10 +254,15 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed && result.value) {
-          await consultationHandler.updateStatus(
-            consultationId,
-            newStatus,
-            result.value
+          const token = TokenManager.getToken();
+          await axios.patch(
+            `${API_URL}/api/consultations/${consultationId}/status`,
+            { status: newStatus, admin_notes: result.value },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
 
           setConsultations(
@@ -273,7 +299,16 @@ const KelolaDataKonseling = ({
         });
 
         if (result.isConfirmed) {
-          await consultationHandler.updateStatus(consultationId, newStatus);
+          const token = TokenManager.getToken();
+          await axios.patch(
+            `${API_URL}/api/consultations/${consultationId}/status`,
+            { status: newStatus },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
           setConsultations(
             consultations.map((consultation) =>
@@ -332,14 +367,19 @@ const KelolaDataKonseling = ({
       const newDateTime = new Date(data.date);
       newDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const response = await consultationHandler.reschedule(
-        selectedConsultation.consultation_id,
-        newDateTime.toISOString(),
-        data.reason
+      const token = TokenManager.getToken();
+      const response = await axios.patch(
+        `${API_URL}/api/consultations/${selectedConsultation.consultation_id}/reschedule`,
+        { newDate: newDateTime.toISOString(), rescheduleReason: data.reason },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       // Update local state
-      const updatedConsultation = response.data as Consultation;
+      const updatedConsultation = response.data.data as Consultation;
       setConsultations(
         consultations.map((c) =>
           c.consultation_id === selectedConsultation.consultation_id
@@ -375,10 +415,15 @@ const KelolaDataKonseling = ({
 
     if (result.isConfirmed) {
       try {
-        await consultationHandler.updateStatus(
-          consultationId,
-          "DECLINED",
-          "Dibatalkan oleh admin"
+        const token = TokenManager.getToken();
+        await axios.patch(
+          `${API_URL}/api/consultations/${consultationId}/status`,
+          { status: "DECLINED", admin_notes: "Dibatalkan oleh admin" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         setConsultations(
@@ -395,7 +440,11 @@ const KelolaDataKonseling = ({
 
         toast.success("Konseling berhasil dibatalkan");
         triggerNotificationRefresh();
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+        }
         console.error("Error canceling consultation:", error);
         toast.error("Gagal membatalkan konseling");
       }

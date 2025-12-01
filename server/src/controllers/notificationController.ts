@@ -41,8 +41,14 @@ export class NotificationController {
       const consultation_cancel = notifications.filter(
         (n) => n.type === "CONSULTATION_CANCEL"
       ).length;
+      const consultation_starting = notifications.filter(
+        (n) => n.type === "CONSULTATION_STARTING"
+      ).length;
       const chat_message = notifications.filter(
         (n) => n.type === "CHAT_MESSAGE"
+      ).length;
+      const beasiswa_new = notifications.filter(
+        (n) => n.type === "BEASISWA_NEW"
       ).length;
 
       const stats = {
@@ -50,7 +56,9 @@ export class NotificationController {
         unread,
         consultation_new,
         consultation_cancel,
+        consultation_starting,
         chat_message,
+        beasiswa_new,
       };
 
       // Map to match frontend interface

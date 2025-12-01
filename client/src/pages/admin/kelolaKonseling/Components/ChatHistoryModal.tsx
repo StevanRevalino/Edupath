@@ -3,10 +3,18 @@ import { X, MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import TokenManager from "../../../../utils/tokenManager";
 import { parseMessageWithImage } from "../../../../utils/cloudinary";
-import {
-  consultationHandler,
-  type ChatMessage,
-} from "../../../../handler/consultationHandler";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export interface ChatMessage {
+  id: string;
+  message: string;
+  senderId: string;
+  senderName: string;
+  timestamp: string;
+  isFromAdmin: boolean;
+}
 
 interface ChatHistoryModalProps {
   isOpen: boolean;
@@ -49,18 +57,34 @@ const ChatHistoryModal = ({
     try {
       setLoading(true);
 
+      const token = TokenManager.getToken();
+
       // Get chat room first
-      const roomResponse = await consultationHandler.getChatRoom(
-        consultationId
+      const roomResponse = await axios.get(
+        `${API_URL}/api/chat/room/${consultationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      const roomId = roomResponse.data!.room_id;
+      const roomId = roomResponse.data.data!.room_id;
 
       // Fetch messages
-      const messagesResponse = await consultationHandler.getChatMessages(
-        roomId
+      const messagesResponse = await axios.get(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setMessages(messagesResponse.data || []);
+      setMessages(messagesResponse.data.data || []);
     } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error fetching chat messages:", error);
       if (error.response?.status === 404) {
         toast.error("Chat room tidak ditemukan");

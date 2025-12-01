@@ -10,9 +10,12 @@ import ScheduleTes from "./Components/ScheduleTes";
 import InfoTes, { type TesSession } from "./Components/InfoTes";
 import TesCard from "./Components/RiwayatTesCard";
 import { useNavigate } from "react-router-dom";
-import { hollandHandler } from "../../../handler/hollandHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import type { AssessmentHistory } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const SESSION_KEY = "holland_test_session";
 
@@ -75,7 +78,13 @@ const Tes = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const assessments = await hollandHandler.getAssessmentHistory();
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/holland/history`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const assessments = response.data.data;
         const mappedSessions = assessments.map(mapAssessmentToTesSession);
         setTesSessions(mappedSessions);
       } catch (err: any) {

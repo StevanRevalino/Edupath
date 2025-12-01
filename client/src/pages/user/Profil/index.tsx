@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { userHanndler, type User } from "../../../handler/userHandler";
+import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import ProfilePageLayout from "./components/ProfilePageLayout";
 import ModalEditProfile from "./components/ModalEditProfile";
+
+export interface User {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+  kelas?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 type UserProfile = User;
 
@@ -26,9 +39,17 @@ const Profil = () => {
         return;
       }
 
-      const userData = await userHanndler.getUserById();
-      setUserProfile(userData);
-      console.log("Profile data loaded:", userData);
+      const userData = await axios.get(
+        `${API_URL}/api/users/${TokenManager.getUserData().userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setUserProfile(userData.data.data);
+      console.log("Profile data loaded:", userData.data.data);
     } catch (error: any) {
       console.error("Error fetching profile:", error);
       toast.error("Gagal mengambil data profil");

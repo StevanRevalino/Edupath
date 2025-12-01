@@ -69,6 +69,7 @@ export class ChatController {
         kelas: consultation.murid.kelas,
         consultation_id: consultation.consultation_id,
         consultation_date: consultation.consultation_date?.toISOString(),
+        consultation_status: consultation.status,
         latestConsultationTopic: consultation.topic,
         room_id: consultation.chatRoom?.room_id,
         lastMessage:

@@ -7,12 +7,14 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import BeasiswaFormModal from "./components/BeasiswaFormModal";
-import { beasiswaHandler } from "../../../handler/beasiswaHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import {
   beasiswaSchema,
   type BeasiswaFormData,
 } from "../../../schema/BeasiswaSchema";
 import { uploadImageToCloudinary } from "../../../utils/cloudinary";
+import { triggerBeasiswaRefresh } from "../../../utils/notificationEvents";
 
 interface Beasiswa {
   beasiswa_id: string;
@@ -22,6 +24,8 @@ interface Beasiswa {
   created_at: string;
   updated_at: string;
 }
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const KelolaDataBeasiswa = () => {
   const [beasiswaList, setBeasiswaList] = useState<Beasiswa[]>([]);
@@ -50,8 +54,8 @@ const KelolaDataBeasiswa = () => {
   const fetchBeasiswa = async () => {
     try {
       setLoading(true);
-      const response = await beasiswaHandler.getAllBeasiswa();
-      setBeasiswaList(response.data);
+      const response = await axios.get(`${API_URL}/api/beasiswa`);
+      setBeasiswaList(response.data.data);
     } catch (error) {
       console.error("Error fetching beasiswa:", error);
       toast.error("Gagal mengambil data beasiswa");
@@ -208,17 +212,28 @@ const KelolaDataBeasiswa = () => {
         image_url: imageUrl,
       };
 
+      const token = TokenManager.getToken();
+      const authHeader = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
       if (selectedBeasiswa) {
         // Update existing
-        await beasiswaHandler.updateBeasiswa(
-          selectedBeasiswa.beasiswa_id,
-          payload
+        await axios.put(
+          `${API_URL}/api/beasiswa/${selectedBeasiswa.beasiswa_id}`,
+          payload,
+          authHeader
         );
         toast.success("Beasiswa berhasil diperbarui");
       } else {
         // Create new
-        await beasiswaHandler.createBeasiswa(payload);
+        await axios.post(`${API_URL}/api/beasiswa`, payload, authHeader);
         toast.success("Beasiswa berhasil ditambahkan");
+        // Trigger notification refresh for students
+        triggerBeasiswaRefresh();
       }
 
       fetchBeasiswa();
@@ -247,13 +262,27 @@ const KelolaDataBeasiswa = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await beasiswaHandler.deleteBeasiswa(beasiswaId);
+          const token = TokenManager.getToken();
+          await axios.delete(`${API_URL}/api/beasiswa/${beasiswaId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           setBeasiswaList(
             beasiswaList.filter((b) => b.beasiswa_id !== beasiswaId)
           );
           toast.success("Beasiswa berhasil dihapus");
         } catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (
+              error.response?.status === 401 ||
+              error.response?.status === 403
+            ) {
+              TokenManager.logout();
+              window.location.href = "/login";
+            }
+          }
           toast.error("Gagal menghapus beasiswa");
         }
       }

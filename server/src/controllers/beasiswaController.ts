@@ -75,6 +75,37 @@ export const createBeasiswa = async (req: Request, res: Response) => {
       },
     });
 
+    // Send notification to all students
+    try {
+      const students = await prisma.user.findMany({
+        where: {
+          role: "STUDENT",
+        },
+        select: {
+          user_id: true,
+        },
+      });
+
+      // Create notifications for all students
+      const notifications = students.map((student) => ({
+        user_id: student.user_id,
+        type: "BEASISWA_NEW",
+        title: "Beasiswa Baru Tersedia!",
+        message: `Beasiswa baru "${title}" telah ditambahkan. Cek sekarang!`,
+        related_id: newBeasiswa.beasiswa_id,
+        link: `/user/beasiswa`,
+      }));
+
+      await prisma.notification.createMany({
+        data: notifications,
+      });
+
+      console.log(`Sent beasiswa notification to ${students.length} students`);
+    } catch (notifError: any) {
+      console.error("Error sending beasiswa notifications:", notifError);
+      // Don't fail the request if notification fails
+    }
+
     res.status(201).json({
       success: true,
       message: "Beasiswa created successfully",

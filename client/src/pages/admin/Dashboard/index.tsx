@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { dashboardHandler } from "../../../handler/dashboardHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -61,6 +62,8 @@ interface RecentChat {
   last_message_time: string;
   unread_count: number;
 }
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -123,15 +126,31 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       end.setDate(start.getDate() + 6);
       end.setHours(23, 59, 59, 999);
 
-      const response = await dashboardHandler.getWeeklyConsultations({
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-      });
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/admin/dashboard/weekly-consultations`,
+        {
+          params: {
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (response.success && response.data) {
-        setWeeklyData(response.data);
+      if (response.data.success && response.data.data) {
+        setWeeklyData(response.data.data);
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+        }
+      }
       console.error("Error fetching weekly data:", error);
     }
   };
@@ -148,18 +167,34 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
     try {
       setLoading(true);
 
+      const token = TokenManager.getToken();
+      const authHeader = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
       // Fetch dashboard statistics
-      const statsResponse = await dashboardHandler.getStats();
+      const statsResponse = await axios.get(
+        `${API_URL}/api/admin/dashboard/stats`,
+        authHeader
+      );
 
       // Fetch upcoming consultations
-      const consultationsResponse =
-        await dashboardHandler.getUpcomingConsultations();
+      const consultationsResponse = await axios.get(
+        `${API_URL}/api/admin/dashboard/upcoming-consultations`,
+        authHeader
+      );
 
       // Fetch recent chats
-      const chatsResponse = await dashboardHandler.getRecentChats();
+      const chatsResponse = await axios.get(
+        `${API_URL}/api/admin/dashboard/recent-chats`,
+        authHeader
+      );
 
-      if (statsResponse.success) {
-        const dashboardData = statsResponse.data;
+      if (statsResponse.data.success) {
+        const dashboardData = statsResponse.data.data;
         setStats(dashboardData.stats);
 
         // Set chart data
@@ -167,13 +202,19 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           setWeeklyData(dashboardData.weeklyConsultations.data);
         }
       }
-      if (consultationsResponse.success) {
-        setUpcomingConsultations(consultationsResponse.data);
+      if (consultationsResponse.data.success) {
+        setUpcomingConsultations(consultationsResponse.data.data);
       }
-      if (chatsResponse.success) {
-        setRecentChats(chatsResponse.data);
+      if (chatsResponse.data.success) {
+        setRecentChats(chatsResponse.data.data);
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          TokenManager.logout();
+          window.location.href = "/login";
+        }
+      }
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);

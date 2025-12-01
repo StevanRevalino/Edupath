@@ -6,11 +6,30 @@ import React, {
   useEffect,
 } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  prodiHandler,
-  type ProdiWithUniversity,
-  type ProdiDetail,
-} from "../../../handler/prodiHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface ProdiWithUniversity {
+  prodi_id: string;
+  nama_prodi: string;
+  jenjang?: string | null;
+  bidang?: string | null;
+  akreditasi?: string | null;
+  universitas?: {
+    university_id: string | null;
+    nama: string | null;
+    provinsi: string | null;
+  };
+}
+
+interface ProdiDetail {
+  prodi_id: string;
+  nama_prodi: string;
+  jenjang?: string | null;
+  status?: string;
+}
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
 
@@ -108,7 +127,16 @@ const Jurusan: React.FC = () => {
         setSelectedRowIndex(rowIndex);
       }
       try {
-        const detail = await prodiHandler.getProdiDetail(prodiId);
+        const token = TokenManager.getToken();
+        const response = await axios.get(
+          `${API_URL}/api/prodi/detail/${prodiId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const detail = response.data.data;
         if (currentId !== detailRequestIdRef.current) return;
         setSelectedProdi(detail);
       } catch (e: any) {
@@ -139,17 +167,41 @@ const Jurusan: React.FC = () => {
         const hasFilter =
           selectedJenjang !== "Semua" || selectedAkreditasi !== "Semua";
 
-        const response = await prodiHandler.getProdiWithFilters({
-          searchKeyword: searchKeyword || undefined,
-          jenjang: selectedJenjang !== "Semua" ? selectedJenjang : undefined,
-          akreditasi:
-            selectedAkreditasi !== "Semua" ? selectedAkreditasi : undefined,
-          limit: !searchKeyword && !hasFilter ? 15 : undefined,
+        const token = TokenManager.getToken();
+        let url: string;
+        let queryParams: any = {};
+
+        if (searchKeyword && searchKeyword.trim().length > 0) {
+          url = `${API_URL}/api/prodi/search/nama/${encodeURIComponent(
+            searchKeyword.trim()
+          )}`;
+        } else {
+          url = `${API_URL}/api/prodi`;
+
+          if (selectedJenjang !== "Semua") {
+            queryParams.jenjang = selectedJenjang;
+          }
+          if (selectedAkreditasi !== "Semua") {
+            queryParams.akreditasi = selectedAkreditasi;
+          }
+          if (!searchKeyword && !hasFilter) {
+            queryParams.limit = 15;
+          }
+        }
+
+        const response = await axios.get(url, {
+          params: queryParams,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
 
         if (currentId !== searchRequestIdRef.current) return;
 
-        const filtered = response.data.filter((p) => p.universitas?.nama);
+        const filtered = (response.data.data || []).filter(
+          (p: ProdiWithUniversity) => p.universitas?.nama
+        );
 
         setResults(filtered);
         setHasSearched(true);
@@ -190,15 +242,24 @@ const Jurusan: React.FC = () => {
       setError("");
 
       try {
-        const response = await prodiHandler.searchProdiByName(
-          q.trim(),
-          ctrl.signal
+        const token = TokenManager.getToken();
+        const response = await axios.get(
+          `${API_URL}/api/prodi/search/nama/${encodeURIComponent(q.trim())}`,
+          {
+            signal: ctrl.signal,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
 
         if (currentId !== searchRequestIdRef.current) return;
 
         // Filter: Only show prodi with universitas.nama
-        const filtered = response.data.filter((p) => p.universitas?.nama);
+        const filtered = (response.data.data || []).filter(
+          (p: ProdiWithUniversity) => p.universitas?.nama
+        );
 
         // Cache the filtered results
         searchCacheRef.current.set(cacheKey, filtered);
@@ -208,7 +269,8 @@ const Jurusan: React.FC = () => {
 
         if (autoSelectExactMatch && filtered.length > 0) {
           const exact = filtered.find(
-            (p) => p.nama_prodi.toLowerCase() === q.trim().toLowerCase()
+            (p: ProdiWithUniversity) =>
+              p.nama_prodi.toLowerCase() === q.trim().toLowerCase()
           );
           if (exact) {
             const exactIndex = filtered.indexOf(exact);

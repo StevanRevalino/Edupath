@@ -17,7 +17,23 @@ import {
 } from "../../../utils/cloudinary";
 import ZoomRequestModal from "./components/ZoomRequestModal";
 import type { ZoomRequestData } from "./components/ZoomRequestModal";
-import { chatHandler, type ChatUser } from "../../../handler/chatHandler";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+export interface ChatUser {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  kelas: number | null;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  room_id?: string;
+  consultation_id?: string;
+  consultation_date?: string;
+  consultation_status?: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
+  unreadCount?: number;
+}
 
 interface ChatMessage {
   id: string;
@@ -25,8 +41,185 @@ interface ChatMessage {
   senderId: string;
   senderName: string;
   timestamp: string;
-  isFromAdmin: boolean; // retained because backend still returns it, but not used for alignment
+  isFromAdmin: boolean;
 }
+
+// Inline ChatHandler for admin live chat
+class ChatHandler {
+  private pollingInterval: NodeJS.Timeout | null = null;
+  private messageHandlers: ((messages: ChatMessage[]) => void)[] = [];
+  private errorHandlers: ((error: string) => void)[] = [];
+  private currentRoomId: string | null = null;
+
+  async getChatUsers(): Promise<ChatUser[]> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.get(`${API_URL}/api/chat/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error("Failed to fetch chat users");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal mengambil data chat");
+        }
+      }
+      throw error;
+    }
+  }
+
+  async getOrCreateRoom(consultationId: string): Promise<string | null> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.get(
+        `${API_URL}/api/chat/room/${consultationId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && response.data.data.room_id) {
+        this.currentRoomId = response.data.data.room_id;
+        return response.data.data.room_id;
+      }
+      throw new Error("Failed to get room ID");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal membuat ruang chat");
+        }
+      }
+      return null;
+    }
+  }
+
+  async loadMessages(roomId: string): Promise<ChatMessage[]> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.get(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error("Failed to load messages");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal memuat pesan");
+        }
+      }
+      return [];
+    }
+  }
+
+  async sendMessage(
+    roomId: string,
+    message: string
+  ): Promise<ChatMessage | null> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.post(
+        `${API_URL}/api/chat/messages/${roomId}`,
+        { message },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          this.notifyErrorHandlers("Gagal mengirim pesan");
+        }
+      }
+      return null;
+    }
+  }
+
+  async createZoomMeeting(data: {
+    consultationId: string;
+    userId: string;
+    topic: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    description?: string;
+  }): Promise<{
+    zoomMeetingId: string;
+    joinUrl: string;
+    startUrl: string;
+    password: string;
+  } | null> {
+    try {
+      const token = TokenManager.getToken();
+      if (!token) throw new Error("No authentication token");
+
+      const response = await axios.post(
+        `${API_URL}/api/zoom/create-meeting`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success) {
+        return response.data.data;
+      }
+      throw new Error("Failed to create Zoom meeting");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.notifyErrorHandlers("Session expired. Silakan login ulang.");
+          TokenManager.logout();
+          window.location.href = "/login";
+        } else {
+          const message =
+            error.response?.data?.message || "Gagal membuat Zoom meeting";
+          this.notifyErrorHandlers(message);
+        }
+      }
+      throw error;
+    }
+  }
+
+  private notifyMessageHandlers(messages: ChatMessage[]) {
+    this.messageHandlers.forEach((handler) => handler(messages));
+  }
+
+  private notifyErrorHandlers(error: string) {
+    this.errorHandlers.forEach((handler) => handler(error));
+  }
+}
+
+const chatHandler = new ChatHandler();
 
 const KelolaLiveChat = () => {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
@@ -43,7 +236,9 @@ const KelolaLiveChat = () => {
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isSendingRef = useRef<boolean>(false);
   const currentUserId = TokenManager.getUserData().userId || "";
 
   // Auto scroll to bottom when new messages arrive
@@ -66,17 +261,33 @@ const KelolaLiveChat = () => {
     if (selectedUser && selectedUser.room_id) {
       // Start polling for new messages every 3 seconds
       pollingIntervalRef.current = setInterval(async () => {
+        // Skip polling if currently sending a message
+        if (isSendingRef.current) {
+          return;
+        }
+
         try {
           const newMessages = await chatHandler.loadMessages(
             selectedUser.room_id!
           );
-          // Only update if messages are different
+          
+          // Only update if messages are actually different
           setChatMessages((prevMessages) => {
-            if (JSON.stringify(prevMessages) !== JSON.stringify(newMessages)) {
-              // Scroll to bottom when new messages arrive
+            // Compare by length and last message ID
+            if (prevMessages.length !== newMessages.length) {
               setTimeout(() => scrollToBottom(), 100);
               return newMessages as unknown as ChatMessage[];
             }
+            
+            // If same length, check if last message ID is different
+            const prevLastId = prevMessages[prevMessages.length - 1]?.id;
+            const newLastId = newMessages[newMessages.length - 1]?.id;
+            
+            if (prevLastId !== newLastId) {
+              setTimeout(() => scrollToBottom(), 100);
+              return newMessages as unknown as ChatMessage[];
+            }
+            
             return prevMessages;
           });
         } catch (error) {
@@ -239,6 +450,8 @@ const KelolaLiveChat = () => {
     )
       return;
 
+    // Set flag to prevent polling interference during send
+    isSendingRef.current = true;
     setSendingMessage(true);
     let messageText = newMessage.trim();
 
@@ -258,6 +471,7 @@ const KelolaLiveChat = () => {
           toast.error(error.message || "Gagal mengupload gambar");
           setUploadingImage(false);
           setSendingMessage(false);
+          isSendingRef.current = false;
           return;
         } finally {
           setUploadingImage(false);
@@ -277,44 +491,25 @@ const KelolaLiveChat = () => {
           );
         } else {
           toast.error("Gagal membuat chat room");
+          isSendingRef.current = false;
           return;
         }
       }
 
       if (selectedUser.room_id) {
-        // Optimistic update: Add message to UI immediately
-        const optimisticMessage: ChatMessage = {
-          id: `temp-${Date.now()}`,
-          message: messageText,
-          senderId: currentUserId,
-          senderName: "Admin EduPath",
-          timestamp: new Date().toISOString(),
-          isFromAdmin: true,
-        };
-
-        // Add to messages immediately for better UX
-        setChatMessages((prev) => [...prev, optimisticMessage]);
+        // Clear input immediately for better UX
         setNewMessage("");
+        handleRemoveImage();
 
-        // Send message via API
+        // Send message via API (no optimistic update to avoid flicker)
         const sentMessage = await chatHandler.sendMessage(
           selectedUser.room_id,
           messageText
         );
 
         if (sentMessage) {
-          // Replace optimistic message with real message from server
-          setChatMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === optimisticMessage.id
-                ? (sentMessage as unknown as ChatMessage)
-                : msg
-            )
-          );
-
-          // Clear message input and image
-          setNewMessage("");
-          handleRemoveImage();
+          // Add real message to chat
+          setChatMessages((prev) => [...prev, sentMessage as unknown as ChatMessage]);
 
           // Update last message in chat users list
           setChatUsers((prev) =>
@@ -323,7 +518,6 @@ const KelolaLiveChat = () => {
                 ? {
                     ...user,
                     lastMessage: messageText,
-                    // Simpan dalam bentuk ISO agar formatter bisa bekerja dengan benar
                     lastMessageTime: new Date().toISOString(),
                   }
                 : user
@@ -332,12 +526,12 @@ const KelolaLiveChat = () => {
 
           // Trigger chat refresh for notification badge
           triggerChatRefresh();
+          
+          // Focus back to textarea so admin can continue typing
+          setTimeout(() => {
+            textareaRef.current?.focus();
+          }, 100);
         } else {
-          // Remove optimistic message if sending failed
-          setChatMessages((prev) =>
-            prev.filter((msg) => msg.id !== optimisticMessage.id)
-          );
-          setNewMessage(messageText); // Restore input
           toast.error("Gagal mengirim pesan");
         }
       } else {
@@ -347,15 +541,13 @@ const KelolaLiveChat = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-
-      // Remove optimistic message and restore input on error
-      setChatMessages((prev) =>
-        prev.filter((msg) => !msg.id.startsWith("temp-"))
-      );
-      setNewMessage(messageText);
       toast.error("Gagal mengirim pesan");
     } finally {
       setSendingMessage(false);
+      // Reset sending flag after a short delay to allow message to reach server
+      setTimeout(() => {
+        isSendingRef.current = false;
+      }, 1000);
     }
   };
 
@@ -877,6 +1069,15 @@ const KelolaLiveChat = () => {
 
             {/* Message Input */}
             <div className="p-4 border-t border-gray-200 bg-gray-50">
+              {/* Show info message if consultation is completed */}
+              {selectedUser?.consultation_status === "COMPLETED" && (
+                <div className="mb-3 p-3 bg-gray-100 rounded-lg text-center">
+                  <p className="text-sm text-gray-600">
+                    ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan lagi.
+                  </p>
+                </div>
+              )}
+
               {/* Image Preview */}
               {imagePreview && (
                 <div className="mb-3 relative inline-block">
@@ -905,7 +1106,7 @@ const KelolaLiveChat = () => {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImage || sendingMessage}
+                  disabled={uploadingImage || sendingMessage || selectedUser?.consultation_status === "COMPLETED"}
                   className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Kirim gambar"
                 >
@@ -915,14 +1116,15 @@ const KelolaLiveChat = () => {
                 {/* Text Input */}
                 <div className="flex-1 flex items-center">
                   <textarea
+                    ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ketik pesan..."
+                    placeholder={selectedUser?.consultation_status === "COMPLETED" ? "Konseling telah selesai" : "Ketik pesan..."}
                     rows={1}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     style={{ minHeight: "40px", maxHeight: "120px" }}
-                    disabled={uploadingImage || sendingMessage}
+                    disabled={uploadingImage || sendingMessage || selectedUser?.consultation_status === "COMPLETED"}
                   />
                 </div>
 
@@ -932,7 +1134,8 @@ const KelolaLiveChat = () => {
                   disabled={
                     (!newMessage.trim() && !selectedImage) ||
                     sendingMessage ||
-                    uploadingImage
+                    uploadingImage ||
+                    selectedUser?.consultation_status === "COMPLETED"
                   }
                   className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
                 >

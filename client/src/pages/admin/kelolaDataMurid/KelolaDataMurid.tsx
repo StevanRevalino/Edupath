@@ -7,7 +7,8 @@ import PageHeader from "../../../components/PageHeader";
 import DataTableContainer from "../../../components/DataTableContainer";
 import AdminDataTable from "../components/AdminDataTable";
 import EditStudentModal from "./components/EditStudentModal";
-import { userManagementHandler } from "../../../handler/userManagementHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 
 interface Student {
   user_id: string;
@@ -18,6 +19,8 @@ interface Student {
   kelas: number | null;
   created_at: string;
 }
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const KelolaDataMurid = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -39,8 +42,14 @@ const KelolaDataMurid = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await userManagementHandler.getAllStudents();
-        setStudents(response.data);
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setStudents(response.data.data);
       } catch (error) {
         console.error("Error fetching users:", error);
         toast.error("Gagal mengambil data murid");
@@ -130,9 +139,16 @@ const KelolaDataMurid = () => {
             kelas: editForm.kelas!,
           };
 
-          await userManagementHandler.updateStudent(
-            selectedStudent.user_id,
-            updatePayload
+          const token = TokenManager.getToken();
+          await axios.put(
+            `${API_URL}/api/users/${selectedStudent.user_id}`,
+            updatePayload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
           );
 
           // Update state lokal
@@ -176,7 +192,13 @@ const KelolaDataMurid = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await userManagementHandler.deleteStudent(studentId);
+          const token = TokenManager.getToken();
+          await axios.delete(`${API_URL}/api/users/${studentId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
 
           setStudents(
             students.filter((student) => student.user_id !== studentId)

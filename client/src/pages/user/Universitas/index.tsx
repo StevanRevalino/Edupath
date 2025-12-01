@@ -6,11 +6,26 @@ import React, {
   useEffect,
 } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  universitasHandler,
-  type Universitas as UniversitasType,
-} from "../../../handler/universitasHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface Universitas {
+  id_universitas: string;
+  nama: string;
+  akreditasi: string | null;
+  tipe: string | null;
+  alamat: string | null;
+  kota: string | null;
+  provinsi: string | null;
+  website: string | null;
+  telepon: string | null;
+  email: string | null;
+  logo_url: string | null;
+  deskripsi: string | null;
+}
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
 
@@ -22,7 +37,7 @@ import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
 import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
-type UniversitasItem = UniversitasType & {
+type UniversitasItem = Universitas & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
@@ -35,7 +50,7 @@ type UniversitasItem = UniversitasType & {
   rank_country?: number | null;
 };
 
-type UniversitasDetailType = UniversitasType & {
+type UniversitasDetailType = Universitas & {
   university_id: string;
   nama: string;
   nama_singkat?: string | null;
@@ -125,8 +140,14 @@ const Universitas: React.FC = () => {
     setDetailLoading(true);
     setDetailError("");
     try {
-      const response = await universitasHandler.getUniversitasById(
-        universityId
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/universitas/${universityId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (currentId !== detailRequestIdRef.current) return; // abaikan response lama
@@ -169,17 +190,39 @@ const Universitas: React.FC = () => {
         const hasFilter =
           selectedProvinsi !== "Semua" || selectedAkreditasi !== "Semua";
 
-        const response = await universitasHandler.getUniversitasWithFilters({
-          searchKeyword: searchKeyword || undefined,
-          provinsi: selectedProvinsi !== "Semua" ? selectedProvinsi : undefined,
-          akreditasi:
-            selectedAkreditasi !== "Semua" ? selectedAkreditasi : undefined,
-          limit: !searchKeyword && !hasFilter ? 15 : undefined,
+        const token = TokenManager.getToken();
+        let url: string;
+        let queryParams: any = {};
+
+        if (searchKeyword && searchKeyword.trim().length > 0) {
+          url = `${API_URL}/api/universitas/search?nama=${encodeURIComponent(
+            searchKeyword.trim()
+          )}`;
+        } else {
+          url = `${API_URL}/api/universitas`;
+
+          if (selectedProvinsi !== "Semua") {
+            queryParams.provinsi = selectedProvinsi;
+          }
+          if (selectedAkreditasi !== "Semua") {
+            queryParams.akreditasi = selectedAkreditasi;
+          }
+          if (!searchKeyword && !hasFilter) {
+            queryParams.limit = 15;
+          }
+        }
+
+        const response = await axios.get(url, {
+          params: queryParams,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
 
         if (currentId !== searchRequestIdRef.current) return; // abaikan response lama
 
-        setResults(response.data as UniversitasItem[]);
+        setResults(response.data.data as UniversitasItem[]);
         setHasSearched(true);
       } catch (e: any) {
         if (currentId !== searchRequestIdRef.current) return;
@@ -229,14 +272,19 @@ const Universitas: React.FC = () => {
       setError("");
 
       try {
-        const response = await universitasHandler.searchUniversitasByName(
-          q.trim(),
-          ctrl.signal
-        );
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/universitas/search`, {
+          params: { nama: q.trim() },
+          signal: ctrl.signal,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (currentId !== searchRequestIdRef.current) return; // abaikan response lama
 
-        const data = response.data as UniversitasItem[];
+        const data = (response.data.data || []) as UniversitasItem[];
 
         // Cache the results
         searchCacheRef.current.set(searchKey, data);

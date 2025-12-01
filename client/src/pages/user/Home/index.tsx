@@ -1,10 +1,22 @@
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { userHanndler, type User } from "../../../handler/userHandler";
-import { prodiHandler } from "../../../handler/prodiHandler";
-import { universitasHandler } from "../../../handler/universitasHandler";
-import { hollandHandler } from "../../../handler/hollandHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+export interface User {
+  user_id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+  kelas?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 import SectionCard from "./components/SectionCard";
 import UnivAndProdiTag from "../../../components/UnivAndProdiTag";
 import HeroSectionBG from "../../../assets/hero-section.png";
@@ -83,8 +95,16 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await userHanndler.getUserById();
-        setUser(userData);
+        const userData = await axios.get(
+          `${API_URL}/api/users/${TokenManager.getUserData().userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${TokenManager.getToken()}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setUser(userData.data.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -97,9 +117,16 @@ const Home = () => {
   useEffect(() => {
     const fetchProdiData = async () => {
       try {
-        const response = await prodiHandler.getAllProdi(679);
-        if (response.success) {
-          const prodiNames = response.data.map((prodi) => prodi.nama_prodi);
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/prodi?limit=679`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data.success) {
+          const prodiNames = response.data.data.map(
+            (prodi: any) => prodi.nama_prodi
+          );
           setAllMajors(prodiNames);
         }
       } catch (error) {
@@ -117,9 +144,19 @@ const Home = () => {
   useEffect(() => {
     const fetchUniversitasData = async () => {
       try {
-        const response = await universitasHandler.getAllUniversitas(645);
-        if (response.success) {
-          const universitasNames = response.data.map((univ) => univ.nama);
+        const token = TokenManager.getToken();
+        const response = await axios.get(
+          `${API_URL}/api/universitas?limit=645`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.success) {
+          const universitasNames = response.data.data.map(
+            (univ: any) => univ.nama
+          );
           setAllUniversities(universitasNames);
         }
       } catch (error) {
@@ -138,7 +175,13 @@ const Home = () => {
     const fetchAssessmentData = async () => {
       try {
         // Fetch assessment history
-        const assessments = await hollandHandler.getAssessmentHistory();
+        const token = TokenManager.getToken();
+        const response = await axios.get(`${API_URL}/api/holland/history`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const assessments = response.data.data;
         const assessmentsArray = assessments || [];
         const totalTests = assessments.length;
 
@@ -157,9 +200,16 @@ const Home = () => {
             : null;
 
           // Fetch detailed result for latest assessment to get recommendations
-          const result = await hollandHandler.getAssessmentResult(
-            latestAssessment.assessment_id
+          const token = TokenManager.getToken();
+          const response = await axios.get(
+            `${API_URL}/api/holland/result/${latestAssessment.assessment_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
+          const result = response.data.data;
 
           const recommendations = result.recommendations || [];
           const scores = result.scores || null;

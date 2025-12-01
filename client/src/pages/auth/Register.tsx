@@ -5,12 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema, emailSchema } from "../../schema/RegsiterSchema";
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
-import { authHandler } from "../../handler/authHandler";
+import axios from "axios";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import AuthEmailInput from "./components/AuthEmailInput";
 import AuthPasswordInput from "./components/AuthPasswordInput";
 import AuthButton from "./components/AuthButton";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 type OptionType = {
   value: string | number;
@@ -94,7 +96,7 @@ export default function Register() {
     }
 
     try {
-      await authHandler.register({
+      await axios.post(`${API_URL}/api/auth/register`, {
         firstname: firstName,
         lastname: lastName,
         kelas: Number(kelas?.value),
@@ -117,7 +119,10 @@ export default function Register() {
       // validasi pakai yup
       await emailSchema.validate({ email });
 
-      const response = await authHandler.sendOtp(email, "verification");
+      const response = await axios.post(
+        `${API_URL}/api/auth/send-verification-otp`,
+        { email }
+      );
       // Set OTP dari server response
       const serverOtp = response.data.otp;
       setOtp(serverOtp);
@@ -149,7 +154,10 @@ export default function Register() {
     if (timer > 0) return;
 
     try {
-      const response = await authHandler.sendOtp(email, "verification");
+      const response = await axios.post(
+        `${API_URL}/api/auth/send-verification-otp`,
+        { email }
+      );
       const newOtp = response.data.otp;
       setOtp(newOtp);
       setOtpResetTrigger((prev) => prev + 1);

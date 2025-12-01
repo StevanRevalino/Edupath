@@ -1,4 +1,25 @@
-import { type Consultation } from "../../../../handler/consultationHandler";
+// Consultation interface
+export interface Consultation {
+  consultation_id: string;
+  murid_id: string;
+  admin_id: string;
+  topic: string;
+  consultation_date: string;
+  consultation_time: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
+  is_active: boolean;
+  description?: string;
+  admin_notes?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  murid?: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    kelas: number | null;
+  };
+}
 
 interface ConsultationCardProps {
   consultation: Consultation;

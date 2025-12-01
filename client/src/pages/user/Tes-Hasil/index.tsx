@@ -5,10 +5,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { hollandHandler } from "../../../handler/hollandHandler";
+import axios from "axios";
+import TokenManager from "../../../utils/tokenManager";
 import type { AssessmentResult, HollandType } from "../../../types/holland";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-hot-toast";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -52,7 +55,16 @@ const HasilTes: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await hollandHandler.getAssessmentResult(assessmentId);
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/holland/result/${assessmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = response.data.data;
       setResult(data);
     } catch (err: any) {
       console.error("Error fetching result:", err);

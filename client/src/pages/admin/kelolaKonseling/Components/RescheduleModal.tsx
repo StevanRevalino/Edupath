@@ -11,7 +11,10 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { CalendarIcon, Clock, X, Minus } from "lucide-react";
-import { consultationHandler } from "../../../../handler/consultationHandler";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Consultation {
   consultation_id: string;
@@ -66,11 +69,29 @@ const RescheduleModal: FC<RescheduleModalProps> = ({
   // Fetch booked slots for selected date
   const fetchBookedSlots = async (date: Date) => {
     try {
-      const response = await consultationHandler.getBookedSlotsForDate(date);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      const token = TokenManager.getToken();
+      const response = await axios.get(
+        `${API_URL}/api/consultations/booked-slots?date=${dateStr}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       // Extract startTime from booked slots
-      const slots = response.data?.map((slot) => slot.startTime) || [];
+      const slots =
+        response.data.data?.map((slot: any) => slot.startTime) || [];
       setBookedSlots(slots);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        TokenManager.logout();
+        window.location.href = "/login";
+      }
       console.error("Error fetching booked slots:", error);
     }
   };

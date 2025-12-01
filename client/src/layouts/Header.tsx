@@ -3,8 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
-import { userHanndler } from "../handler/userHandler";
+import axios from "axios";
 import NotificationPanel from "../pages/user/notification";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -50,8 +52,13 @@ const Header = () => {
         const { userId } = TokenManager.getUserData();
         if (!userId) return;
 
-        const userData = await userHanndler.getUserById(userId);
-        setUser(userData);
+        const userData = await axios.get(`${API_URL}/api/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${TokenManager.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setUser(userData.data.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
