@@ -365,7 +365,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
 
       setNewMessage("");
       handleRemoveImage();
-      
+
       // Focus back to textarea so user can continue typing
       setTimeout(() => {
         textareaRef.current?.focus();
@@ -680,7 +680,8 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
           {consultation.status === "COMPLETED" && (
             <div className="mb-3 p-3 bg-gray-100 rounded-lg text-center">
               <p className="text-sm text-gray-600">
-                ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan lagi.
+                ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan
+                lagi.
               </p>
             </div>
           )}
@@ -713,7 +714,11 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingImage || sendingMessage || consultation.status === "COMPLETED"}
+              disabled={
+                uploadingImage ||
+                sendingMessage ||
+                consultation.status === "COMPLETED"
+              }
               className="p-2 bg-secondary-light text-gray-600 hover:text-primary hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               title="Kirim gambar"
             >
@@ -727,11 +732,19 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={consultation.status === "COMPLETED" ? "Konseling telah selesai" : "Ketik pesan..."}
+                placeholder={
+                  consultation.status === "COMPLETED"
+                    ? "Konseling telah selesai"
+                    : "Ketik pesan..."
+                }
                 rows={1}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 style={{ minHeight: "40px", maxHeight: "120px" }}
-                disabled={uploadingImage || sendingMessage || consultation.status === "COMPLETED"}
+                disabled={
+                  uploadingImage ||
+                  sendingMessage ||
+                  consultation.status === "COMPLETED"
+                }
               />
             </div>
 

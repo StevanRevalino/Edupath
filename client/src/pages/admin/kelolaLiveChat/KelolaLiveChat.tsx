@@ -270,7 +270,7 @@ const KelolaLiveChat = () => {
           const newMessages = await chatHandler.loadMessages(
             selectedUser.room_id!
           );
-          
+
           // Only update if messages are actually different
           setChatMessages((prevMessages) => {
             // Compare by length and last message ID
@@ -278,16 +278,16 @@ const KelolaLiveChat = () => {
               setTimeout(() => scrollToBottom(), 100);
               return newMessages as unknown as ChatMessage[];
             }
-            
+
             // If same length, check if last message ID is different
             const prevLastId = prevMessages[prevMessages.length - 1]?.id;
             const newLastId = newMessages[newMessages.length - 1]?.id;
-            
+
             if (prevLastId !== newLastId) {
               setTimeout(() => scrollToBottom(), 100);
               return newMessages as unknown as ChatMessage[];
             }
-            
+
             return prevMessages;
           });
         } catch (error) {
@@ -509,7 +509,10 @@ const KelolaLiveChat = () => {
 
         if (sentMessage) {
           // Add real message to chat
-          setChatMessages((prev) => [...prev, sentMessage as unknown as ChatMessage]);
+          setChatMessages((prev) => [
+            ...prev,
+            sentMessage as unknown as ChatMessage,
+          ]);
 
           // Update last message in chat users list
           setChatUsers((prev) =>
@@ -526,7 +529,7 @@ const KelolaLiveChat = () => {
 
           // Trigger chat refresh for notification badge
           triggerChatRefresh();
-          
+
           // Focus back to textarea so admin can continue typing
           setTimeout(() => {
             textareaRef.current?.focus();
@@ -1073,7 +1076,8 @@ const KelolaLiveChat = () => {
               {selectedUser?.consultation_status === "COMPLETED" && (
                 <div className="mb-3 p-3 bg-gray-100 rounded-lg text-center">
                   <p className="text-sm text-gray-600">
-                    ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan lagi.
+                    ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan
+                    lagi.
                   </p>
                 </div>
               )}
@@ -1106,7 +1110,11 @@ const KelolaLiveChat = () => {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImage || sendingMessage || selectedUser?.consultation_status === "COMPLETED"}
+                  disabled={
+                    uploadingImage ||
+                    sendingMessage ||
+                    selectedUser?.consultation_status === "COMPLETED"
+                  }
                   className="p-2 text-gray-600 hover:text-primary hover:bg-secondary-lighter rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Kirim gambar"
                 >
@@ -1120,11 +1128,19 @@ const KelolaLiveChat = () => {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder={selectedUser?.consultation_status === "COMPLETED" ? "Konseling telah selesai" : "Ketik pesan..."}
+                    placeholder={
+                      selectedUser?.consultation_status === "COMPLETED"
+                        ? "Konseling telah selesai"
+                        : "Ketik pesan..."
+                    }
                     rows={1}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     style={{ minHeight: "40px", maxHeight: "120px" }}
-                    disabled={uploadingImage || sendingMessage || selectedUser?.consultation_status === "COMPLETED"}
+                    disabled={
+                      uploadingImage ||
+                      sendingMessage ||
+                      selectedUser?.consultation_status === "COMPLETED"
+                    }
                   />
                 </div>
 
