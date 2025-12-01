@@ -47,16 +47,16 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/universitas", universitasRoutes);
-app.use("/api/prodi", prodiRoutes);
-app.use("/api/consultations", consultationRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/chat", chatRoutes);
 app.use("/api/beasiswa", beasiswaRoutes);
-app.use("/api/holland", hollandRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/consultations", consultationRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
-app.use("/api/zoom", zoomRoutes);
+app.use("/api/holland", hollandRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/prodi", prodiRoutes);
+app.use("/api/universitas", universitasRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/zoom", zoomRoutes);
 
 const PORT = 5000;
 
