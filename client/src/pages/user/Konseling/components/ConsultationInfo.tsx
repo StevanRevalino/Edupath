@@ -32,8 +32,12 @@ const ConsultationInfo = ({
       return false;
     }
 
-    // Chat is available anytime as long as consultation is accepted and active
-    return true;
+    // Check if consultation has started
+    const consultationStartTime = new Date(consultation.consultation_date);
+    const now = new Date();
+
+    // Chat is only available when consultation time has started
+    return now >= consultationStartTime;
   };
 
   const handleCancelConsultation = async () => {

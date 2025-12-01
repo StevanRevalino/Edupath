@@ -70,26 +70,6 @@ export const eduPathColors = {
     sastraInggris: "#6366F1",
   },
 
-  // University Colors - Warna untuk universitas
-  university: {
-    universitasIndonesia: "#B91C1C",
-    institutTeknologiBandung: "#BE123C",
-    universitasGadjahMada: "#C2410C",
-    institutTeknologiSepuluhNopember: "#1F2937",
-    universitasBinaNusantara: "#1E3A8A",
-    universitasBrawijaya: "#047857",
-    universitasDiponegoro: "#DC2626",
-    universitasPadjadjaran: "#F59E0B",
-    binaNusantara: "#1E40AF",
-    universitasTrisakti: "#7C3AED",
-    universitasPelitaHarapan: "#7C2D12",
-    universitasTarumanagara: "#059669",
-    institutPertanianBogor: "#3C3782",
-    universitasSebelasMaret: "#8B0000",
-    universitasHasanuddin: "#EF4444",
-    universitasNegeriYogyakarta: "#B31507",
-  },
-
   // Consultation Status Colors - Warna untuk status konseling
   consultationStatus: {
     pending: "#F59E0B", // Kuning - menunggu

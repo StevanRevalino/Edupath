@@ -150,6 +150,15 @@ const Konseling = () => {
       return;
     }
 
+    // Check if consultation has started
+    const consultationStartTime = new Date(consultation.consultation_date);
+    const now = new Date();
+
+    if (now < consultationStartTime) {
+      toast.error("Chat akan tersedia saat waktu konseling dimulai");
+      return;
+    }
+
     setShowChat(true);
   };
 
