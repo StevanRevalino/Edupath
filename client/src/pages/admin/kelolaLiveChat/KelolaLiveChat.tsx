@@ -46,10 +46,7 @@ interface ChatMessage {
 
 // Inline ChatHandler for admin live chat
 class ChatHandler {
-  private pollingInterval: NodeJS.Timeout | null = null;
-  private messageHandlers: ((messages: ChatMessage[]) => void)[] = [];
   private errorHandlers: ((error: string) => void)[] = [];
-  private currentRoomId: string | null = null;
 
   async getChatUsers(): Promise<ChatUser[]> {
     try {
@@ -89,7 +86,6 @@ class ChatHandler {
       );
 
       if (response.data.success && response.data.data.room_id) {
-        this.currentRoomId = response.data.data.room_id;
         return response.data.data.room_id;
       }
       throw new Error("Failed to get room ID");
@@ -208,10 +204,6 @@ class ChatHandler {
       }
       throw error;
     }
-  }
-
-  private notifyMessageHandlers(messages: ChatMessage[]) {
-    this.messageHandlers.forEach((handler) => handler(messages));
   }
 
   private notifyErrorHandlers(error: string) {

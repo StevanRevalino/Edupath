@@ -1,4 +1,3 @@
-import React from "react";
 import leftArrowIcon from "../../../../assets/icons/left-arrow.png";
 import RightArrowIcon from "../../../../assets/icons/right-arrow.png";
 

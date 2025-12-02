@@ -33,7 +33,6 @@ class ChatHandler {
   private pollingInterval: NodeJS.Timeout | null = null;
   private messageHandlers: ((messages: Message[]) => void)[] = [];
   private errorHandlers: ((error: string) => void)[] = [];
-  private currentRoomId: string | null = null;
 
   async getOrCreateRoom(consultationId: string): Promise<string | null> {
     try {
@@ -46,7 +45,6 @@ class ChatHandler {
       );
 
       if (response.data.success && response.data.data.room_id) {
-        this.currentRoomId = response.data.data.room_id;
         return response.data.data.room_id;
       }
       throw new Error("Failed to get room ID");
@@ -123,7 +121,6 @@ class ChatHandler {
 
   startPolling(roomId: string, intervalMs: number = 3000) {
     this.stopPolling();
-    this.currentRoomId = roomId;
 
     this.pollingInterval = setInterval(async () => {
       try {

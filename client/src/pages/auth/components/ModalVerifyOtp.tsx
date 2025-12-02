@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import warningLogo from "../../../assets/warning-logo.png";
 
@@ -22,7 +21,7 @@ export default function OTPModal({
   const [inputOtp, setInputOtp] = useState(Array(6).fill(""));
   const [timer, setTimer] = useState(30);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const [resetTrigger, setResetTrigger] = useState(0);
+  const [resetTrigger] = useState(0);
 
   useEffect(() => {
     setTimer(30);

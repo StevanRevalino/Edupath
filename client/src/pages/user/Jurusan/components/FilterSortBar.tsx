@@ -22,7 +22,6 @@ const FilterSortBar: React.FC<FilterSortBarProps> = ({
   selectedAkreditasi,
   onAkreditasiChange,
   jenjangOptions,
-  akreditasiOptions,
   onReset,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
