@@ -51,13 +51,12 @@ model Universitas {
 }
 
 model Prodi {
-  prodi_id               Int                     @id
-  nama_prodi             String
-  jenjang                String?
-  created_at             DateTime                @default(now())
-  prodi_pt               ProdiPT[]
-  hollandMappings        HollandProdiMapping[]
-  hollandRecommendations HollandRecommendation[]
+  prodi_id        Int                   @id
+  nama_prodi      String
+  jenjang         String?
+  created_at      DateTime              @default(now())
+  prodi_pt        ProdiPT[]
+  hollandMappings HollandProdiMapping[]
 
   @@index([nama_prodi])
   @@index([jenjang])
@@ -202,49 +201,32 @@ enum HollandType {
 }
 
 model HollandQuestion {
-  question_id   Int               @id @default(autoincrement())
+  question_id   Int         @id @default(autoincrement())
   question_text String
   holland_type  HollandType
-  created_at    DateTime          @default(now())
-  responses     HollandResponse[]
+  created_at    DateTime    @default(now())
 
   @@index([holland_type])
 }
 
 model HollandAssessment {
-  assessment_id       String                  @id @default(cuid())
+  assessment_id       String       @id @default(cuid())
   user_id             String
-  realistic_score     Int                     @default(0)
-  investigative_score Int                     @default(0)
-  artistic_score      Int                     @default(0)
-  social_score        Int                     @default(0)
-  enterprising_score  Int                     @default(0)
-  conventional_score  Int                     @default(0)
+  realistic_score     Int          @default(0)
+  investigative_score Int          @default(0)
+  artistic_score      Int          @default(0)
+  social_score        Int          @default(0)
+  enterprising_score  Int          @default(0)
+  conventional_score  Int          @default(0)
   primary_type        HollandType
   secondary_type      HollandType?
   holland_code        String
-  completed_at        DateTime                @default(now())
-  user                User                    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  responses           HollandResponse[]
-  recommendations     HollandRecommendation[]
+  completed_at        DateTime     @default(now())
+  user                User         @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([primary_type])
   @@index([completed_at])
-}
-
-model HollandResponse {
-  response_id   String            @id @default(cuid())
-  assessment_id String
-  question_id   Int
-  answer_value  Int
-  created_at    DateTime          @default(now())
-  assessment    HollandAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
-  question      HollandQuestion   @relation(fields: [question_id], references: [question_id], onDelete: Cascade)
-
-  @@unique([assessment_id, question_id])
-  @@index([assessment_id])
-  @@index([question_id])
 }
 
 model HollandProdiMapping {
@@ -258,19 +240,4 @@ model HollandProdiMapping {
   @@index([primary_type])
   @@index([secondary_type])
   @@index([prodi_id])
-}
-
-model HollandRecommendation {
-  recommendation_id String            @id @default(cuid())
-  assessment_id     String
-  prodi_id          Int
-  match_percentage  Float
-  rank              Int
-  created_at        DateTime          @default(now())
-  assessment        HollandAssessment @relation(fields: [assessment_id], references: [assessment_id], onDelete: Cascade)
-  prodi             Prodi             @relation(fields: [prodi_id], references: [prodi_id], onDelete: Cascade)
-
-  @@index([assessment_id])
-  @@index([prodi_id])
-  @@index([rank])
 }
