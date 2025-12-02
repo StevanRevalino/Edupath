@@ -6,7 +6,6 @@ import {
   Calendar,
   AlertCircle,
   Trash2,
-  CheckCheck,
   Video,
   Award,
 } from "lucide-react";
@@ -15,6 +14,7 @@ import { id } from "date-fns/locale";
 import { NOTIFICATION_EVENTS } from "../../../utils/notificationEvents";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
+import Swal from "sweetalert2";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -261,10 +261,6 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
     setIsOpen(false);
   };
 
-  const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
-  };
-
   const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
     e.stopPropagation();
     await deleteNotification(notificationId);
@@ -273,14 +269,43 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
   const handleDeleteAll = async () => {
     if (notifications.length === 0) return;
 
-    const confirmed = window.confirm(
-      `Apakah Anda yakin ingin menghapus semua ${notifications.length} notifikasi?`
-    );
+    const result = await Swal.fire({
+      title: "Hapus Semua Notifikasi?",
+      text: `Apakah Anda yakin ingin menghapus semua ${notifications.length} notifikasi? Tindakan ini tidak dapat dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus Semua!",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    });
 
-    if (confirmed) {
-      await deleteAllNotifications();
+    if (result.isConfirmed) {
+      const success = await deleteAllNotifications();
+      if (success) {
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Semua notifikasi telah dihapus.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
     }
   };
+
+  // Auto mark all as read when panel opens
+  useEffect(() => {
+    if (isOpen && stats.unread > 0) {
+      // Delay slightly to allow panel animation to complete
+      const timer = setTimeout(() => {
+        markAllAsRead();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   return (
     <div className="relative">
@@ -333,17 +358,6 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
                   Belum Dibaca: {stats.unread}
                 </span>
               </div>
-
-              {/* Mark All as Read Button */}
-              {stats.unread > 0 && (
-                <button
-                  onClick={handleMarkAllAsRead}
-                  className="mt-2 w-full px-3 py-2 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm"
-                >
-                  <CheckCheck className="w-4 h-4" />
-                  Tandai Semua Dibaca
-                </button>
-              )}
 
               {/* Delete All Button */}
               {stats.total > 0 && (
