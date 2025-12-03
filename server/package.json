@@ -13,7 +13,8 @@
     "db:deploy": "npm run db:migrate && npm run db:generate",
     "db:seed": "npm run universitasdanprodi:seed",
     "import:csv": "ts-node src/scripts/import-csv.ts",
-    "import:sample": "ts-node src/scripts/insert-sample-data.ts"
+    "import:sample": "ts-node src/scripts/insert-sample-data.ts",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
