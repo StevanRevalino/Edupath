@@ -152,7 +152,9 @@ const Universitas: React.FC = () => {
 
       if (currentId !== detailRequestIdRef.current) return; // abaikan response lama
 
-      setSelectedUniversitas(response.data as UniversitasDetailType);
+      // Handle response data structure (check if data is nested or direct)
+      const data = response.data.data || response.data;
+      setSelectedUniversitas(data as UniversitasDetailType);
     } catch (e: any) {
       if (currentId !== detailRequestIdRef.current) return;
       const msg =
@@ -169,6 +171,7 @@ const Universitas: React.FC = () => {
 
   const handleUniversitasClick = useCallback(
     (universityId: string) => {
+      console.log("Clicked university ID:", universityId);
       setDetailLoading(true);
       fetchUniversitasDetail(universityId);
     },
