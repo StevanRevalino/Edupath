@@ -29,15 +29,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install
+          npm ci
           npm run build --if-present
           npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: .
+          name: backend
+          path: backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,7 +50,8 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: backend
+          path: ./deploy
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -65,6 +66,7 @@ jobs:
         with:
           app-name: 'Edupath'
           slot-name: 'Production'
-          package: .
+          package: ./deploy
 
           
+
