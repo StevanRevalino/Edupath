@@ -15,6 +15,7 @@ import notificationRoutes from "./routes/notificationRoutes";
 import { seedDefaultAdmins } from "./configs/adminSeeder";
 import { seedLocalData } from "./configs/localDataSeeder";
 import { startConsultationScheduler } from "./services/consultationScheduler";
+import { start } from "repl";
 
 dotenv.config();
 const app = express();
@@ -61,12 +62,22 @@ app.use("/api/zoom", zoomRoutes);
 const PORT = 5000;
 
 // Listen on localhost for better compatibility
-app.listen(PORT, "localhost", async () => {
-  console.log(`Server running on localhost:${PORT}`);
-  console.log(`Access URL: http://localhost:${PORT}`);
+// app.listen(PORT, "localhost", async () => {
+//   console.log(`Server running on localhost:${PORT}`);
+//   console.log(`Access URL: http://localhost:${PORT}`);
+//   await seedDefaultAdmins();
+//   await seedLocalData();
+
+//   // Start consultation auto-complete scheduler
+//   startConsultationScheduler();
+// });
+
+app.get("/", async (req, res) => {
   await seedDefaultAdmins();
   await seedLocalData();
 
-  // Start consultation auto-complete scheduler
   startConsultationScheduler();
+  res.send("Edupath API is running");
 });
+
+export default app;
