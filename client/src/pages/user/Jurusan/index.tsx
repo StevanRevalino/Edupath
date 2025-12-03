@@ -448,11 +448,15 @@ const Jurusan: React.FC = () => {
 
   // auto-select dari navigation state
   useEffect(() => {
-    const selectedMajorName = (location.state as any)?.selectedMajor;
+    const selectedMajorName = (location.state as any)?.selectedProdi;
     if (selectedMajorName) {
       setQuery(selectedMajorName);
       setHasSearched(true);
       search(selectedMajorName, true);
+      // Auto scroll to search section after navigation
+      setTimeout(() => {
+        focusSearch();
+      }, 100);
     } else {
       // Load default prodi on mount (15 items)
       fetchProdiWithFilters("");
