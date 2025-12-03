@@ -73,10 +73,10 @@ const PORT = 5000;
 // });
 
 app.get("/", async (req, res) => {
-  await seedDefaultAdmins();
-  await seedLocalData();
+  // await seedDefaultAdmins();
+  // await seedLocalData();
 
-  startConsultationScheduler();
+  // startConsultationScheduler();
   res.send("Edupath API is running");
 });
 
