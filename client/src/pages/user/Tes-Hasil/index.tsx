@@ -409,7 +409,11 @@ const HasilTes: React.FC = () => {
                 <div
                   key={rec.prodi_id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/prodi/${rec.prodi_id}`)}
+                  onClick={() =>
+                    navigate("/jurusan", {
+                      state: { selectedProdi: rec.nama_prodi },
+                    })
+                  }
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
