@@ -58,7 +58,7 @@ app.use("/api/universitas", universitasRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/zoom", zoomRoutes);
 
-const PORT = process.env.PORT || 5000;      // pakai PORT dari Azure kalau ada                  // jangan "localhost"
+const PORT = process.env.PORT || 5000;      // pakai PORT dari Azure kalau ada
 
 app.listen(PORT, async () => {
   console.log(`Server running on http://:${PORT}`);
@@ -72,8 +72,6 @@ app.listen(PORT, async () => {
     console.log("Startup tasks completed");
   } catch (err) {
     console.error("Startup failed:", err);
-    // Optional: kalau mau langsung matiin supaya kelihatan error di log
-    // process.exit(1);
   }
 });
 
