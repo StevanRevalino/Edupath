@@ -58,6 +58,9 @@ jobs:
           pwd
           ls -la
           ls -la ./deploy
+          ls -la ./deploy/node_modules
+          ls -la ./deploy/node_modules/.prisma
+          ls -la ./deploy/node_modules/.prisma/client
       
       - name: Login to Azure
         uses: azure/login@v2
