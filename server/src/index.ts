@@ -58,15 +58,22 @@ app.use("/api/universitas", universitasRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/zoom", zoomRoutes);
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;      // pakai PORT dari Azure kalau ada                  // jangan "localhost"
 
-// Listen on localhost for better compatibility
-app.listen(PORT, "localhost", async () => {
-  console.log(`Server running on localhost:${PORT}`);
-  console.log(`Access URL: http://localhost:${PORT}`);
-  await seedDefaultAdmins();
-  await seedLocalData();
+app.listen(PORT, async () => {
+  console.log(`Server running on http://:${PORT}`);
+  try {
+    await seedDefaultAdmins();
+    await seedLocalData();
 
-  // Start consultation auto-complete scheduler
-  startConsultationScheduler();
+    // Start consultation auto-complete scheduler
+    startConsultationScheduler();
+
+    console.log("Startup tasks completed");
+  } catch (err) {
+    console.error("Startup failed:", err);
+    // Optional: kalau mau langsung matiin supaya kelihatan error di log
+    // process.exit(1);
+  }
 });
+
