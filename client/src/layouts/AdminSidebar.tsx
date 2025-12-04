@@ -8,6 +8,15 @@ import axios from "axios";
 import TokenManager from "../utils/tokenManager";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
 
+// Import all admin icons
+import edupathLogo from "../assets/edupath-logo.png";
+import adminDashboardIcon from "../assets/icons/admin-dashboard.png";
+import kelolaDataMuridIcon from "../assets/icons/kelola-data-murid.png";
+import kelolaDataKonselingIcon from "../assets/icons/kelola-data-konseling.png";
+import kelolaChatMuridIcon from "../assets/icons/kelola-chat-murid.png";
+import kelolaDataBeasiswaIcon from "../assets/icons/kelola-data-beasiswa.png";
+import logOutIcon from "../assets/icons/log-out.png";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface AdminSidebarProps {
@@ -183,31 +192,31 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       {
         id: "dashboard",
         label: "Dashboard",
-        icon: "/src/assets/icons/admin-dashboard.png",
+        icon: adminDashboardIcon,
         badgeCount: 0,
       },
       {
         id: "kelola-data-murid",
         label: "Kelola Data Murid",
-        icon: "/src/assets/icons/kelola-data-murid.png",
+        icon: kelolaDataMuridIcon,
         badgeCount: 0,
       },
       {
         id: "kelola-data-konseling",
         label: "Kelola Data Konseling",
-        icon: "/src/assets/icons/kelola-data-konseling.png",
+        icon: kelolaDataKonselingIcon,
         badgeCount: counts.pendingConsultations,
       },
       {
         id: "kelola-live-chat",
         label: "Chat Murid",
-        icon: "/src/assets/icons/kelola-chat-murid.png",
+        icon: kelolaChatMuridIcon,
         badgeCount: counts.unreadChats,
       },
       {
         id: "kelola-data-beasiswa",
         label: "Kelola Data Beasiswa",
-        icon: "/src/assets/icons/kelola-data-beasiswa.png",
+        icon: kelolaDataBeasiswaIcon,
         badgeCount: 0,
       },
     ],
@@ -222,7 +231,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
           {/* Logo Section */}
           <div className="flex items-center justify-center mb-2">
             <img
-              src="/src/assets/edupath-logo.png"
+              src={edupathLogo}
               alt="EduPath Logo"
               className="w-[110px] h-[95px]"
             />
@@ -267,11 +276,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
             onClick={handleLogout}
             className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-lighter transition-colors duration-200"
           >
-            <img
-              src="/src/assets/icons/log-out.png"
-              alt="Logout Icon"
-              className="w-full h-15"
-            />
+            <img src={logOutIcon} alt="Logout Icon" className="w-full h-15" />
           </button>
         </div>
       </div>
@@ -300,7 +305,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
               {/* Logo Section */}
               <div className="flex items-center justify-center mb-4">
                 <img
-                  src="/src/assets/edupath-logo.png"
+                  src={edupathLogo}
                   alt="EduPath Logo"
                   className="w-[80px] h-[68px]"
                 />
@@ -344,7 +349,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                   className="w-full flex items-center px-3 py-2 cursor-pointer rounded-lg hover:bg-[#4BB8FF] transition-colors duration-200"
                 >
                   <img
-                    src="/src/assets/icons/log-out.png"
+                    src={logOutIcon}
                     alt="Logout Icon"
                     className="w-48 mx-auto"
                   />
