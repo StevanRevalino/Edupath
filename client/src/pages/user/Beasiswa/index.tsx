@@ -11,7 +11,7 @@ import BeasiswaCard from "./components/BeasiswaCard";
 import BeasiswaDetailModal from "./components/BeasiswaDetailModal";
 
 import HeroSectionBG from "../../../assets/hero-section.png";
-import BeasiswaIcon from "../../../assets/icons/conseling-icon.png";
+import BeasiswaIcon from "../../../assets/icons/beasiswa-icon.png";
 
 interface Beasiswa {
   beasiswa_id: string;

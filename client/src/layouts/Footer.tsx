@@ -2,6 +2,7 @@ import logo from "../assets/edupath-logo.png";
 import homeIcon from "../assets/icons/home-icon.png";
 import jurusanIcon from "../assets/icons/jurusan-icon.png";
 import konselingIcon from "../assets/icons/conseling-footer.png";
+import beasiswaIcon from "../assets/icons/beasiswa-icon.png";
 import tesIcon from "../assets/icons/tes-icon.png";
 import universitasIcon from "../assets/icons/universitas-icon.png";
 import callIcon from "../assets/icons/call-icon.png";
@@ -106,7 +107,7 @@ const Footer = () => {
               >
                 <span>
                   <img
-                    src={homeIcon}
+                    src={beasiswaIcon}
                     alt="Beasiswa Icon"
                     className="w-5 h-5 md:w-6 md:h-6"
                   />

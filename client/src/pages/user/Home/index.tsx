@@ -123,11 +123,17 @@ const Home = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (response.data.success) {
-          const prodiNames = response.data.data.map(
-            (prodi: any) => prodi.nama_prodi
-          );
+        console.log('Prodi response:', response.data);
+        
+        // Handle both response structures
+        const data = response.data.data || response.data;
+        if (Array.isArray(data)) {
+          const prodiNames = data.map((prodi: any) => prodi.nama_prodi);
+          console.log('Prodi names loaded:', prodiNames.length);
           setAllMajors(prodiNames);
+        } else {
+          console.warn('Prodi data is not an array:', data);
+          setAllMajors([]);
         }
       } catch (error) {
         console.error("Error fetching prodi data:", error);
@@ -153,11 +159,17 @@ const Home = () => {
             },
           }
         );
-        if (response.data.success) {
-          const universitasNames = response.data.data.map(
-            (univ: any) => univ.nama
-          );
+        console.log('Universitas response:', response.data);
+        
+        // Handle both response structures
+        const data = response.data.data || response.data;
+        if (Array.isArray(data)) {
+          const universitasNames = data.map((univ: any) => univ.nama);
+          console.log('Universitas names loaded:', universitasNames.length);
           setAllUniversities(universitasNames);
+        } else {
+          console.warn('Universitas data is not an array:', data);
+          setAllUniversities([]);
         }
       } catch (error) {
         console.error("Error fetching universitas data:", error);
