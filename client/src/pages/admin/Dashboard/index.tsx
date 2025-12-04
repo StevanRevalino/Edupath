@@ -175,23 +175,12 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         },
       };
 
-      // Fetch dashboard statistics
-      const statsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/stats`,
-        authHeader
-      );
-
-      // Fetch upcoming consultations
-      const consultationsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/upcoming-consultations`,
-        authHeader
-      );
-
-      // Fetch recent chats
-      const chatsResponse = await axios.get(
-        `${API_URL}/api/admin/dashboard/recent-chats`,
-        authHeader
-      );
+      // Fetch all data in parallel for faster loading
+      const [statsResponse, consultationsResponse, chatsResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/admin/dashboard/stats`, authHeader),
+        axios.get(`${API_URL}/api/admin/dashboard/upcoming-consultations`, authHeader),
+        axios.get(`${API_URL}/api/admin/dashboard/recent-chats`, authHeader),
+      ]);
 
       if (statsResponse.data.success) {
         const dashboardData = statsResponse.data.data;

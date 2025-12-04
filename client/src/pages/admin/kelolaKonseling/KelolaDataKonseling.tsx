@@ -115,15 +115,13 @@ const KelolaDataKonseling = ({
       try {
         setLoading(true);
 
-        // First, auto-complete any expired consultations
-        await autoCompleteExpiredConsultations();
-
         const token = TokenManager.getToken();
         const response = await axios.get(`${API_URL}/api/consultations`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+        
         setConsultations((response.data.data || []) as Consultation[]);
       } catch (error) {
         console.error("Error fetching consultations:", error);
@@ -135,9 +133,12 @@ const KelolaDataKonseling = ({
 
     fetchConsultations();
 
-    // Set interval to auto-complete expired consultations every 1 minute
+    // Auto-complete expired consultations in background (every 1 minute)
     const interval = setInterval(() => {
-      autoCompleteExpiredConsultations();
+      autoCompleteExpiredConsultations().then(() => {
+        // Refresh data after auto-complete
+        fetchConsultations();
+      });
     }, 60000);
 
     return () => clearInterval(interval);

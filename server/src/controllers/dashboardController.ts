@@ -53,29 +53,39 @@ async function autoCompleteExpiredConsultations() {
 // Get Dashboard Statistics
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
-    const totalStudents = await prisma.user.count({
-      where: { role: "STUDENT" },
-    });
+    const adminId = req.user?.user_id;
 
-    const totalConsultations = await prisma.consultation.count();
-    const pendingConsultations = await prisma.consultation.count({
-      where: { status: "PENDING" },
-    });
-    const activeConsultations = await prisma.consultation.count({
-      where: { status: "ACCEPTED" },
-    });
-    const completedConsultations = await prisma.consultation.count({
-      where: { status: "COMPLETED" },
-    });
-    const declinedConsultations = await prisma.consultation.count({
-      where: { status: "DECLINED" },
-    });
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
 
-    const totalScholarships = await prisma.beasiswa.count();
-    const totalChats = await prisma.chatRoom.count();
+    // Run all counts in parallel for faster response
+    const [
+      totalStudents,
+      totalConsultations,
+      pendingConsultations,
+      activeConsultations,
+      completedConsultations,
+      declinedConsultations,
+      totalScholarships,
+      totalChats,
+    ] = await Promise.all([
+      prisma.user.count({ where: { role: "STUDENT" } }),
+      prisma.consultation.count({ where: { admin_id: adminId } }),
+      prisma.consultation.count({ where: { status: "PENDING", admin_id: adminId } }),
+      prisma.consultation.count({ where: { status: "ACCEPTED", admin_id: adminId } }),
+      prisma.consultation.count({ where: { status: "COMPLETED", admin_id: adminId } }),
+      prisma.consultation.count({ where: { status: "DECLINED", admin_id: adminId } }),
+      prisma.beasiswa.count(),
+      prisma.chatRoom.count({ where: { admin_id: adminId } }),
+    ]);
 
     // Count unread chats
     const chatRooms = await prisma.chatRoom.findMany({
+      where: { admin_id: adminId },
       include: {
         messages: {
           where: {
@@ -106,6 +116,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 
     const weeklyConsultations = await prisma.consultation.findMany({
       where: {
+        admin_id: adminId,
         consultation_date: {
           gte: sevenDaysAgo,
           lte: today,
@@ -132,6 +143,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 
     const monthlyConsultations = await prisma.consultation.findMany({
       where: {
+        admin_id: adminId,
         consultation_date: {
           gte: sixMonthsAgo,
           lte: today,
@@ -259,6 +271,15 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 // Get Upcoming Consultations
 export const getUpcomingConsultations = async (req: Request, res: Response) => {
   try {
+    const adminId = req.user?.user_id;
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
     const now = new Date();
     const indonesiaTime = new Date(
       now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
@@ -266,6 +287,7 @@ export const getUpcomingConsultations = async (req: Request, res: Response) => {
 
     const consultations = await prisma.consultation.findMany({
       where: {
+        admin_id: adminId,
         OR: [
           {
             consultation_date: {
@@ -320,7 +342,22 @@ export const getUpcomingConsultations = async (req: Request, res: Response) => {
 // Get Recent Chats
 export const getRecentChats = async (req: Request, res: Response) => {
   try {
+    const adminId = req.user?.user_id;
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
     const chatRooms = await prisma.chatRoom.findMany({
+      where: { 
+        admin_id: adminId,
+        consultation: {
+          is_active: true,
+        },
+      },
       include: {
         murid: {
           select: {

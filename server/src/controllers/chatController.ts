@@ -16,6 +16,15 @@ export class ChatController {
   // Get chat users for admin (students with accepted consultations)
   async getChatUsers(req: Request, res: Response) {
     try {
+      const adminId = req.user?.user_id;
+
+      if (!adminId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
       // Get current time in Indonesia (WIB - UTC+7)
       const now = new Date();
       const indonesiaTime = new Date(
@@ -25,6 +34,7 @@ export class ChatController {
 
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
+          admin_id: adminId,
           status: "ACCEPTED",
           is_active: true,
           consultation_date: {
@@ -497,8 +507,18 @@ export class ChatController {
   // ✨ NEW: Get chat history (inactive consultations)
   async getChatHistory(req: Request, res: Response) {
     try {
+      const adminId = req.user?.user_id;
+
+      if (!adminId) {
+        return res.status(401).json({
+          success: false,
+          message: "User not authenticated",
+        });
+      }
+
       const inactiveConsultations = await prisma.consultation.findMany({
         where: {
+          admin_id: adminId,
           is_active: false,
           chatRoom: {
             isNot: null,
