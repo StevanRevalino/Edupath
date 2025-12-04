@@ -16,7 +16,7 @@ router.post(
   "/send-verification-otp",
   controller.sendVerificationOtp.bind(controller)
 );
-router.post("/forgot-password", controller.forgotPassword.bind(controller));
+router.post("/reset-password", controller.resetPassword.bind(controller));
 router.put(
   "/update-profile",
   authenticateToken,
