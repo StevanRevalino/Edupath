@@ -121,7 +121,7 @@ const KelolaDataKonseling = ({
             Authorization: `Bearer ${token}`,
           },
         });
-        
+
         setConsultations((response.data.data || []) as Consultation[]);
       } catch (error) {
         console.error("Error fetching consultations:", error);

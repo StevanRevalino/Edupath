@@ -75,10 +75,18 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     ] = await Promise.all([
       prisma.user.count({ where: { role: "STUDENT" } }),
       prisma.consultation.count({ where: { admin_id: adminId } }),
-      prisma.consultation.count({ where: { status: "PENDING", admin_id: adminId } }),
-      prisma.consultation.count({ where: { status: "ACCEPTED", admin_id: adminId } }),
-      prisma.consultation.count({ where: { status: "COMPLETED", admin_id: adminId } }),
-      prisma.consultation.count({ where: { status: "DECLINED", admin_id: adminId } }),
+      prisma.consultation.count({
+        where: { status: "PENDING", admin_id: adminId },
+      }),
+      prisma.consultation.count({
+        where: { status: "ACCEPTED", admin_id: adminId },
+      }),
+      prisma.consultation.count({
+        where: { status: "COMPLETED", admin_id: adminId },
+      }),
+      prisma.consultation.count({
+        where: { status: "DECLINED", admin_id: adminId },
+      }),
       prisma.beasiswa.count(),
       prisma.chatRoom.count({ where: { admin_id: adminId } }),
     ]);
@@ -352,7 +360,7 @@ export const getRecentChats = async (req: Request, res: Response) => {
     }
 
     const chatRooms = await prisma.chatRoom.findMany({
-      where: { 
+      where: {
         admin_id: adminId,
         consultation: {
           is_active: true,
