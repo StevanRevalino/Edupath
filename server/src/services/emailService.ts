@@ -4,46 +4,15 @@ import { google } from "googleapis";
 
 export class EmailService {
   // Private method to refresh access token
-  private async refreshAccessToken(): Promise<string> {
-    try {
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.OAUTH_CLIENTID,
-        process.env.OAUTH_CLIENT_SECRET,
-        "https://developers.google.com/oauthplayground"
-      );
-
-      oauth2Client.setCredentials({
-        refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-      });
-
-      const { credentials } = await oauth2Client.refreshAccessToken();
-      const accessToken = credentials.access_token;
-
-      console.log("✅ Access token refreshed successfully");
-      return accessToken as string;
-    } catch (error) {
-      console.error("❌ Error refreshing access token:", error);
-      throw new Error("Failed to refresh access token");
-    }
-  }
 
   // Private method to create transporter with OAuth2 and auto-refresh
   private async createTransporter() {
     try {
-      // Always refresh access token before creating transporter
-      const accessToken = await this.refreshAccessToken();
-
       const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true, // use SSL
+        service: "gmail", 
         auth: {
-          type: "OAuth2",
           user: process.env.MAIL_USERNAME,
-          clientId: process.env.OAUTH_CLIENTID,
-          clientSecret: process.env.OAUTH_CLIENT_SECRET,
-          refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-          accessToken: accessToken,
+          pass: process.env.MAIL_APP_PASSWORD,
         },
       } as TransportOptions);
 

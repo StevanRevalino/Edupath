@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { ProdiPddiktiService } from "../services/prodiPddiktiService";
+// import { ProdiPddiktiService } from "../services/prodiPddiktiService";
 import prisma from "../configs/prisma";
 
 export class ProdiController {
-  private pddiktiService: ProdiPddiktiService;
+  // private pddiktiService: ProdiPddiktiService;
 
   constructor() {
-    this.pddiktiService = new ProdiPddiktiService();
+    // this.pddiktiService = new ProdiPddiktiService();
 
     // Bind methods to preserve 'this' context
     this.getAllProdi = this.getAllProdi.bind(this);

@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { UniversitasPddiktiService } from "../services/universitasPddiktiService";
+// import { UniversitasPddiktiService } from "../services/universitasPddiktiService";
 import prisma from "../configs/prisma";
 
 export class UniversitasController {
-  private universitasService: UniversitasPddiktiService;
+  // private universitasService: UniversitasPddiktiService;
 
   constructor() {
-    this.universitasService = new UniversitasPddiktiService();
+    // this.universitasService = new UniversitasPddiktiService();
 
     // Bind methods to preserve 'this' context
     this.getAllUniversitas = this.getAllUniversitas.bind(this);
