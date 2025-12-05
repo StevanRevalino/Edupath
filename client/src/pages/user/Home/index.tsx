@@ -123,16 +123,16 @@ const Home = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log('Prodi response:', response.data);
-        
+        console.log("Prodi response:", response.data);
+
         // Handle both response structures
         const data = response.data.data || response.data;
         if (Array.isArray(data)) {
           const prodiNames = data.map((prodi: any) => prodi.nama_prodi);
-          console.log('Prodi names loaded:', prodiNames.length);
+          console.log("Prodi names loaded:", prodiNames.length);
           setAllMajors(prodiNames);
         } else {
-          console.warn('Prodi data is not an array:', data);
+          console.warn("Prodi data is not an array:", data);
           setAllMajors([]);
         }
       } catch (error) {
@@ -159,16 +159,16 @@ const Home = () => {
             },
           }
         );
-        console.log('Universitas response:', response.data);
-        
+        console.log("Universitas response:", response.data);
+
         // Handle both response structures
         const data = response.data.data || response.data;
         if (Array.isArray(data)) {
           const universitasNames = data.map((univ: any) => univ.nama);
-          console.log('Universitas names loaded:', universitasNames.length);
+          console.log("Universitas names loaded:", universitasNames.length);
           setAllUniversities(universitasNames);
         } else {
-          console.warn('Universitas data is not an array:', data);
+          console.warn("Universitas data is not an array:", data);
           setAllUniversities([]);
         }
       } catch (error) {
@@ -294,9 +294,12 @@ const Home = () => {
   useEffect(() => {
     checkScrollPosition();
     if (testHistoryRef.current) {
-      testHistoryRef.current.addEventListener('scroll', checkScrollPosition);
+      testHistoryRef.current.addEventListener("scroll", checkScrollPosition);
       return () => {
-        testHistoryRef.current?.removeEventListener('scroll', checkScrollPosition);
+        testHistoryRef.current?.removeEventListener(
+          "scroll",
+          checkScrollPosition
+        );
       };
     }
   }, [assessmentStats.allTests]);
