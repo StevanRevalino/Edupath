@@ -171,6 +171,11 @@ export class ConsultationController {
       }
 
       // Check if consultation date is in the future (with 5 minute margin to account for processing time)
+      // Convert consultation date to Indonesia timezone for comparison
+      const consultationDateIndonesia = new Date(
+        consultationDate.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+      
       const now = new Date();
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
@@ -179,7 +184,7 @@ export class ConsultationController {
         indonesiaTime.getTime() + 5 * 60 * 1000
       );
 
-      if (consultationDate < fiveMinutesFromNow) {
+      if (consultationDateIndonesia < fiveMinutesFromNow) {
         return res.status(400).json({
           success: false,
           message: "Tanggal konseling harus minimal 5 menit dari sekarang",
@@ -742,6 +747,11 @@ export class ConsultationController {
       }
 
       // Check if new date is in the future
+      // Convert consultation date to Indonesia timezone for comparison
+      const newConsultationDateIndonesia = new Date(
+        newConsultationDate.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+      );
+      
       const now = new Date();
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
@@ -750,7 +760,7 @@ export class ConsultationController {
         indonesiaTime.getTime() + 5 * 60 * 1000
       );
 
-      if (newConsultationDate < fiveMinutesFromNow) {
+      if (newConsultationDateIndonesia < fiveMinutesFromNow) {
         return res.status(400).json({
           success: false,
           message: "Tanggal konseling harus minimal 5 menit dari sekarang",
