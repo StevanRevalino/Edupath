@@ -15,11 +15,21 @@ const AdminDashboard = () => {
   const getActiveTab = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard setActiveTab={setActiveTab} setConsultationInitialTab={setConsultationInitialTab} />;
+        return (
+          <Dashboard
+            setActiveTab={setActiveTab}
+            setConsultationInitialTab={setConsultationInitialTab}
+          />
+        );
       case "kelola-data-murid":
         return <KelolaDataMurid />;
       case "kelola-data-konseling":
-        return <KelolaDataKonseling setActiveTab={setActiveTab} initialTab={consultationInitialTab} />;
+        return (
+          <KelolaDataKonseling
+            setActiveTab={setActiveTab}
+            initialTab={consultationInitialTab}
+          />
+        );
       case "kelola-live-chat":
         return <KelolaLiveChat />;
       case "kelola-data-beasiswa":

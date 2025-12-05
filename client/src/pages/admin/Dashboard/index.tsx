@@ -34,7 +34,9 @@ ChartJS.register(
 
 interface DashboardProps {
   setActiveTab?: (tab: string) => void;
-  setConsultationInitialTab?: (tab: "pending" | "active" | "completed" | "declined") => void;
+  setConsultationInitialTab?: (
+    tab: "pending" | "active" | "completed" | "declined"
+  ) => void;
 }
 
 interface DashboardStats {
@@ -66,7 +68,10 @@ interface RecentChat {
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab, setConsultationInitialTab }) => {
+const AdminDashboard: React.FC<DashboardProps> = ({
+  setActiveTab,
+  setConsultationInitialTab,
+}) => {
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalConsultations: 0,
