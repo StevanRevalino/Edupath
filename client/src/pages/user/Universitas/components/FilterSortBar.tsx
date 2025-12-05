@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Filter, X } from "lucide-react";
+import { ChevronDown, Filter, X } from "lucide-react";
 
 interface FilterSortBarProps {
   // Filter states
@@ -60,6 +60,12 @@ const FilterSortBar: React.FC<FilterSortBarProps> = ({
               {activeFilterCount}
             </span>
           )}
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${
+              showFilters ? "rotate-180" : ""
+            }`}
+          />
         </button>
 
         {/* Reset Button */}
