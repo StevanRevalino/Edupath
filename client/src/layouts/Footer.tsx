@@ -124,7 +124,10 @@ const Footer = () => {
             </h3>
             <div className="bg-[#417A99] w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
             <div className="space-y-3 md:space-y-4">
-              <div className="flex items-center space-x-3">
+              <a
+                href="/contact-us#contact-form"
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
                 <span>
                   <img
                     src={emailIcon}
@@ -132,9 +135,14 @@ const Footer = () => {
                     className="w-6 h-4 md:w-7 md:h-5"
                   />
                 </span>
-                <span className="text-sm md:text-base">EduPath@gmail.com</span>
-              </div>
-              <div className="flex items-center space-x-3">
+                <span className="text-sm md:text-base">
+                  edupath.app@gmail.com
+                </span>
+              </a>
+              <a
+                href="/contact-us#contact-form"
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
                 <span>
                   <img
                     src={callIcon}
@@ -142,8 +150,10 @@ const Footer = () => {
                     className="w-5 h-5 md:w-6 md:h-6"
                   />
                 </span>
-                <span className="text-sm md:text-base">+08xxxxxxxx</span>
-              </div>
+                <span className="text-sm md:text-base">
+                  (+62) 812 9690 1533
+                </span>
+              </a>
             </div>
 
             {/* Social Media */}
@@ -153,14 +163,24 @@ const Footer = () => {
               </h4>
               <div className="bg-primary-light w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
               <div className="flex space-x-4 md:space-x-6">
-                <a href="#" className="hover:opacity-80 transition-opacity">
+                <a
+                  href="https://www.instagram.com/edupath_app?igsh=a3ZzcHBhN3Brbnhy&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity"
+                >
                   <img
                     src={instagramIcon}
                     alt="Instagram Icon"
                     className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
                   />
                 </a>
-                <a href="#" className="hover:opacity-80 transition-opacity">
+                <a
+                  href="https://x.com/edupath_app?s=21"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity"
+                >
                   <img
                     src={twitterIcon}
                     alt="Twitter Icon"

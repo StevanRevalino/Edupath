@@ -22,13 +22,13 @@ const tutorialSteps: TutorialStep[] = [
       "Tes ini dirancang untuk membantumu memahami minat dan bakat pribadimu. Hasilnya akan membantumu menentukan jurusan atau jalur karier yang sesuai.",
   },
   {
-    icon: TutorialIcon2,
+    icon: TutorialIcon3,
     title: "Luangkan Waktu Sebentar",
     description:
-      "Tes hanya berlangsung sekitar xx menit. Pastikan kamu berada di tempat yang tenang dan tidak terganggu saat mengerjakan.",
+      "Tes ini memerlukan waktu hanya beberapa menit. Pastikan kamu berada di tempat yang tenang dan tidak terganggu saat mengerjakan.",
   },
   {
-    icon: TutorialIcon3,
+    icon: TutorialIcon2,
     title: "Tidak Ada Jawaban Benar atau Salah",
     description:
       "Pilih jawaban yang paling menggambarkan dirimu apa adanya, bukan yang menurutmu paling benar. Jawaban jujur = hasil lebih akurat!",

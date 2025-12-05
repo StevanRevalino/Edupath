@@ -691,6 +691,11 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                   <div
                     key={chat.room_id}
                     className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                    onClick={() => {
+                      if (setActiveTab) {
+                        setActiveTab("kelola-chat");
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

@@ -15,7 +15,8 @@ export default function ContactUs() {
   };
 
   const handleInstagramClick = () => {
-    const instagramLink = "https://www.instagram.com/edupath/";
+    const instagramLink =
+      "https://www.instagram.com/edupath_app?igsh=a3ZzcHBhN3Brbnhy&utm_source=qr";
     window.open(instagramLink, "_blank");
   };
 
