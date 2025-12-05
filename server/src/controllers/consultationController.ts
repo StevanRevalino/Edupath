@@ -175,7 +175,7 @@ export class ConsultationController {
       const consultationDateIndonesia = new Date(
         consultationDate.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
       );
-      
+
       const now = new Date();
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
@@ -749,9 +749,11 @@ export class ConsultationController {
       // Check if new date is in the future
       // Convert consultation date to Indonesia timezone for comparison
       const newConsultationDateIndonesia = new Date(
-        newConsultationDate.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        newConsultationDate.toLocaleString("en-US", {
+          timeZone: "Asia/Jakarta",
+        })
       );
-      
+
       const now = new Date();
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
