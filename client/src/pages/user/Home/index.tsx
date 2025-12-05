@@ -290,6 +290,17 @@ const Home = () => {
     fetchAssessmentData();
   }, []);
 
+  // Check scroll position on mount and when tests change
+  useEffect(() => {
+    checkScrollPosition();
+    if (testHistoryRef.current) {
+      testHistoryRef.current.addEventListener('scroll', checkScrollPosition);
+      return () => {
+        testHistoryRef.current?.removeEventListener('scroll', checkScrollPosition);
+      };
+    }
+  }, [assessmentStats.allTests]);
+
   const infoItems = [
     {
       label: "Tentang Kami",
@@ -329,6 +340,19 @@ const Home = () => {
   // Horizontal scroll ref for test history
   const testHistoryRef = useRef<HTMLDivElement>(null);
 
+  // Scroll state for chevron visibility
+  const [showLeftChevron, setShowLeftChevron] = useState(false);
+  const [showRightChevron, setShowRightChevron] = useState(true);
+
+  // Check scroll position to show/hide chevrons
+  const checkScrollPosition = () => {
+    if (testHistoryRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = testHistoryRef.current;
+      setShowLeftChevron(scrollLeft > 0);
+      setShowRightChevron(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
   // Horizontal scroll functions for test history
   const scrollTestHistory = (direction: "left" | "right") => {
     if (testHistoryRef.current) {
@@ -342,6 +366,9 @@ const Home = () => {
         left: newPosition,
         behavior: "smooth",
       });
+
+      // Check position after scroll animation
+      setTimeout(checkScrollPosition, 300);
     }
   };
 
@@ -418,7 +445,7 @@ const Home = () => {
                 <button
                   className="mt-5 inline-flex items-center rounded-full bg-primary px-4 py-2
                        text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
-                       hover:brightness-95 active:brightness-90 transition"
+                       hover:brightness-95 active:brightness-90 transition cursor-pointer"
                   onClick={() => navigate("/profil")}
                 >
                   Ubah profil
@@ -621,20 +648,24 @@ const Home = () => {
               {/* Scroll Buttons */}
               {assessmentStats.allTests.length > 3 && (
                 <>
-                  <button
-                    onClick={() => scrollTestHistory("left")}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-1 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Scroll left"
-                  >
-                    <ChevronLeft className="w-6 h-6 text-gray-700" />
-                  </button>
-                  <button
-                    onClick={() => scrollTestHistory("right")}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-1 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Scroll right"
-                  >
-                    <ChevronRight className="w-6 h-6 text-gray-700" />
-                  </button>
+                  {showLeftChevron && (
+                    <button
+                      onClick={() => scrollTestHistory("left")}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all"
+                      aria-label="Scroll left"
+                    >
+                      <ChevronLeft className="w-6 h-6 text-gray-700" />
+                    </button>
+                  )}
+                  {showRightChevron && (
+                    <button
+                      onClick={() => scrollTestHistory("right")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all"
+                      aria-label="Scroll right"
+                    >
+                      <ChevronRight className="w-6 h-6 text-gray-700" />
+                    </button>
+                  )}
                 </>
               )}
 

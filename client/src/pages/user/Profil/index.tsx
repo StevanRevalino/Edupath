@@ -95,7 +95,7 @@ const Profil = () => {
                 </h1>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="w-fit group relative bg-gradient-to-r from-[#4FC3F7] to-[#00B4D8] hover:from-[#39B5E8] hover:to-[#0096C7] text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                  className="w-fit group relative bg-gradient-to-r from-[#4FC3F7] to-[#00B4D8] hover:from-[#39B5E8] hover:to-[#0096C7] text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <svg

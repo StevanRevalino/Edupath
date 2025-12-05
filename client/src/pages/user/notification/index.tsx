@@ -312,7 +312,7 @@ const NotificationPanel = ({ onNotificationClick }: NotificationPanelProps) => {
       {/* Bell Icon with Badge */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-secondary-lighter transition-colors"
+        className="relative p-2 rounded-lg hover:bg-secondary-lighter transition-colors cursor-pointer"
         title="Notifikasi"
       >
         <Bell className="w-6 h-6 text-gray-700" />
