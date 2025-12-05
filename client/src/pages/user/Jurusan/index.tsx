@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 
@@ -29,6 +29,27 @@ interface ProdiDetail {
   nama_prodi: string;
   jenjang?: string | null;
   status?: string;
+  kode_prodi?: string | null;
+  bidang?: string | null;
+  akreditasi?: string | null;
+  akreditasi_internasional?: string | null;
+  status_akreditasi?: string | null;
+  tanggal_berdiri?: string | null;
+  no_tel?: string | null;
+  no_fax?: string | null;
+  website?: string | null;
+  email?: string | null;
+  alamat?: string | null;
+  universitas?: {
+    university_id?: string | null;
+    nama?: string | null;
+    kode_pt?: string | null;
+    provinsi?: string | null;
+    kab_kota?: string | null;
+    kecamatan?: string | null;
+    lintang?: number | null;
+    bujur?: number | null;
+  };
 }
 
 import HeroSectionBG from "../../../assets/hero-section2.png";
@@ -39,12 +60,27 @@ import jurusanInfo3 from "../../../assets/jurusan-info-3.png";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
 import SearchBar from "@/components/SearchBar";
 import FilterSortBar from "./components/FilterSortBar";
-import { ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  ChevronsUpDown,
+  ChevronUp,
+  ChevronDown,
+  Building2,
+  Award,
+  Phone,
+  Mail,
+  Globe,
+  MapPin,
+  Calendar,
+  Hash,
+  Layers,
+  ExternalLink,
+} from "lucide-react";
 
 type ProdiItem = ProdiWithUniversity;
 
 const Jurusan: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [heroQuery, setHeroQuery] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -145,6 +181,7 @@ const Jurusan: React.FC = () => {
           }
         );
         const detail = response.data.data;
+        console.log("Detail data received:", detail);
         if (currentId !== detailRequestIdRef.current) return;
         setSelectedProdi(detail);
       } catch (e: any) {
@@ -1145,65 +1182,385 @@ const Jurusan: React.FC = () => {
                 </div>
               ) : selectedProdi ? (
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                  {/* Header */}
+                  <div className="px-6 py-5 bg-gray-50 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900">
                       {selectedProdi.nama_prodi}
                     </h2>
-                    {selectedProdi.jenjang && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Jenjang {selectedProdi.jenjang}
-                      </p>
-                    )}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {selectedProdi.jenjang && (
+                        <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
+                          {selectedProdi.jenjang}
+                        </span>
+                      )}
+                      {selectedProdi.status && (
+                        <span
+                          className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ring-1 ${
+                            selectedProdi.status === "Aktif"
+                              ? "bg-green-100 text-green-800 ring-green-600/20"
+                              : "bg-red-100 text-red-800 ring-red-600/20"
+                          }`}
+                        >
+                          {selectedProdi.status}
+                        </span>
+                      )}
+                      {selectedProdi.akreditasi && (
+                        <span
+                          className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${badgeClass(
+                            selectedProdi.akreditasi
+                          )} ring-1`}
+                        >
+                          Akreditasi {selectedProdi.akreditasi}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {detailError && (
-                    <div className="mx-6 mt-4 rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2">
+                    <div className="mx-6 mt-4 rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
                       {detailError}
                     </div>
                   )}
 
-                  <div className="px-6 py-4">
-                    <h3 className="text-md font-medium text-gray-900 mb-3">
-                      Informasi Umum
-                    </h3>
-                    <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-sm">
-                      <div>
-                        <dt className="font-medium text-gray-500">
-                          Nama Program Studi
-                        </dt>
-                        <dd className="text-gray-900">
-                          {selectedProdi.nama_prodi}
-                        </dd>
+                  {/* Scrollable Content */}
+                  <div className="max-h-full overflow-y-auto">
+                    {/* Informasi Program Studi */}
+                    <div className="px-6 py-4 border-b border-gray-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Layers className="w-5 h-5 text-primary" />
+                        <h3 className="text-md font-semibold text-gray-900">
+                          Informasi Program Studi
+                        </h3>
                       </div>
+                      <dl className="grid grid-cols-1 gap-3 text-sm">
+                        {selectedProdi.kode_prodi && (
+                          <div className="flex items-start gap-2">
+                            <Hash className="w-4 h-4 text-gray-400 mt-0.5" />
+                            <div className="flex-1">
+                              <dt className="font-medium text-gray-500">
+                                Kode Program Studi
+                              </dt>
+                              <dd className="text-gray-900 font-mono">
+                                {selectedProdi.kode_prodi}
+                              </dd>
+                            </div>
+                          </div>
+                        )}
+                        {selectedProdi.bidang && (
+                          <div className="flex items-start gap-2">
+                            <Layers className="w-4 h-4 text-gray-400 mt-0.5" />
+                            <div className="flex-1">
+                              <dt className="font-medium text-gray-500">
+                                Bidang
+                              </dt>
+                              <dd className="text-gray-900">
+                                {selectedProdi.bidang}
+                              </dd>
+                            </div>
+                          </div>
+                        )}
+                        {selectedProdi.tanggal_berdiri && (
+                          <div className="flex items-start gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
+                            <div className="flex-1">
+                              <dt className="font-medium text-gray-500">
+                                Tanggal Berdiri
+                              </dt>
+                              <dd className="text-gray-900">
+                                {new Date(
+                                  selectedProdi.tanggal_berdiri
+                                ).toLocaleDateString("id-ID", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </dd>
+                            </div>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
 
-                      {selectedProdi.jenjang && (
-                        <div>
-                          <dt className="font-medium text-gray-500">Jenjang</dt>
-                          <dd>
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-secondary-light text-primary-dark">
-                              {selectedProdi.jenjang}
-                            </span>
-                          </dd>
+                    {/* Akreditasi */}
+                    {(selectedProdi.akreditasi ||
+                      selectedProdi.status_akreditasi ||
+                      selectedProdi.akreditasi_internasional) && (
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Award className="w-5 h-5 text-primary" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Akreditasi
+                          </h3>
+                        </div>
+                        <dl className="grid grid-cols-1 gap-3 text-sm">
+                          {selectedProdi.akreditasi && (
+                            <div>
+                              <dt className="font-medium text-gray-500 mb-1">
+                                Peringkat Akreditasi
+                              </dt>
+                              <dd>
+                                <span
+                                  className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${badgeClass(
+                                    selectedProdi.akreditasi
+                                  )} ring-1`}
+                                >
+                                  {selectedProdi.akreditasi}
+                                </span>
+                              </dd>
+                            </div>
+                          )}
+                          {selectedProdi.status_akreditasi && (
+                            <div>
+                              <dt className="font-medium text-gray-500 mb-1">
+                                Status Akreditasi
+                              </dt>
+                              <dd className="text-gray-900">
+                                {selectedProdi.status_akreditasi}
+                              </dd>
+                            </div>
+                          )}
+                          {selectedProdi.akreditasi_internasional && (
+                            <div>
+                              <dt className="font-medium text-gray-500 mb-1">
+                                Akreditasi Internasional
+                              </dt>
+                              <dd className="text-gray-900">
+                                {selectedProdi.akreditasi_internasional}
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                    )}
+
+                    {/* Perguruan Tinggi */}
+                    {selectedProdi.universitas && (
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Building2 className="w-5 h-5 text-primary" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Perguruan Tinggi
+                          </h3>
+                        </div>
+                        <dl className="grid grid-cols-1 gap-3 text-sm">
+                          {selectedProdi.universitas.nama && (
+                            <div>
+                              <dt className="font-medium text-gray-500 mb-1">
+                                Nama Universitas
+                              </dt>
+                              <dd className="text-gray-900 font-medium text-base">
+                                {selectedProdi.universitas.nama}
+                              </dd>
+                            </div>
+                          )}
+                          {selectedProdi.universitas.kode_pt && (
+                            <div className="flex items-start gap-2">
+                              <Hash className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Kode PT
+                                </dt>
+                                <dd className="text-gray-900 font-mono">
+                                  {selectedProdi.universitas.kode_pt}
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                          {(selectedProdi.universitas.provinsi ||
+                            selectedProdi.universitas.kab_kota ||
+                            selectedProdi.universitas.kecamatan) && (
+                            <div className="flex items-start gap-2">
+                              <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Lokasi
+                                </dt>
+                                <dd className="text-gray-900">
+                                  {[
+                                    selectedProdi.universitas.kecamatan,
+                                    selectedProdi.universitas.kab_kota,
+                                    selectedProdi.universitas.provinsi,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                        </dl>
+                        {selectedProdi.universitas.nama && (
+                          <button
+                            onClick={() => {
+                              navigate("/universitas", {
+                                state: {
+                                  selectedUniversity:
+                                    selectedProdi.universitas!.nama,
+                                },
+                              });
+                            }}
+                            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors shadow-sm"
+                          >
+                            <Building2 className="w-4 h-4" />
+                            Lihat Universitas
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Informasi Kontak */}
+                    {(selectedProdi.email ||
+                      selectedProdi.no_tel ||
+                      selectedProdi.no_fax ||
+                      selectedProdi.website ||
+                      selectedProdi.alamat) && (
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Phone className="w-5 h-5 text-primary" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Informasi Kontak
+                          </h3>
+                        </div>
+                        <dl className="grid grid-cols-1 gap-3 text-sm">
+                          {selectedProdi.email && (
+                            <div className="flex items-start gap-2">
+                              <Mail className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Email
+                                </dt>
+                                <dd>
+                                  <a
+                                    href={`mailto:${selectedProdi.email}`}
+                                    className="text-primary hover:text-primary-dark hover:underline"
+                                  >
+                                    {selectedProdi.email}
+                                  </a>
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                          {selectedProdi.no_tel && (
+                            <div className="flex items-start gap-2">
+                              <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Telepon
+                                </dt>
+                                <dd>
+                                  <a
+                                    href={`tel:${selectedProdi.no_tel}`}
+                                    className="text-primary hover:text-primary-dark hover:underline"
+                                  >
+                                    {selectedProdi.no_tel}
+                                  </a>
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                          {selectedProdi.no_fax && (
+                            <div className="flex items-start gap-2">
+                              <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Fax
+                                </dt>
+                                <dd className="text-gray-900">
+                                  {selectedProdi.no_fax}
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                          {selectedProdi.website && (
+                            <div className="flex items-start gap-2">
+                              <Globe className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Website
+                                </dt>
+                                <dd>
+                                  <a
+                                    href={
+                                      selectedProdi.website.startsWith("http")
+                                        ? selectedProdi.website
+                                        : `https://${selectedProdi.website}`
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:text-primary-dark hover:underline inline-flex items-center gap-1"
+                                  >
+                                    {selectedProdi.website}
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                          {selectedProdi.alamat && (
+                            <div className="flex items-start gap-2">
+                              <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                              <div className="flex-1">
+                                <dt className="font-medium text-gray-500">
+                                  Alamat
+                                </dt>
+                                <dd className="text-gray-900">
+                                  {selectedProdi.alamat}
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                    )}
+
+                    {/* Lokasi Geografis */}
+                    {selectedProdi.universitas &&
+                      (selectedProdi.universitas.lintang ||
+                        selectedProdi.universitas.bujur) && (
+                        <div className="px-6 py-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <MapPin className="w-5 h-5 text-primary" />
+                            <h3 className="text-md font-semibold text-gray-900">
+                              Lokasi Geografis
+                            </h3>
+                          </div>
+                          <dl className="grid grid-cols-2 gap-3 text-sm">
+                            {selectedProdi.universitas.lintang && (
+                              <div>
+                                <dt className="font-medium text-gray-500">
+                                  Lintang
+                                </dt>
+                                <dd className="text-gray-900 font-mono">
+                                  {selectedProdi.universitas.lintang}
+                                </dd>
+                              </div>
+                            )}
+                            {selectedProdi.universitas.bujur && (
+                              <div>
+                                <dt className="font-medium text-gray-500">
+                                  Bujur
+                                </dt>
+                                <dd className="text-gray-900 font-mono">
+                                  {selectedProdi.universitas.bujur}
+                                </dd>
+                              </div>
+                            )}
+                          </dl>
+                          {selectedProdi.universitas.lintang &&
+                            selectedProdi.universitas.bujur && (
+                              <a
+                                href={`https://www.google.com/maps?q=${selectedProdi.universitas.lintang},${selectedProdi.universitas.bujur}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+                              >
+                                <MapPin className="w-4 h-4" />
+                                Buka di Google Maps
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            )}
                         </div>
                       )}
-
-                      {selectedProdi.status && (
-                        <div>
-                          <dt className="font-medium text-gray-500">Status</dt>
-                          <dd>
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                selectedProdi.status === "Aktif"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {selectedProdi.status}
-                            </span>
-                          </dd>
-                        </div>
-                      )}
-                    </dl>
                   </div>
                 </div>
               ) : (

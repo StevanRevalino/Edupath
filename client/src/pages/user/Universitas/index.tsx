@@ -9,6 +9,17 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import TokenManager from "../../../utils/tokenManager";
 import UnivAndProdiTag from "@/components/UnivAndProdiTag";
+import {
+  Building2,
+  Award,
+  Phone,
+  Mail,
+  Globe,
+  MapPin,
+  Hash,
+  ExternalLink,
+  FileText,
+} from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -533,6 +544,10 @@ const Universitas: React.FC = () => {
       // auto-select dari navigation state
       setQuery(selectedUniversityName);
       search(selectedUniversityName, true);
+      // Auto scroll to search section after navigation
+      setTimeout(() => {
+        focusSearch();
+      }, 100);
     } else {
       // Load default universities (15 items sorted by QS rank)
       fetchUniversitasWithFilters("");
@@ -1277,15 +1292,45 @@ const Universitas: React.FC = () => {
                 </div>
               ) : selectedUniversitas ? (
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                  {/* Header */}
+                  <div className="px-6 py-5 bg-gray-50 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
                       {selectedUniversitas.nama}
                     </h2>
-                    {selectedUniversitas.nama_singkat && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        ({selectedUniversitas.nama_singkat})
-                      </p>
-                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {selectedUniversitas.nama_singkat && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                          <Hash className="w-3 h-3 mr-1" />
+                          {selectedUniversitas.nama_singkat}
+                        </span>
+                      )}
+                      {selectedUniversitas.akreditasi && (
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium ring-1 ring-inset ${
+                            selectedUniversitas.akreditasi === "Unggul" ||
+                            selectedUniversitas.akreditasi === "A"
+                              ? "bg-green-50 text-green-700 ring-green-600/20"
+                              : selectedUniversitas.akreditasi ===
+                                  "Baik Sekali" ||
+                                selectedUniversitas.akreditasi === "B"
+                              ? "bg-blue-50 text-blue-700 ring-blue-700/10"
+                              : selectedUniversitas.akreditasi === "Baik" ||
+                                selectedUniversitas.akreditasi === "C"
+                              ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
+                              : "bg-gray-50 text-gray-600 ring-gray-500/10"
+                          }`}
+                        >
+                          <Award className="w-3 h-3 mr-1" />
+                          {selectedUniversitas.akreditasi}
+                        </span>
+                      )}
+                      {selectedUniversitas.tipe && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                          <Building2 className="w-3 h-3 mr-1" />
+                          {selectedUniversitas.tipe}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {detailError && (
@@ -1294,194 +1339,244 @@ const Universitas: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="px-6 py-4">
-                    <h3 className="text-md font-medium text-gray-900 mb-3">
-                      Informasi Umum
-                    </h3>
-                    <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-sm">
-                      <div>
-                        <dt className="font-medium text-gray-500">
-                          Nama Lengkap
-                        </dt>
-                        <dd className="text-gray-900">
-                          {selectedUniversitas.nama}
-                        </dd>
+                  {/* Scrollable Content */}
+                  <div className="px-6 py-4 max-h-full overflow-y-auto space-y-6">
+                    {/* Informasi Umum */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-md font-semibold text-gray-900">
+                          Informasi Umum
+                        </h3>
                       </div>
-
-                      {selectedUniversitas.provinsi && (
+                      <dl className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm">
                         <div>
-                          <dt className="font-medium text-gray-500">
-                            Provinsi
+                          <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                            <FileText className="w-4 h-4" />
+                            Nama Lengkap
                           </dt>
-                          <dd className="text-gray-900">
-                            {cleanProvinceName(selectedUniversitas.provinsi)}
+                          <dd className="text-gray-900 ml-6">
+                            {selectedUniversitas.nama}
                           </dd>
                         </div>
-                      )}
 
-                      {selectedUniversitas.kota && (
-                        <div>
-                          <dt className="font-medium text-gray-500">Kota</dt>
-                          <dd className="text-gray-900">
-                            {selectedUniversitas.kota}
-                          </dd>
-                        </div>
-                      )}
+                        {selectedUniversitas.nama_singkat && (
+                          <div>
+                            <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                              <Hash className="w-4 h-4" />
+                              Nama Singkat
+                            </dt>
+                            <dd className="text-gray-900 ml-6">
+                              {selectedUniversitas.nama_singkat}
+                            </dd>
+                          </div>
+                        )}
 
-                      {selectedUniversitas.akreditasi && (
-                        <div>
-                          <dt className="font-medium text-gray-500">
-                            Akreditasi
-                          </dt>
-                          <dd>
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                selectedUniversitas.akreditasi === "Unggul" ||
-                                selectedUniversitas.akreditasi === "A"
-                                  ? "bg-green-100 text-green-800"
-                                  : selectedUniversitas.akreditasi ===
-                                      "Baik Sekali" ||
-                                    selectedUniversitas.akreditasi === "B"
-                                  ? "bg-secondary-light text-primary-dark"
-                                  : selectedUniversitas.akreditasi === "Baik" ||
-                                    selectedUniversitas.akreditasi === "C"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {selectedUniversitas.akreditasi}
-                            </span>
-                          </dd>
-                        </div>
-                      )}
+                        {selectedUniversitas.tipe && (
+                          <div>
+                            <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                              <Building2 className="w-4 h-4" />
+                              Tipe
+                            </dt>
+                            <dd className="text-gray-900 ml-6">
+                              {selectedUniversitas.tipe}
+                            </dd>
+                          </div>
+                        )}
 
-                      {selectedUniversitas.alamat && (
-                        <div>
-                          <dt className="font-medium text-gray-500">Alamat</dt>
-                          <dd className="text-gray-900">
-                            {selectedUniversitas.alamat}
-                          </dd>
+                        {selectedUniversitas.provinsi && (
+                          <div>
+                            <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                              <MapPin className="w-4 h-4" />
+                              Provinsi
+                            </dt>
+                            <dd className="text-gray-900 ml-6">
+                              {cleanProvinceName(selectedUniversitas.provinsi)}
+                            </dd>
+                          </div>
+                        )}
+
+                        {selectedUniversitas.kota && (
+                          <div>
+                            <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                              <MapPin className="w-4 h-4" />
+                              Kota
+                            </dt>
+                            <dd className="text-gray-900 ml-6">
+                              {selectedUniversitas.kota}
+                            </dd>
+                          </div>
+                        )}
+
+                        {selectedUniversitas.alamat && (
+                          <div>
+                            <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                              <MapPin className="w-4 h-4" />
+                              Alamat
+                            </dt>
+                            <dd className="text-gray-900 ml-6">
+                              {selectedUniversitas.alamat}
+                            </dd>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
+
+                    {/* Informasi Kontak */}
+                    {(selectedUniversitas.email ||
+                      selectedUniversitas.telepon ||
+                      selectedUniversitas.website) && (
+                      <div className="pt-6 border-t border-gray-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Phone className="w-5 h-5 text-blue-600" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Informasi Kontak
+                          </h3>
                         </div>
-                      )}
-                    </dl>
+                        <dl className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm">
+                          {selectedUniversitas.email && (
+                            <div>
+                              <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                                <Mail className="w-4 h-4" />
+                                Email
+                              </dt>
+                              <dd className="ml-6">
+                                <a
+                                  href={`mailto:${selectedUniversitas.email}`}
+                                  className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+                                >
+                                  {selectedUniversitas.email}
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </dd>
+                            </div>
+                          )}
+
+                          {selectedUniversitas.telepon && (
+                            <div>
+                              <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                                <Phone className="w-4 h-4" />
+                                Telepon
+                              </dt>
+                              <dd className="ml-6">
+                                <a
+                                  href={`tel:${selectedUniversitas.telepon}`}
+                                  className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+                                >
+                                  {selectedUniversitas.telepon}
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </dd>
+                            </div>
+                          )}
+
+                          {selectedUniversitas.website && (
+                            <div>
+                              <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                                <Globe className="w-4 h-4" />
+                                Website
+                              </dt>
+                              <dd className="ml-6">
+                                <a
+                                  href={
+                                    selectedUniversitas.website.startsWith(
+                                      "http"
+                                    )
+                                      ? selectedUniversitas.website
+                                      : `https://${selectedUniversitas.website}`
+                                  }
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+                                >
+                                  {selectedUniversitas.website}
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                    )}
+
+                    {/* Peringkat */}
+                    {(selectedUniversitas.rank_qs ||
+                      selectedUniversitas.rank_country) && (
+                      <div className="pt-6 border-t border-gray-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Award className="w-5 h-5 text-blue-600" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Peringkat
+                          </h3>
+                        </div>
+                        <dl className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm">
+                          {selectedUniversitas.rank_qs && (
+                            <div>
+                              <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                                <Hash className="w-4 h-4" />
+                                Ranking QS
+                              </dt>
+                              <dd className="ml-6">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                                  #{selectedUniversitas.rank_qs}
+                                </span>
+                              </dd>
+                            </div>
+                          )}
+
+                          {selectedUniversitas.rank_country && (
+                            <div>
+                              <dt className="flex items-center gap-2 font-medium text-gray-500 mb-1">
+                                <Hash className="w-4 h-4" />
+                                Ranking Nasional
+                              </dt>
+                              <dd className="ml-6">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20">
+                                  #{selectedUniversitas.rank_country}
+                                </span>
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                    )}
+
+                    {/* Lokasi */}
+                    {selectedUniversitas?.alamat && (
+                      <div className="pt-6 border-t border-gray-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <MapPin className="w-5 h-5 text-blue-600" />
+                          <h3 className="text-md font-semibold text-gray-900">
+                            Lokasi
+                          </h3>
+                        </div>
+                        <div className="space-y-4">
+                          <iframe
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                              selectedUniversitas.alamat
+                            )}&z=15&output=embed`}
+                            width="100%"
+                            height="300"
+                            className="rounded-lg border border-gray-200"
+                            title="Lokasi Universitas"
+                          ></iframe>
+
+                          <a
+                            href={`https://www.google.com/maps?q=${encodeURIComponent(
+                              selectedUniversitas.alamat
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            <MapPin className="w-4 h-4" />
+                            Lihat di Google Maps
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {(selectedUniversitas.email ||
-                    selectedUniversitas.telepon) && (
-                    <div className="px-6 py-4 border-t border-gray-200">
-                      <h3 className="text-md font-medium text-gray-900 mb-3">
-                        Kontak
-                      </h3>
-                      <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-sm">
-                        {selectedUniversitas.email && (
-                          <div>
-                            <dt className="font-medium text-gray-500">Email</dt>
-                            <dd>
-                              <a
-                                href={`mailto:${selectedUniversitas.email}`}
-                                className="text-primary hover:text-primary-dark"
-                              >
-                                {selectedUniversitas.email}
-                              </a>
-                            </dd>
-                          </div>
-                        )}
-
-                        {selectedUniversitas.telepon && (
-                          <div>
-                            <dt className="font-medium text-gray-500">
-                              Telepon
-                            </dt>
-                            <dd>
-                              <a
-                                href={`tel:${selectedUniversitas.telepon}`}
-                                className="text-primary hover:text-primary-dark"
-                              >
-                                {selectedUniversitas.telepon}
-                              </a>
-                            </dd>
-                          </div>
-                        )}
-                      </dl>
-                    </div>
-                  )}
-
-                  {(selectedUniversitas.rank_qs ||
-                    selectedUniversitas.rank_country) && (
-                    <div className="px-6 py-4 border-t border-gray-200">
-                      <h3 className="text-md font-medium text-gray-900 mb-3">
-                        Peringkat
-                      </h3>
-                      <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-sm">
-                        {selectedUniversitas.rank_qs && (
-                          <div>
-                            <dt className="font-medium text-gray-500">
-                              Ranking QS
-                            </dt>
-                            <dd className="text-gray-900">
-                              #{selectedUniversitas.rank_qs}
-                            </dd>
-                          </div>
-                        )}
-
-                        {selectedUniversitas.rank_country && (
-                          <div>
-                            <dt className="font-medium text-gray-500">
-                              Ranking Nasional
-                            </dt>
-                            <dd className="text-gray-900">
-                              #{selectedUniversitas.rank_country}
-                            </dd>
-                          </div>
-                        )}
-                      </dl>
-                    </div>
-                  )}
-
-                  {/* Map Link */}
-                  {selectedUniversitas?.alamat && (
-                    <div className="px-6 py-4 border-t border-gray-200 space-y-4">
-                      <iframe
-                        src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                          selectedUniversitas.alamat
-                        )}&z=15&output=embed`}
-                        width="100%"
-                        height="300"
-                        className="rounded-lg border"
-                        title="Lokasi Universitas"
-                      ></iframe>
-
-                      <a
-                        href={`https://www.google.com/maps?q=${encodeURIComponent(
-                          selectedUniversitas.alamat
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition"
-                      >
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        Lihat di Google Maps
-                      </a>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200 min-h-96">

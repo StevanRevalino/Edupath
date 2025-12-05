@@ -1,13 +1,8 @@
 import { Request, Response } from "express";
-// import { ProdiPddiktiService } from "../services/prodiPddiktiService";
 import prisma from "../configs/prisma";
 
 export class ProdiController {
-  // private pddiktiService: ProdiPddiktiService;
-
   constructor() {
-    // this.pddiktiService = new ProdiPddiktiService();
-
     // Bind methods to preserve 'this' context
     this.getAllProdi = this.getAllProdi.bind(this);
     this.getProdiById = this.getProdiById.bind(this);
@@ -503,7 +498,7 @@ export class ProdiController {
         return res.status(400).json({ message: "ID prodi harus disediakan" });
       }
 
-      // Use local database (from CSV dataset)
+      // Use local database with complete relations
       const result = await prisma.prodi.findUnique({
         where: { prodi_id: parseInt(id) },
         include: {
@@ -515,20 +510,45 @@ export class ProdiController {
         },
       });
 
-      if (!result) {
+      if (!result || !result.prodi_pt || result.prodi_pt.length === 0) {
         return res.status(404).json({ message: "Prodi tidak ditemukan" });
       }
 
-      const localProdi = {
+      // Get first university relation (most prodi have one university)
+      const firstUniv = result.prodi_pt[0].universitas;
+
+      // Transform to complete format with all university details
+      const detailData = {
         prodi_id: result.prodi_id.toString(),
         nama_prodi: result.nama_prodi,
         jenjang: result.jenjang,
-        akreditasi: result.prodi_pt[0]?.universitas?.akreditasi || null,
+        status: "Aktif", // Default status
+        kode_prodi: null,
+        bidang: null,
+        akreditasi: firstUniv?.akreditasi || null,
+        akreditasi_internasional: null,
+        status_akreditasi: null,
+        tanggal_berdiri: null,
+        no_tel: firstUniv?.telepon || null,
+        no_fax: firstUniv?.fax || null,
+        website: null,
+        email: firstUniv?.email || null,
+        alamat: firstUniv?.alamat || null,
+        universitas: {
+          university_id: firstUniv?.university_id.toString() || null,
+          nama: firstUniv?.nama || null,
+          kode_pt: null,
+          provinsi: firstUniv?.provinsi || null,
+          kab_kota: firstUniv?.kota || null,
+          kecamatan: null,
+          lintang: null,
+          bujur: null,
+        },
       };
 
       res.json({
-        message: "Berhasil mengambil detail prodi (dataset lokal)",
-        data: localProdi,
+        message: "Berhasil mengambil detail prodi",
+        data: detailData,
         source: "local",
       });
     } catch (e: any) {
