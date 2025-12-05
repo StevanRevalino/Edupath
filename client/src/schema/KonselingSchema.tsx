@@ -10,8 +10,14 @@ export const konselingSchema = yup.object().shape({
       function (value) {
         if (!value) return true;
 
-        // Get today's date at midnight (00:00:00)
-        const today = new Date();
+        // Get current time in Indonesia timezone (WIB - UTC+7)
+        const now = new Date();
+        const indonesiaTime = new Date(
+          now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        );
+
+        // Get today's date at midnight (00:00:00) in Indonesia timezone
+        const today = new Date(indonesiaTime);
         today.setHours(0, 0, 0, 0);
 
         // Get selected date at midnight (00:00:00)
@@ -34,16 +40,21 @@ export const konselingSchema = yup.object().shape({
         const { selectedDate } = this.parent;
         if (!selectedDate || !value) return true;
 
-        // Get selected date
+        // Get selected date and time
         const selected = new Date(selectedDate);
         const [hours, minutes] = value.split(":").map(Number);
         selected.setHours(hours, minutes, 0, 0);
 
-        // Get current time
+        // Get current time in Indonesia timezone (WIB - UTC+7)
         const now = new Date();
+        const indonesiaTime = new Date(
+          now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        );
 
-        // Must be at least 5 minutes from now
-        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+        // Must be at least 5 minutes from now (Indonesia time)
+        const fiveMinutesFromNow = new Date(
+          indonesiaTime.getTime() + 5 * 60 * 1000
+        );
 
         return selected >= fiveMinutesFromNow;
       }

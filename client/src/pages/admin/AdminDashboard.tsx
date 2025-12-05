@@ -11,6 +11,9 @@ const AdminDashboard = () => {
   const [consultationInitialTab, setConsultationInitialTab] = useState<
     "pending" | "active" | "completed" | "declined"
   >("pending");
+  const [selectedChatUserId, setSelectedChatUserId] = useState<string | null>(
+    null
+  );
 
   const getActiveTab = () => {
     switch (activeTab) {
@@ -19,6 +22,7 @@ const AdminDashboard = () => {
           <Dashboard
             setActiveTab={setActiveTab}
             setConsultationInitialTab={setConsultationInitialTab}
+            setSelectedChatUserId={setSelectedChatUserId}
           />
         );
       case "kelola-data-murid":
@@ -28,10 +32,16 @@ const AdminDashboard = () => {
           <KelolaDataKonseling
             setActiveTab={setActiveTab}
             initialTab={consultationInitialTab}
+            setSelectedChatUserId={setSelectedChatUserId}
           />
         );
       case "kelola-live-chat":
-        return <KelolaLiveChat />;
+        return (
+          <KelolaLiveChat
+            preSelectedUserId={selectedChatUserId}
+            onUserSelected={() => setSelectedChatUserId(null)}
+          />
+        );
       case "kelola-data-beasiswa":
         return <KelolaDataBeasiswa />;
       default:

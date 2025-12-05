@@ -37,6 +37,7 @@ interface DashboardProps {
   setConsultationInitialTab?: (
     tab: "pending" | "active" | "completed" | "declined"
   ) => void;
+  setSelectedChatUserId?: (userId: string) => void;
 }
 
 interface DashboardStats {
@@ -60,6 +61,7 @@ interface UpcomingConsultation {
 
 interface RecentChat {
   room_id: string;
+  user_id: string;
   murid_name: string;
   last_message: string;
   last_message_time: string;
@@ -71,6 +73,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const AdminDashboard: React.FC<DashboardProps> = ({
   setActiveTab,
   setConsultationInitialTab,
+  setSelectedChatUserId,
 }) => {
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
@@ -163,6 +166,13 @@ const AdminDashboard: React.FC<DashboardProps> = ({
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Auto-refresh dashboard data every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   useEffect(() => {
@@ -251,12 +261,27 @@ const AdminDashboard: React.FC<DashboardProps> = ({
 
   const getTimeUntil = (dateString: string) => {
     const now = new Date();
-    const target = new Date(dateString);
-    const diffMs = target.getTime() - now.getTime();
+    const indonesiaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
+    const consultationStart = new Date(dateString);
+    const consultationEnd = new Date(
+      consultationStart.getTime() + 60 * 60 * 1000
+    ); // +1 hour
+
+    // Check if currently ongoing
+    if (indonesiaTime >= consultationStart && indonesiaTime < consultationEnd) {
+      return "Sedang Berlangsung";
+    }
+
+    // Calculate time until start
+    const diffMs = consultationStart.getTime() - indonesiaTime.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-    if (diffHours > 24) {
+    if (diffMs < 0) {
+      return "Sudah Selesai";
+    } else if (diffHours > 24) {
       return `${Math.floor(diffHours / 24)} hari lagi`;
     } else if (diffHours > 0) {
       return `${diffHours} jam ${diffMins} menit lagi`;
@@ -701,8 +726,9 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                     key={chat.room_id}
                     className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                     onClick={() => {
-                      if (setActiveTab) {
-                        setActiveTab("kelola-chat");
+                      if (setSelectedChatUserId && setActiveTab) {
+                        setSelectedChatUserId(chat.user_id);
+                        setActiveTab("kelola-live-chat");
                       }
                     }}
                   >

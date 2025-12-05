@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   Search,
   Send,
@@ -213,7 +219,15 @@ class ChatHandler {
 
 const chatHandler = new ChatHandler();
 
-const KelolaLiveChat = () => {
+interface KelolaLiveChatProps {
+  preSelectedUserId?: string | null;
+  onUserSelected?: () => void;
+}
+
+const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
+  preSelectedUserId,
+  onUserSelected,
+}) => {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -233,13 +247,13 @@ const KelolaLiveChat = () => {
   const isSendingRef = useRef<boolean>(false);
   const currentUserId = TokenManager.getUserData().userId || "";
 
-  // Auto scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
+  // Auto scroll to bottom when new messages arrive (debounced)
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
     });
-  };
+  }, []);
 
   // All users are available for chat now (no time restriction)
   const availableChatUsers = chatUsers;
@@ -251,7 +265,7 @@ const KelolaLiveChat = () => {
   // Polling for message updates when a user is selected
   useEffect(() => {
     if (selectedUser && selectedUser.room_id) {
-      // Start polling for new messages every 3 seconds
+      // Start polling for new messages every 5 seconds (reduced from 3)
       pollingIntervalRef.current = setInterval(async () => {
         // Skip polling if currently sending a message
         if (isSendingRef.current) {
@@ -263,30 +277,18 @@ const KelolaLiveChat = () => {
             selectedUser.room_id!
           );
 
-          // Only update if messages are actually different
+          // Only update if messages count changed
           setChatMessages((prevMessages) => {
-            // Compare by length and last message ID
             if (prevMessages.length !== newMessages.length) {
               setTimeout(() => scrollToBottom(), 100);
               return newMessages as unknown as ChatMessage[];
             }
-
-            // If same length, check if last message ID is different
-            const prevLastId = prevMessages[prevMessages.length - 1]?.id;
-            const newLastId = newMessages[newMessages.length - 1]?.id;
-
-            if (prevLastId !== newLastId) {
-              setTimeout(() => scrollToBottom(), 100);
-              return newMessages as unknown as ChatMessage[];
-            }
-
             return prevMessages;
           });
         } catch (error) {
-          console.error("Error polling messages:", error);
-          // Don't show toast for polling errors to avoid spam
+          // Silent error - don't spam console or UI
         }
-      }, 3000);
+      }, 5000); // Increased from 3000 to 5000ms
     }
 
     // Cleanup function
@@ -315,6 +317,19 @@ const KelolaLiveChat = () => {
 
     fetchChatUsers();
   }, []);
+
+  // Auto-select user when preSelectedUserId is provided
+  useEffect(() => {
+    if (preSelectedUserId && chatUsers.length > 0) {
+      const userToSelect = chatUsers.find(
+        (u) => u.user_id === preSelectedUserId
+      );
+      if (userToSelect) {
+        handleUserSelect(userToSelect);
+        onUserSelected?.(); // Clear the selection after using it
+      }
+    }
+  }, [preSelectedUserId, chatUsers]);
 
   // Fetch chat messages for selected user
   const fetchChatMessages = async (userId: string) => {
@@ -1119,7 +1134,12 @@ const KelolaLiveChat = () => {
                     ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
                     placeholder={
                       selectedUser?.consultation_status === "COMPLETED"
                         ? "Konseling telah selesai"

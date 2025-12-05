@@ -28,7 +28,7 @@ interface ConsultationCardsProps {
   onDecline: (consultation: Consultation) => void;
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
-  onOpenLiveChat?: () => void;
+  onOpenLiveChat?: (consultation: Consultation) => void;
   onViewChatHistory?: (consultation: Consultation) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
@@ -150,56 +150,39 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
 
             {consultation.status === "ACCEPTED" &&
               (() => {
-                // Parse end time from consultation_time (format: "13:30 - 14:30")
-                const consultationDate = new Date(
+                const consultationStartTime = new Date(
                   consultation.consultation_date
                 );
-                let endHour = 0,
-                  endMinute = 0;
-                if (consultation.consultation_time) {
-                  const timeParts = consultation.consultation_time.split("-");
-                  if (timeParts.length === 2) {
-                    const endTimeStr = timeParts[1].trim();
-                    const [hourStr, minuteStr] = endTimeStr.split(":");
-                    endHour = parseInt(hourStr, 10);
-                    endMinute = parseInt(minuteStr, 10);
-                  }
-                }
-
-                // Set end time to consultationDate with endHour and endMinute
-                const consultationEndTime = new Date(consultationDate);
-                consultationEndTime.setHours(endHour);
-                consultationEndTime.setMinutes(endMinute);
-                consultationEndTime.setSeconds(0);
-
-                // Use local time from user's device
                 const now = new Date();
-                const isBeforeEnd = now < consultationEndTime;
+                const indonesiaTime = new Date(
+                  now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+                );
+                const hasStarted = indonesiaTime >= consultationStartTime;
 
                 return (
                   <div className="flex gap-2">
+                    {hasStarted && (
+                      <button
+                        onClick={() => onOpenLiveChat?.(consultation)}
+                        className="flex-1 px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Chat
+                      </button>
+                    )}
                     <button
-                      onClick={onOpenLiveChat}
-                      className="flex-1 px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      onClick={() => onReschedule(consultation)}
+                      className="flex-1 px-4 py-2.5 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-colors"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      Chat
+                      Reschedule
                     </button>
-                    {isBeforeEnd && (
-                      <>
-                        <button
-                          onClick={() => onReschedule(consultation)}
-                          className="flex-1 px-4 py-2.5 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-colors"
-                        >
-                          Reschedule
-                        </button>
-                        <button
-                          onClick={() => onCancel(consultation.consultation_id)}
-                          className="flex-1 px-4 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
-                        >
-                          Batalkan
-                        </button>
-                      </>
+                    {!hasStarted && (
+                      <button
+                        onClick={() => onCancel(consultation.consultation_id)}
+                        className="flex-1 px-4 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
+                      >
+                        Batalkan
+                      </button>
                     )}
                   </div>
                 );

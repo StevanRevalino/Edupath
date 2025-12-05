@@ -4,21 +4,41 @@ import prisma from "../configs/prisma";
 // Helper function for auto-completing expired consultations
 async function autoCompleteExpiredConsultations() {
   try {
+    // Get current time in Indonesia (WIB - UTC+7)
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const indonesiaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
 
+    // Find all active consultations
     const expiredConsultations = await prisma.consultation.findMany({
       where: {
         status: "ACCEPTED",
         is_active: true,
-        consultation_date: {
-          lt: oneHourAgo,
-        },
       },
     });
 
-    if (expiredConsultations.length > 0) {
-      const consultationIds = expiredConsultations.map(
+    // Filter consultations that have exceeded 1 hour from their start time
+    const consultationsToComplete = expiredConsultations.filter(
+      (consultation) => {
+        // Convert consultation_date to Indonesia timezone
+        const consultationStartTime = new Date(consultation.consultation_date);
+        const consultationStartIndonesia = new Date(
+          consultationStartTime.toLocaleString("en-US", {
+            timeZone: "Asia/Jakarta",
+          })
+        );
+        const oneHourAfterStart = new Date(
+          consultationStartIndonesia.getTime() + 60 * 60 * 1000
+        );
+
+        // Only complete if current time (Indonesia) is MORE than 1 hour after start time
+        return indonesiaTime >= oneHourAfterStart;
+      }
+    );
+
+    if (consultationsToComplete.length > 0) {
+      const consultationIds = consultationsToComplete.map(
         (c) => c.consultation_id
       );
       const result = await prisma.consultation.updateMany({
@@ -36,7 +56,7 @@ async function autoCompleteExpiredConsultations() {
       return {
         success: true,
         count: result.count,
-        consultations: expiredConsultations.map((c) => ({
+        consultations: consultationsToComplete.map((c) => ({
           id: c.consultation_id,
           startTime: c.consultation_date,
         })),
@@ -398,6 +418,7 @@ export const getRecentChats = async (req: Request, res: Response) => {
 
         return {
           room_id: room.room_id,
+          user_id: room.murid_id,
           murid_name: `${room.murid.firstname} ${room.murid.lastname}`,
           last_message: room.messages[0]?.message || "Belum ada pesan",
           last_message_time: room.messages[0]?.created_at || room.created_at,

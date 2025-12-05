@@ -1412,8 +1412,16 @@ export class ConsultationController {
         (consultation) => {
           if (!consultation.is_active) return false;
 
+          // Convert consultation_date to Indonesia timezone
           const consultationDate = new Date(consultation.consultation_date);
-          const endTime = new Date(consultationDate.getTime() + 60 * 60 * 1000); // +1 hour
+          const consultationDateIndonesia = new Date(
+            consultationDate.toLocaleString("en-US", {
+              timeZone: "Asia/Jakarta",
+            })
+          );
+          const endTime = new Date(
+            consultationDateIndonesia.getTime() + 60 * 60 * 1000
+          ); // +1 hour
 
           // Check if current time (Indonesia) is past the end time
           return indonesiaTime >= endTime;

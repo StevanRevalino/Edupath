@@ -6,7 +6,11 @@ import prisma from "../configs/prisma";
  */
 export async function autoCompleteExpiredConsultations() {
   try {
+    // Get current time in Indonesia (WIB - UTC+7)
     const now = new Date();
+    const indonesiaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
 
     // Find all active consultations that started AND have exceeded 1 hour duration
     const expiredConsultations = await prisma.consultation.findMany({
@@ -19,13 +23,19 @@ export async function autoCompleteExpiredConsultations() {
     // Filter consultations that have exceeded 1 hour from their start time
     const consultationsToComplete = expiredConsultations.filter(
       (consultation) => {
+        // Convert consultation_date to Indonesia timezone
         const consultationStartTime = new Date(consultation.consultation_date);
+        const consultationStartIndonesia = new Date(
+          consultationStartTime.toLocaleString("en-US", {
+            timeZone: "Asia/Jakarta",
+          })
+        );
         const oneHourAfterStart = new Date(
-          consultationStartTime.getTime() + 60 * 60 * 1000
+          consultationStartIndonesia.getTime() + 60 * 60 * 1000
         );
 
-        // Only complete if current time is MORE than 1 hour after start time
-        return now >= oneHourAfterStart;
+        // Only complete if current time (Indonesia) is MORE than 1 hour after start time
+        return indonesiaTime >= oneHourAfterStart;
       }
     );
 

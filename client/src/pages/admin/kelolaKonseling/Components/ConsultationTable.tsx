@@ -28,7 +28,7 @@ interface ConsultationTableProps {
   onDecline: (consultation: Consultation) => void;
   onReschedule: (consultation: Consultation) => void;
   onCancel: (id: string) => void;
-  onOpenLiveChat?: () => void;
+  onOpenLiveChat?: (consultation: Consultation) => void;
   onViewChatHistory?: (consultation: Consultation) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
@@ -158,38 +158,54 @@ const ConsultationTable = ({
                   </button>
                 </>
               )}
-              {consultation.status === "ACCEPTED" && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenLiveChat?.();
-                    }}
-                    className="px-3 py-1.5 text-xs font-semibold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1"
-                  >
-                    <MessageCircle size={14} />
-                    Chat
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReschedule(consultation);
-                    }}
-                    className="px-3 py-1.5 text-xs font-semibold bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancel(consultation.consultation_id);
-                    }}
-                    className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    Batalkan
-                  </button>
-                </>
-              )}
+              {consultation.status === "ACCEPTED" &&
+                (() => {
+                  const consultationStartTime = new Date(
+                    consultation.consultation_date
+                  );
+                  const now = new Date();
+                  const indonesiaTime = new Date(
+                    now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+                  );
+                  const hasStarted = indonesiaTime >= consultationStartTime;
+
+                  return (
+                    <>
+                      {hasStarted && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenLiveChat?.(consultation);
+                          }}
+                          className="px-3 py-1.5 text-xs font-semibold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1"
+                        >
+                          <MessageCircle size={14} />
+                          Chat
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReschedule(consultation);
+                        }}
+                        className="px-3 py-1.5 text-xs font-semibold bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                      >
+                        Reschedule
+                      </button>
+                      {!hasStarted && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCancel(consultation.consultation_id);
+                          }}
+                          className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          Batalkan
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
               {consultation.status === "COMPLETED" && (
                 <button
                   onClick={(e) => {

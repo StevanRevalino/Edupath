@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import questionIcon from "../../../assets/question-logo.png";
@@ -53,11 +53,13 @@ interface Consultation {
 interface KelolaDataKonselingProps {
   setActiveTab: (tab: string) => void;
   initialTab?: "pending" | "active" | "completed" | "declined";
+  setSelectedChatUserId?: (userId: string) => void;
 }
 
 const KelolaDataKonseling = ({
   setActiveTab: setParentActiveTab,
   initialTab = "pending",
+  setSelectedChatUserId,
 }: KelolaDataKonselingProps) => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,9 +74,13 @@ const KelolaDataKonseling = ({
   const [isChatHistoryModalOpen, setIsChatHistoryModalOpen] = useState(false);
   const [showPendingBadge, setShowPendingBadge] = useState(true);
   const [lastPendingCount, setLastPendingCount] = useState(0);
+  const previousPendingCountRef = useRef(0);
 
-  // Handler to open live chat tab
-  const handleOpenLiveChat = () => {
+  // Handler to open live chat tab with selected user
+  const handleOpenLiveChat = (consultation: Consultation) => {
+    if (setSelectedChatUserId) {
+      setSelectedChatUserId(consultation.murid_id);
+    }
     setParentActiveTab("kelola-live-chat");
   };
 
@@ -136,14 +142,55 @@ const KelolaDataKonseling = ({
     fetchConsultations();
 
     // Auto-complete expired consultations in background (every 1 minute)
-    const interval = setInterval(() => {
+    const autoCompleteInterval = setInterval(() => {
       autoCompleteExpiredConsultations().then(() => {
         // Refresh data after auto-complete
         fetchConsultations();
       });
     }, 60000);
 
-    return () => clearInterval(interval);
+    // Poll for new pending consultations (every 15 seconds)
+    const pollInterval = setInterval(() => {
+      const token = TokenManager.getToken();
+      axios
+        .get(`${API_URL}/api/consultations`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const newConsultations = (response.data.data || []) as Consultation[];
+          const newPendingCount = newConsultations.filter(
+            (c) => c.status === "PENDING"
+          ).length;
+          const previousPendingCount = previousPendingCountRef.current;
+
+          // If there are new pending consultations, refresh and show notification
+          if (newPendingCount > previousPendingCount) {
+            setConsultations(newConsultations);
+            setShowPendingBadge(true);
+            toast.success(
+              `Ada ${
+                newPendingCount - previousPendingCount
+              } konseling baru yang menunggu!`,
+              {
+                duration: 4000,
+              }
+            );
+          }
+
+          // Update ref with current count
+          previousPendingCountRef.current = newPendingCount;
+        })
+        .catch((error) => {
+          console.error("Error polling consultations:", error);
+        });
+    }, 15000); // Poll every 15 seconds
+
+    return () => {
+      clearInterval(autoCompleteInterval);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // Monitor pending count changes to show badge again when new pending appears
