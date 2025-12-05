@@ -274,9 +274,15 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       const [hours, minutes] = selectedTimeStart.split(":");
       consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // Convert to ISO string (this will be in UTC)
-      // The backend will receive this and store it correctly
-      const consultationDateStr = consultationDateTime.toISOString();
+      // Convert to ISO string in Indonesia timezone
+      // Get the offset between local time and Indonesia time
+      const localOffset = consultationDateTime.getTimezoneOffset(); // in minutes
+      const indonesiaOffset = -420; // Indonesia is UTC+7, which is -420 minutes from UTC
+      const offsetDiff = (indonesiaOffset - localOffset) * 60000; // convert to milliseconds
+      
+      // Adjust the time to Indonesia timezone
+      const indonesiaDateTime = new Date(consultationDateTime.getTime() - offsetDiff);
+      const consultationDateStr = indonesiaDateTime.toISOString();
 
       // Get user ID from token
       const userData = TokenManager.getUserData();
