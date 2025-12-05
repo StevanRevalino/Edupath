@@ -87,16 +87,27 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
     }
 
     // Check if slot is in the past (for today only)
-    const today = new Date();
-    const isToday = selectedDate.toDateString() === today.toDateString();
+    // Use Indonesia timezone (WIB - UTC+7) for consistency with validation
+    const now = new Date();
+    const indonesiaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
+
+    const isToday =
+      selectedDate.toDateString() === indonesiaTime.toDateString();
 
     if (!isToday) return false;
 
     const [hours, minutes] = timeSlot.split(":").map(Number);
-    const slotTime = new Date();
+    const slotTime = new Date(indonesiaTime);
     slotTime.setHours(hours, minutes, 0, 0);
 
-    return slotTime <= today;
+    // Add 5 minute buffer - slot must be at least 5 minutes from now
+    const fiveMinutesFromNow = new Date(
+      indonesiaTime.getTime() + 5 * 60 * 1000
+    );
+
+    return slotTime < fiveMinutesFromNow;
   };
 
   // Helper function to get all time slots (don't filter, just return all)
@@ -182,7 +193,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         // Extract ALL time slots that are occupied (start time and slots within the period, but NOT including end time)
         const bookedTimes: string[] = [];
 
-        response.data.data.forEach((slot: any) => {
+        response.data.forEach((slot: any) => {
           const startTime = slot.startTime; // e.g., "08:00"
           const endTime = slot.endTime; // e.g., "09:00"
 
@@ -269,20 +280,14 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
       await konselingSchema.validate(validationData, { abortEarly: false });
 
       // Combine date and time for consultation_date
-      // Create a proper Date object in local timezone
-      const consultationDateTime = new Date(selectedDate!);
-      const [hours, minutes] = selectedTimeStart.split(":");
-      consultationDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      // Parse date and time as Indonesia timezone (WIB = UTC+7)
+      const year = selectedDate!.getFullYear();
+      const month = String(selectedDate!.getMonth() + 1).padStart(2, "0");
+      const date = String(selectedDate!.getDate()).padStart(2, "0");
 
-      // Convert to ISO string in Indonesia timezone
-      // Get the offset between local time and Indonesia time
-      const localOffset = consultationDateTime.getTimezoneOffset(); // in minutes
-      const indonesiaOffset = -420; // Indonesia is UTC+7, which is -420 minutes from UTC
-      const offsetDiff = (indonesiaOffset - localOffset) * 60000; // convert to milliseconds
-      
-      // Adjust the time to Indonesia timezone
-      const indonesiaDateTime = new Date(consultationDateTime.getTime() - offsetDiff);
-      const consultationDateStr = indonesiaDateTime.toISOString();
+      // Create ISO string in Indonesia timezone format
+      // Backend expects: "YYYY-MM-DDTHH:mm:ss+07:00" (WIB timezone)
+      const consultationDateStr = `${year}-${month}-${date}T${selectedTimeStart}:00+07:00`;
 
       // Get user ID from token
       const userData = TokenManager.getUserData();
