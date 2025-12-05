@@ -34,6 +34,7 @@ ChartJS.register(
 
 interface DashboardProps {
   setActiveTab?: (tab: string) => void;
+  setConsultationInitialTab?: (tab: "pending" | "active" | "completed" | "declined") => void;
 }
 
 interface DashboardStats {
@@ -65,7 +66,7 @@ interface RecentChat {
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
+const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab, setConsultationInitialTab }) => {
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalConsultations: 0,
@@ -417,6 +418,9 @@ const AdminDashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
                     className="flex items-start gap-4 p-4 bg-secondary-light border border-secondary rounded-lg hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => {
                       if (setActiveTab) {
+                        if (setConsultationInitialTab) {
+                          setConsultationInitialTab("active");
+                        }
                         setActiveTab("kelola-data-konseling");
                       }
                     }}

@@ -52,17 +52,19 @@ interface Consultation {
 
 interface KelolaDataKonselingProps {
   setActiveTab: (tab: string) => void;
+  initialTab?: "pending" | "active" | "completed" | "declined";
 }
 
 const KelolaDataKonseling = ({
   setActiveTab: setParentActiveTab,
+  initialTab = "pending",
 }: KelolaDataKonselingProps) => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<
     "pending" | "active" | "completed" | "declined"
-  >("pending");
+  >(initialTab);
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
