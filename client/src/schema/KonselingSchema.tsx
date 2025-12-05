@@ -11,10 +11,10 @@ export const konselingSchema = yup.object().shape({
         if (!value) return true;
 
         // Get current time in Indonesia timezone (WIB - UTC+7)
+        // Use UTC time and add 7 hours offset for Indonesia time
         const now = new Date();
-        const indonesiaTime = new Date(
-          now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
-        );
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const indonesiaTime = new Date(utcTime + 7 * 60 * 60 * 1000);
 
         // Get today's date at midnight (00:00:00) in Indonesia timezone
         const today = new Date(indonesiaTime);
@@ -46,10 +46,10 @@ export const konselingSchema = yup.object().shape({
         selected.setHours(hours, minutes, 0, 0);
 
         // Get current time in Indonesia timezone (WIB - UTC+7)
+        // Use UTC time and add 7 hours offset for Indonesia time
         const now = new Date();
-        const indonesiaTime = new Date(
-          now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
-        );
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const indonesiaTime = new Date(utcTime + 7 * 60 * 60 * 1000);
 
         // Must be at least 5 minutes from now (Indonesia time)
         const fiveMinutesFromNow = new Date(
