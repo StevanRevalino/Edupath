@@ -467,7 +467,7 @@ const KelolaDataMurid = () => {
                         e.stopPropagation();
                         handleEdit(student.user_id);
                       }}
-                      className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
+                      className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors hover:bg-primary-hover cursor-pointer"
                     >
                       Edit
                     </button>
@@ -476,7 +476,6 @@ const KelolaDataMurid = () => {
               ]}
               data={filteredStudents}
               keyExtractor={(student) => student.user_id}
-              onRowClick={(student) => handleEdit(student.user_id)}
               emptyMessage="Tidak ada data murid"
             />
           </div>
@@ -518,7 +517,7 @@ const KelolaDataMurid = () => {
                       </div>
                       <button
                         onClick={() => handleEdit(student.user_id)}
-                        className="flex items-center space-x-1 px-3 py-1 bg-primary text-white text-sm rounded-full hover:bg-primary-light transition-colors"
+                        className="flex items-center space-x-1 px-3 py-1 bg-primary text-white text-sm rounded-full transition-colors hover:bg-primary-hover"
                       >
                         <span>Edit</span>
                       </button>

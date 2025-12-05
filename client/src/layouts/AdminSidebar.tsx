@@ -226,58 +226,60 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   return (
     <>
       {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden lg:flex bg-primary text-white w-64 min-h-screen flex-col rounded-br-2xl rounded-tr-2xl">
-        <div className="p-4 flex-1">
-          {/* Logo Section */}
-          <div className="flex items-center justify-center mb-2">
-            <img
-              src={edupathLogo}
-              alt="EduPath Logo"
-              className="w-[110px] h-[95px]"
-            />
+      <div className="hidden lg:block w-64">
+        <div className="sticky top-0 h-screen bg-primary text-white flex flex-col rounded-br-2xl rounded-tr-2xl">
+          <div className="p-4 flex-1 overflow-y-auto">
+            {/* Logo Section */}
+            <div className="flex items-center justify-center mb-2">
+              <img
+                src={edupathLogo}
+                alt="EduPath Logo"
+                className="w-[110px] h-[95px]"
+              />
+            </div>
+
+            {/* Navigation Menu */}
+            <nav>
+              <ul className="space-y-2">
+                {menuItems.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        clearBadge(item.id);
+                      }}
+                      className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-primary-hoverer ${
+                        activeTab === item.id
+                          ? "bg-primary-hoverer"
+                          : "bg-transparent"
+                      }`}
+                    >
+                      <img
+                        src={item.icon}
+                        alt={`${item.label} Icon`}
+                        className="w-12 h-14 mr-3"
+                      />
+                      <span className="font-medium flex-1">{item.label}</span>
+                      {/* Tompel merah kecil - muncul jika ada notifikasi */}
+                      {item.badgeCount > 0 && (
+                        <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
 
-          {/* Navigation Menu */}
-          <nav>
-            <ul className="space-y-2">
-              {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      clearBadge(item.id);
-                    }}
-                    className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-primary-lighter ${
-                      activeTab === item.id
-                        ? "bg-primary-lighter"
-                        : "bg-transparent"
-                    }`}
-                  >
-                    <img
-                      src={item.icon}
-                      alt={`${item.label} Icon`}
-                      className="w-12 h-14 mr-3"
-                    />
-                    <span className="font-medium flex-1">{item.label}</span>
-                    {/* Tompel merah kecil - muncul jika ada notifikasi */}
-                    {item.badgeCount > 0 && (
-                      <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-
-        {/* Logout Button - Fixed at bottom */}
-        <div className="p-4">
-          <button
-            onClick={handleLogout}
-            className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-lighter transition-colors duration-200"
-          >
-            <img src={logOutIcon} alt="Logout Icon" className="w-full h-15" />
-          </button>
+          {/* Logout Button - Fixed at bottom */}
+          <div className="p-4">
+            <button
+              onClick={handleLogout}
+              className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200"
+            >
+              <img src={logOutIcon} alt="Logout Icon" className="w-full h-15" />
+            </button>
+          </div>
         </div>
       </div>
 

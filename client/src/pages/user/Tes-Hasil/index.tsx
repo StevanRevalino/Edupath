@@ -457,7 +457,7 @@ const HasilTes: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate("/jurusan")}
-              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-light font-medium"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover font-medium"
             >
               Jelajahi Semua Program Studi
             </button>

@@ -84,7 +84,7 @@ export default function TutorialCard({ onStartTest }: TutorialCardProps) {
       {isLastStep && (
         <button
           onClick={handleNext}
-          className="bg-primary-lighter hover:bg-primary-light text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
+          className="bg-primary-hoverer hover:bg-primary-hover text-white font-medium py-3 px-8 rounded-full transition-colors relative z-10"
         >
           {currentTutorial.buttonText}
         </button>

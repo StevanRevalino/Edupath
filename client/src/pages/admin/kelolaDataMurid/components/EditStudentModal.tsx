@@ -121,8 +121,8 @@ const EditStudentModal = ({
               }
               className={`px-4 py-2 rounded-lg transition-colors ${
                 !editForm.firstname || !editForm.lastname || !editForm.kelas
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-primary text-white hover:bg-primary-light cursor-pointer"
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300"
+                  : "bg-primary text-white hover:bg-primary-hover cursor-pointer"
               }`}
             >
               Simpan

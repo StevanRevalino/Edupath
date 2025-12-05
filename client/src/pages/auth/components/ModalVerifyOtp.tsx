@@ -121,7 +121,7 @@ export default function OTPModal({
 
         <button
           onClick={handleSubmit}
-          className="bg-primary hover:bg-primary-lighter text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
+          className="bg-primary hover:bg-primary-hoverer text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           Verifikasi Email
         </button>

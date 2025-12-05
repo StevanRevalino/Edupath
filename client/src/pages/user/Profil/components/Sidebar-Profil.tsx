@@ -54,7 +54,7 @@ export default function SidebarProfil({
     <>
       {/* Desktop Sidebar */}
       <div
-        className="hidden lg:flex w-[400px] p-6 relative flex-col"
+        className="hidden lg:block w-[400px] p-6 relative"
         style={{ minHeight: `${mainSectionHeight}px` }}
       >
         {/* Menu Title & Top Buttons - Absolute position with high z-index */}
@@ -63,20 +63,20 @@ export default function SidebarProfil({
             Menu
           </h2>
           <button
-            className={`min-w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
+            className={`min-w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all duration-200 ${
               isActive("/profil")
                 ? "bg-white border-primary-dark text-primary-dark"
-                : "bg-white/90 border-white text-primary-dark hover:bg-white"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white hover:scale-105 hover:shadow-xl"
             }`}
             onClick={() => navigate("/profil")}
           >
             Profil saya
           </button>
           <button
-            className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
+            className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all duration-200 ${
               isActive("/about-us")
                 ? "bg-white border-primary-dark text-primary-dark"
-                : "bg-white/90 border-white text-primary-dark hover:bg-white"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white hover:scale-105 hover:shadow-xl"
             }`}
             onClick={() => navigate("/about-us")}
           >
@@ -84,13 +84,16 @@ export default function SidebarProfil({
           </button>
         </div>
 
-        {/* Bottom buttons - Positioned at bottom of main section */}
-        <div className="absolute left-6 space-y-3" style={{ bottom: "24px" }}>
+        {/* Bottom buttons - Sticky position that follows scroll */}
+        <div
+          className="sticky left-6 space-y-3"
+          style={{ top: "calc(100vh - 180px)" }}
+        >
           <button
-            className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all ${
+            className={`w-full text-left border-3 rounded-full px-6 py-2.5 font-medium shadow-lg cursor-pointer transition-all duration-200 ${
               isActive("/contact-us")
                 ? "bg-white border-primary-dark text-primary-dark"
-                : "bg-white/90 border-white text-primary-dark hover:bg-white"
+                : "bg-white/90 border-white text-primary-dark hover:bg-white hover:scale-105 hover:shadow-xl"
             }`}
             onClick={() => navigate("/contact-us")}
           >
@@ -98,7 +101,7 @@ export default function SidebarProfil({
           </button>
           <button
             onClick={onLogout}
-            className="w-full border-3 border-white bg-white/90 rounded-full px-6 py-2.5 text-primary-dark font-medium shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white transition-all"
+            className="w-full border-3 border-white bg-white/90 rounded-full px-6 py-2.5 text-primary-dark font-medium shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-200"
           >
             <LogOut size={16} />
             Keluar
@@ -129,10 +132,10 @@ export default function SidebarProfil({
           {menuItems.map((item) => (
             <button
               key={item.path}
-              className={`w-full text-left border-2 rounded-full px-6 py-2.5 font-medium shadow-md cursor-pointer transition-all ${
+              className={`w-full text-left border-2 rounded-full px-6 py-2.5 font-medium shadow-md cursor-pointer transition-all duration-200 ${
                 isActive(item.path)
                   ? "bg-primary-dark border-primary-dark text-white"
-                  : "bg-white border-primary-dark text-primary-dark hover:bg-primary-dark/10"
+                  : "bg-white border-primary-dark text-primary-dark hover:bg-primary-dark/20 hover:scale-105 hover:shadow-lg"
               }`}
               onClick={() => navigate(item.path)}
             >
@@ -142,7 +145,7 @@ export default function SidebarProfil({
 
           <button
             onClick={onLogout}
-            className="w-full border-2 border-red-500 bg-white rounded-full px-6 py-2.5 text-red-500 font-medium shadow-md flex items-center justify-center gap-2 cursor-pointer hover:bg-red-50 transition-all"
+            className="w-full border-2 border-red-500 bg-white rounded-full px-6 py-2.5 text-red-500 font-medium shadow-md flex items-center justify-center gap-2 cursor-pointer hover:bg-red-100 hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
             <LogOut size={16} />
             Keluar

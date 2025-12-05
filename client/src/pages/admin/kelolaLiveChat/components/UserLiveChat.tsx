@@ -203,7 +203,7 @@ const UserLiveChat = ({ isOpen, onToggle }: ChatProps) => {
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim() || sendingMessage}
-                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send size={16} />
                 </button>

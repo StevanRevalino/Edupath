@@ -95,7 +95,7 @@ const BeasiswaDetailModal: React.FC<BeasiswaDetailModalProps> = ({
             href={beasiswa.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-light text-white py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+            className="flex items-center justify-center gap-2 w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-md hover:shadow-lg hover:bg-primary-hover cursor-pointer"
           >
             Kunjungi Halaman Beasiswa
             <ExternalLink size={20} />

@@ -52,7 +52,7 @@ const BeasiswaCard: React.FC<BeasiswaCardProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-light text-white py-3 rounded-lg font-semibold transition-colors duration-200"
+          className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition-colors duration-200"
         >
           Lihat Detail
           <ExternalLink size={18} />

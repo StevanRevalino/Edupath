@@ -688,7 +688,7 @@ const Home = () => {
                       <div className="text-sm font-bold text-gray-700">
                         Tes #{assessmentStats.allTests.length - idx}
                       </div>
-                      <div className="bg-primary-lighter text-primary-dark px-3 py-1 rounded-full text-xs font-semibold">
+                      <div className="bg-primary-hoverer text-primary-dark px-3 py-1 rounded-full text-xs font-semibold">
                         {test.dominant_type}
                       </div>
                     </div>

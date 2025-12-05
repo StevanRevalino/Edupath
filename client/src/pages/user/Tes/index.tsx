@@ -330,7 +330,7 @@ const Tes = () => {
             </p>
             <button
               onClick={() => setShowModal(false)}
-              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-light"
+              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             >
               Tutup
             </button>

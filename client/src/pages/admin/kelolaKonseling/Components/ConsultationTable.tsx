@@ -131,7 +131,7 @@ const ConsultationTable = ({
                   e.stopPropagation();
                   onViewDetails(consultation);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <Eye size={14} />
                 Detail

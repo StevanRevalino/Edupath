@@ -215,7 +215,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                       className={`${
                         timer > 0
                           ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-primary hover:bg-primary-lighter text-white"
+                          : "bg-primary hover:bg-primary-hoverer text-white"
                       } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap`}
                       disabled={timer > 0}
                     >
@@ -323,7 +323,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               onClick={handleSubmit}
               className={`${
                 isFormValid
-                  ? "bg-primary hover:bg-primary-lighter text-white"
+                  ? "bg-primary hover:bg-primary-hoverer text-white"
                   : "bg-gray-300 text-gray-500 "
               } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap cursor-pointer`}
             >

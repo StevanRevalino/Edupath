@@ -165,7 +165,7 @@ export default function Login() {
           disabled={!email || !password}
           className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl ${
             email && password
-              ? "bg-primary hover:bg-primary-lighter text-white"
+              ? "bg-primary hover:bg-primary-hoverer text-white"
               : "bg-gray-300 text-gray-500"
           }`}
         >

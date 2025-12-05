@@ -243,7 +243,7 @@ const TesPertanyaan = () => {
           <p className="text-red-500 mb-4">{error}</p>
           <button
             onClick={loadQuestions}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-light"
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
           >
             Coba Lagi
           </button>
@@ -356,7 +356,7 @@ const TesPertanyaan = () => {
             <button
               className={`font-medium py-3 px-8 rounded-3xl transition-colors ${
                 allQuestionsAnswered && !submitting
-                  ? "bg-primary-lighter hover:bg-primary-light text-white"
+                  ? "bg-primary-hoverer hover:bg-primary-hover text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
               disabled={!allQuestionsAnswered || submitting}

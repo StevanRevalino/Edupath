@@ -59,7 +59,7 @@ const ZoomRequestModal = ({
             <div className="bg-secondary-light p-2 rounded-lg">
               <Video className="text-primary" size={24} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-bold text-gray-800 cursor-pointer">
               Buat Zoom Meeting
             </h2>
           </div>
@@ -149,7 +149,7 @@ const ZoomRequestModal = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-light font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 {isSubmitting ? (
                   <>

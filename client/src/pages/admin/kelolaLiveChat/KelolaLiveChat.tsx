@@ -1165,7 +1165,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
                     uploadingImage ||
                     selectedUser?.consultation_status === "COMPLETED"
                   }
-                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
+                  className="bg-primary text-white p-2 rounded-lg hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
                 >
                   {uploadingImage ? (
                     <Loader className="animate-spin" size={20} />

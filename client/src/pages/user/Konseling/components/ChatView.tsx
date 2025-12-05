@@ -514,7 +514,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                       // Special styling for Zoom meeting messages
                       <div className="bg-gray-200 border-2 border-gray-300 rounded-xl p-4 shadow-md">
                         <div className="flex items-start gap-3">
-                          <div className="bg-primary-light p-2 rounded-lg flex-shrink-0">
+                          <div className="bg-primary-hover p-2 rounded-lg flex-shrink-0">
                             <svg
                               className="w-6 h-6 text-white"
                               fill="none"
@@ -580,7 +580,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                                       rel="noopener noreferrer"
                                       className="block mb-2"
                                     >
-                                      <button className="w-full bg-primary hover:bg-primary-light text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                      <button className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
                                         <svg
                                           className="w-5 h-5"
                                           fill="none"
@@ -754,7 +754,7 @@ const ChatView = ({ consultation, currentUserId, onBack }: ChatViewProps) => {
                 uploadingImage ||
                 consultation.status === "COMPLETED"
               }
-              className="bg-primary text-white p-2 rounded-lg hover:bg-primary-light disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px] min-h-[40px]"
+              className="bg-primary text-white p-2 rounded-lg hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px] min-h-[40px]"
             >
               {uploadingImage ? (
                 <Loader className="animate-spin" size={20} />

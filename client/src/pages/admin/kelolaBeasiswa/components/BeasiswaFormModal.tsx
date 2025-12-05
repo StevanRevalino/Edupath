@@ -159,7 +159,7 @@ const BeasiswaFormModal = ({
               </button>
               <button
                 onClick={onSubmit}
-                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={isUploading}
               >
                 {isUploading

@@ -65,6 +65,14 @@ const Jurusan: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // ===== Available Filter Options (stored separately) =====
+  const [availableJenjangOptions, setAvailableJenjangOptions] = useState<
+    string[]
+  >([]);
+  const [availableAkreditasiOptions, setAvailableAkreditasiOptions] = useState<
+    string[]
+  >([]);
+
   // ===== Search Cache =====
   const searchCacheRef = useRef<Map<string, ProdiItem[]>>(new Map());
 
@@ -202,6 +210,18 @@ const Jurusan: React.FC = () => {
         const filtered = (response.data.data || []).filter(
           (p: ProdiWithUniversity) => p.universitas?.nama
         );
+
+        // Extract and save all available filter options (only when not filtering)
+        if (!hasFilter) {
+          const jenjangSet = new Set<string>();
+          const akreditasiSet = new Set<string>();
+          filtered.forEach((p: any) => {
+            if (p.jenjang) jenjangSet.add(p.jenjang);
+            if (p.akreditasi) akreditasiSet.add(p.akreditasi);
+          });
+          setAvailableJenjangOptions(Array.from(jenjangSet).sort());
+          setAvailableAkreditasiOptions(Array.from(akreditasiSet).sort());
+        }
 
         setResults(filtered);
         setHasSearched(true);
@@ -345,21 +365,28 @@ const Jurusan: React.FC = () => {
   };
 
   // ===== Extract unique filter options =====
+  // Use stored options if available, otherwise extract from current results
   const jenjangOptions = useMemo(() => {
+    if (availableJenjangOptions.length > 0) {
+      return availableJenjangOptions;
+    }
     const unique = new Set<string>();
     results.forEach((p) => {
       if (p.jenjang) unique.add(p.jenjang);
     });
     return Array.from(unique).sort();
-  }, [results]);
+  }, [availableJenjangOptions, results]);
 
   const akreditasiOptions = useMemo(() => {
+    if (availableAkreditasiOptions.length > 0) {
+      return availableAkreditasiOptions;
+    }
     const unique = new Set<string>();
     results.forEach((p) => {
       if (p.akreditasi) unique.add(p.akreditasi);
     });
     return Array.from(unique).sort();
-  }, [results]);
+  }, [availableAkreditasiOptions, results]);
 
   // ===== Filtered and Sorted Results =====
   // Sorted Results (filter sudah dihandle di backend)

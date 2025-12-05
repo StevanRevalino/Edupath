@@ -366,7 +366,7 @@ const ConsultationDetailModal: FC<ConsultationDetailModalProps> = ({
           )}
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors font-medium"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
           >
             Tutup
           </button>

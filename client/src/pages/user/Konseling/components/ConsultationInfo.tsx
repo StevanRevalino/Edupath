@@ -400,7 +400,7 @@ const ConsultationInfo = ({
             {isChatAvailable() ? (
               <button
                 onClick={() => onOpenChat(consultation)}
-                className="w-full bg-primary hover:bg-primary-light text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-primary hover:bg-primary-hover text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-primary-hover cursor-pointer"
               >
                 <MessageCircle size={20} />
                 Buka Chat Konseling
@@ -434,7 +434,7 @@ const ConsultationInfo = ({
             <button
               onClick={handleCancelConsultation}
               disabled={canceling}
-              className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               {canceling ? (
                 <>

@@ -30,15 +30,15 @@ const Footer = () => {
           </div>
 
           {/* Navigation */}
-          <div className="sm:col-span-1 lg:col-span-1">
+          <div className="sm:col-span-1 lg:col-span-1 text-center sm:text-left">
             <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
               Navigation
             </h3>
-            <div className="bg-primary-light w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
+            <div className="bg-primary-hover w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1 mx-auto sm:mx-0" />
             <nav className="space-y-2 md:space-y-3">
               <a
                 href="/home"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -51,7 +51,7 @@ const Footer = () => {
               </a>
               <a
                 href="/tes"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -64,7 +64,7 @@ const Footer = () => {
               </a>
               <a
                 href="/jurusan"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -77,7 +77,7 @@ const Footer = () => {
               </a>
               <a
                 href="/universitas"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -90,7 +90,7 @@ const Footer = () => {
               </a>
               <a
                 href="/konseling"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -103,7 +103,7 @@ const Footer = () => {
               </a>
               <a
                 href="/beasiswa"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
+                className="flex items-center justify-center sm:justify-start space-x-2 hover:opacity-80 transition-opacity text-sm md:text-base"
               >
                 <span>
                   <img
@@ -118,15 +118,15 @@ const Footer = () => {
           </div>
 
           {/* Contact Us */}
-          <div className="sm:col-span-1 lg:col-span-1">
+          <div className="sm:col-span-1 lg:col-span-1 text-center sm:text-left">
             <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
               Contact Us
             </h3>
-            <div className="bg-[#417A99] w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
+            <div className="bg-[#417A99] w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1 mx-auto sm:mx-0" />
             <div className="space-y-3 md:space-y-4">
               <a
                 href="/contact-us#contact-form"
-                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+                className="flex items-center justify-center sm:justify-start space-x-3 hover:opacity-80 transition-opacity"
               >
                 <span>
                   <img
@@ -141,7 +141,7 @@ const Footer = () => {
               </a>
               <a
                 href="/contact-us#contact-form"
-                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+                className="flex items-center justify-center sm:justify-start space-x-3 hover:opacity-80 transition-opacity"
               >
                 <span>
                   <img
@@ -161,8 +161,8 @@ const Footer = () => {
               <h4 className="text-base sm:text-lg md:text-xl lg:text-3xl font-bold">
                 Social Media
               </h4>
-              <div className="bg-primary-light w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1" />
-              <div className="flex space-x-4 md:space-x-6">
+              <div className="bg-primary-hover w-[80px] sm:w-[100px] md:w-[120px] h-1 mb-3 md:mb-4 mt-1 mx-auto sm:mx-0" />
+              <div className="flex justify-center sm:justify-start space-x-4 md:space-x-6">
                 <a
                   href="https://www.instagram.com/edupath_app?igsh=a3ZzcHBhN3Brbnhy&utm_source=qr"
                   target="_blank"
