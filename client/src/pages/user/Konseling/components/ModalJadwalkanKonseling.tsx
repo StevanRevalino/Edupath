@@ -182,7 +182,7 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
         // Extract ALL time slots that are occupied (start time and slots within the period, but NOT including end time)
         const bookedTimes: string[] = [];
 
-        response.data.forEach((slot: any) => {
+        response.data.data.forEach((slot: any) => {
           const startTime = slot.startTime; // e.g., "08:00"
           const endTime = slot.endTime; // e.g., "09:00"
 

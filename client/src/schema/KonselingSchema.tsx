@@ -40,34 +40,23 @@ export const konselingSchema = yup.object().shape({
         const { selectedDate } = this.parent;
         if (!selectedDate || !value) return true;
 
-        // Parse selected date and time (assumes user input is in Indonesia timezone)
+        // Get selected date and time
         const selected = new Date(selectedDate);
         const [hours, minutes] = value.split(":").map(Number);
-
-        // Create selected datetime in Indonesia timezone
-        // Convert to UTC then add Indonesia offset
-        const selectedUTC = Date.UTC(
-          selected.getFullYear(),
-          selected.getMonth(),
-          selected.getDate(),
-          hours,
-          minutes,
-          0,
-          0
-        );
-        const selectedIndonesia = new Date(selectedUTC - 7 * 60 * 60 * 1000);
+        selected.setHours(hours, minutes, 0, 0);
 
         // Get current time in Indonesia timezone (WIB - UTC+7)
         const now = new Date();
-        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-        const indonesiaTime = new Date(utcTime + 7 * 60 * 60 * 1000);
+        const indonesiaTime = new Date(
+          now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        );
 
         // Must be at least 5 minutes from now (Indonesia time)
         const fiveMinutesFromNow = new Date(
           indonesiaTime.getTime() + 5 * 60 * 1000
         );
 
-        return selectedIndonesia >= fiveMinutesFromNow;
+        return selected >= fiveMinutesFromNow;
       }
     ),
 
