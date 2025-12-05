@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useRef,
-  useMemo,
   useCallback,
 } from "react";
 import {
@@ -646,13 +645,6 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
     } catch (error) {
       console.error("Error creating zoom meeting:", error);
       toast.error("Gagal membuat Zoom meeting");
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
     }
   };
 
