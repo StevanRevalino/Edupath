@@ -300,7 +300,7 @@ const KelolaDataBeasiswa = () => {
       <div className="mb-6">
         <button
           onClick={() => handleOpenModal()}
-          className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
         >
           <Plus size={20} />
           Tambah Beasiswa

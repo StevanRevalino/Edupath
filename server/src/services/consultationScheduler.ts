@@ -7,27 +7,35 @@ import prisma from "../configs/prisma";
 export async function autoCompleteExpiredConsultations() {
   try {
     const now = new Date();
-    // Calculate time 1 hour ago
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
-    // Find all active consultations that started more than 1 hour ago
+    // Find all active consultations that started AND have exceeded 1 hour duration
     const expiredConsultations = await prisma.consultation.findMany({
       where: {
         status: "ACCEPTED",
         is_active: true,
-        consultation_date: {
-          lt: oneHourAgo,
-        },
       },
     });
 
-    if (expiredConsultations.length > 0) {
+    // Filter consultations that have exceeded 1 hour from their start time
+    const consultationsToComplete = expiredConsultations.filter(
+      (consultation) => {
+        const consultationStartTime = new Date(consultation.consultation_date);
+        const oneHourAfterStart = new Date(
+          consultationStartTime.getTime() + 60 * 60 * 1000
+        );
+
+        // Only complete if current time is MORE than 1 hour after start time
+        return now >= oneHourAfterStart;
+      }
+    );
+
+    if (consultationsToComplete.length > 0) {
       console.log(
-        `[Scheduler] Found ${expiredConsultations.length} expired consultations to auto-complete`
+        `[Scheduler] Found ${consultationsToComplete.length} expired consultations to auto-complete`
       );
 
       // Update all expired consultations to inactive and completed
-      const consultationIds = expiredConsultations.map(
+      const consultationIds = consultationsToComplete.map(
         (c) => c.consultation_id
       );
 
@@ -50,7 +58,7 @@ export async function autoCompleteExpiredConsultations() {
       return {
         success: true,
         count: result.count,
-        consultations: expiredConsultations.map((c) => ({
+        consultations: consultationsToComplete.map((c) => ({
           id: c.consultation_id,
           startTime: c.consultation_date,
         })),

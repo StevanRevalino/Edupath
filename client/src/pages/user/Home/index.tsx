@@ -771,11 +771,11 @@ const Home = () => {
             >
               <div className="flex items-center justify-start h-full min-h-[120px]">
                 <button
-                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200"
                   onClick={() => navigate("/tes")}
                 >
                   <div className="flex items-center gap-5 h-full justify-start">
-                    <div className="p-6 bg-[#E9E9E9] rounded-md">
+                    <div className="p-6 bg-[#E9E9E9] rounded-md hover:bg-[#D9D9D9] transition-colors">
                       <Plus
                         size={32}
                         className="text-[#7E7E7E]"
@@ -849,11 +849,11 @@ const Home = () => {
             >
               <div className="flex items-center justify-start h-full min-h-[120px]">
                 <button
-                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer"
+                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200"
                   onClick={() => navigate("/konseling")}
                 >
                   <div className="flex items-center gap-5 h-full justify-start">
-                    <div className="p-6 bg-gray-200 rounded-md">
+                    <div className="p-6 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
                       <Plus
                         size={32}
                         className="text-gray-500"
