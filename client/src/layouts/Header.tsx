@@ -160,6 +160,8 @@ const Header = () => {
                 });
               } else if (type === "ZOOM_MEETING") {
                 navigate("/konseling");
+              } else if (type === "BEASISWA_NEW") {
+                navigate("/beasiswa");
               }
             }}
           />
