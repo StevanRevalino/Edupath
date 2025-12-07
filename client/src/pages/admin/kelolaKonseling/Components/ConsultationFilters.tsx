@@ -80,7 +80,7 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           <div className="flex flex-col items-center space-y-1.5">
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "active" ? "text-primary-dark" : "text-gray-500"
+                activeTab === "active" ? "text-primary" : "text-gray-500"
               }`}
             >
               Active
