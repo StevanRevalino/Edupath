@@ -37,10 +37,7 @@ export class ChatController {
           admin_id: adminId,
           status: "ACCEPTED",
           is_active: true,
-          consultation_date: {
-            gte: oneHourAgo,
-            lte: indonesiaTime,
-          },
+          // REMOVED: consultation_date filter - terlalu ketat
         },
         include: {
           murid: {
@@ -69,6 +66,9 @@ export class ChatController {
               },
             },
           },
+        },
+        orderBy: {
+          consultation_date: "desc", // Urutkan dari yang terbaru
         },
       });
 
