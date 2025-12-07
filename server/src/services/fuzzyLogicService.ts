@@ -313,68 +313,6 @@ export class FuzzyLogicService {
     // Round to nearest integer and cap at 100
     return Math.min(Math.round(matchPercentage), 100);
   }
-
-  /**
-   * Debug method to see fuzzy inference details (DEPRECATED - Use enableLog parameter instead)
-   * This method is kept for backward compatibility
-   */
-  public debugFuzzyInference(
-    userScores: UserRiasecScores,
-    prodiPrimaryType: RiasecType,
-    prodiSecondaryType: RiasecType | null
-  ): any {
-    const primaryScore =
-      userScores[prodiPrimaryType[0] as keyof UserRiasecScores];
-    const secondaryScore = prodiSecondaryType
-      ? userScores[prodiSecondaryType[0] as keyof UserRiasecScores]
-      : 0;
-
-    const primaryFuzzy = this.fuzzifyScore(primaryScore);
-    const secondaryFuzzy = this.fuzzifyScore(secondaryScore);
-
-    const fuzzyInput: FuzzyInput = {
-      primaryScore,
-      secondaryScore,
-    };
-
-    const firedRules = this.inferenceEngine(
-      fuzzyInput,
-      primaryFuzzy,
-      secondaryFuzzy
-    );
-
-    const matchPercentage = this.calculateWeightedAverage(firedRules);
-
-    const userPrimaryType = this.getHighestType(userScores);
-    const userSecondaryType = this.getSecondHighestType(userScores);
-
-    return {
-      input: {
-        userScores,
-        userPrimaryType,
-        userSecondaryType,
-        prodiPrimaryType,
-        prodiSecondaryType,
-        extractedScores: {
-          primary: primaryScore,
-          secondary: secondaryScore,
-        },
-      },
-      fuzzification: {
-        primary: primaryFuzzy,
-        secondary: secondaryFuzzy,
-      },
-      fuzzyInput,
-      firedRules: firedRules.map((fr) => ({
-        ruleId: fr.rule.id,
-        consequent: fr.rule.consequent,
-        alpha: fr.alpha.toFixed(3),
-        z: fr.z.toFixed(2),
-      })),
-      totalFiredRules: firedRules.length,
-      finalMatchPercentage: matchPercentage.toFixed(2) + "%",
-    };
-  }
 }
 
 // Export singleton instance

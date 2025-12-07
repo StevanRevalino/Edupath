@@ -5,7 +5,7 @@
 
 import { Request, Response } from "express";
 import prisma from "../configs/prisma";
-import { fuzzyLogicService } from "../services/fuzzyLogic";
+import { fuzzyLogicService } from "../services/fuzzyLogicService";
 
 // Types for Holland assessment
 type HollandType =

@@ -96,7 +96,7 @@ class ZoomService {
         start_time: config.start_time,
         duration: config.duration,
         timezone: config.timezone,
-        password: config.password || this.generatePassword(),
+        password: config.password,
         agenda: config.agenda || "",
         settings: {
           host_video: true,
@@ -144,89 +144,6 @@ class ZoomService {
         error.response?.data?.message || "Failed to create Zoom meeting"
       );
     }
-  }
-
-  /**
-   * Get Meeting Details
-   */
-  async getMeeting(meetingId: number): Promise<ZoomMeetingResponse> {
-    try {
-      const token = await this.getAccessToken();
-
-      const response = await axios.get(
-        `https://api.zoom.us/v2/meetings/${meetingId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      console.error(
-        "❌ Error getting Zoom meeting:",
-        error.response?.data || error.message
-      );
-      throw new Error("Failed to get Zoom meeting details");
-    }
-  }
-
-  /**
-   * Delete a Zoom Meeting
-   */
-  async deleteMeeting(meetingId: number): Promise<void> {
-    try {
-      const token = await this.getAccessToken();
-
-      await axios.delete(`https://api.zoom.us/v2/meetings/${meetingId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    } catch (error: any) {
-      console.error(
-        "❌ Error deleting Zoom meeting:",
-        error.response?.data || error.message
-      );
-      throw new Error("Failed to delete Zoom meeting");
-    }
-  }
-
-  /**
-   * Update a Zoom Meeting
-   */
-  async updateMeeting(
-    meetingId: number,
-    updates: Partial<ZoomMeetingConfig>
-  ): Promise<void> {
-    try {
-      const token = await this.getAccessToken();
-
-      await axios.patch(
-        `https://api.zoom.us/v2/meetings/${meetingId}`,
-        updates,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (error: any) {
-      console.error(
-        "❌ Error updating Zoom meeting:",
-        error.response?.data || error.message
-      );
-      throw new Error("Failed to update Zoom meeting");
-    }
-  }
-
-  /**
-   * Generate random 6-digit password
-   */
-  private generatePassword(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   /**
