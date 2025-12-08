@@ -117,7 +117,6 @@ export class AuthController {
         return;
       }
 
-      // Create JWT Token
       const token = jwt.sign(
         {
           user_id: user.user_id,
@@ -283,14 +282,6 @@ export class AuthController {
     try {
       const { email } = req.body;
 
-      if (!email) {
-        res.status(400).json({
-          success: false,
-          message: "Email wajib diisi",
-        });
-        return;
-      }
-
       // Generate OTP (6 digit)
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -314,14 +305,6 @@ export class AuthController {
   async sendVerificationOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
-
-      if (!email) {
-        res.status(400).json({
-          success: false,
-          message: "Email wajib diisi",
-        });
-        return;
-      }
 
       // Generate OTP (6 digit)
       const otp = Math.floor(100000 + Math.random() * 900000).toString();

@@ -19,54 +19,40 @@ sequenceDiagram
     User->>LoginPage: 2. Click "Masuk" button
 
     activate LoginPage
-    LoginPage->>LoginPage: 3. Validate input (Yup Schema)
+    LoginPage->>LoginPage: 3. handleLogin()
 
-    alt Validation Failed
+    alt Validation Failed (Yup)
         LoginPage-->>User: Show validation errors
     else Validation Success
-        LoginPage->>AuthController: 4. POST /api/auth/login<br/>{email, password}
+        LoginPage->>AuthController: 4. login()
 
         activate AuthController
-        AuthController->>AuthController: 5. Check email & password not empty
+        AuthController->>UserDB: 5. findUnique(email)
 
-        alt Missing Fields
-            AuthController-->>LoginPage: 400: Email dan password wajib diisi
+        activate UserDB
+        UserDB-->>AuthController: Return user or null
+        deactivate UserDB
+
+        alt User Not Found
+            AuthController-->>LoginPage: 401: Email atau password salah
             LoginPage-->>User: Show error toast
-        else Fields Present
-            AuthController->>UserDB: 6. findUnique({email})
-
-            activate UserDB
-            UserDB-->>AuthController: 7. Return user data
-            deactivate UserDB
-
-            alt User Not Found
+        else User Found
+            alt Password Mismatch (bcrypt)
                 AuthController-->>LoginPage: 401: Email atau password salah
                 LoginPage-->>User: Show error toast
-            else User Found
-                AuthController->>AuthController: 8. bcrypt.compare(password, hashedPassword)
+            else Password Match
+                AuthController-->>LoginPage: 6. Return token & user data
+                deactivate AuthController
 
-                alt Password Mismatch
-                    AuthController-->>LoginPage: 401: Email atau password salah
-                    LoginPage-->>User: Show error toast
-                else Password Match
-                    AuthController->>AuthController: 9. jwt.sign(payload, secret)
-                    AuthController-->>LoginPage: 10. 200 OK<br/>{token, user data}
+                LoginPage-->>User: 7. Show success toast
 
-                    LoginPage->>LoginPage: 11. TokenManager.clearAllAuthData()
-                    LoginPage->>LoginPage: 12. TokenManager.setToken(token)
-                    LoginPage->>LoginPage: 13. TokenManager.setUserData(userId, role)
-                    LoginPage->>LoginPage: 14. Save to localStorage
-                    LoginPage-->>User: 15. Show success toast
-
-                    alt User Role = ADMIN
-                        LoginPage->>User: 16. Navigate to /dashboard-admin
-                    else User Role = USER
-                        LoginPage->>User: 16. Navigate to /home
-                    end
+                alt User Role = ADMIN
+                    LoginPage->>User: 8. navigate(/dashboard-admin)
+                else User Role = USER
+                    LoginPage->>User: 8. navigate(/home)
                 end
             end
         end
-        deactivate AuthController
     end
     deactivate LoginPage
 ```

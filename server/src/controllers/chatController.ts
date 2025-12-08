@@ -30,14 +30,15 @@ export class ChatController {
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
       );
-      const oneHourAgo = new Date(indonesiaTime.getTime() - 60 * 60 * 1000);
 
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
           admin_id: adminId,
           status: "ACCEPTED",
           is_active: true,
-          // REMOVED: consultation_date filter - terlalu ketat
+          consultation_date: {
+            lte: indonesiaTime, // Hanya tampilkan jika consultation_date sudah lewat atau sekarang
+          },
         },
         include: {
           murid: {
