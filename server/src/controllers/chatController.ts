@@ -25,7 +25,7 @@ export class ChatController {
         });
       }
 
-      // Get current time in Indonesia (WIB - UTC+7)
+      // Get current time in Indonesia (WIB - UTC+7) - same logic as frontend
       const now = new Date();
       const indonesiaTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
@@ -37,7 +37,7 @@ export class ChatController {
           status: "ACCEPTED",
           is_active: true,
           consultation_date: {
-            lte: indonesiaTime, // Hanya tampilkan jika consultation_date sudah lewat atau sekarang
+            lte: indonesiaTime, // Chat muncul saat consultation_date sudah tiba atau lewat
           },
         },
         include: {
