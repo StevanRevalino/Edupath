@@ -25,11 +25,8 @@ export class ChatController {
         });
       }
 
-      // Get current time in Indonesia (WIB - UTC+7) - same logic as frontend
+      // Get current time
       const now = new Date();
-      const indonesiaTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
-      );
 
       const acceptedConsultations = await prisma.consultation.findMany({
         where: {
@@ -37,7 +34,7 @@ export class ChatController {
           status: "ACCEPTED",
           is_active: true,
           consultation_date: {
-            lte: indonesiaTime, // Chat muncul saat consultation_date sudah tiba atau lewat
+            lte: now, // Chat muncul saat consultation_date sudah tiba atau lewat
           },
         },
         include: {
