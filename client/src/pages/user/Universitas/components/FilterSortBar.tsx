@@ -30,12 +30,12 @@ const FilterSortBar: React.FC<FilterSortBarProps> = ({
   onReset,
 }) => {
   const [showFilters, setShowFilters] = useState(() => {
-    const saved = localStorage.getItem('universitasFilterOpen');
+    const saved = localStorage.getItem("universitasFilterOpen");
     return saved ? JSON.parse(saved) : false;
   });
 
   useEffect(() => {
-    localStorage.setItem('universitasFilterOpen', JSON.stringify(showFilters));
+    localStorage.setItem("universitasFilterOpen", JSON.stringify(showFilters));
   }, [showFilters]);
 
   const akreditasiOptions = ["Semua", "Unggul", "Baik Sekali", "Baik"];
