@@ -35,7 +35,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   const startTimer = () => {
-    setTimer(30);
+    setTimer(300);
     const id = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1 && intervalId) {

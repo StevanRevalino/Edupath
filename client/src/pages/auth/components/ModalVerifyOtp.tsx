@@ -19,12 +19,12 @@ export default function OTPModal({
   onResend,
 }: OTPModalProps) {
   const [inputOtp, setInputOtp] = useState(Array(6).fill(""));
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(300);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [resetTrigger] = useState(0);
 
   useEffect(() => {
-    setTimer(30);
+    setTimer(300);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {

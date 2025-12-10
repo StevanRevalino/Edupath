@@ -9,7 +9,7 @@ export class EmailService {
   private async createTransporter() {
     try {
       const transporter = nodemailer.createTransport({
-        service: "gmail", 
+        service: "gmail",
         auth: {
           user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_APP_PASSWORD,
@@ -51,7 +51,7 @@ export class EmailService {
             </div>
             
             <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">
-              ⚠️ This OTP will expire in 30 seconds for security reasons.
+              ⚠️ This OTP will expire in 5 minutes for security reasons.
             </p>
           </div>
           
@@ -69,7 +69,7 @@ export class EmailService {
         
         OTP Code: ${otp}
         
-        ⚠️ This OTP will expire in 30 seconds for security reasons.
+        ⚠️ This OTP will expire in 5 minutes for security reasons.
         
         If you didn't request this, please ignore this email.
         
@@ -118,7 +118,7 @@ export class EmailService {
             </div>
             
             <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">
-              ⚠️ This OTP will expire in 30 seconds for security reasons.
+              ⚠️ This OTP will expire in 5 minutes for security reasons.
             </p>
           </div>
           
@@ -136,7 +136,7 @@ export class EmailService {
         
         OTP Code: ${otp}
         
-        ⚠️ This OTP will expire in 30 seconds for security reasons.
+        ⚠️ This OTP will expire in 5 minutes for security reasons.
         
         If you didn't create an account, please ignore this email.
         

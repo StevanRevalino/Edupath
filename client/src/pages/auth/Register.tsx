@@ -25,7 +25,7 @@ export default function Register() {
   const [otp, setOtp] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(300);
   const kelasOptions = [
     { value: "10", label: "Kelas 10" },
     { value: "11", label: "Kelas 11" },
@@ -173,7 +173,7 @@ export default function Register() {
   useEffect(() => {
     if (!showModal) return;
 
-    setTimer(30);
+    setTimer(300);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -188,7 +188,7 @@ export default function Register() {
   }, [showModal]);
 
   useEffect(() => {
-    if (timer === 30) {
+    if (timer === 300) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 1) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, Filter, X } from "lucide-react";
 
 interface FilterSortBarProps {
@@ -29,7 +29,14 @@ const FilterSortBar: React.FC<FilterSortBarProps> = ({
   kotaOptions,
   onReset,
 }) => {
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(() => {
+    const saved = localStorage.getItem('universitasFilterOpen');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('universitasFilterOpen', JSON.stringify(showFilters));
+  }, [showFilters]);
 
   const akreditasiOptions = ["Semua", "Unggul", "Baik Sekali", "Baik"];
 
