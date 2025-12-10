@@ -380,12 +380,12 @@ const ModalJadwalkanKonseling: React.FC<ModalJadwalkanKonselingProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 my-8 relative max-h-[calc(100vh-4rem)] overflow-y-auto">
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10 bg-white rounded-full"
         >
           <X className="w-6 h-6" />
         </button>
