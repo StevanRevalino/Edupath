@@ -35,7 +35,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   const startTimer = () => {
-    setTimer(300);
+    setTimer(30);
     const id = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1 && intervalId) {
@@ -51,6 +51,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
     try {
       await emailSchema.validate({ email }, { abortEarly: false });
       setErrors({});
+      startTimer();
 
       const response = await axios.post(
         `${API_URL}/api/auth/send-verification-otp`,
@@ -64,7 +65,6 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
       setServerOtp(response.data.otp);
 
       toast.success("OTP berhasil dikirim ke email!");
-      startTimer();
     } catch (err: any) {
       if (err instanceof ValidationError) {
         const emailErr: { email?: string } = {};
@@ -176,7 +176,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[700px] shadow-xl relative mx-4">
+      <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[850px] shadow-xl relative mx-4">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-12">
             <img src={warningLogo} alt="warning" className="h-28 w-24 " />

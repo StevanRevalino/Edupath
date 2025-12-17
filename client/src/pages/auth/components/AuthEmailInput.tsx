@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { CheckCircle } from "lucide-react";
 
 interface AuthEmailInputProps
@@ -23,6 +23,16 @@ const AuthEmailInput = forwardRef<HTMLInputElement, AuthEmailInputProps>(
     },
     ref
   ) => {
+    const [disableOtp, setDisableOtp] = useState(false);
+    const handleVerify = async () => {
+      if (onVerify) {
+        setDisableOtp(true);
+        await onVerify();
+      }
+      // setTimeout(()=>{
+        setDisableOtp(false);
+      // }, 3000);
+    }
     return (
       <div className="w-full">
         {label && (
@@ -43,7 +53,8 @@ const AuthEmailInput = forwardRef<HTMLInputElement, AuthEmailInputProps>(
           {!isVerified && onVerify ? (
             <button
               type="button"
-              onClick={onVerify}
+              disabled={disableOtp}
+              onClick={handleVerify}
               className="bg-primary hover:bg-primary-hoverer text-white px-4 sm:px-3 py-2.5 sm:py-2 rounded-full text-sm sm:text-lg font-semibold cursor-pointer whitespace-nowrap flex-shrink-0"
             >
               {verifyButtonText}
