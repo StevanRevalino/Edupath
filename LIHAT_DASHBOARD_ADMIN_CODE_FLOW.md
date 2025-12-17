@@ -44,7 +44,6 @@ This document describes the code flow for the "Lihat Dashboard Admin" (View Admi
 
 - **User** - Student and admin users
 - **Consultation** - Consultation sessions
-- **Beasiswa** - Scholarship data
 - **ChatRoom** - Chat room records
 - **ChatMessage** - Chat messages
 - **HollandAssessment** - Career assessment records
@@ -58,7 +57,6 @@ sequenceDiagram
     participant dashboardController as dashboardController<<controller>>
     participant User as User<<model>>
     participant Consultation as Consultation<<model>>
-    participant Beasiswa as Beasiswa<<model>>
     participant ChatRoom as ChatRoom<<model>>
 
     Admin->>DashboardPage: Click 'Dashboard' on sidebar
@@ -67,8 +65,6 @@ sequenceDiagram
     User-->>dashboardController: Return student count
     dashboardController->>Consultation: count(), findMany()
     Consultation-->>dashboardController: Return consultation data
-    dashboardController->>Beasiswa: count()
-    Beasiswa-->>dashboardController: Return scholarship count
     dashboardController->>ChatRoom: findMany()
     ChatRoom-->>dashboardController: Return chat data
     dashboardController-->>DashboardPage: Return dashboard data
@@ -148,7 +144,6 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       activeConsultations,
       completedConsultations,
       declinedConsultations,
-      totalScholarships,
       totalChats,
     ] = await Promise.all([
       prisma.user.count({ where: { role: "STUDENT" } }),
@@ -165,7 +160,6 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       prisma.consultation.count({
         where: { status: "DECLINED", admin_id: adminId },
       }),
-      prisma.beasiswa.count(),
       prisma.chatRoom.count({ where: { admin_id: adminId } }),
     ]);
 
@@ -190,7 +184,6 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         pendingConsultations,
         activeConsultations,
         completedConsultations,
-        totalScholarships,
         totalChats,
         unreadChats,
       },
@@ -293,7 +286,6 @@ interface DashboardStats {
   pendingConsultations: number;
   activeConsultations: number;
   completedConsultations: number;
-  totalScholarships: number;
   totalChats: number;
   unreadChats: number;
 }
@@ -344,7 +336,6 @@ interface RecentChat {
       "pendingConsultations": 5,
       "activeConsultations": 3,
       "completedConsultations": 35,
-      "totalScholarships": 20,
       "totalChats": 12,
       "unreadChats": 2
     },
@@ -444,14 +435,10 @@ interface RecentChat {
 
 **Displayed Metrics**:
 
-- Total Students
-- Total Consultations
-- Pending Consultations
-- Active Consultations
-- Completed Consultations
-- Total Scholarships
-- Total Chats
-- Unread Chats
+- Total Students (Total Murid)
+- Pending Consultations (Konseling Pending)
+- Active Consultations (Konseling Aktif)
+- Unread Chats (Pesan Baru)
 
 **UI Components**:
 

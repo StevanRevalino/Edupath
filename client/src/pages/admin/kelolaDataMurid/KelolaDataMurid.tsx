@@ -408,7 +408,7 @@ const KelolaDataMurid = () => {
 
         <DataTableContainer loading={loading}>
           {/* Desktop Table View - Hidden on Mobile */}
-          <div className="hidden lg:block overflow-y-auto">
+          <div className="hidden lg:block">
             <AdminDataTable
               columns={[
                 {
