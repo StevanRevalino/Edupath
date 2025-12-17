@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Send, User, MessageSquare } from "lucide-react";
+import axios from "axios";
+import TokenManager from "../../../../utils/tokenManager";
 
 interface ContactFormData {
   namaDepan: string;
@@ -13,6 +15,8 @@ interface ContactFormProps {
   destinationEmail?: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function ContactForm({
   onSubmit,
   destinationEmail = "edupath.app@gmail.com",
@@ -23,6 +27,47 @@ export default function ContactForm({
     email: "",
     pesan: "",
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const token = TokenManager.getToken();
+      const userData = TokenManager.getUserData();
+
+      if (!token || !userData.userId) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/users/${userData.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        const user = response.data.data;
+        setFormData((prev) => ({
+          ...prev,
+          namaDepan: user.firstname || "",
+          namaBelakang: user.lastname || "",
+          email: user.email || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -50,6 +95,16 @@ export default function ContactForm({
       window.location.href = mailtoLink;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-br from-white via-blue-50/30 to-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 border border-gray-200/50 backdrop-blur-sm">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00437A]"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-white via-blue-50/30 to-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 border border-gray-200/50 backdrop-blur-sm">
