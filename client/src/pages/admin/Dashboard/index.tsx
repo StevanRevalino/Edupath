@@ -21,6 +21,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 // Register ChartJS components
 ChartJS.register(
@@ -89,6 +90,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
     UpcomingConsultation[]
   >([]);
   const [recentChats, setRecentChats] = useState<RecentChat[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Chart data states
@@ -180,6 +182,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
+
       const token = TokenManager.getToken();
       const authHeader = {
         headers: {
@@ -222,8 +226,14 @@ const AdminDashboard: React.FC<DashboardProps> = ({
         }
       }
       console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner size="lg" message="Memuat data beasiswa..." />;
+  }
 
   // Chart data
   const weeklyConsultationsData = {
