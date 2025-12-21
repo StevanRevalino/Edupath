@@ -494,6 +494,8 @@ export class ProdiController {
   async getProdiById(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      const { university_id } = req.query as any;
+
       if (!id) {
         return res.status(400).json({ message: "ID prodi harus disediakan" });
       }
@@ -514,8 +516,24 @@ export class ProdiController {
         return res.status(404).json({ message: "Prodi tidak ditemukan" });
       }
 
-      // Get first university relation (most prodi have one university)
-      const firstUniv = result.prodi_pt[0].universitas;
+      // Filter by university_id if provided, otherwise get first
+      let selectedUniv;
+      if (university_id) {
+        const univIdNum = parseInt(university_id);
+        const matchingPt = result.prodi_pt.find(
+          (pt) => pt.universitas?.university_id === univIdNum
+        );
+        selectedUniv = matchingPt?.universitas;
+
+        if (!selectedUniv) {
+          console.warn(
+            `University ID ${university_id} not found for prodi ${id}, using first`
+          );
+          selectedUniv = result.prodi_pt[0].universitas;
+        }
+      } else {
+        selectedUniv = result.prodi_pt[0].universitas;
+      }
 
       // Transform to complete format with all university details
       const detailData = {
@@ -525,21 +543,21 @@ export class ProdiController {
         status: "Aktif", // Default status
         kode_prodi: null,
         bidang: null,
-        akreditasi: firstUniv?.akreditasi || null,
+        akreditasi: selectedUniv?.akreditasi || null,
         akreditasi_internasional: null,
         status_akreditasi: null,
         tanggal_berdiri: null,
-        no_tel: firstUniv?.telepon || null,
-        no_fax: firstUniv?.fax || null,
+        no_tel: selectedUniv?.telepon || null,
+        no_fax: selectedUniv?.fax || null,
         website: null,
-        email: firstUniv?.email || null,
-        alamat: firstUniv?.alamat || null,
+        email: selectedUniv?.email || null,
+        alamat: selectedUniv?.alamat || null,
         universitas: {
-          university_id: firstUniv?.university_id.toString() || null,
-          nama: firstUniv?.nama || null,
+          university_id: selectedUniv?.university_id.toString() || null,
+          nama: selectedUniv?.nama || null,
           kode_pt: null,
-          provinsi: firstUniv?.provinsi || null,
-          kab_kota: firstUniv?.kota || null,
+          provinsi: selectedUniv?.provinsi || null,
+          kab_kota: selectedUniv?.kota || null,
           kecamatan: null,
           lintang: null,
           bujur: null,

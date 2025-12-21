@@ -87,7 +87,9 @@ const Jurusan: React.FC = () => {
   const [error, setError] = useState("");
   const [results, setResults] = useState<ProdiItem[]>([]);
   const [selectedProdi, setSelectedProdi] = useState<ProdiDetail | null>(null);
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  const [selectedCompositeKey, setSelectedCompositeKey] = useState<
+    string | null
+  >(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -163,25 +165,41 @@ const Jurusan: React.FC = () => {
   };
 
   const fetchProdiDetail = useCallback(
-    async (prodiId: string, rowIndex?: number) => {
+    async (prodiId: string, universityId: string | null) => {
       const currentId = ++detailRequestIdRef.current;
       setDetailLoading(true);
       setDetailError("");
-      if (rowIndex !== undefined) {
-        setSelectedRowIndex(rowIndex);
-      }
+      const compositeKey = `${prodiId}-${universityId || "none"}`;
+      setSelectedCompositeKey(compositeKey);
       try {
         const token = TokenManager.getToken();
-        const response = await axios.get(
-          `${API_URL}/api/prodi/detail/${prodiId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+
+        // Build URL with university_id query parameter if available
+        const url = universityId
+          ? `${API_URL}/api/prodi/detail/${prodiId}?university_id=${universityId}`
+          : `${API_URL}/api/prodi/detail/${prodiId}`;
+
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const detail = response.data.data;
         console.log("Detail data received:", detail);
+        console.log("Requested university_id:", universityId);
+
+        // Validate: Jika universityId yang diklik tidak match dengan yang di-return, tampilkan error
+        if (
+          universityId &&
+          detail.universitas?.university_id &&
+          detail.universitas.university_id !== universityId
+        ) {
+          console.warn(
+            `University mismatch: clicked ${universityId}, got ${detail.universitas.university_id}`
+          );
+          // Still show detail but log the mismatch
+        }
+
         if (currentId !== detailRequestIdRef.current) return;
         setSelectedProdi(detail);
       } catch (e: any) {
@@ -330,8 +348,10 @@ const Jurusan: React.FC = () => {
               p.nama_prodi.toLowerCase() === q.trim().toLowerCase()
           );
           if (exact) {
-            const exactIndex = filtered.indexOf(exact);
-            fetchProdiDetail(exact.prodi_id, exactIndex);
+            fetchProdiDetail(
+              exact.prodi_id,
+              exact.universitas?.university_id || null
+            );
           }
         }
       } catch (e: any) {
@@ -860,70 +880,76 @@ const Jurusan: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {paginatedResults.length > 0 ? (
-                            paginatedResults.map((p, index) => (
-                              <tr
-                                key={`${p.prodi_id}-${
-                                  p.universitas?.university_id || "no-univ"
-                                }-${index}`}
-                                onClick={() =>
-                                  fetchProdiDetail(p.prodi_id, index)
-                                }
-                                className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 ${
-                                  selectedRowIndex === index
-                                    ? "bg-secondary-light ring-2 ring-inset ring-secondary"
-                                    : "bg-white"
-                                }`}
-                              >
-                                <th className="px-6 py-4" scope="row">
-                                  <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
-                                    {p.nama_prodi}
-                                  </div>
-                                  {p.bidang && (
-                                    <div className="text-gray-500 text-xs mt-0.5">
-                                      {p.bidang}
+                            paginatedResults.map((p) => {
+                              const compositeKey = `${p.prodi_id}-${
+                                p.universitas?.university_id || "none"
+                              }`;
+                              return (
+                                <tr
+                                  key={compositeKey}
+                                  onClick={() =>
+                                    fetchProdiDetail(
+                                      p.prodi_id,
+                                      p.universitas?.university_id || null
+                                    )
+                                  }
+                                  className={`hover:bg-secondary-lighter cursor-pointer transition-all duration-200 ${
+                                    selectedCompositeKey === compositeKey
+                                      ? "bg-secondary-light ring-2 ring-inset ring-secondary"
+                                      : "bg-white"
+                                  }`}
+                                >
+                                  <th className="px-6 py-4" scope="row">
+                                    <div className="font-semibold text-primary-dark hover:text-primary transition-colors">
+                                      {p.nama_prodi}
                                     </div>
-                                  )}
-                                </th>
-                                <td className="px-6 py-4">
-                                  {p.jenjang ? (
-                                    <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
-                                      {p.jenjang}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4">
-                                  {p.universitas?.nama ? (
-                                    <div>
-                                      <div className="font-medium text-gray-900 text-sm">
-                                        {p.universitas.nama}
+                                    {p.bidang && (
+                                      <div className="text-gray-500 text-xs mt-0.5">
+                                        {p.bidang}
                                       </div>
-                                      {p.universitas.provinsi && (
-                                        <div className="text-gray-500 text-xs mt-0.5">
-                                          {p.universitas.provinsi}
+                                    )}
+                                  </th>
+                                  <td className="px-6 py-4">
+                                    {p.jenjang ? (
+                                      <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-secondary-light text-primary-dark ring-1 ring-primary/20">
+                                        {p.jenjang}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {p.universitas?.nama ? (
+                                      <div>
+                                        <div className="font-medium text-gray-900 text-sm">
+                                          {p.universitas.nama}
                                         </div>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4">
-                                  {p.akreditasi ? (
-                                    <span
-                                      className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${badgeClass(
-                                        p.akreditasi
-                                      )} ring-1`}
-                                    >
-                                      {p.akreditasi}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))
+                                        {p.universitas.provinsi && (
+                                          <div className="text-gray-500 text-xs mt-0.5">
+                                            {p.universitas.provinsi}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {p.akreditasi ? (
+                                      <span
+                                        className={`inline-flex px-3 py-1 text-xs font-bold rounded-full ${badgeClass(
+                                          p.akreditasi
+                                        )} ring-1`}
+                                      >
+                                        {p.akreditasi}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
                           ) : (
                             <tr>
                               <td
