@@ -301,8 +301,10 @@ const AdminDashboard: React.FC<DashboardProps> = ({
     <div className="min-h-screen p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Admin</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Dashboard Admin
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
           Selamat datang! Berikut ringkasan aktivitas EduPath
         </p>
       </div>
@@ -385,19 +387,19 @@ const AdminDashboard: React.FC<DashboardProps> = ({
         {/* Left Column - Larger */}
         <div className="lg:col-span-2 space-y-6">
           {/* Weekly Consultations Chart */}
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 Konsultasi Mingguan
               </h3>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigateWeek(-1)}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   aria-label="Previous week"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
                 <span className="text-sm text-gray-600 font-medium">
                   {getWeekRange()}
@@ -427,8 +429,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Upcoming Consultations */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
               Jadwal Konseling Mendatang ({upcomingConsultations.length})
             </h3>
@@ -442,7 +444,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                 upcomingConsultations.map((consultation) => (
                   <div
                     key={consultation.consultation_id}
-                    className="flex items-start gap-4 p-4 bg-secondary-light border border-secondary rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    className="flex items-start gap-4 p-4 bg-secondary-light dark:bg-gray-700 border border-secondary dark:border-gray-600 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => {
                       if (setActiveTab) {
                         if (setConsultationInitialTab) {
@@ -471,10 +473,10 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
                         {consultation.murid_name}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {consultation.topic}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-xs">
@@ -482,13 +484,13 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                           <Clock className="w-3 h-3 inline mr-1" />
                           {formatTime(consultation.consultation_date)}
                         </span>
-                        <span className="text-orange-600 font-medium">
+                        <span className="text-orange-600 dark:text-orange-400 font-medium">
                           {getTimeUntil(consultation.consultation_date)}
                         </span>
                       </div>
                     </div>
                     <div>
-                      <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                      <span className="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-semibold rounded-full">
                         {consultation.status === "ACCEPTED"
                           ? "Diterima"
                           : consultation.status}
@@ -504,8 +506,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({
         {/* Right Column - Smaller */}
         <div className="space-y-6">
           {/* Calendar */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
               Kalender
             </h3>
@@ -518,11 +520,11 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                     newDate.setMonth(newDate.getMonth() - 1);
                     setSelectedDate(newDate);
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5 text-primary-dark" />
+                  <ChevronLeft className="w-5 h-5 text-primary-dark dark:text-blue-400" />
                 </button>
-                <h3 className="font-semibold text-gray-800">
+                <h3 className="font-semibold text-gray-800 dark:text-white">
                   {selectedDate.toLocaleDateString("id-ID", {
                     month: "long",
                     year: "numeric",
@@ -547,7 +549,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                   (day) => (
                     <div
                       key={day}
-                      className="text-center text-sm font-semibold text-gray-600 py-2"
+                      className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2"
                     >
                       {day}
                     </div>
@@ -645,9 +647,11 @@ const AdminDashboard: React.FC<DashboardProps> = ({
               </div>
 
               {/* Selected Date Display */}
-              <div className="pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600">Tanggal Dipilih:</p>
-                <p className="text-lg font-semibold text-primary-dark">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Tanggal Dipilih:
+                </p>
+                <p className="text-lg font-semibold text-primary-dark dark:text-blue-400">
                   {selectedDate.toLocaleDateString("id-ID", {
                     weekday: "long",
                     day: "numeric",
@@ -672,18 +676,18 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                   if (consultationsOnSelectedDate.length > 0) {
                     return (
                       <div className="mt-3 space-y-2">
-                        <p className="text-xs font-semibold text-gray-700 uppercase">
+                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
                           Jadwal Hari Ini ({consultationsOnSelectedDate.length})
                         </p>
                         {consultationsOnSelectedDate.map((consultation) => (
                           <div
                             key={consultation.consultation_id}
-                            className="bg-secondary-lighter border-l-4 border-primary-dark p-2 rounded"
+                            className="bg-secondary-lighter dark:bg-gray-700 border-l-4 border-primary-dark dark:border-blue-400 p-2 rounded"
                           >
-                            <p className="text-xs font-semibold text-gray-900">
+                            <p className="text-xs font-semibold text-gray-900 dark:text-white">
                               {consultation.murid_name}
                             </p>
-                            <p className="text-xs text-gray-600 truncate">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                               {consultation.topic}
                             </p>
                             <p className="text-xs text-primary-dark font-medium mt-1">
@@ -695,7 +699,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                     );
                   } else {
                     return (
-                      <p className="text-xs text-gray-500 mt-2 italic">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">
                         Tidak ada jadwal konseling
                       </p>
                     );
@@ -706,8 +710,8 @@ const AdminDashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Recent Chats */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-primary" />
               Chat Terbaru
             </h3>
@@ -721,7 +725,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                 recentChats.map((chat) => (
                   <div
                     key={chat.room_id}
-                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                    className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors"
                     onClick={() => {
                       if (setSelectedChatUserId && setActiveTab) {
                         setSelectedChatUserId(chat.user_id);
@@ -732,7 +736,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-sm text-gray-900">
+                          <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
                             {chat.murid_name}
                           </h4>
                           {chat.unread_count > 0 && (
@@ -741,10 +745,10 @@ const AdminDashboard: React.FC<DashboardProps> = ({
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-600 mt-1 truncate max-w-[300px]">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate max-w-[300px]">
                           {chat.last_message}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           {formatTime(chat.last_message_time)}
                         </p>
                       </div>

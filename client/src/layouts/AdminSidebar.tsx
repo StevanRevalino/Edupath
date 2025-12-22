@@ -1,12 +1,13 @@
 import { useMemo, useState, useEffect, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Moon, Sun } from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
 import axios from "axios";
 import TokenManager from "../utils/tokenManager";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 // Import all admin icons
 import edupathLogo from "../assets/edupath-logo.png";
@@ -31,6 +32,7 @@ interface NotificationCount {
 
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [counts, setCounts] = useState<NotificationCount>({
     pendingConsultations: 0,
@@ -227,7 +229,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
     <>
       {/* Desktop Sidebar - Hidden on mobile */}
       <div className="hidden lg:block w-64">
-        <div className="sticky top-0 h-screen bg-primary text-white flex flex-col rounded-br-2xl rounded-tr-2xl">
+        <div className="sticky top-0 h-screen bg-primary dark:bg-blue-900/40 text-white flex flex-col rounded-br-2xl rounded-tr-2xl">
           <div className="p-4 flex-1 overflow-y-auto">
             {/* Logo Section */}
             <div className="flex items-center justify-center mb-2">
@@ -272,7 +274,24 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
           </div>
 
           {/* Logout Button - Fixed at bottom */}
-          <div className="p-4">
+          <div className="p-4 space-y-3">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200"
+              title={isDarkMode ? "Light Mode" : "Dark Mode"}
+            >
+              {isDarkMode ? (
+                <Sun className="w-6 h-6 text-yellow-300" />
+              ) : (
+                <Moon className="w-6 h-6 text-white" />
+              )}
+              <span className="font-medium text-sm">
+                {isDarkMode ? "Light Mode" : "Dark Mode"}
+              </span>
+            </button>
+
+            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200"
@@ -345,7 +364,24 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
               </nav>
 
               {/* Logout Button */}
-              <div className="mt-4 pt-4 border-t border-[#4BB8FF]">
+              <div className="mt-4 pt-4 border-t border-[#4BB8FF] space-y-2">
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={toggleDarkMode}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 cursor-pointer rounded-lg hover:bg-[#4BB8FF] transition-colors duration-200"
+                  title={isDarkMode ? "Light Mode" : "Dark Mode"}
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-yellow-300" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-white" />
+                  )}
+                  <span className="font-medium text-sm">
+                    {isDarkMode ? "Light Mode" : "Dark Mode"}
+                  </span>
+                </button>
+
+                {/* Logout Button */}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center px-3 py-2 cursor-pointer rounded-lg hover:bg-[#4BB8FF] transition-colors duration-200"

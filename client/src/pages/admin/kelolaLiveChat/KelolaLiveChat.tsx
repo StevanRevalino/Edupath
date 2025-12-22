@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Search,
   Send,
@@ -710,15 +705,17 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
   }
 
   return (
-    <div className="bg-white h-[calc(100vh-120px)] rounded-lg shadow-lg flex">
+    <div className="bg-white dark:bg-gray-800 h-[calc(100vh-120px)] rounded-lg shadow-lg flex transition-colors duration-300">
       {/* Chat Users List */}
-      <div className="w-1/3 border-r border-gray-200 flex flex-col">
+      <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-800">Live Chat</h2>
-              <p className="text-sm text-gray-600">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+                Live Chat
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 chat dengan siswa secara langsung
               </p>
             </div>
@@ -736,7 +733,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
               placeholder="Cari siswa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -744,7 +741,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
         {/* Users List */}
         <div className="flex-1 overflow-y-auto">
           {filteredUsers.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               {searchTerm
                 ? "Tidak ada siswa yang ditemukan"
                 : chatUsers.length === 0
@@ -756,9 +753,9 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
               <div
                 key={user.user_id}
                 onClick={() => handleUserSelect(user)}
-                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                   selectedUser?.user_id === user.user_id
-                    ? "bg-secondary-light border-secondary"
+                    ? "bg-secondary-light dark:bg-gray-700 border-secondary"
                     : ""
                 }`}
               >
@@ -814,7 +811,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
         {selectedUser ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 transition-colors duration-300">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="relative">
@@ -825,11 +822,11 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-800">
+                      <h3 className="font-semibold text-gray-800 dark:text-white">
                         {selectedUser.firstname} {selectedUser.lastname}
                       </h3>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Kelas {selectedUser.kelas}
                     </p>
                   </div>
@@ -1070,11 +1067,11 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 transition-colors duration-300">
               {/* Show info message if consultation is completed */}
               {selectedUser?.consultation_status === "COMPLETED" && (
-                <div className="mb-3 p-3 bg-gray-100 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">
+                <div className="mb-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     ⏱️ Sesi konseling telah selesai. Chat tidak dapat digunakan
                     lagi.
                   </p>
@@ -1138,7 +1135,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
                         : "Ketik pesan..."
                     }
                     rows={1}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
                     style={{ minHeight: "40px", maxHeight: "120px" }}
                     disabled={
                       uploadingImage ||
@@ -1170,13 +1167,16 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
           </>
         ) : (
           // No chat selected
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
+          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
             <div className="text-center">
-              <MessageCircle size={64} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              <MessageCircle
+                size={64}
+                className="mx-auto text-gray-400 dark:text-gray-500 mb-4"
+              />
+              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
                 Pilih Chat untuk Memulai
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 Pilih siswa dari daftar untuk memulai percakapan
               </p>
             </div>

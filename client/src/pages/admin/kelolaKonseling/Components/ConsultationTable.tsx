@@ -53,17 +53,17 @@ const ConsultationTable = ({
           header: "Murid",
           accessor: (consultation) => (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-semibold text-sm">
                   {consultation.murid.firstname.charAt(0).toUpperCase()}
                   {consultation.murid.lastname.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="min-w-0">
-                <div className="font-medium text-gray-900">
+                <div className="font-medium text-gray-900 dark:text-white">
                   {consultation.murid.firstname} {consultation.murid.lastname}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                   {consultation.murid.email}
                 </div>
               </div>
@@ -72,13 +72,17 @@ const ConsultationTable = ({
         },
         {
           header: "Topik",
-          accessor: "topic",
+          accessor: (consultation) => (
+            <span className="text-gray-900 dark:text-white">
+              {consultation.topic}
+            </span>
+          ),
         },
         {
           header: "Jadwal",
           accessor: (consultation) => (
             <div className="flex flex-col gap-1">
-              <div className="flex items-center text-sm text-gray-700">
+              <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
                 <Calendar className="w-4 h-4 mr-2 text-primary" />
                 {new Date(consultation.consultation_date).toLocaleDateString(
                   "id-ID",
@@ -89,7 +93,7 @@ const ConsultationTable = ({
                   }
                 )}
               </div>
-              <div className="flex items-center text-sm text-gray-700">
+              <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
                 <Clock className="w-4 h-4 mr-2 text-primary" />
                 {new Date(consultation.consultation_date).toLocaleTimeString(
                   "id-ID",
@@ -131,7 +135,7 @@ const ConsultationTable = ({
                   e.stopPropagation();
                   onViewDetails(consultation);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 text-xs font-semibold bg-primary dark:bg-blue-900 text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <Eye size={14} />
                 Detail

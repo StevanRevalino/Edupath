@@ -300,7 +300,7 @@ const KelolaDataBeasiswa = () => {
       <div className="mb-6">
         <button
           onClick={() => handleOpenModal()}
-          className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
+          className="bg-primary hover:bg-primary-hover dark:bg-blue-900 dark:hover:bg-blue-900/50 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
         >
           <Plus size={20} />
           Tambah Beasiswa
@@ -327,7 +327,11 @@ const KelolaDataBeasiswa = () => {
             },
             {
               header: "Judul",
-              accessor: "title",
+              accessor: (beasiswa) => (
+                <span className="text-gray-900 dark:text-white">
+                  {beasiswa.title}
+                </span>
+              ),
             },
             {
               header: "Link",
@@ -336,7 +340,7 @@ const KelolaDataBeasiswa = () => {
                   href={beasiswa.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:text-primary-dark hover:underline flex items-center gap-1"
+                  className="text-primary hover:text-primary-dark dark:text-blue-400 dark:hover:text-blue-300 hover:underline flex items-center gap-1"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Lihat Link

@@ -21,15 +21,15 @@ function AdminDataTable<T>({
   emptyMessage = "Tidak ada data",
 }: AdminDataTableProps<T>) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
       <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-28rem)]">
         <table className="w-full">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-gray-50 border-b border-gray-200">
+            <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 transition-colors duration-300">
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className={`px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-50 ${
+                  className={`px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-gray-50 dark:bg-gray-700 ${
                     column.headerClassName || ""
                   }`}
                 >
@@ -38,12 +38,12 @@ function AdminDataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-8 text-center text-gray-500"
+                  className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                 >
                   {emptyMessage}
                 </td>
@@ -55,14 +55,14 @@ function AdminDataTable<T>({
                   onClick={() => onRowClick?.(row)}
                   className={`${
                     onRowClick
-                      ? "hover:bg-gray-50 cursor-pointer"
-                      : "hover:bg-gray-50"
+                      ? "hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
                   } transition-colors`}
                 >
                   {columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className={`px-6 py-4 text-sm text-gray-900 ${
+                      className={`px-6 py-4 text-sm text-gray-900 dark:text-gray-100 ${
                         column.className || ""
                       }`}
                     >

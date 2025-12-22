@@ -240,28 +240,32 @@ const KelolaDataMurid = () => {
         />
 
         {/* Integrated Control Panel: Kelas Tabs + Search */}
-        <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-4 overflow-hidden transition-colors duration-300">
           {/* Kelas Tabs with Stats */}
           <div className="grid grid-cols-4">
             <button
               onClick={() => setSelectedKelas("all")}
               className={`px-4 py-5 transition-all duration-200 relative ${
                 selectedKelas === "all"
-                  ? "bg-gradient-to-b from-blue-50 to-white"
-                  : "bg-gray-50 hover:bg-gray-100"
+                  ? "bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/30 dark:to-gray-800"
+                  : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
               }`}
             >
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === "all" ? "text-black" : "text-gray-500"
+                    selectedKelas === "all"
+                      ? "text-black dark:text-white"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   Semua Kelas
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === "all" ? "text-black" : "text-gray-400"
+                    selectedKelas === "all"
+                      ? "text-black dark:text-white"
+                      : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
                   {students.length}
@@ -276,21 +280,25 @@ const KelolaDataMurid = () => {
               onClick={() => setSelectedKelas(10)}
               className={`px-4 py-5 transition-all duration-200 relative ${
                 selectedKelas === 10
-                  ? "bg-gradient-to-b from-green-50 to-white"
-                  : "bg-gray-50 hover:bg-gray-100"
+                  ? "bg-gradient-to-b from-green-50 to-white dark:from-green-900/30 dark:to-gray-800"
+                  : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
               }`}
             >
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === 10 ? "text-green-700" : "text-gray-500"
+                    selectedKelas === 10
+                      ? "text-green-700 dark:text-green-400"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   Kelas 10
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === 10 ? "text-green-600" : "text-gray-400"
+                    selectedKelas === 10
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
                   {students.filter((s) => s.kelas === 10).length}
@@ -305,21 +313,25 @@ const KelolaDataMurid = () => {
               onClick={() => setSelectedKelas(11)}
               className={`px-4 py-5 transition-all duration-200 relative ${
                 selectedKelas === 11
-                  ? "bg-gradient-to-b from-blue-50 to-white"
-                  : "bg-gray-50 hover:bg-gray-100"
+                  ? "bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/30 dark:to-gray-800"
+                  : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
               }`}
             >
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === 11 ? "text-primary-dark" : "text-gray-500"
+                    selectedKelas === 11
+                      ? "text-primary-dark dark:text-blue-400"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   Kelas 11
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === 11 ? "text-primary" : "text-gray-400"
+                    selectedKelas === 11
+                      ? "text-primary dark:text-blue-400"
+                      : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
                   {students.filter((s) => s.kelas === 11).length}
@@ -334,21 +346,25 @@ const KelolaDataMurid = () => {
               onClick={() => setSelectedKelas(12)}
               className={`px-4 py-5 transition-all duration-200 relative ${
                 selectedKelas === 12
-                  ? "bg-gradient-to-b from-purple-50 to-white"
-                  : "bg-gray-50 hover:bg-gray-100"
+                  ? "bg-gradient-to-b from-purple-50 to-white dark:from-purple-900/30 dark:to-gray-800"
+                  : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
               }`}
             >
               <div className="flex flex-col items-center space-y-1.5">
                 <span
                   className={`text-xs font-semibold uppercase tracking-wider ${
-                    selectedKelas === 12 ? "text-purple-700" : "text-gray-500"
+                    selectedKelas === 12
+                      ? "text-purple-700 dark:text-purple-400"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   Kelas 12
                 </span>
                 <span
                   className={`text-3xl font-bold transition-colors ${
-                    selectedKelas === 12 ? "text-purple-600" : "text-gray-400"
+                    selectedKelas === 12
+                      ? "text-purple-600 dark:text-purple-400"
+                      : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
                   {students.filter((s) => s.kelas === 12).length}
@@ -361,10 +377,10 @@ const KelolaDataMurid = () => {
           </div>
 
           {/* Integrated Search Bar */}
-          <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 transition-colors duration-300">
             <div className="relative">
               <svg
-                className="absolute left-3.5 top-3 h-5 w-5 text-gray-400"
+                className="absolute left-3.5 top-3 h-5 w-5 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -381,7 +397,7 @@ const KelolaDataMurid = () => {
                 placeholder="Cari berdasarkan nama atau email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
               {searchTerm && (
                 <button
@@ -422,7 +438,7 @@ const KelolaDataMurid = () => {
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900 dark:text-white">
                           {`${student.firstname || ""} ${
                             student.lastname || ""
                           }`.trim() || "N/A"}
@@ -446,7 +462,7 @@ const KelolaDataMurid = () => {
                 {
                   header: "Email",
                   accessor: (student) => (
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       {student.email || "N/A"}
                     </span>
                   ),
@@ -492,7 +508,7 @@ const KelolaDataMurid = () => {
                 {filteredStudents.map((student) => (
                   <div
                     key={student.user_id}
-                    className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 transition-colors duration-300"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -504,7 +520,7 @@ const KelolaDataMurid = () => {
                           </span>
                         </div>
                         <div className="ml-3 min-w-0 flex-1">
-                          <div className="text-lg font-semibold text-gray-900">
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">
                             {`${student.firstname || ""} ${
                               student.lastname || ""
                             }`.trim() || "N/A"}

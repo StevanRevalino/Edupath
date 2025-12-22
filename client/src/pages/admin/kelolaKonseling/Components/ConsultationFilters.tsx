@@ -25,7 +25,7 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
   onClearPendingBadge,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-4 overflow-hidden transition-colors duration-300">
       {/* Tab Navigation with Inline Stats */}
       <div className="grid grid-cols-4">
         <button
@@ -35,8 +35,8 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           }}
           className={`px-4 py-5 transition-all duration-200 relative ${
             activeTab === "pending"
-              ? "bg-gradient-to-b from-blue-50 to-white"
-              : "bg-gray-50 hover:bg-gray-100"
+              ? "bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/30 dark:to-gray-800"
+              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
           }`}
         >
           <div className="flex flex-col items-center space-y-1.5 relative">
@@ -50,14 +50,18 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
 
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "pending" ? "text-yellow-700" : "text-gray-500"
+                activeTab === "pending"
+                  ? "text-yellow-700 dark:text-yellow-400"
+                  : "text-gray-500 dark:text-gray-400"
               }`}
             >
               Pending
             </span>
             <span
               className={`text-3xl font-bold transition-colors ${
-                activeTab === "pending" ? "text-yellow-600" : "text-gray-400"
+                activeTab === "pending"
+                  ? "text-yellow-600 dark:text-yellow-400"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
               {counts.pending}
@@ -73,21 +77,25 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           onClick={() => setActiveTab("active")}
           className={`px-4 py-5 transition-all duration-200 relative ${
             activeTab === "active"
-              ? "bg-gradient-to-b from-blue-50 to-white"
-              : "bg-gray-50 hover:bg-gray-100"
+              ? "bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/30 dark:to-gray-800"
+              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
           }`}
         >
           <div className="flex flex-col items-center space-y-1.5">
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "active" ? "text-primary" : "text-gray-500"
+                activeTab === "active"
+                  ? "text-primary dark:text-blue-400"
+                  : "text-gray-500 dark:text-gray-400"
               }`}
             >
               Active
             </span>
             <span
               className={`text-3xl font-bold transition-colors ${
-                activeTab === "active" ? "text-primary" : "text-gray-400"
+                activeTab === "active"
+                  ? "text-primary dark:text-blue-400"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
               {counts.active}
@@ -102,21 +110,25 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           onClick={() => setActiveTab("completed")}
           className={`px-4 py-5 transition-all duration-200 relative ${
             activeTab === "completed"
-              ? "bg-gradient-to-b from-green-50 to-white"
-              : "bg-gray-50 hover:bg-gray-100"
+              ? "bg-gradient-to-b from-green-50 to-white dark:from-green-900/30 dark:to-gray-800"
+              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
           }`}
         >
           <div className="flex flex-col items-center space-y-1.5">
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "completed" ? "text-green-700" : "text-gray-500"
+                activeTab === "completed"
+                  ? "text-green-700 dark:text-green-400"
+                  : "text-gray-500 dark:text-gray-400"
               }`}
             >
               Completed
             </span>
             <span
               className={`text-3xl font-bold transition-colors ${
-                activeTab === "completed" ? "text-green-600" : "text-gray-400"
+                activeTab === "completed"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
               {counts.completed}
@@ -131,21 +143,25 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
           onClick={() => setActiveTab("declined")}
           className={`px-4 py-5 transition-all duration-200 relative ${
             activeTab === "declined"
-              ? "bg-gradient-to-b from-red-50 to-white"
-              : "bg-gray-50 hover:bg-gray-100"
+              ? "bg-gradient-to-b from-red-50 to-white dark:from-red-900/30 dark:to-gray-800"
+              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
           }`}
         >
           <div className="flex flex-col items-center space-y-1.5">
             <span
               className={`text-xs font-semibold uppercase tracking-wider ${
-                activeTab === "declined" ? "text-red-700" : "text-gray-500"
+                activeTab === "declined"
+                  ? "text-red-700 dark:text-red-400"
+                  : "text-gray-500 dark:text-gray-400"
               }`}
             >
               Declined
             </span>
             <span
               className={`text-3xl font-bold transition-colors ${
-                activeTab === "declined" ? "text-red-600" : "text-gray-400"
+                activeTab === "declined"
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
               {counts.declined}
@@ -158,10 +174,10 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
       </div>
 
       {/* Integrated Search Bar */}
-      <div className="p-4 bg-gray-50 border-t border-gray-200">
+      <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 transition-colors duration-300">
         <div className="relative">
           <svg
-            className="absolute left-3.5 top-3 h-5 w-5 text-gray-400"
+            className="absolute left-3.5 top-3 h-5 w-5 text-gray-400 dark:text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -178,7 +194,7 @@ const ConsultationFilters: FC<ConsultationFiltersProps> = ({
             placeholder="Cari nama murid atau topik konseling..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
           {searchTerm && (
             <button

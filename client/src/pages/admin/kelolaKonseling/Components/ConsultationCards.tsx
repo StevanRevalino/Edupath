@@ -51,7 +51,7 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
       {consultations.map((consultation) => (
         <div
           key={consultation.consultation_id}
-          className="bg-white rounded-xl shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300"
         >
           {/* Header: Student Info & Status */}
           <div className="flex items-start justify-between mb-4">
@@ -61,11 +61,11 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
                 {consultation.murid.lastname[0]}
               </div>
               <div>
-                <div className="font-semibold text-gray-900">
+                <div className="font-semibold text-gray-900 dark:text-white">
                   {consultation.murid.firstname} {consultation.murid.lastname}
                 </div>
                 {consultation.murid.kelas && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     Kelas {consultation.murid.kelas}
                   </div>
                 )}
@@ -82,18 +82,18 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
 
           {/* ID & Topic */}
           <div className="mb-4 space-y-2">
-            <div className="text-xs text-gray-500 font-mono">
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
               ID: {consultation.consultation_id.slice(0, 8)}
             </div>
-            <div className="text-sm font-semibold text-gray-900">
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">
               {consultation.topic}
             </div>
           </div>
 
           {/* Schedule Info */}
           <div className="flex flex-col gap-2 mb-4 text-sm">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <Calendar className="w-4 h-4 text-primary dark:text-blue-400" />
               <span>
                 {new Date(consultation.consultation_date).toLocaleDateString(
                   "id-ID",
@@ -105,8 +105,8 @@ const ConsultationCards: FC<ConsultationCardsProps> = ({
                 )}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-gray-700">
-              <Clock className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <Clock className="w-4 h-4 text-primary dark:text-blue-400" />
               <span>
                 {new Date(consultation.consultation_date).toLocaleTimeString(
                   "id-ID",
