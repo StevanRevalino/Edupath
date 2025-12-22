@@ -188,7 +188,8 @@ const KelolaDataMurid = () => {
       showCancelButton: true,
       confirmButtonColor: "var(--primary)",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
