@@ -175,18 +175,18 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white p-4 sm:p-6 rounded-4xl w-full max-w-[850px] shadow-xl relative mx-4">
+    <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-4xl w-full max-w-[850px] shadow-xl relative mx-4 transition-colors">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-12">
             <img src={warningLogo} alt="warning" className="h-28 w-24 " />
-            <h1 className="text-4xl sm:text-md font-bold text-start">
+            <h1 className="text-4xl sm:text-md font-bold text-start text-gray-900 dark:text-white">
               Reset Password
             </h1>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-600 text-sm underline cursor-pointer"
+            className="text-gray-600 dark:text-gray-300 text-sm underline cursor-pointer hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
           >
             <X className="w-6 h-6" strokeWidth={3} />
           </button>
@@ -195,11 +195,13 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         <div className="flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
             <div>
-              <label className="text-sm block mb-1 text-left">Email</label>
+              <label className="text-sm block mb-1 text-left text-gray-900 dark:text-gray-300">
+                Email
+              </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
-                  className="flex-1 px-3 py-2 bg-gray-100 shadow-md rounded-md w-full focus:outline-none"
+                  className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white shadow-md rounded-md w-full focus:outline-none transition-colors"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => {
@@ -214,44 +216,46 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                       onClick={handleVerifyEmail}
                       className={`${
                         timer > 0
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                           : "bg-primary hover:bg-primary-hoverer text-white"
-                      } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap`}
+                      } px-2 py-2 rounded-md cursor-pointer text-sm sm:text-base whitespace-nowrap transition-colors`}
                       disabled={timer > 0}
                     >
                       {timer > 0 ? `Kirim ulang (${timer}s)` : "Verifikasi"}
                     </button>
                   ) : (
-                    <CheckCircle className="text-green-500" />
+                    <CheckCircle className="text-green-500 dark:text-green-400" />
                   )}
                 </div>
               </div>
               {errors.email && (
-                <p className="text-sm text-red-500 text-left">{errors.email}</p>
+                <p className="text-sm text-red-500 dark:text-red-400 text-left">
+                  {errors.email}
+                </p>
               )}
             </div>
 
             <div>
-              <label className="text-sm block mb-1 text-left">
+              <label className="text-sm block mb-1 text-left text-gray-900 dark:text-gray-300">
                 Password Baru
               </label>
               <div className="relative">
                 <input
                   type={showNewPassword ? "text" : "password"}
-                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
+                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] dark:bg-gray-600 text-gray-900 dark:text-white shadow-md rounded-md focus:outline-none transition-colors"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
                 >
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.newPassword && (
-                <p className="text-sm text-red-500 text-left">
+                <p className="text-sm text-red-500 dark:text-red-400 text-left">
                   {errors.newPassword}
                 </p>
               )}
@@ -261,30 +265,30 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="flex items-center order-2 lg:order-1 mb-3 lg:mb-0">
               <div>
-                <label className="font-bold block text-left text-xl sm:text-2xl">
+                <label className="font-bold block text-left text-xl sm:text-2xl text-gray-900 dark:text-white">
                   Verifikasi Email
                 </label>
-                <p className="text-sm text-gray-500 text-left">
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-left">
                   Masukkan kode yang kami kirimkan ke email Anda!
                 </p>
               </div>
             </div>
 
             <div className="order-1 lg:order-2">
-              <label className="text-sm block mb-1 text-left">
+              <label className="text-sm block mb-1 text-left text-gray-900 dark:text-gray-300">
                 Konfirmasi Password
               </label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] shadow-md rounded-md focus:outline-none"
+                  className="w-full px-3 py-2 pr-12 bg-[#F1F1F1] dark:bg-gray-600 text-gray-900 dark:text-white shadow-md rounded-md focus:outline-none transition-colors"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={20} />
@@ -294,7 +298,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500 text-left">
+                <p className="text-sm text-red-500 dark:text-red-400 text-left">
                   {errors.confirmPassword}
                 </p>
               )}
@@ -314,7 +318,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
                   value={val}
                   onChange={(e) => handleChangeOtp(e.target.value, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
-                  className="sm:w-10 sm:h-10 mb-4 sm:mb-10 w-12 h-12 border bg-gray-300 font-semibold border-none rounded-lg shadow-md shadow-gray-400 text-center text-lg focus:outline-none focus:bg-gray-400 focus:ring-primary"
+                  className="sm:w-10 sm:h-10 mb-4 sm:mb-10 w-12 h-12 border bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white font-semibold border-none rounded-lg shadow-md shadow-gray-400 dark:shadow-gray-900 text-center text-lg focus:outline-none focus:bg-gray-400 dark:focus:bg-gray-500 focus:ring-primary transition-colors"
                 />
               ))}
             </div>
@@ -324,8 +328,8 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               className={`${
                 isFormValid
                   ? "bg-primary hover:bg-primary-hoverer text-white"
-                  : "bg-gray-300 text-gray-500 "
-              } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap cursor-pointer`}
+                  : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+              } px-4 py-2 rounded-md font-semibold text-sm sm:text-base w-full sm:w-auto whitespace-nowrap cursor-pointer transition-colors`}
             >
               Simpan Perubahan
             </button>
@@ -336,7 +340,9 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         <div className="flex justify-between">
           {/* Success message */}
           {success && (
-            <p className="text-green-600 text-sm">Password berhasil direset!</p>
+            <p className="text-green-600 dark:text-green-400 text-sm">
+              Password berhasil direset!
+            </p>
           )}
         </div>
       </div>

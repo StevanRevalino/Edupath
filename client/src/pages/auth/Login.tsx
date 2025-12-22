@@ -130,7 +130,7 @@ export default function Login() {
       <div className="flex justify-end">
         <a
           href="#"
-          className="text-xs sm:text-sm text-primary hover:text-primary-dark underline"
+          className="text-xs sm:text-sm text-primary hover:text-primary-dark dark:text-blue-400 dark:hover:text-blue-300 underline transition-colors"
           onClick={(e) => {
             e.preventDefault();
             setOpenModalVerifyOtp(true);
@@ -149,11 +149,11 @@ export default function Login() {
 
       <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
         {/* Daftar Link */}
-        <p className="text-center text-xs sm:text-sm">
+        <p className="text-center text-xs sm:text-sm text-gray-900 dark:text-gray-300">
           Tidak punya akun?{" "}
           <a
             href="/register"
-            className="text-primary hover:text-primary-dark underline"
+            className="text-primary hover:text-primary-dark dark:text-blue-400 dark:hover:text-blue-300 underline transition-colors"
           >
             Daftar!
           </a>
@@ -163,10 +163,10 @@ export default function Login() {
         <AuthButton
           onClick={handleLogin}
           disabled={!email || !password}
-          className={`w-full sm:w-fit py-1 sm:py-2 lg:py-3 px-8 sm:px-12 lg:px-16 text-lg sm:text-xl lg:text-2xl ${
+          className={`w-full sm:w-fit py-1 sm:py-2 lg:py-3 px-8 sm:px-12 lg:px-16 text-lg sm:text-xl lg:text-2xl transition-colors ${
             email && password
               ? "bg-primary hover:bg-primary-hover text-white"
-              : "bg-gray-300 text-gray-500"
+              : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
           }`}
         >
           Masuk

@@ -35,14 +35,7 @@ export const DarkModeProvider = ({ children }: DarkModeProviderProps) => {
   });
 
   useEffect(() => {
-    // Apply dark mode class to document
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-
-    // Save to localStorage
+    // Save to localStorage only
     localStorage.setItem("admin_dark_mode", isDarkMode.toString());
   }, [isDarkMode]);
 

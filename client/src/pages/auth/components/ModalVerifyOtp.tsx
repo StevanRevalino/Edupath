@@ -76,14 +76,16 @@ export default function OTPModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-sm p-8 rounded-4xl shadow-lg text-center">
+    <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-sm p-8 rounded-4xl shadow-lg text-center transition-colors">
         <div className="flex justify-center mb-4">
           <img src={warningLogo} alt="warning" className="w-24 h-28" />
         </div>
 
-        <h2 className="text-xl font-bold mb-1">Periksa Email Anda</h2>
-        <p className="text-sm text-gray-600 mb-4">
+        <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">
+          Periksa Email Anda
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
           Kode verifikasi telah dikirim ke
           <br />
           <span className="font-medium">{email}</span>
@@ -101,17 +103,17 @@ export default function OTPModal({
               value={val}
               onChange={(e) => handleChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className="w-12 h-12 border bg-gray-300 font-semibold border-none rounded-lg shadow-md shadow-gray-400 text-center text-lg focus:outline-none focus:bg-gray-400 focus:ring-primary"
+              className="w-12 h-12 border bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white font-semibold border-none rounded-lg shadow-md shadow-gray-400 dark:shadow-gray-900 text-center text-lg focus:outline-none focus:bg-gray-400 dark:focus:bg-gray-500 focus:ring-primary transition-colors"
             />
           ))}
         </div>
 
-        <div className="text-sm text-gray-500 mb-4">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Tidak menerima kode verifikasi?{" "}
           <button
             onClick={onResend}
             disabled={timer > 0}
-            className={`font-semibold text-primary hover:text-primary-dark hover:underline disabled:opacity-40 cursor-pointer ${
+            className={`font-semibold text-primary dark:text-blue-400 hover:text-primary-dark dark:hover:text-blue-300 hover:underline disabled:opacity-40 cursor-pointer ${
               timer > 0 ? "disabled:cursor-not-allowed" : ""
             }`}
           >
@@ -121,14 +123,14 @@ export default function OTPModal({
 
         <button
           onClick={handleSubmit}
-          className="bg-primary hover:bg-primary-hoverer text-white w-full py-2 rounded-lg font-semibold cursor-pointer"
+          className="bg-primary hover:bg-primary-hoverer text-white w-full py-2 rounded-lg font-semibold cursor-pointer transition-colors"
         >
           Verifikasi Email
         </button>
 
         <button
           onClick={onClose}
-          className="text-sm font-semibold text-gray-600 mt-4 hover:underline cursor-pointer"
+          className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-4 hover:underline cursor-pointer transition-colors"
         >
           Batal
         </button>

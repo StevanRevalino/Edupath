@@ -5,6 +5,7 @@ import KelolaDataMurid from "./kelolaDataMurid/KelolaDataMurid";
 import KelolaDataKonseling from "./kelolaKonseling/KelolaDataKonseling";
 import KelolaLiveChat from "./kelolaLiveChat/KelolaLiveChat";
 import KelolaDataBeasiswa from "./kelolaBeasiswa/KelolaDataBeasiswa";
+import { DarkModeProvider } from "@/contexts/DarkModeContext";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -50,10 +51,12 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex-1 p-10">{getActiveTab()}</div>
-    </div>
+    <DarkModeProvider>
+      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="flex-1 p-10">{getActiveTab()}</div>
+      </div>
+    </DarkModeProvider>
   );
 };
 

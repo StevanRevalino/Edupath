@@ -320,11 +320,11 @@ export default function Register() {
       />
 
       <div className="flex flex-col gap-3 sm:gap-2 items-center w-full mt-2">
-        <p className="text-center text-xs sm:text-sm">
+        <p className="text-center text-xs sm:text-sm text-gray-900 dark:text-gray-300">
           Sudah punya akun?{" "}
           <a
             href="/login"
-            className="text-primary hover:text-primary-dark underline"
+            className="text-primary hover:text-primary-dark dark:text-blue-400 dark:hover:text-blue-300 underline transition-colors"
           >
             Log in!
           </a>
@@ -333,10 +333,10 @@ export default function Register() {
         <AuthButton
           onClick={handleRegisterSubmit}
           disabled={!isFormValid}
-          className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl ${
+          className={`w-full sm:w-fit py-3 sm:py-4 lg:py-5 px-8 sm:px-12 lg:px-20 text-lg sm:text-xl lg:text-2xl transition-colors ${
             isFormValid
               ? "bg-primary hover:bg-primary-hoverer text-white"
-              : "bg-gray-300 text-gray-500"
+              : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
           }`}
         >
           Daftar akun

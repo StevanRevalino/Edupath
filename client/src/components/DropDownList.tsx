@@ -34,7 +34,7 @@ export default function DropdownList({
           menu: () => "rounded-full shadow-md z-20",
         }}
         styles={{
-          control: (base) => ({
+          control: (base, state) => ({
             ...base,
             borderColor: error ? "#ef4444" : "white",
             minHeight: "40px",
@@ -43,10 +43,50 @@ export default function DropdownList({
             paddingBottom: "9px",
             paddingLeft: "6px",
             paddingRight: "6px",
+            backgroundColor: document.documentElement.classList.contains("dark")
+              ? "#4B5563"
+              : "white",
+            color: document.documentElement.classList.contains("dark")
+              ? "white"
+              : "#111827",
           }),
           placeholder: (base) => ({
             ...base,
-            color: "gray",
+            color: document.documentElement.classList.contains("dark")
+              ? "#9CA3AF"
+              : "gray",
+          }),
+          singleValue: (base) => ({
+            ...base,
+            color: document.documentElement.classList.contains("dark")
+              ? "white"
+              : "#111827",
+          }),
+          menu: (base) => ({
+            ...base,
+            backgroundColor: document.documentElement.classList.contains("dark")
+              ? "#374151"
+              : "white",
+          }),
+          option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isFocused
+              ? document.documentElement.classList.contains("dark")
+                ? "#4B5563"
+                : "#E5E7EB"
+              : document.documentElement.classList.contains("dark")
+              ? "#374151"
+              : "white",
+            color: document.documentElement.classList.contains("dark")
+              ? "white"
+              : "#111827",
+            ":active": {
+              backgroundColor: document.documentElement.classList.contains(
+                "dark"
+              )
+                ? "#1F2937"
+                : "#D1D5DB",
+            },
           }),
           valueContainer: (base) => ({
             ...base,
@@ -54,7 +94,9 @@ export default function DropdownList({
         }}
         isSearchable={false}
       />
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && (
+        <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error}</p>
+      )}
     </div>
   );
 }

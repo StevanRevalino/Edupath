@@ -5,6 +5,7 @@ import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
 import axios from "axios";
 import NotificationPanel from "../pages/user/notification";
+import DarkModeToggle from "../components/DarkModeToggle";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -120,7 +121,7 @@ const Header = () => {
         </div>
 
         {/* Menu Desktop */}
-        <nav className="hidden md:flex flex-1 justify-center sm:space-x-2 md:space-x-4 lg:space-x-8 xl:space-x-16 text-white text-lg md:text-lg xl:text-2xl">
+        <nav className="hidden md:flex flex-1 justify-center sm:space-x-2 md:space-x-4 lg:space-x-8 xl:space-x-16 !text-white text-lg md:text-lg xl:text-xl">
           {menuItems
             .filter((item) => item.label !== "Profil")
             .map((item) => {
@@ -129,7 +130,7 @@ const Header = () => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`cursor-pointer transition ${
+                  className={`cursor-pointer transition !text-white ${
                     isActive ? "font-bold" : ""
                   }`}
                 >
@@ -141,6 +142,9 @@ const Header = () => {
 
         {/* Profil untuk Desktop */}
         <div className="hidden md:flex flex-row gap-3 items-center">
+          {/* Dark Mode Toggle */}
+          <DarkModeToggle />
+
           {/* Notification Panel */}
           <NotificationPanel
             onNotificationClick={(_referenceId, type) => {
@@ -190,7 +194,7 @@ const Header = () => {
         {/* Hamburger Menu untuk Mobile */}
         <button
           ref={hamburgerRef}
-          className="md:hidden text-white"
+          className="md:hidden !text-white"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <X size={36} /> : <Menu size={36} />}
@@ -210,7 +214,7 @@ const Header = () => {
                 navigate(item.path);
                 setMenuOpen(false);
               }}
-              className={`py-2 border-t w-full text-center text-white ${
+              className={`py-2 border-t w-full text-center !text-white ${
                 location.pathname === item.path ? "font-bold bg-secondary" : ""
               }`}
             >
