@@ -719,7 +719,7 @@ const KelolaLiveChat: React.FC<KelolaLiveChatProps> = ({
             <div>
               <h2 className="text-xl font-bold text-gray-800">Live Chat</h2>
               <p className="text-sm text-gray-600">
-                Murid dengan konseling ter-accept ({chatUsers.length})
+                chat dengan siswa secara langsung
               </p>
             </div>
             <MessageCircle className="text-primary" size={24} />
