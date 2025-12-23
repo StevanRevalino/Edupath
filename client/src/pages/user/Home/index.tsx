@@ -28,6 +28,7 @@ import infoHome3 from "../../../assets/icons/info-home-3.png";
 import infoHome4 from "../../../assets/icons/info-home-4.png";
 import infoHome5 from "../../../assets/icons/info-home-5.png";
 import infoHome6 from "../../../assets/icons/info-home-6.png";
+import { DarkModeProvider } from "@/contexts/DarkModeContext";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -399,14 +400,14 @@ const Home = () => {
     navigate("/jurusan", { state: { selectedMajor: name } });
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 relative">
       {/* HERO SECTION */}
       <section className="hidden sm:block absolute -top-10 lg:-top-20 left-0 w-full h-64 sm:h-80 md:h-[540px] lg:h-[780px] z-[1]">
         {/* Background */}
         <img
           src={HeroSectionBG}
           alt="Hero Home"
-          className="w-full h-full object-cover rounded-b-4xl"
+          className="w-full h-full object-cover rounded-b-4xl dark:brightness-75"
         />
 
         {/* Overlay content */}
@@ -448,7 +449,7 @@ const Home = () => {
                 <button
                   className="mt-5 inline-flex items-center rounded-full bg-primary px-4 py-2
                        text-sm font-semibold text-primary-dark shadow-[0_6px_16px_rgba(0,0,0,0.15)]
-                       hover:brightness-95 active:brightness-90 transition cursor-pointer"
+                       hover:brightness-95 active:brightness-90 transition cursor-pointer dark:bg-primary-dark dark:text-white"
                   onClick={() => navigate("/profil")}
                 >
                   Ubah profil
@@ -489,7 +490,10 @@ const Home = () => {
 
       <div className="relative px-4 sm:px-8 lg:px-10 xl:px-24 sm:pt-80 md:pt-[540px] lg:pt-[720px] pb-6">
         {/* INFO (mobile only) */}
-        <SectionCard title="Info" className="block lg:hidden w-full mb-6">
+        <SectionCard
+          title="Info"
+          className="block lg:hidden w-full mb-6 dark:bg-gray-800 dark:text-white"
+        >
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {infoItems.map((item, i) => (
               <button
@@ -522,7 +526,9 @@ const Home = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-gray-600">Memuat data analytics...</p>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Memuat data analytics...
+                </p>
               </div>
             </div>
           ) : (
@@ -573,7 +579,7 @@ const Home = () => {
                     {/* Holland Scores Diagram */}
                     {assessmentStats.latestTestDetails.scores && (
                       <div className="bg-gray-50 rounded-xl p-4">
-                        <h4 className="font-semibold text-sm mb-3">
+                        <h4 className="font-semibold text-sm mb-3 dark:text-white">
                           Holland Scores:
                         </h4>
                         <div className="space-y-2">
@@ -586,7 +592,7 @@ const Home = () => {
                               </div>
                               <div className="flex-1 bg-gray-200 rounded-full h-6 relative overflow-hidden">
                                 <div
-                                  className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                                  className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2 dark:from-primary-dark dark:to-secondary-dark"
                                   style={{ width: `${value}%` }}
                                 >
                                   <span className="text-xs font-bold text-white">
@@ -604,7 +610,7 @@ const Home = () => {
                     {assessmentStats.latestTestDetails.recommendations.length >
                       0 && (
                       <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                        <h4 className="font-semibold text-sm mb-3 text-green-800">
+                        <h4 className="font-semibold text-sm mb-3 text-green-800 dark:text-green-200">
                           Top 5 Rekomendasi Jurusan:
                         </h4>
                         <div className="space-y-2">
@@ -614,11 +620,11 @@ const Home = () => {
                                 key={idx}
                                 className="p-2 bg-white rounded-lg hover:shadow-sm transition-shadow"
                               >
-                                <div className="font-semibold text-sm text-gray-800">
+                                <div className="font-semibold text-sm text-gray-800 dark:text-white">
                                   {idx + 1}. {rec.nama_prodi}
                                 </div>
                                 {rec.jenjang && (
-                                  <div className="text-xs text-gray-500 mt-0.5">
+                                  <div className="text-xs text-gray-500 dark:text-gray-300 mt-0.5">
                                     {rec.jenjang}
                                   </div>
                                 )}
@@ -631,10 +637,10 @@ const Home = () => {
                   </div>
                 ) : (
                   <div className="bg-gray-50 rounded-xl p-6 text-center">
-                    <div className="text-gray-500 text-sm">
+                    <div className="text-gray-500 text-sm dark:text-gray-300">
                       Belum ada data tes
                     </div>
-                    <div className="text-xs text-gray-400 mt-2">
+                    <div className="text-xs text-gray-400 dark:text-gray-400 mt-2">
                       Mulai tes pertama Anda untuk melihat statistik di sini
                     </div>
                   </div>
@@ -647,7 +653,7 @@ const Home = () => {
         {/* RIWAYAT TES - Scrollable Horizontal */}
         {!assessmentLoading && assessmentStats.allTests.length > 0 && (
           <SectionCard title="Riwayat Tes" className="mt-8 lg:mt-12 w-full">
-            <div className="relative">
+            <div className="relative dark:bg-gray-800 dark:text-white">
               {/* Scroll Buttons */}
               {assessmentStats.allTests.length > 3 && (
                 <>
@@ -675,14 +681,14 @@ const Home = () => {
               {/* Scrollable Container */}
               <div
                 ref={testHistoryRef}
-                className="flex gap-4 overflow-x-auto scrollbar-hide px-8 py-2"
+                className="flex gap-4 overflow-x-auto scrollbar-hide px-8 py-2 dark:bg-gray-900"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {assessmentStats.allTests.map((test, idx) => (
                   <div
                     key={test.assessment_id}
                     onClick={() => navigate(`/tes/hasil/${test.assessment_id}`)}
-                    className="bg-white rounded-2xl shadow-md p-4 min-w-[280px] flex-shrink-0 border-2 border-gray-100 hover:border-primary hover:shadow-lg transition-all cursor-pointer"
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 min-w-[280px] flex-shrink-0 border-2 border-gray-100 dark:border-gray-700 hover:border-primary hover:shadow-lg transition-all cursor-pointer"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-sm font-bold text-gray-700">
@@ -719,20 +725,23 @@ const Home = () => {
         <div className="flex flex-col mt-8 lg:mt-12 gap-8 lg:gap-16">
           {/* Jurusan + Ujian */}
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
-            <SectionCard title="Jurusan" className="w-full lg:w-[60%] h-fit">
+            <SectionCard
+              title="Jurusan"
+              className="w-full lg:w-[60%] h-fit dark:bg-gray-800 dark:text-white"
+            >
               <div className="mb-4">
                 <input
                   type="text"
                   placeholder="Jelajahi jurusan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 lg:py-3 border-2 border-primary-dark rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                  className="w-full px-4 py-2 lg:py-3 border-2 border-primary-dark rounded-full text-sm lg:text-base focus:outline-none bg-white dark:bg-gray-900 dark:text-white"
                 />
               </div>
 
               <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
                 {majorsLoading ? (
-                  <div className="text-gray-500 text-sm lg:text-base">
+                  <div className="text-gray-500 text-sm lg:text-base dark:text-gray-300">
                     Memuat data jurusan...
                   </div>
                 ) : displayedExploreMajors.length > 0 ? (
@@ -747,7 +756,7 @@ const Home = () => {
                     {hasMoreExplore && (
                       <button
                         onClick={() => navigate("/jurusan")}
-                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors dark:bg-primary-dark"
                       >
                         Lihat semua jurusan...
                       </button>
@@ -767,11 +776,11 @@ const Home = () => {
 
             <SectionCard
               title="Ujian"
-              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
+              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5 dark:bg-gray-800 dark:text-white"
             >
               <div className="flex items-center justify-start h-full min-h-[120px]">
                 <button
-                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200"
+                  className="bg-white dark:bg-gray-900 rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200 dark:border-gray-700"
                   onClick={() => navigate("/tes")}
                 >
                   <div className="flex items-center gap-5 h-full justify-start">
@@ -795,7 +804,7 @@ const Home = () => {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-32">
             <SectionCard
               title="Universitas"
-              className="w-full lg:w-[60%] h-fit"
+              className="w-full lg:w-[60%] h-fit dark:bg-gray-800 dark:text-white"
             >
               <div className="mb-4">
                 <input
@@ -803,13 +812,13 @@ const Home = () => {
                   placeholder="Jelajahi universitas..."
                   value={universitySearchQuery}
                   onChange={(e) => setUniversitySearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white"
+                  className="w-full px-4 py-2 lg:py-3 border-2 border-[#003B73] rounded-full text-sm lg:text-base focus:outline-none bg-white dark:bg-gray-900 dark:text-white"
                 />
               </div>
 
               <div className="flex flex-wrap gap-2 lg:gap-3 mb-4">
                 {universitiesLoading ? (
-                  <div className="text-gray-500 text-sm lg:text-base">
+                  <div className="text-gray-500 text-sm lg:text-base dark:text-gray-300">
                     Memuat data universitas...
                   </div>
                 ) : displayedUniversities.length > 0 ? (
@@ -824,7 +833,7 @@ const Home = () => {
                     {hasMoreUniversities && (
                       <button
                         onClick={() => navigate("/universitas")}
-                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors"
+                        className="text-white text-xs lg:text-sm px-3 py-1 rounded-full font-semibold bg-gray-500 cursor-pointer hover:bg-gray-600 transition-colors dark:bg-primary-dark"
                       >
                         Lihat semua universitas...
                       </button>
@@ -845,11 +854,11 @@ const Home = () => {
 
             <SectionCard
               title="Konseling"
-              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5"
+              className="w-full lg:w-[40%] h-fit pt-6 lg:pt-8 pb-4 lg:pb-5 dark:bg-gray-800 dark:text-white"
             >
               <div className="flex items-center justify-start h-full min-h-[120px]">
                 <button
-                  className="bg-white rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200"
+                  className="bg-white dark:bg-gray-900 rounded-2xl p-3 text-center w-full h-fit cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-2 border-transparent hover:border-gray-200 dark:border-gray-700"
                   onClick={() => navigate("/konseling")}
                 >
                   <div className="flex items-center gap-5 h-full justify-start">

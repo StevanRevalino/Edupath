@@ -165,8 +165,8 @@ export default function Login() {
           disabled={!email || !password}
           className={`w-full sm:w-fit py-1 sm:py-2 lg:py-3 px-8 sm:px-12 lg:px-16 text-lg sm:text-xl lg:text-2xl transition-colors ${
             email && password
-              ? "bg-primary hover:bg-primary-hover text-white"
-              : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+              ? "bg-primary hover:bg-primary-hover dark:bg-blue-900 hover:dark:bg-blue-950 text-white"
+              : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-000"
           }`}
         >
           Masuk

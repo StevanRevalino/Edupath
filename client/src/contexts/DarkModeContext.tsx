@@ -35,8 +35,14 @@ export const DarkModeProvider = ({ children }: DarkModeProviderProps) => {
   });
 
   useEffect(() => {
-    // Save to localStorage only
+    // Save to localStorage
     localStorage.setItem("admin_dark_mode", isDarkMode.toString());
+    // Add/remove 'dark' class on <html>
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
