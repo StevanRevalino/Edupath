@@ -34,7 +34,7 @@ export default function DropdownList({
           menu: () => "rounded-full shadow-md z-20",
         }}
         styles={{
-          control: (base, state) => ({
+          control: (base) => ({
             ...base,
             borderColor: error ? "#ef4444" : "white",
             minHeight: "40px",

@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X,} from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
 import axios from "axios";
