@@ -7,7 +7,6 @@ import questionIcon from "../assets/question-logo.png";
 import axios from "axios";
 import TokenManager from "../utils/tokenManager";
 import { NOTIFICATION_EVENTS } from "../utils/notificationEvents";
-import { useDarkMode } from "../contexts/DarkModeContext";
 
 // Import all admin icons
 import edupathLogo from "../assets/edupath-logo.png";
@@ -32,7 +31,6 @@ interface NotificationCount {
 
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [counts, setCounts] = useState<NotificationCount>({
     pendingConsultations: 0,
@@ -275,22 +273,6 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
           {/* Logout Button - Fixed at bottom */}
           <div className="p-4 space-y-3">
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200"
-              title={isDarkMode ? "Light Mode" : "Dark Mode"}
-            >
-              {isDarkMode ? (
-                <Sun className="w-6 h-6 text-yellow-300" />
-              ) : (
-                <Moon className="w-6 h-6 text-white" />
-              )}
-              <span className="font-medium text-sm">
-                {isDarkMode ? "Light Mode" : "Dark Mode"}
-              </span>
-            </button>
-
             {/* Logout Button */}
             <button
               onClick={handleLogout}
@@ -365,21 +347,6 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
               {/* Logout Button */}
               <div className="mt-4 pt-4 border-t border-[#4BB8FF] space-y-2">
-                {/* Dark Mode Toggle */}
-                <button
-                  onClick={toggleDarkMode}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 cursor-pointer rounded-lg hover:bg-[#4BB8FF] transition-colors duration-200"
-                  title={isDarkMode ? "Light Mode" : "Dark Mode"}
-                >
-                  {isDarkMode ? (
-                    <Sun className="w-5 h-5 text-yellow-300" />
-                  ) : (
-                    <Moon className="w-5 h-5 text-white" />
-                  )}
-                  <span className="font-medium text-sm">
-                    {isDarkMode ? "Light Mode" : "Dark Mode"}
-                  </span>
-                </button>
 
                 {/* Logout Button */}
                 <button

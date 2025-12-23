@@ -28,7 +28,6 @@ import infoHome3 from "../../../assets/icons/info-home-3.png";
 import infoHome4 from "../../../assets/icons/info-home-4.png";
 import infoHome5 from "../../../assets/icons/info-home-5.png";
 import infoHome6 from "../../../assets/icons/info-home-6.png";
-import { DarkModeProvider } from "@/contexts/DarkModeContext";
 
 const Home = () => {
   const navigate = useNavigate();

@@ -5,7 +5,6 @@ import logo from "../assets/edupath-logo.png";
 import TokenManager from "@/utils/tokenManager";
 import axios from "axios";
 import NotificationPanel from "../pages/user/notification";
-import DarkModeToggle from "../components/DarkModeToggle";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -142,9 +141,6 @@ const Header = () => {
 
         {/* Profil untuk Desktop */}
         <div className="hidden md:flex flex-row gap-3 items-center">
-          {/* Dark Mode Toggle */}
-          <DarkModeToggle />
-
           {/* Notification Panel */}
           <NotificationPanel
             onNotificationClick={(_referenceId, type) => {
