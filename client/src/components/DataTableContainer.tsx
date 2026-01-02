@@ -4,16 +4,22 @@ interface DataTableContainerProps {
   loading?: boolean;
   children: ReactNode;
   className?: string;
+  useFlexLayout?: boolean;
 }
 
 const DataTableContainer = ({
   loading = false,
   children,
   className = "",
+  useFlexLayout = false,
 }: DataTableContainerProps) => {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col flex-1 transition-colors duration-300 ${className}`}
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col transition-colors duration-300 ${
+        useFlexLayout
+          ? "flex-1"
+          : "max-h-[calc(100vh-24rem)] sm:max-h-[calc(100vh-28rem)]"
+      } ${className}`}
     >
       {loading ? (
         <div className="flex-1 flex items-center justify-center">

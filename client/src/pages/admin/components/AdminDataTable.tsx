@@ -11,6 +11,7 @@ interface AdminDataTableProps<T> {
   keyExtractor: (row: T) => string;
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
+  useFlexLayout?: boolean;
 }
 
 function AdminDataTable<T>({
@@ -19,10 +20,19 @@ function AdminDataTable<T>({
   keyExtractor,
   onRowClick,
   emptyMessage = "Tidak ada data",
+  useFlexLayout = false,
 }: AdminDataTableProps<T>) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300 flex flex-col flex-1">
-      <div className="overflow-x-auto overflow-y-auto flex-1">
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300 ${
+        useFlexLayout ? "flex flex-col flex-1" : ""
+      }`}
+    >
+      <div
+        className={`overflow-x-auto overflow-y-auto ${
+          useFlexLayout ? "flex-1" : "max-h-[calc(100vh-28rem)]"
+        }`}
+      >
         <table className="w-full">
           <thead className="sticky top-0 z-10">
             <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 transition-colors duration-300">

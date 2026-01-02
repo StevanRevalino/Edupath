@@ -308,8 +308,9 @@ const KelolaDataBeasiswa = () => {
       </div>
 
       {/* Table */}
-      <DataTableContainer loading={loading}>
+      <DataTableContainer loading={loading} useFlexLayout={true}>
         <AdminDataTable
+          useFlexLayout={true}
           columns={[
             {
               header: "No",
