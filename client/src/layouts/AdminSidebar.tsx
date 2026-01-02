@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Menu, X,} from "lucide-react";
+import { Menu, X, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Swal from "sweetalert2";
 import questionIcon from "../assets/question-logo.png";
 import axios from "axios";
@@ -16,6 +16,7 @@ import kelolaDataKonselingIcon from "../assets/icons/kelola-data-konseling.png";
 import kelolaChatMuridIcon from "../assets/icons/kelola-chat-murid.png";
 import kelolaDataBeasiswaIcon from "../assets/icons/kelola-data-beasiswa.png";
 import logOutIcon from "../assets/icons/log-out.png";
+import logOutSmallIcon from "../assets/icons/logout-small-icon.png";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -32,6 +33,7 @@ interface NotificationCount {
 const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [counts, setCounts] = useState<NotificationCount>({
     pendingConsultations: 0,
     unreadChats: 0,
@@ -226,15 +228,34 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   return (
     <>
       {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden lg:block w-64">
+      <div
+        className={`hidden lg:block transition-all duration-300 ${
+          isCollapsed ? "w-24" : "w-64"
+        }`}
+      >
         <div className="sticky top-0 h-screen bg-primary dark:bg-blue-900/40 text-white flex flex-col rounded-br-2xl rounded-tr-2xl">
-          <div className="p-4 flex-1 overflow-y-auto">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="absolute -right-4 top-6 z-10 w-8 h-8 bg-white dark:bg-gray-800 text-primary dark:text-blue-400 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+            title={isCollapsed ? "Buka Sidebar" : "Tutup Sidebar"}
+          >
+            {isCollapsed ? (
+              <PanelLeftOpen size={20} />
+            ) : (
+              <PanelLeftClose size={20} />
+            )}
+          </button>
+
+          <div className="p-4 flex-1">
             {/* Logo Section */}
             <div className="flex items-center justify-center mb-2">
               <img
                 src={edupathLogo}
                 alt="EduPath Logo"
-                className="w-[110px] h-[95px]"
+                className={`transition-all duration-300 ${
+                  isCollapsed ? "w-[60px] h-[52px]" : "w-[110px] h-[95px]"
+                }`}
               />
             </div>
 
@@ -248,21 +269,55 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                         setActiveTab(item.id);
                         clearBadge(item.id);
                       }}
-                      className={`w-full flex items-center px-4 py-3 text-left cursor-pointer rounded-lg transition-colors duration-200 hover:bg-primary-hoverer ${
+                      className={`w-full flex items-center ${
+                        isCollapsed ? "justify-center px-2" : "px-4"
+                      } py-3 text-left cursor-pointer rounded-lg transition-all duration-200 hover:bg-primary-hoverer ${
                         activeTab === item.id
                           ? "bg-primary-hoverer"
                           : "bg-transparent"
-                      }`}
+                      } relative group`}
+                      title={isCollapsed ? item.label : ""}
                     >
-                      <img
-                        src={item.icon}
-                        alt={`${item.label} Icon`}
-                        className="w-12 h-14 mr-3"
-                      />
-                      <span className="font-medium flex-1">{item.label}</span>
-                      {/* Tompel merah kecil - muncul jika ada notifikasi */}
-                      {item.badgeCount > 0 && (
-                        <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                      <div className="relative">
+                        <img
+                          src={item.icon}
+                          alt={`${item.label} Icon`}
+                          className={`transition-all duration-300 ${
+                            isCollapsed ? "w-8 h-9" : "w-12 h-14 mr-3"
+                          }`}
+                        />
+                        {/* Tompel merah kecil - muncul jika ada notifikasi (posisi adjusted untuk collapsed) */}
+                        {item.badgeCount > 0 && (
+                          <span
+                            className={`absolute bg-red-500 rounded-full animate-pulse ${
+                              isCollapsed
+                                ? "w-2 h-2 -top-1 -right-1"
+                                : "w-3 h-3 top-0 right-0"
+                            }`}
+                          ></span>
+                        )}
+                      </div>
+                      {!isCollapsed && (
+                        <>
+                          <span className="font-medium flex-1">
+                            {item.label}
+                          </span>
+                          {item.badgeCount > 0 && (
+                            <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                          )}
+                        </>
+                      )}
+
+                      {/* Tooltip on hover when collapsed */}
+                      {isCollapsed && (
+                        <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                          {item.label}
+                          {item.badgeCount > 0 && (
+                            <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                              {item.badgeCount}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </button>
                   </li>
@@ -272,13 +327,29 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
           </div>
 
           {/* Logout Button - Fixed at bottom */}
-          <div className="p-4 space-y-3">
+          <div className="p-4">
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full p-4 cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200"
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center px-2 py-3" : "justify-center p-4"
+              } cursor-pointer rounded-lg hover:bg-primary-hoverer transition-colors duration-200 relative group`}
+              title={isCollapsed ? "Logout" : ""}
             >
-              <img src={logOutIcon} alt="Logout Icon" className="w-full h-15" />
+              <img
+                src={isCollapsed ? logOutSmallIcon : logOutIcon}
+                alt="Logout Icon"
+                className={`transition-all duration-300 object-contain ${
+                  isCollapsed ? "w-8 h-8" : "w-40 h-12"
+                }`}
+              />
+
+              {/* Tooltip on hover when collapsed */}
+              {isCollapsed && (
+                <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 bottom-4">
+                  Logout
+                </div>
+              )}
             </button>
           </div>
         </div>
@@ -347,7 +418,6 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
               {/* Logout Button */}
               <div className="mt-4 pt-4 border-t border-[#4BB8FF] space-y-2">
-
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
