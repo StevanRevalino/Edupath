@@ -27,7 +27,7 @@ const corsOpts: cors.CorsOptions = {
     "http://[::1]:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://edupath-mauve.vercel.app",
+    "https://edupath-app.vercel.app",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -59,7 +59,7 @@ app.use("/api/universitas", universitasRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/zoom", zoomRoutes);
 
-const PORT = process.env.PORT || 5000;      // pakai PORT dari Azure kalau ada
+const PORT = process.env.PORT || 5000; // pakai PORT dari Azure kalau ada
 
 app.listen(PORT, async () => {
   console.log(`Server running on http://:${PORT}`);
@@ -75,4 +75,3 @@ app.listen(PORT, async () => {
     console.error("Startup failed:", err);
   }
 });
-
