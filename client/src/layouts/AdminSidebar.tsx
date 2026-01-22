@@ -49,7 +49,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (
@@ -57,7 +57,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         consultationsResponse.data.data
       ) {
         const pendingCount = consultationsResponse.data.data.filter(
-          (c: any) => c.status === "PENDING"
+          (c: any) => c.status === "PENDING",
         ).length;
 
         setCounts((prev) => ({
@@ -76,7 +76,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (notificationsResponse.data) {
@@ -132,12 +132,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
 
     window.addEventListener(
       NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
-      handleConsultationUpdate
+      handleConsultationUpdate,
     );
     if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
       window.addEventListener(
         NOTIFICATION_EVENTS.CHAT_UPDATED,
-        handleChatUpdate
+        handleChatUpdate,
       );
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -147,12 +147,12 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
       clearInterval(interval);
       window.removeEventListener(
         NOTIFICATION_EVENTS.CONSULTATION_UPDATED,
-        handleConsultationUpdate
+        handleConsultationUpdate,
       );
       if (NOTIFICATION_EVENTS.CHAT_UPDATED) {
         window.removeEventListener(
           NOTIFICATION_EVENTS.CHAT_UPDATED,
-          handleChatUpdate
+          handleChatUpdate,
         );
       }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -222,7 +222,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
         badgeCount: 0,
       },
     ],
-    [counts]
+    [counts],
   );
 
   return (
@@ -286,15 +286,9 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
                             isCollapsed ? "w-8 h-9" : "w-12 h-14 mr-3"
                           }`}
                         />
-                        {/* Tompel merah kecil - muncul jika ada notifikasi (posisi adjusted untuk collapsed) */}
-                        {item.badgeCount > 0 && (
-                          <span
-                            className={`absolute bg-red-500 rounded-full animate-pulse ${
-                              isCollapsed
-                                ? "w-2 h-2 -top-1 -right-1"
-                                : "w-3 h-3 top-0 right-0"
-                            }`}
-                          ></span>
+                        {/* Tompel merah kecil - hanya muncul saat collapsed */}
+                        {item.badgeCount > 0 && isCollapsed && (
+                          <span className="absolute w-2 h-2 -top-1 -right-1 bg-red-500 rounded-full animate-pulse"></span>
                         )}
                       </div>
                       {!isCollapsed && (
