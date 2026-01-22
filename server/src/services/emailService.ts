@@ -3,7 +3,6 @@ import { TransportOptions } from "nodemailer";
 import { google } from "googleapis";
 
 export class EmailService {
-  // Private method to refresh access token
 
   // Private method to create transporter with OAuth2 and auto-refresh
   private async createTransporter() {
