@@ -222,6 +222,7 @@ const Tes = () => {
                         key={tesSession.test_id}
                         tesSession={tesSession}
                         index={index}
+                        totalTests={tesSessions.length}
                         isSelected={
                           selectedTesSession?.test_id === tesSession.test_id
                         }

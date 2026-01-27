@@ -3,11 +3,12 @@ import { type TesSession } from "./InfoTes";
 interface TesCardProps {
   tesSession: TesSession;
   index: number;
+  totalTests: number;
   isSelected?: boolean;
   onClick: (tesSession: TesSession) => void;
 }
 
-const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
+const TesCard = ({ tesSession, index, totalTests, isSelected, onClick }: TesCardProps) => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "COMPLETED":
@@ -51,9 +52,8 @@ const TesCard = ({ tesSession, index, isSelected, onClick }: TesCardProps) => {
         >
           {getStatusText(tesSession.status)}
         </span>
-        <span className="text-xs text-gray-500">#{tesSession.test_id}</span>
       </div>
-      <h4 className="font-semibold text-gray-800 mb-1">Test {index + 1}</h4>
+      <h4 className="font-semibold text-gray-800 mb-1">Test {totalTests - index}</h4>
       <p className="text-xs text-gray-600">
         {new Date(tesSession.test_date).toLocaleDateString("id-ID")} -{" "}
         {new Date(tesSession.test_date).toLocaleTimeString("id-ID", {

@@ -118,11 +118,7 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
     return (
       <div className="h-full">
         <h4 className="text-lg font-semibold text-gray-800 text-center mb-8">
-          tes minat & bakat #
-          {Array(8)
-            .fill(0)
-            .map(() => "x")
-            .join("")}
+          tes minat & bakat
         </h4>
 
         {/* Placeholder content for test info */}
