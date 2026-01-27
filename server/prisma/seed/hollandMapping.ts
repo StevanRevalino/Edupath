@@ -18,7 +18,6 @@ interface ProdiMapping {
   keywords: string[]; // Multiple possible names
   primary_type: string;
   secondary_type: string | null;
-  compatibility_score?: number; // Optional, not used in current implementation
 }
 
 export const hollandProdiMapping: ProdiMapping[] = [
@@ -31,31 +30,26 @@ export const hollandProdiMapping: ProdiMapping[] = [
     keywords: ["Teknik Mesin", "Mesin"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 95,
   },
   {
     keywords: ["Teknik Elektro", "Elektro"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 95,
   },
   {
     keywords: ["Teknik Sipil", "Sipil"],
     primary_type: "REALISTIC",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 95,
   },
   {
     keywords: ["Teknik Industri", "Industri"],
     primary_type: "REALISTIC",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 90,
   },
   {
     keywords: ["Arsitektur", "Architecture"],
     primary_type: "REALISTIC",
     secondary_type: "ARTISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: [
@@ -71,7 +65,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: [
@@ -82,7 +75,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: [
@@ -92,67 +84,56 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "REALISTIC",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Teknik Pertanian", "Pertanian", "Agricultural Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknik Kimia", "Chemical Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknik Geologi", "Geological Engineering", "Geologi Teknik"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknik Lingkungan", "Environmental Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknik Metalurgi", "Metalurgi", "Metallurgical Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknik Perminyakan", "Perminyakan", "Petroleum Engineering"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Teknologi Pangan", "Food Technology"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: ["Teknik Kelautan", "Kelautan", "Marine Engineering", "Ocean"],
     primary_type: "REALISTIC",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: ["Kehutanan", "Forestry"],
     primary_type: "REALISTIC",
     secondary_type: null,
-    compatibility_score: 90,
   },
   {
     keywords: ["Peternakan", "Animal Science", "Animal Husbandry"],
     primary_type: "REALISTIC",
     secondary_type: null,
-    compatibility_score: 85,
   },
 
   // ========================================
@@ -164,85 +145,71 @@ export const hollandProdiMapping: ProdiMapping[] = [
     keywords: ["Kedokteran", "Medicine", "Pendidikan Dokter"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "SOCIAL",
-    compatibility_score: 100,
   },
   {
     keywords: ["Farmasi", "Pharmacy", "Apoteker"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "REALISTIC",
-    compatibility_score: 95,
   },
   {
     keywords: ["Biologi", "Biology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 95,
   },
   {
     keywords: ["Kimia", "Chemistry"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 95,
   },
   {
     keywords: ["Fisika", "Physics"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 95,
   },
   {
     keywords: ["Matematika", "Mathematics"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 95,
   },
   {
     keywords: ["Statistika", "Statistics", "Statistik"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 90,
   },
   {
     keywords: ["Psikologi", "Psychology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "SOCIAL",
-    compatibility_score: 90,
   },
   {
     keywords: ["Bioteknologi", "Biotechnology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: ["Kedokteran Gigi", "Dentistry", "Pendidikan Dokter Gigi"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "SOCIAL",
-    compatibility_score: 95,
   },
   {
     keywords: ["Kedokteran Hewan", "Veterinary"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: ["Geofisika", "Geophysics", "Geologi", "Geology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: "REALISTIC",
-    compatibility_score: 85,
   },
   {
     keywords: ["Mikrobiologi", "Microbiology"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 90,
   },
   {
     keywords: ["Astronomi", "Astronomy"],
     primary_type: "INVESTIGATIVE",
     secondary_type: null,
-    compatibility_score: 95,
   },
 
   // ========================================
@@ -254,13 +221,11 @@ export const hollandProdiMapping: ProdiMapping[] = [
     keywords: ["Desain Grafis", "Graphic Design"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 95,
   },
   {
     keywords: ["Desain Interior", "Interior Design", "Desain Ruang"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 95,
   },
   {
     keywords: [
@@ -270,43 +235,36 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ARTISTIC",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 95,
   },
   {
     keywords: ["Desain Produk", "Product Design"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: ["Seni Rupa", "Fine Arts"],
     primary_type: "ARTISTIC",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: ["Seni Musik", "Music", "Musik"],
     primary_type: "ARTISTIC",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: ["Seni Tari", "Dance", "Tari"],
     primary_type: "ARTISTIC",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: ["Seni Teater", "Theater", "Theatre"],
     primary_type: "ARTISTIC",
     secondary_type: "SOCIAL",
-    compatibility_score: 95,
   },
   {
     keywords: ["Kriya", "Craft", "Seni Kriya"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: [
@@ -316,7 +274,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ARTISTIC",
     secondary_type: "SOCIAL",
-    compatibility_score: 90,
   },
   {
     keywords: [
@@ -326,7 +283,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ARTISTIC",
     secondary_type: "SOCIAL",
-    compatibility_score: 90,
   },
   {
     keywords: [
@@ -341,37 +297,31 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ARTISTIC",
     secondary_type: "SOCIAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Film dan Televisi", "Film", "Broadcasting", "Television"],
     primary_type: "ARTISTIC",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 90,
   },
   {
     keywords: ["Periklanan", "Advertising"],
     primary_type: "ARTISTIC",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 90,
   },
   {
     keywords: ["Fotografi", "Photography"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 85,
   },
   {
     keywords: ["Fashion Design", "Desain Fashion", "Desain Mode"],
     primary_type: "ARTISTIC",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 85,
   },
   {
     keywords: ["Animasi", "Animation"],
     primary_type: "ARTISTIC",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
 
   // ========================================
@@ -383,7 +333,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     keywords: ["Pendidikan", "Education"],
     primary_type: "SOCIAL",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: [
@@ -393,7 +342,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "SOCIAL",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: [
@@ -403,73 +351,61 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 100,
   },
   {
     keywords: ["Ilmu Keperawatan", "Nursing", "Keperawatan", "Ners"],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 95,
   },
   {
     keywords: ["Kesehatan Masyarakat", "Public Health"],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Pekerjaan Sosial", "Social Work"],
     primary_type: "SOCIAL",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: ["Sosiologi", "Sociology"],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Antropologi", "Anthropology"],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Hubungan Internasional", "International Relations"],
     primary_type: "SOCIAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 85,
   },
   {
     keywords: ["Ilmu Politik", "Political Science", "Politik"],
     primary_type: "SOCIAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 85,
   },
   {
     keywords: ["Pendidikan Bahasa Inggris", "English Education"],
     primary_type: "SOCIAL",
     secondary_type: "ARTISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: ["Fisioterapi", "Physiotherapy", "Terapi Fisik"],
     primary_type: "SOCIAL",
     secondary_type: "REALISTIC",
-    compatibility_score: 85,
   },
   {
     keywords: ["Gizi", "Nutrition", "Ilmu Gizi"],
     primary_type: "SOCIAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: ["Kesejahteraan Sosial", "Social Welfare"],
     primary_type: "SOCIAL",
     secondary_type: null,
-    compatibility_score: 95,
   },
 
   // ========================================
@@ -490,7 +426,6 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 100,
   },
   {
     keywords: [
@@ -503,13 +438,11 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ENTERPRISING",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Ekonomi Pembangunan", "Development Economics"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
-    compatibility_score: 85,
   },
   {
     keywords: [
@@ -520,25 +453,21 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ENTERPRISING",
     secondary_type: "REALISTIC",
-    compatibility_score: 85,
   },
   {
     keywords: ["Bisnis Digital", "Digital Business", "E-Business"],
     primary_type: "ENTERPRISING",
     secondary_type: "REALISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: ["Kewirausahaan", "Entrepreneurship"],
     primary_type: "ENTERPRISING",
     secondary_type: null,
-    compatibility_score: 100,
   },
   {
     keywords: ["Pemasaran", "Marketing"],
     primary_type: "ENTERPRISING",
     secondary_type: "ARTISTIC",
-    compatibility_score: 90,
   },
   {
     keywords: [
@@ -550,43 +479,36 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 90,
   },
   {
     keywords: ["Ilmu Hukum", "Law", "Hukum"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
-    compatibility_score: 90,
   },
   {
     keywords: ["Hubungan Masyarakat", "Public Relations", "Humas"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Perhotelan", "Hotel Management", "Hospitality"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Pariwisata", "Tourism", "Kepariwisataan"],
     primary_type: "ENTERPRISING",
     secondary_type: "SOCIAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Manajemen Retail", "Retail Management"],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 85,
   },
   {
     keywords: ["Logistik", "Logistics", "Supply Chain"],
     primary_type: "ENTERPRISING",
     secondary_type: "CONVENTIONAL",
-    compatibility_score: 85,
   },
 
   // ========================================
@@ -606,37 +528,31 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 100,
   },
   {
     keywords: ["Administrasi Publik", "Public Administration"],
     primary_type: "CONVENTIONAL",
     secondary_type: "SOCIAL",
-    compatibility_score: 95,
   },
   {
     keywords: ["Administrasi Perpajakan", "Tax Administration", "Perpajakan"],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 95,
   },
   {
     keywords: ["Perpustakaan", "Library Science", "Ilmu Perpustakaan"],
     primary_type: "CONVENTIONAL",
     secondary_type: null,
-    compatibility_score: 90,
   },
   {
     keywords: ["Arsip", "Archival Science"],
     primary_type: "CONVENTIONAL",
     secondary_type: null,
-    compatibility_score: 90,
   },
   {
     keywords: ["Sekretaris", "Secretary"],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 85,
   },
   {
     keywords: [
@@ -646,43 +562,36 @@ export const hollandProdiMapping: ProdiMapping[] = [
     ],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 85,
   },
   {
     keywords: ["Perbankan", "Banking"],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 90,
   },
   {
     keywords: ["Keuangan", "Finance"],
     primary_type: "CONVENTIONAL",
     secondary_type: "ENTERPRISING",
-    compatibility_score: 90,
   },
   {
     keywords: ["Audit", "Auditing"],
     primary_type: "CONVENTIONAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 90,
   },
   {
     keywords: ["Manajemen Informasi", "Information Management"],
     primary_type: "CONVENTIONAL",
     secondary_type: "REALISTIC",
-    compatibility_score: 80,
   },
   {
     keywords: ["Data Science", "Ilmu Data", "Sains Data"],
     primary_type: "CONVENTIONAL",
     secondary_type: "INVESTIGATIVE",
-    compatibility_score: 85,
   },
   {
     keywords: ["Manajemen Operasional", "Operations Management"],
     primary_type: "CONVENTIONAL",
     secondary_type: "REALISTIC",
-    compatibility_score: 80,
   },
 ];
 

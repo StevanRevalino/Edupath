@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "universitasdanprodi:seed": "ts-node prisma/seed/universitas_dan_prodi.ts",
+    "holland:seed": "ts-node prisma/seed/seedHolland.ts",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:deploy": "npm run db:migrate && npm run db:generate",

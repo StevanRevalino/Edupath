@@ -13,52 +13,52 @@ export const hollandQuestions = [
   // ========================================
   {
     question_text:
-      "Saya suka bekerja langsung dengan mesin, alat, atau peralatan teknis.",
+      "Saya menyukai kegiatan praktik yang menggunakan alat atau mesin.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih senang melakukan aktivitas fisik daripada duduk lama di depan komputer atau meja.",
+      "Saya lebih suka aktivitas yang banyak bergerak daripada duduk lama.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya menikmati kegiatan seperti memperbaiki, merakit, atau membuat sesuatu dengan tangan saya sendiri.",
+      "Saya senang memperbaiki, merakit, atau membuat sesuatu dengan tangan sendiri.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya merasa puas ketika bisa melihat hasil kerja saya secara nyata dan berwujud.",
+      "Saya puas kalau hasil kerja saya terlihat jelas dan bisa disentuh.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih menghargai hasil kerja yang konkret dibandingkan ide-ide abstrak.",
+      "Saya lebih suka pekerjaan yang hasilnya nyata daripada sekadar ide.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya menganggap diri saya orang yang praktis dan terampil secara teknis.",
+      "Saya merasa saya orang yang praktis dan cepat belajar hal teknis.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya lebih nyaman bekerja di luar ruangan atau di bengkel daripada di kantor.",
+      "Saya lebih nyaman kerja di lapangan atau bengkel daripada di kantor.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya senang menggunakan alat atau mesin untuk menyelesaikan suatu pekerjaan.",
+      "Saya senang menggunakan alat atau mesin untuk menyelesaikan tugas.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya biasanya menghindari pekerjaan yang terlalu banyak berinteraksi dengan orang.",
+      "Saya kurang menyukai pekerjaan yang mengharuskan saya banyak berkomunikasi dengan orang.",
     holland_type: "REALISTIC",
   },
   {
     question_text:
-      "Saya tertarik pada hal-hal seperti mesin, peralatan elektronik, atau bahan bangunan.",
+      "Saya tertarik pada mesin, elektronik, teknologi, atau hal-hal teknik.",
     holland_type: "REALISTIC",
   },
 
@@ -67,52 +67,50 @@ export const hollandQuestions = [
   // ========================================
   {
     question_text:
-      "Saya suka mencari tahu bagaimana sesuatu bisa bekerja atau terjadi.",
+      "Saya suka mencari tahu mengapa dan bagaimana sesuatu bisa terjadi.",
+    holland_type: "INVESTIGATIVE",
+  },
+  {
+    question_text: "Saya senang memecahkan masalah yang sulit dan menantang.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya menikmati memecahkan masalah yang rumit dan menantang pikiran.",
+      "Saya tertarik belajar hal baru tentang sains dan teknologi.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya tertarik membaca atau menonton hal-hal baru tentang sains dan teknologi.",
+      "Bagi saya, belajar hal baru itu penting walau tidak langsung menghasilkan uang.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Bagi saya, belajar dan menemukan hal baru lebih penting daripada mengejar status atau uang.",
+      "Saya senang mencari data atau informasi sebelum menjawab pertanyaan.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya merasa senang saat melakukan riset atau mencari informasi untuk menjawab pertanyaan tertentu.",
+      "Saya suka berpikir logis dan menganalisis sesuatu dengan teliti.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang logis, analitis, dan suka berpikir kritis.",
+      "Orang lain sering menilai saya memiliki rasa ingin tahu yang tinggi.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Orang lain sering menilai saya sebagai pribadi yang cerdas atau punya rasa ingin tahu tinggi.",
+      "Saya nyaman belajar atau bekerja sendiri di tempat yang tenang.",
     holland_type: "INVESTIGATIVE",
   },
   {
     question_text:
-      "Saya lebih suka bekerja sendiri di lingkungan yang tenang, seperti laboratorium atau perpustakaan.",
+      "Saya kurang suka aktivitas yang fokusnya menjual atau membujuk orang.",
     holland_type: "INVESTIGATIVE",
   },
   {
-    question_text:
-      "Saya tidak terlalu suka pekerjaan yang menuntut kemampuan menjual atau membujuk orang lain.",
-    holland_type: "INVESTIGATIVE",
-  },
-  {
-    question_text:
-      "Saya senang memahami fenomena alam atau sosial melalui pengamatan dan analisis.",
+    question_text: "Saya suka mengamati sesuatu lalu mencari penjelasannya.",
     holland_type: "INVESTIGATIVE",
   },
 
@@ -121,52 +119,51 @@ export const hollandQuestions = [
   // ========================================
   {
     question_text:
-      "Saya senang menciptakan sesuatu yang unik seperti karya seni, musik, atau tulisan.",
+      "Saya senang membuat karya seperti gambar, musik, video, atau tulisan.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang memberi kebebasan untuk berkreasi dan berimajinasi.",
+      "Saya suka tugas yang memberi ruang untuk berkreasi dan berimajinasi.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya tertarik pada kegiatan seperti menggambar, menulis, mendesain, atau tampil di depan umum.",
+      "Saya tertarik kegiatan kreatif seperti menggambar, menulis, atau mendesain.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya menghargai kebebasan berekspresi lebih dari aturan atau rutinitas yang kaku.",
+      "Saya lebih suka kebebasan berekspresi daripada aturan yang terlalu kaku.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya mudah terinspirasi oleh keindahan visual, musik, atau ide-ide kreatif.",
+      "Saya mudah mendapatkan inspirasi dari hal-hal yang saya lihat atau dengar.",
+    holland_type: "ARTISTIC",
+  },
+  {
+    question_text: "Saya suka mencoba hal baru dan memiliki banyak ide.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya menganggap diri saya sebagai orang yang terbuka terhadap pengalaman baru dan penuh imajinasi.",
+      "Saya merasa punya kemampuan di bidang seni, desain, atau hal kreatif.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya merasa punya bakat dalam bidang seni, desain, atau ekspresi kreatif lainnya.",
+      "Saya nyaman di lingkungan yang fleksibel dan tidak terlalu banyak aturan.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya lebih nyaman bekerja di lingkungan yang bebas, fleksibel, dan tidak terlalu terstruktur.",
+      "Saya mudah bosan dengan pekerjaan yang terlalu rutin dan berulang.",
     holland_type: "ARTISTIC",
   },
   {
     question_text:
-      "Saya kurang cocok dengan pekerjaan yang terlalu rutin dan berulang-ulang.",
-    holland_type: "ARTISTIC",
-  },
-  {
-    question_text:
-      "Saya senang menyalurkan ide melalui seni, musik, tulisan, atau media kreatif lainnya.",
+      "Saya suka mengekspresikan ide lewat karya atau media kreatif.",
     holland_type: "ARTISTIC",
   },
 
@@ -175,52 +172,50 @@ export const hollandQuestions = [
   // ========================================
   {
     question_text:
-      "Saya merasa senang ketika bisa membantu orang lain menyelesaikan masalahnya.",
+      "Saya senang membantu orang lain saat mereka menghadapi masalah.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya tertarik menjadi pengajar, pembimbing, atau pelatih bagi orang lain.",
+      "Saya tertarik mengajar, membimbing, atau menjelaskan sesuatu ke orang lain.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya menikmati bekerja dalam tim dan berinteraksi dengan banyak orang.",
+      "Saya suka bekerja dalam kelompok dan berinteraksi dengan banyak orang.",
+    holland_type: "SOCIAL",
+  },
+  {
+    question_text: "Saya merasa puas kalau bisa bermanfaat untuk orang lain.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya merasa puas jika bisa berkontribusi untuk kesejahteraan orang lain.",
+      "Saya suka menjaga hubungan baik dan komunikasi yang nyaman.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya menghargai hubungan baik dan komunikasi yang positif dengan orang di sekitar saya.",
+      "Saya merasa saya orang yang sabar, ramah, dan mudah berempati.",
+    holland_type: "SOCIAL",
+  },
+  {
+    question_text: "Teman sering bercerita atau meminta saran kepada saya.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya menganggap diri saya sabar, ramah, dan mudah memahami perasaan orang lain.",
+      "Saya suka kegiatan yang melibatkan membantu orang secara langsung.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Orang lain sering datang kepada saya untuk bercerita atau meminta saran.",
+      "Saya kurang suka pekerjaan yang isinya hanya mesin/teknis tanpa banyak interaksi.",
     holland_type: "SOCIAL",
   },
   {
     question_text:
-      "Saya lebih suka pekerjaan yang melibatkan pelayanan atau membantu orang secara langsung.",
-    holland_type: "SOCIAL",
-  },
-  {
-    question_text:
-      "Saya kurang tertarik pada pekerjaan yang bersifat mekanis atau terlalu teknis.",
-    holland_type: "SOCIAL",
-  },
-  {
-    question_text:
-      "Saya menikmati kegiatan sosial seperti mengajar, konseling, atau kegiatan sukarela.",
+      "Saya senang kegiatan sosial seperti relawan, mentoring, atau konseling.",
     holland_type: "SOCIAL",
   },
 
@@ -229,52 +224,47 @@ export const hollandQuestions = [
   // ========================================
   {
     question_text:
-      "Saya senang memimpin dan memotivasi orang lain untuk mencapai tujuan bersama.",
+      "Saya suka memimpin dan memotivasi orang lain untuk mencapai target.",
     holland_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya menikmati kegiatan seperti bernegosiasi, menjual, atau mempresentasikan ide.",
+      "Saya senang bernegosiasi, mempromosikan sesuatu, atau menyampaikan ide kepada orang lain.",
+    holland_type: "ENTERPRISING",
+  },
+  {
+    question_text: "Saya percaya diri saat berbicara di depan banyak orang.",
     holland_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya merasa percaya diri saat berbicara di depan orang banyak.",
+      "Saya termotivasi untuk mencapai prestasi dan memiliki pengaruh.",
+    holland_type: "ENTERPRISING",
+  },
+  {
+    question_text: "Saya suka tantangan, target, dan kompetisi.",
     holland_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya termotivasi untuk mencapai kesuksesan, pengaruh, atau posisi kepemimpinan.",
+      "Saya merasa saya orang yang energik, ambisius, dan percaya diri.",
+    holland_type: "ENTERPRISING",
+  },
+  {
+    question_text: "Saya suka mengatur proyek dan mengambil keputusan.",
+    holland_type: "ENTERPRISING",
+  },
+  {
+    question_text: "Saya suka lingkungan yang dinamis dan cepat berubah.",
     holland_type: "ENTERPRISING",
   },
   {
     question_text:
-      "Saya menghargai tantangan dan kompetisi dalam dunia kerja atau bisnis.",
+      "Saya kurang menyukai kegiatan yang terlalu teoritis tanpa penerapan.",
     holland_type: "ENTERPRISING",
   },
   {
-    question_text:
-      "Saya menganggap diri saya sebagai orang yang energik, ambisius, dan percaya diri.",
-    holland_type: "ENTERPRISING",
-  },
-  {
-    question_text:
-      "Saya senang mengarahkan proyek dan membuat keputusan yang berpengaruh besar.",
-    holland_type: "ENTERPRISING",
-  },
-  {
-    question_text:
-      "Saya lebih suka lingkungan kerja yang dinamis dan kompetitif.",
-    holland_type: "ENTERPRISING",
-  },
-  {
-    question_text:
-      "Saya kurang tertarik pada pekerjaan yang terlalu ilmiah atau analitis.",
-    holland_type: "ENTERPRISING",
-  },
-  {
-    question_text:
-      "Saya tidak takut mengambil risiko untuk mencapai hasil yang besar.",
+    question_text: "Saya berani mengambil risiko jika peluangnya baik.",
     holland_type: "ENTERPRISING",
   },
 
@@ -282,23 +272,22 @@ export const hollandQuestions = [
   // CONVENTIONAL (C)
   // ========================================
   {
-    question_text:
-      "Saya suka mengatur data, dokumen, atau informasi agar tersusun dengan rapi.",
+    question_text: "Saya suka merapikan data, catatan, atau dokumen.",
     holland_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya lebih nyaman dengan pekerjaan yang memiliki prosedur dan aturan yang jelas.",
+      "Saya nyaman dengan tugas yang punya aturan dan langkah yang jelas.",
     holland_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya tertarik pada kegiatan administrasi, pembukuan, atau pengelolaan data.",
+      "Saya tertarik dengan administrasi, pengolahan data, atau pekerjaan yang rapi.",
     holland_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya merasa puas jika pekerjaan saya dilakukan dengan rapi, efisien, dan tepat waktu.",
+      "Saya puas kalau pekerjaan saya rapi, cepat, dan tepat waktu.",
     holland_type: "CONVENTIONAL",
   },
   {
@@ -307,27 +296,25 @@ export const hollandQuestions = [
   },
   {
     question_text:
-      "Saya menganggap diri saya orang yang teliti, hati-hati, dan dapat diandalkan.",
+      "Saya merasa saya orang yang teliti, hati-hati, dan bisa diandalkan.",
+    holland_type: "CONVENTIONAL",
+  },
+  {
+    question_text: "Orang lain sering menilai saya rapi dan terorganisir.",
+    holland_type: "CONVENTIONAL",
+  },
+  {
+    question_text: "Saya suka lingkungan yang terstruktur dan tertata.",
     holland_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Orang lain sering melihat saya sebagai orang yang terorganisir dan bertanggung jawab.",
+      "Saya tidak nyaman kalau tugasnya tidak jelas atau terlalu bebas tanpa arahan.",
     holland_type: "CONVENTIONAL",
   },
   {
     question_text:
-      "Saya lebih suka lingkungan kerja yang terstruktur dan teratur.",
-    holland_type: "CONVENTIONAL",
-  },
-  {
-    question_text:
-      "Saya tidak nyaman dengan situasi kerja yang terlalu bebas atau tidak jelas arahannya.",
-    holland_type: "CONVENTIONAL",
-  },
-  {
-    question_text:
-      "Saya senang bekerja dengan angka, sistem, atau pekerjaan yang membutuhkan ketelitian tinggi.",
+      "Saya suka bekerja dengan angka, sistem, atau hal yang butuh ketelitian.",
     holland_type: "CONVENTIONAL",
   },
 ];
