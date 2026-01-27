@@ -28,7 +28,7 @@ interface TestSession {
 
 // Helper function to map AssessmentHistory to TesSession
 const mapAssessmentToTesSession = (
-  assessment: AssessmentHistory
+  assessment: AssessmentHistory,
 ): TesSession => {
   return {
     test_id: assessment.assessment_id,

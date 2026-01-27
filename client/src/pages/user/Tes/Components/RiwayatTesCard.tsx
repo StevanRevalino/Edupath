@@ -8,7 +8,13 @@ interface TesCardProps {
   onClick: (tesSession: TesSession) => void;
 }
 
-const TesCard = ({ tesSession, index, totalTests, isSelected, onClick }: TesCardProps) => {
+const TesCard = ({
+  tesSession,
+  index,
+  totalTests,
+  isSelected,
+  onClick,
+}: TesCardProps) => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "COMPLETED":
@@ -47,13 +53,15 @@ const TesCard = ({ tesSession, index, totalTests, isSelected, onClick }: TesCard
       <div className="flex justify-between items-start mb-2">
         <span
           className={`text-white text-xs font-semibold px-2 py-1 rounded ${getStatusColor(
-            tesSession.status
+            tesSession.status,
           )}`}
         >
           {getStatusText(tesSession.status)}
         </span>
       </div>
-      <h4 className="font-semibold text-gray-800 mb-1">Test {totalTests - index}</h4>
+      <h4 className="font-semibold text-gray-800 mb-1">
+        Test {totalTests - index}
+      </h4>
       <p className="text-xs text-gray-600">
         {new Date(tesSession.test_date).toLocaleDateString("id-ID")} -{" "}
         {new Date(tesSession.test_date).toLocaleTimeString("id-ID", {
