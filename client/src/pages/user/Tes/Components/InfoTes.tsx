@@ -136,6 +136,10 @@ const InfoTes = ({ tesSession }: InfoTesProps) => {
 
   return (
     <div className="h-full flex flex-col">
+      <h4 className="text-lg font-semibold text-gray-800 text-center mb-6">
+        Detail sesi tes
+      </h4>
+
       <div className="space-y-6 flex-1 overflow-y-auto pr-2 max-h-full">
         {/* Status & Date */}
         <div className="border-b pb-4">
